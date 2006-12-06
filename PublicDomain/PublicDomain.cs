@@ -1,4 +1,5 @@
 /// PublicDomain
+///  PublicDomain, Version=0.0.1.0, Culture=neutral, PublicKeyToken=fd3f43b5776a962b
 /// ======================================
 ///  Original Author: Kevin Grigorenko (kevgrig@gmail.com)
 ///  Contributing Authors:
