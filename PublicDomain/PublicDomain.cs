@@ -143,6 +143,9 @@ using System.Threading;
 
 namespace PublicDomain
 {
+    /// <summary>
+    /// Various useful global constants.
+    /// </summary>
     public static class GlobalConstants
     {
         public const int StreamBlockSize = 1024;
@@ -158,6 +161,11 @@ namespace PublicDomain
         public const double EarthDiameterKilometers = EarthRadiusKilometers * 2;
     }
 
+    /// <summary>
+    /// Generic class that encapsulates a pair of objects of any types.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="U"></typeparam>
     [Serializable]
     public class Pair<T, U>
     {
@@ -190,6 +198,12 @@ namespace PublicDomain
         }
     }
 
+    /// <summary>
+    /// Generic class that encapsulates three objects of any type.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="U"></typeparam>
+    /// <typeparam name="V"></typeparam>
     [Serializable]
     public class Triple<T, U, V>
     {
@@ -209,6 +223,9 @@ namespace PublicDomain
         }
     }
 
+    /// <summary>
+    /// String manipulation and generation methods, as well as string array manipulation.
+    /// </summary>
     public static class StringUtilities
     {
         /// <summary>
@@ -416,6 +433,9 @@ namespace PublicDomain
 #endif
     }
 
+    /// <summary>
+    /// Methods to work with characters, such as an indexable ASCII table.
+    /// </summary>
 #if !(NONUNIT)
     [TestFixture]
 #endif
@@ -450,6 +470,9 @@ namespace PublicDomain
         }
     }
 
+    /// <summary>
+    /// Common conversion tasks such as parsing string values into various types.
+    /// </summary>
     public static class ConversionUtilities
     {
         public static bool IsStringAnInteger(string str)
@@ -612,6 +635,9 @@ namespace PublicDomain
         }
     }
 
+    /// <summary>
+    /// Methods to manipulate arrays.
+    /// </summary>
     public static class ArrayUtilities
     {
         public static T[] InsertReplace<T>(T[] array, int index, T[] insert)
@@ -659,6 +685,9 @@ namespace PublicDomain
         }
     }
 
+    /// <summary>
+    /// Methods to work with Exceptions.
+    /// </summary>
     public static class ExceptionUtilities
     {
         public static void WriteExceptions(Exception ex)
@@ -697,6 +726,9 @@ namespace PublicDomain
         }
     }
 
+    /// <summary>
+    /// Methods to help in file system related manipulations.
+    /// </summary>
     public static class FileSystemUtilities
     {
         private static char[] trackbackChars = new char[] { '\\', '/' };
@@ -858,6 +890,10 @@ namespace PublicDomain
         }
     }
 
+    /// <summary>
+    /// Methods to work with generic objects, such as serializing and deserializing
+    /// them to byte arrays or memory streams.
+    /// </summary>
     public static class ObjectUtilities
     {
         public static MemoryStream SerializeObjectToBinaryStream(object o)
@@ -881,6 +917,9 @@ namespace PublicDomain
         }
     }
 
+    /// <summary>
+    /// Methods to help in common Reflection tasks.
+    /// </summary>
     public static class ReflectionUtilities
     {
         public static StrongName GetStrongName(Assembly assembly)
@@ -1391,6 +1430,7 @@ namespace PublicDomain
 
 #if !(NOPINVOKE)
     /// <summary>
+    /// Interfaces into Win32 calls.
     /// http://www.codeproject.com/csharp/essentialpinvoke.asp
     /// </summary>
     public static class Win32
@@ -2065,6 +2105,7 @@ namespace PublicDomain
     }
 
     /// <summary>
+    /// Windows culture constants such as LCIDs and culture names.
     /// See: http://msdn.microsoft.com/library/default.asp?url=/library/en-us/cpref/html/frlrfsystemglobalizationcultureinfoclasstopic.asp
     /// </summary>
     public class CultureConstants
@@ -2725,17 +2766,18 @@ namespace PublicDomain
         }
     }
 
+    /// <summary>
+    /// Interface that represents an object that can be locked by a reader/writer lock.
+    /// </summary>
     public interface IExposesReaderWriterLock
     {
         ReaderWriterLock Sync { get; }
         void OnBeforeAcquire(ReaderWriterLockSynchronizeType desiredType);
     }
 
-    public enum ReaderWriterLockSynchronizeType
-    {
-        Read, Write
-    }
-
+    /// <summary>
+    /// Generic Reader/Writer lock that can be used in a using() statement.
+    /// </summary>
     public class DisposableReaderWriter : IDisposable
     {
         public DisposableReaderWriter(IExposesReaderWriterLock root, ReaderWriterLockSynchronizeType type)
@@ -2854,12 +2896,11 @@ namespace PublicDomain
     }
 
     /// <summary>
+    /// Common regular expressions.
     /// http://www.codeproject.com/dotnet/RegexTutorial.asp
     /// </summary>
     public static class RegexUtilities
     {
-        #region Break and Paragraph tags (<BR> and <P>)
-
         public const string HtmlBreakExpression = @"<\s*br\s*/?\s*>";
         public const string HtmlParagraphExpression = @"<\s*p\s*/?\s*>";
         public const string HtmlBreakOrParagraphExpression = @"<\s*([bp]r?)\s*/?\s*>";
@@ -2873,24 +2914,17 @@ namespace PublicDomain
 
         public static Regex HtmlBreakOrParagraphTrim = new Regex(string.Format("({0})|({1})", HtmlBreakOrParagraphTrimLeftExpression, HtmlBreakOrParagraphTrimRightExpression), RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        #endregion
-
-        #region URIs
-
         public const string UriChars = @"[^\s)<>\]}!([]+";
 
         public static readonly Regex Uri = new Regex(@"\w+://" + UriChars, RegexOptions.Compiled);
         public static readonly Regex UriLenient = new Regex(@"(\w+://)?" + UriChars, RegexOptions.Compiled);
 
-        #endregion
-
         public static readonly Regex Email = new Regex(@"^[\w-\.]{1,}\@([\da-zA-Z-]{1,}\.){1,}[\da-zA-Z-]{2,3}$", RegexOptions.Compiled);
     }
 
-    public static class LanguageUtilities
-    {
-    }
-
+    /// <summary>
+    /// Methods for working with code and languages.
+    /// </summary>
     public static class CodeUtilities
     {
         /// <summary>
@@ -3894,6 +3928,9 @@ namespace PublicDomain
         }
     }
 
+    /// <summary>
+    /// Generic representation of a latitude and longitude point.
+    /// </summary>
     [Serializable]
     public class LatitudeLongitudePoint
     {
@@ -4102,6 +4139,9 @@ namespace PublicDomain
         }
     }
 
+    /// <summary>
+    /// Methods to help in date and time manipulation.
+    /// </summary>
     public static class DateTimeUtlities
     {
         public static Month ParseMonth(string str)
@@ -4770,6 +4810,10 @@ namespace PublicDomain
 
 #endif
 
+    /// <summary>
+    /// Methods and date related to the United States, such as a list
+    /// of States.
+    /// </summary>
 #if !(NOSTATES)
     public static class UnitedStatesUtilities
     {
@@ -4957,6 +5001,11 @@ namespace PublicDomain
         StatuteMiles,
         NauticalMiles,
         Kilometers
+    }
+
+    public enum ReaderWriterLockSynchronizeType
+    {
+        Read, Write
     }
 
     #endregion
