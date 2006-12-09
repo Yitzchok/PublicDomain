@@ -3,7 +3,7 @@
 /// ======================================
 ///  Original Author: Kevin Grigorenko (kevgrig@gmail.com)
 ///  Contributing Authors:
-///   * Your name here.
+///   * William M. Leszczuk (billl@eden.rutgers.edu)
 /// 
 ///  - "Be free Jedi, be free!"
 /// ======================================
@@ -44,6 +44,11 @@
 ///
 /// Version History:
 /// ======================================
+/// V0.0.1.1
+///  [kevgrig@gmail.com]
+///   * Added bunch of methods to ConversionUtilities courtesy of
+///     William M. Leszczuk (billl@eden.rutgers.edu)
+///   * Parsing of tz files works
 /// V0.0.1.0
 ///  [kevgrig@gmail.com]
 ///   * Project creation in CodePlex (http://www.codeplex.com/PublicDomain)
@@ -130,6 +135,7 @@ using System.Threading;
 
 #if !(NOCLSCOMPLIANTWARNINGSOFF)
 #pragma warning disable 3001
+#pragma warning disable 3002
 #pragma warning disable 3003
 #pragma warning disable 3006
 #pragma warning disable 3009
@@ -205,6 +211,14 @@ namespace PublicDomain
 
     public static class StringUtilities
     {
+        /// <summary>
+        /// Returns a string of length <paramref name="size"/> filled
+        /// with random ASCII characters in the range A-Z, a-z. If <paramref name="lowerCase"/>
+        /// is <c>true</c>, then the range is only a-z.
+        /// </summary>
+        /// <param name="size"></param>
+        /// <param name="lowerCase"></param>
+        /// <returns></returns>
         public static string RandomString(int size, bool lowerCase)
         {
             StringBuilder builder = new StringBuilder();
@@ -222,6 +236,13 @@ namespace PublicDomain
             return builder.ToString();
         }
 
+        /// <summary>
+        /// Returns a string of length <paramref name="length"/> with
+        /// 0's padded to the left, if necessary.
+        /// </summary>
+        /// <param name="val"></param>
+        /// <param name="length"></param>
+        /// <returns></returns>
         public static string PadIntegerLeft(int val, int length)
         {
             return PadIntegerLeft(val, length, '0');
@@ -236,6 +257,163 @@ namespace PublicDomain
             }
             return result;
         }
+
+        /// <summary>
+        /// Replace the first occurrence of <paramref name="find"/> (case sensitive) with
+        /// <paramref name="replace"/>.
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="find"></param>
+        /// <param name="replace"></param>
+        /// <returns></returns>
+        public static string ReplaceFirst(string str, string find, string replace)
+        {
+            return ReplaceFirst(str, find, replace, StringComparison.CurrentCulture);
+        }
+
+        /// <summary>
+        /// Replace the first occurrence of <paramref name="find"/> with
+        /// <paramref name="replace"/>.
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="find"></param>
+        /// <param name="replace"></param>
+        /// <param name="findComparison"></param>
+        /// <returns></returns>
+        public static string ReplaceFirst(string str, string find, string replace, StringComparison findComparison)
+        {
+            if (str == null)
+            {
+                throw new ArgumentNullException("str");
+            }
+            else if (string.IsNullOrEmpty(find))
+            {
+                throw new ArgumentNullException("find");
+            }
+            int firstIndex = str.IndexOf(find, findComparison);
+            if (firstIndex != -1)
+            {
+                if (firstIndex == 0)
+                {
+                    str = replace + str.Substring(find.Length);
+                }
+                else if (firstIndex == (str.Length - find.Length))
+                {
+                    str = str.Substring(0, firstIndex) + replace;
+                }
+                else
+                {
+                    str = str.Substring(0, firstIndex) + replace + str.Substring(firstIndex + find.Length);
+                }
+            }
+            return str;
+        }
+
+        public static string[] Split(string[] pieces, char splitChar, params int[] indices)
+        {
+            if (pieces == null)
+            {
+                throw new ArgumentNullException("pieces");
+            }
+            else if (indices == null)
+            {
+                throw new ArgumentNullException("indices");
+            }
+
+            // First, we need to sort the indices
+            Array.Sort(indices);
+
+            int offset = 0;
+            foreach (int index in indices)
+            {
+                if (index + offset < pieces.Length)
+                {
+                    string[] subPieces = pieces[index + offset].Split(splitChar);
+                    if (subPieces.Length > 1)
+                    {
+                        pieces = ArrayUtilities.InsertReplace<string>(pieces, index + offset, subPieces);
+                        offset += subPieces.Length - 1;
+                    }
+                }
+            }
+
+            return pieces;
+        }
+
+        /// <summary>
+        /// Ensures that within <paramref name="str"/> there are no two
+        /// consecutive whitespace characters.
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static string RemoveConsecutiveWhitespace(string str)
+        {
+            return ReplaceConsecutiveWhitespace(str, " ");
+        }
+
+        /// <summary>
+        /// Ensures that within <paramref name="str"/> there are no two
+        /// consecutive whitespace characters.
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static string ReplaceConsecutiveWhitespace(string str, string replacement)
+        {
+            return Regex.Replace(str, @"\s+", replacement, RegexOptions.Compiled);
+        }
+
+        public static string[] RemoveEmptyPieces(string[] array)
+        {
+            int index = IndexOfEmptyPiece(array);
+            while (index != -1)
+            {
+                ArrayUtilities.Remove<string>(ref array, index);
+                index = IndexOfEmptyPiece(array, index);
+            }
+            return array;
+        }
+
+        public static int IndexOfEmptyPiece(string[] array)
+        {
+            return IndexOfEmptyPiece(array, 0);
+        }
+
+        public static int IndexOfEmptyPiece(string[] array, int startIndex)
+        {
+            for (int i = startIndex; i < array.Length; i++)
+            {
+                if (string.IsNullOrEmpty(array[i]))
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+#if !(NONUNIT)
+        [TestFixture]
+        public class Tests
+        {
+            [Test]
+            public void TestReplaceFirst()
+            {
+                // Test single character finds
+                Assert.AreEqual(ReplaceFirst("aa", "a", "b"), "ba");
+                Assert.AreEqual(ReplaceFirst("bba", "a", "b"), "bbb");
+                Assert.AreEqual(ReplaceFirst("baa", "a", "b"), "bba");
+
+                // Test multi-character finds
+                Assert.AreEqual(ReplaceFirst("aa", "aa", "bb"), "bb");
+                Assert.AreEqual(ReplaceFirst("baa", "aa", "bb"), "bbb");
+                Assert.AreEqual(ReplaceFirst("baab", "aa", "bb"), "bbbb");
+
+                // Test empty replaces
+                Assert.AreEqual(ReplaceFirst("aa", "aa", ""), "");
+                Assert.AreEqual(ReplaceFirst("baa", "aa", ""), "b");
+                Assert.AreEqual(ReplaceFirst("baab", "aa", ""), "bb");
+            }
+        }
+#endif
     }
 
 #if !(NONUNIT)
@@ -276,15 +454,208 @@ namespace PublicDomain
     {
         public static bool IsStringAnInteger(string str)
         {
-            int trash;
-            return int.TryParse(str, out trash);
+            return IsStringAnInteger64(str);
+        }
+
+        public static bool IsStringAnInteger16(string str)
+        {
+            Int16 trash;
+            return Int16.TryParse(str, out trash);
+        }
+
+        public static bool IsStringAnInteger32(string str)
+        {
+            Int32 trash;
+            return Int32.TryParse(str, out trash);
+        }
+
+        public static bool IsStringAnInteger64(string str)
+        {
+            Int64 trash;
+            return Int64.TryParse(str, out trash);
+        }
+
+        public static bool IsStringAnUnsignedIntegerAny(string str)
+        {
+            return IsStringAnUnsignedInteger64(str);
+        }
+
+        public static bool IsStringAnUnsignedInteger16(string str)
+        {
+            UInt16 trash;
+            return UInt16.TryParse(str, out trash);
+        }
+
+        public static bool IsStringAnUnsignedInteger32(string str)
+        {
+            UInt32 trash;
+            return UInt32.TryParse(str, out trash);
+        }
+
+        public static bool IsStringAnUnsignedInteger64(string str)
+        {
+            UInt64 trash;
+            return UInt64.TryParse(str, out trash);
+        }
+
+        public static bool IsStringADouble(string str)
+        {
+            double trash;
+            return double.TryParse(str, out trash);
+        }
+
+        public static bool IsStringADecimal(string str)
+        {
+            decimal trash;
+            return decimal.TryParse(str, out trash);
+        }
+
+        public static bool IsStringAFloat(string str)
+        {
+            float trash;
+            return float.TryParse(str, out trash);
+        }
+
+        public static bool IsStringAChar(string str)
+        {
+            char trash;
+            return char.TryParse(str, out trash);
+        }
+
+        public static bool IsStringABoolean(string str)
+        {
+            bool trash;
+            return bool.TryParse(str, out trash);
+        }
+
+        public static bool IsStringAByte(string str)
+        {
+            byte trash;
+            return byte.TryParse(str, out trash);
         }
 
         public static int ParseInt(string str)
         {
-            int result = 0;
+            int result;
             int.TryParse(str, out result);
             return result;
+        }
+
+        public static short ParseShort(string str)
+        {
+            short result;
+            short.TryParse(str, out result);
+            return result;
+        }
+
+        public static long ParseLong(string str)
+        {
+            long result;
+            long.TryParse(str, out result);
+            return result;
+        }
+
+        public static float ParseFloat(string str)
+        {
+            float result;
+            float.TryParse(str, out result);
+            return result;
+        }
+
+        public static double ParseDouble(string str)
+        {
+            double result;
+            double.TryParse(str, out result);
+            return result;
+        }
+
+        public static decimal ParseDecimal(string str)
+        {
+            decimal result;
+            decimal.TryParse(str, out result);
+            return result;
+        }
+
+        public static uint ParseUInt(string str)
+        {
+            uint result;
+            uint.TryParse(str, out result);
+            return result;
+        }
+
+        public static ushort ParseUShort(string str)
+        {
+            ushort result;
+            ushort.TryParse(str, out result);
+            return result;
+        }
+
+        public static ulong ParseULong(string str)
+        {
+            ulong result;
+            ulong.TryParse(str, out result);
+            return result;
+        }
+
+        public static byte ParseByte(string str)
+        {
+            byte result;
+            byte.TryParse(str, out result);
+            return result;
+        }
+
+        public static char ParseChar(string str)
+        {
+            char result;
+            char.TryParse(str, out result);
+            return result;
+        }
+    }
+
+    public static class ArrayUtilities
+    {
+        public static T[] InsertReplace<T>(T[] array, int index, T[] insert)
+        {
+            int newLength = array.Length + insert.Length - 1;
+            Array.Resize<T>(ref array, newLength);
+            // Shift all the elements from the index up to the end
+            int offset = (insert.Length - 1);
+            for (int i = array.Length - 1; i >= index; i--)
+            {
+                if (i - offset < 0)
+                {
+                    break;
+                }
+                array[i] = array[i - offset];
+            }
+
+            // Now put all the insert elements starting at index
+            for (int j = 0; j < insert.Length; j++)
+            {
+                array[index++] = insert[j];
+            }
+            return array;
+        }
+
+        public static T[] Remove<T>(ref T[] array, int index)
+        {
+            if (array == null)
+            {
+                throw new ArgumentNullException("array");
+            }
+            else if (index < 0 || index >= array.Length)
+            {
+                throw new IndexOutOfRangeException("Cannot remove element at index " + index);
+            }
+
+            // Crush the elemnts from the end down to the index
+            for (int i = index; i < array.Length - 1; i++)
+            {
+                array[i] = array[i + 1];
+            }
+
+            Array.Resize<T>(ref array, array.Length - 1);
+            return array;
         }
     }
 
@@ -2518,17 +2889,6 @@ namespace PublicDomain
 
     public static class LanguageUtilities
     {
-        public enum Language
-        {
-            CSharp,
-            PHP,
-            JSharp,
-            CPlusPlus,
-            JScript,
-            VisualBasic,
-            Java,
-            Ruby,
-        }
     }
 
     public static class CodeUtilities
@@ -2541,7 +2901,7 @@ namespace PublicDomain
         /// <returns></returns>
         /// <exception cref="PublicDomain.CodeUtilities.CompileException"/>
         /// <exception cref="PublicDomain.CodeUtilities.NativeCompileException"/>
-        public static string Eval(LanguageUtilities.Language language, string code)
+        public static string Eval(Language language, string code)
         {
             using (CodeDomProvider domProvider = CodeDomProvider.CreateProvider(language.ToString()))
             {
@@ -3709,10 +4069,10 @@ namespace PublicDomain
         /// <returns></returns>
         public static double DistanceBetween(LatitudeLongitudePoint point1, LatitudeLongitudePoint point2)
         {
-            return DistanceBetween(point1, point2, LatitudeLongitudeDistanceType.StatuteMiles);
+            return DistanceBetween(point1, point2, DistanceType.StatuteMiles);
         }
 
-        public static double DistanceBetween(LatitudeLongitudePoint point1, LatitudeLongitudePoint point2, LatitudeLongitudeDistanceType returnType)
+        public static double DistanceBetween(LatitudeLongitudePoint point1, LatitudeLongitudePoint point2, DistanceType returnType)
         {
             // see http://www.mathforum.com/library/drmath/view/51711.html
             // TODO is this really correct, or do I have to first convert decimal to degrees and then to radians?
@@ -3722,7 +4082,7 @@ namespace PublicDomain
             double c = point2.Latitude / 57.29577951D;
             double d = point2.Longitude / 57.29577951D;
 
-            double earthRadius = (returnType == LatitudeLongitudeDistanceType.StatuteMiles ? GlobalConstants.EarthRadiusStatuteMiles : (returnType == LatitudeLongitudeDistanceType.NauticalMiles ? GlobalConstants.EarthRadiusNauticalMiles : GlobalConstants.EarthRadiusKilometers));
+            double earthRadius = (returnType == DistanceType.StatuteMiles ? GlobalConstants.EarthRadiusStatuteMiles : (returnType == DistanceType.NauticalMiles ? GlobalConstants.EarthRadiusNauticalMiles : GlobalConstants.EarthRadiusKilometers));
 
             double sina = Math.Sin(a);
             double sinc = Math.Sin(c);
@@ -3740,10 +4100,94 @@ namespace PublicDomain
                 return earthRadius * Math.Acos(ans1);
             }
         }
+    }
 
-        public enum LatitudeLongitudeDistanceType
+    public static class DateTimeUtlities
+    {
+        public static Month ParseMonth(string str)
         {
-            StatuteMiles, NauticalMiles, Kilometers
+            if (string.IsNullOrEmpty(str))
+            {
+                throw new ArgumentNullException("str");
+            }
+            if (str.Length < 3)
+            {
+                throw new ArgumentException("Month should be at least 3 characters (" + str + ")");
+            }
+            str = str.ToLower().Trim().Substring(0, 3);
+            switch (str)
+            {
+                case "jan":
+                    return Month.January;
+                case "feb":
+                    return Month.February;
+                case "mar":
+                    return Month.March;
+                case "apr":
+                    return Month.April;
+                case "may":
+                    return Month.May;
+                case "jun":
+                    return Month.June;
+                case "jul":
+                    return Month.July;
+                case "aug":
+                    return Month.August;
+                case "sep":
+                    return Month.September;
+                case "oct":
+                    return Month.October;
+                case "nov":
+                    return Month.November;
+                case "dec":
+                    return Month.December;
+                default:
+                    throw new DateException("Unknown month " + str);
+            }
+        }
+
+        public static DayOfWeek ParseDayOfWeek(string str)
+        {
+            if (string.IsNullOrEmpty(str))
+            {
+                throw new ArgumentNullException("str");
+            }
+            if (str.Length < 3)
+            {
+                throw new ArgumentException("Day of week should be at least 3 characters (" + str + ")");
+            }
+            str = str.ToLower().Trim().Substring(0, 3);
+            switch (str)
+            {
+                case "sun":
+                    return DayOfWeek.Sunday;
+                case "mon":
+                    return DayOfWeek.Monday;
+                case "tue":
+                    return DayOfWeek.Tuesday;
+                case "wed":
+                    return DayOfWeek.Wednesday;
+                case "thu":
+                    return DayOfWeek.Thursday;
+                case "fri":
+                    return DayOfWeek.Friday;
+                case "sat":
+                    return DayOfWeek.Saturday;
+                default:
+                    throw new DateException("Unknown day of week " + str);
+            }
+        }
+
+        [Serializable]
+        public class DateException : Exception
+        {
+            public DateException() { }
+            public DateException(string message) : base(message) { }
+            public DateException(string message, Exception inner) : base(message, inner) { }
+            protected DateException(
+              System.Runtime.Serialization.SerializationInfo info,
+              System.Runtime.Serialization.StreamingContext context)
+                : base(info, context) { }
         }
     }
 
@@ -3758,12 +4202,15 @@ namespace PublicDomain
 #endif
     public class TzParser
     {
+        private const string Iso3166TabFile = @"C:\temp\tzdata\iso3166.tab";
+        private const string ZoneTabFile = @"C:\temp\tzdata\zone.tab";
+
 #if !(NONUNIT)
         [Test]
 #endif
         public void Parse3166Tab()
         {
-            Dictionary<string, Iso3166> map = ParseIso3166Tab(@"C:\temp\tzdata\iso3166.tab");
+            Dictionary<string, Iso3166> map = ParseIso3166Tab(Iso3166TabFile);
             foreach (string key in map.Keys)
             {
                 Iso3166 data = map[key];
@@ -3776,7 +4223,7 @@ namespace PublicDomain
 #endif
         public void ParseZoneTab()
         {
-            List<TzZoneDescription> items = ParseZoneTab(@"C:\temp\tzdata\zone.tab");
+            List<TzZoneDescription> items = ParseZoneTab(ZoneTabFile);
             foreach (TzZoneDescription item in items)
             {
                 Console.WriteLine(item);
@@ -3788,74 +4235,328 @@ namespace PublicDomain
 #endif
         public void ReadDatabase()
         {
-            ReadDatabase(@"c:\temp\tzdata\");
+            // First, get all of the data from the tz db
+            List<TzDataRule> rules = new List<TzDataRule>();
+            List<TzDataZone> zones = new List<TzDataZone>();
+            ReadDatabase(@"c:\temp\tzdata\", rules, zones);
+
+            // Now, get all of the tab files
+            Dictionary<string, Iso3166> map = ParseIso3166Tab(Iso3166TabFile);
+            List<TzZoneDescription> items = ParseZoneTab(ZoneTabFile);
+
+            // Now, we can start combining all of this information into TzZone objects
+
         }
 
-        public static List<TzInfo> ReadDatabase(string dir)
+        public static void ReadDatabase(string dir, List<TzDataRule> rules, List<TzDataZone> zones)
         {
-            List<TzInfo> infos = new List<TzInfo>();
             if (dir == null)
             {
                 throw new ArgumentNullException("dir");
             }
+            List<string[]> links = new List<string[]>();
             DirectoryInfo dirInfo = new DirectoryInfo(dir);
             FileInfo[] files = dirInfo.GetFiles();
             foreach (FileInfo file in files)
             {
                 if (string.IsNullOrEmpty(file.Extension))
                 {
-                    ReadDatabaseFile(file, infos);
+                    ReadDatabaseFile(file, rules, zones, links);
                 }
             }
-            return infos;
+
+            foreach (string[] pieces in links)
+            {
+                // Find the time zone this is a link to
+                TzDataZone linkedTo = FindTzDataZone(zones, pieces[1]);
+
+                // Clone it and add it to the list
+                TzDataZone link = (TzDataZone)linkedTo.Clone();
+                link.ZoneName = pieces[2];
+
+                zones.Add(link);
+            }
         }
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="file"></param>
-        /// <param name="infos"></param>
         /// <exception cref="PublicDomain.TzException" />
-        private static void ReadDatabaseFile(FileInfo file, List<TzInfo> infos)
+        private static void ReadDatabaseFile(FileInfo file, List<TzDataRule> rules, List<TzDataZone> zones, List<string[]> links)
         {
             string[] lines = File.ReadAllLines(file.FullName);
             foreach (string line in lines)
             {
-                string[] pieces = line.Split('\t');
-                if (pieces.Length > 0)
+                // This line may be a continuation Zone
+                if (!string.IsNullOrEmpty(line))
                 {
-                    switch (pieces[0].ToLower())
+                    if (line.TrimStart()[0] != '#')
                     {
-                        case "rule":
-                            Console.WriteLine(line);
-                            break;
-                        case "zone":
-                            Console.WriteLine(line);
-                            break;
+                        if (char.IsWhiteSpace(line[0]) && zones.Count > 0)
+                        {
+                            if (line.Trim() != string.Empty)
+                            {
+                                // This is a continuation of a previous Zone
+                                zones.Add(zones[zones.Count - 1].Clone(line));
+                            }
+                        }
+                        else
+                        {
+                            string[] pieces = line.Split('\t');
+                            pieces = StringUtilities.Split(pieces, ' ', 0);
+                            if (pieces.Length > 0)
+                            {
+                                switch (pieces[0].ToLower())
+                                {
+                                    case "rule":
+                                        rules.Add(TzDataRule.Parse(line));
+                                        break;
+                                    case "zone":
+                                        zones.Add(TzDataZone.Parse(line));
+                                        break;
+                                    case "link":
+                                        links.Add(StringUtilities.RemoveEmptyPieces(pieces));
+                                        break;
+                                    case "leap":
+                                        // Not yet handled
+                                        break;
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
 
-        [Serializable]
-        public class TzInfo
+        private static TzDataZone FindTzDataZone(List<TzDataZone> zones, string zoneName)
         {
+            foreach (TzDataZone zone in zones)
+            {
+                if (zone.ZoneName.Equals(zoneName))
+                {
+                    return zone;
+                }
+            }
+            throw new TzParseException("Could not find LINKed zone " + zoneName);
+        }
+
+        [Serializable]
+        public class TzDataZone : ICloneable
+        {
+            /// <summary>
+            /// Unique name for each zone, for example America/New_York, though
+            /// there can be multiple zones with the same name but different properties.
+            /// </summary>
+            public string ZoneName;
+
+            /// <summary>
+            /// Offset from UTC
+            /// </summary>
+            public TimeSpan UtcOffset;
+
+            /// <summary>
+            /// The rule that applies to this zone.
+            /// </summary>
+            public string RuleName;
+
+            public string Format;
+
+            public int UntilYear;
+
+            public Month UntilMonth = 0;
+
+            public int UntilDay;
+
+            public DayOfWeek? UntilDay_DayOfWeek;
+
+            public TimeSpan UntilTime;
+
+            public string Comment;
+
+            public static TzDataZone Parse(string str)
+            {
+                if (string.IsNullOrEmpty(str))
+                {
+                    throw new ArgumentNullException("str");
+                }
+                TzDataZone z = new TzDataZone();
+                ParsePieces(str, z);
+                return z;
+            }
+
+            private static void ParsePieces(string str, TzDataZone z)
+            {
+                string[] pieces = str.Split('\t');
+                if (pieces[0].Contains(" ") || pieces[1].Contains(" ") || pieces[2].Contains(" "))
+                {
+                    pieces = StringUtilities.Split(pieces, ' ', 0, 1, 2);
+                }
+                pieces = StringUtilities.RemoveEmptyPieces(pieces);
+                z.ZoneName = pieces[1];
+
+                if (z.ZoneName != "Factory")
+                {
+                    z.UtcOffset = TimeSpan.Parse(pieces[2]);
+                    z.RuleName = pieces[3];
+                    z.Format = pieces[4];
+
+                    // The rest of the format is optional an erratic, so we combine
+                    // the rest of the array into a big string
+                    if (pieces.Length > 5)
+                    {
+                        string ending = String.Join(" ", pieces, 5, pieces.Length - 5);
+                        int poundIndex;
+                        if ((poundIndex = ending.IndexOf('#')) != -1)
+                        {
+                            z.Comment = ending.Substring(poundIndex + 1).Trim();
+                            ending = ending.Substring(0, poundIndex).Trim();
+                            if (ending != "")
+                            {
+                                string[] untilPieces = StringUtilities.RemoveEmptyPieces(ending.Split(' '));
+                                z.UntilYear = int.Parse(untilPieces[0]);
+                                if (untilPieces.Length > 1)
+                                {
+                                    z.UntilMonth = DateTimeUtlities.ParseMonth(untilPieces[1]);
+                                    if (untilPieces.Length > 2)
+                                    {
+                                        int untilDay;
+                                        DayOfWeek? untilDay_dayOfWeek;
+                                        GetTzDataDay(untilPieces[2], out untilDay, out untilDay_dayOfWeek);
+                                        z.UntilDay = untilDay;
+                                        z.UntilDay_DayOfWeek = untilDay_dayOfWeek;
+
+                                        if (untilPieces.Length > 3)
+                                        {
+                                            z.UntilTime = GetTzDataTime(untilPieces[3]);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            public object Clone()
+            {
+                return (TzDataZone)MemberwiseClone();
+            }
+
+            public TzDataZone Clone(string line)
+            {
+                TzDataZone z = (TzDataZone)Clone();
+                line = "Zone\t" + z.ZoneName + "\t" + string.Join("\t", StringUtilities.RemoveEmptyPieces(line.Split('\t')));
+                ParsePieces(line, z);
+                return z;
+            }
         }
 
         [Serializable]
         public class TzDataRule
         {
+            /// <summary>
+            /// Each Zone rule has a name which each zone refers to.
+            /// A zone rule name is not unique in its own right, but
+            /// only with all of its properties. Therefore, there may
+            /// be multiple zone rules with the same name but different properties.
+            /// </summary>
             public string RuleName;
-            public int From;
-            public TzToType ToType;
-            public int ToYear;
-        }
 
-        public enum TzToType
-        {
-            Year,
-            Only,
-            Max
+            /// <summary>
+            /// The effective year the zone rule is effective on.
+            /// </summary>
+            public int From;
+
+            /// <summary>
+            /// The year the zone rule effectively ends.
+            /// </summary>
+            public int To;
+
+            /// <summary>
+            /// The integer month the rule starts on. January = 1, February = 2, ..., December = 12
+            /// </summary>
+            public Month StartMonth;
+
+            /// <summary>
+            /// The day of the month the rule starts on.
+            /// </summary>
+            public int StartDay;
+
+            /// <summary>
+            /// The day of the month is optionally modified by
+            /// a day of week.
+            /// </summary>
+            public DayOfWeek? StartDay_DayOfWeek;
+
+            /// <summary>
+            /// The time of the day the Rule starts on.
+            /// </summary>
+            public TimeSpan StartTime;
+
+            /// <summary>
+            /// The amount of time saved by the Rule.
+            /// </summary>
+            public TimeSpan SaveTime;
+
+            public string Modifier;
+
+            public string Comment;
+
+            public static TzDataRule Parse(string str)
+            {
+                if (string.IsNullOrEmpty(str))
+                {
+                    throw new ArgumentNullException("str");
+                }
+                TzDataRule t = new TzDataRule();
+                string[] pieces = str.Split('\t');
+                pieces = StringUtilities.Split(pieces, ' ', 0);
+                if (pieces.Length == 11 && pieces[10][0] == '#')
+                {
+                    // the comment was tabbed off the end
+                    string comment = pieces[10];
+                    Array.Resize<string>(ref pieces, 10);
+                    pieces[9] += " " + comment;
+                }
+                if (pieces.Length != 10)
+                {
+                    throw new TzParseException("Rule has an invalid number of pieces: " + pieces.Length + " (" + str + ")");
+                }
+                t.RuleName = pieces[1];
+                if (pieces[2] == "min")
+                {
+                    t.From = 0;
+                }
+                else
+                {
+                    t.From = int.Parse(pieces[2]);
+                }
+                switch (pieces[3])
+                {
+                    case "only":
+                        t.To = t.From;
+                        break;
+                    case "max":
+                        t.To = int.MaxValue;
+                        break;
+                    default:
+                        t.To = int.Parse(pieces[3]);
+                        break;
+                }
+                t.StartMonth = DateTimeUtlities.ParseMonth(pieces[5]);
+
+                int startDay;
+                DayOfWeek? startDay_dayOfWeek;
+                GetTzDataDay(pieces[6], out startDay, out startDay_dayOfWeek);
+                t.StartDay = startDay;
+                t.StartDay_DayOfWeek = startDay_dayOfWeek;
+
+                t.StartTime = GetTzDataTime(pieces[7]);
+                t.SaveTime = TimeSpan.Parse(pieces[8]);
+                t.Modifier = pieces[9];
+                return t;
+            }
         }
 
         /// <summary>
@@ -3923,6 +4624,37 @@ namespace PublicDomain
                 return string.Format("{0}\t{1}\t{2}\t{3}", TwoLetterCode, Location, ZoneName, Comments);
             }
         }
+
+        private static void GetTzDataDay(string str, out int startDay, out DayOfWeek? startDay_dayOfWeek)
+        {
+            startDay = 0;
+            startDay_dayOfWeek = null;
+            if (ConversionUtilities.IsStringAnInteger(str))
+            {
+                startDay = int.Parse(str);
+            }
+            else
+            {
+                if (str.Contains(">="))
+                {
+                    startDay_dayOfWeek = DateTimeUtlities.ParseDayOfWeek(str.Trim().Substring(0, 3));
+                    startDay = int.Parse(str.Substring(str.LastIndexOf('=') + 1));
+                }
+                else if (str.ToLower().Equals("lastsun"))
+                {
+                    startDay_dayOfWeek = DayOfWeek.Sunday;
+                }
+            }
+        }
+
+        private static TimeSpan GetTzDataTime(string saveTime)
+        {
+            if (char.IsLetter(saveTime[saveTime.Length - 1]))
+            {
+                saveTime = saveTime.Substring(0, saveTime.Length - 1);
+            }
+            return TimeSpan.Parse(saveTime);
+        }
     }
 
     [Serializable]
@@ -3932,6 +4664,19 @@ namespace PublicDomain
         public TzException(string message) : base(message) { }
         public TzException(string message, Exception inner) : base(message, inner) { }
         protected TzException(
+          System.Runtime.Serialization.SerializationInfo info,
+          System.Runtime.Serialization.StreamingContext context)
+            : base(info, context) { }
+    }
+
+
+    [Serializable]
+    public class TzParseException : TzException
+    {
+        public TzParseException() { }
+        public TzParseException(string message) : base(message) { }
+        public TzParseException(string message, Exception inner) : base(message, inner) { }
+        protected TzParseException(
           System.Runtime.Serialization.SerializationInfo info,
           System.Runtime.Serialization.StreamingContext context)
             : base(info, context) { }
@@ -3950,17 +4695,17 @@ namespace PublicDomain
     /// Represents a Time Zone from the Olson tz database.
     /// </summary>
     [Serializable]
-    public class OTimeZone : System.TimeZone
+    public class TzTimeZone : TimeZone
     {
-        public const string TIMEZONE_US_EASTERN = "US/Eastern";
-        public const string TIMEZONE_US_CENTRAL = "US/Central";
-        public const string TIMEZONE_US_MOUNTAIN = "US/Mountain";
-        public const string TIMEZONE_US_PACIFIC = "US/Pacific";
+        public const string TimzoneUsEastern = "US/Eastern";
+        public const string TimezoneUsCentral = "US/Central";
+        public const string TimezoneUsMountain = "US/Mountain";
+        public const string TimezoneUsPacific = "US/Pacific";
 
         private string m_standardName;
         private string m_daylightName;
 
-        public OTimeZone(string standardName)
+        public TzTimeZone(string standardName)
         {
             m_standardName = standardName;
             m_daylightName = standardName;
@@ -4015,13 +4760,14 @@ namespace PublicDomain
 
     /// <summary>
     /// Wraps DateTime to provide time zone information
-    /// with an <see cref="PublicDomain.OTimeZone"> from
+    /// with an <see cref="PublicDomain.TzTimeZone"> from
     /// the Olson tz database.
     /// </summary>
     [Serializable]
-    public class ODateTime
+    public class TzDateTime
     {
     }
+
 #endif
 
 #if !(NOSTATES)
@@ -4087,26 +4833,138 @@ namespace PublicDomain
 			};
         }
 
+        /// <summary>
+        /// Attempts to find a <see cref="PublicDomain.UnitedStatesUtilities.USState"/>
+        /// by its abbreviate.
+        /// </summary>
+        /// <param name="abbreviation">The abbreviation of the state to search for. Not case sensitive.</param>
+        /// <returns>The <see cref="PublicDomain.UnitedStatesUtilities.USState"/> that represents the
+        /// <c>abbreviation</c>, or if it is not found, throws a <see cref="PublicDomain.UnitedStatesUtilities.StateNotFoundException"/></returns>
+        /// <exception cref="PublicDomain.UnitedStatesUtilities.StateNotFoundException"></exception>
+        public static USState GetStateByAbbrivation(string abbreviation)
+        {
+            if (abbreviation == null)
+            {
+                throw new ArgumentNullException("abbreviation");
+            }
+            abbreviation = abbreviation.ToLower().Trim();
+            foreach (USState state in States)
+            {
+                if (state.Abbreviation.ToLower() == abbreviation)
+                {
+                    return state;
+                }
+            }
+            throw new StateNotFoundException(abbreviation);
+        }
+
+        /// <summary>
+        /// Attempts to find a <see cref="PublicDomain.UnitedStatesUtilities.USState"/>
+        /// by its name.
+        /// </summary>
+        /// <param name="stateName">The name of the state to search for. Not case sensitive.</param>
+        /// <returns>The <see cref="PublicDomain.UnitedStatesUtilities.USState"/> that represents the
+        /// <c>abbreviation</c>, or if it is not found, throws a <see cref="PublicDomain.UnitedStatesUtilities.StateNotFoundException"/></returns>
+        /// <exception cref="PublicDomain.UnitedStatesUtilities.StateNotFoundException"></exception>
+        public static USState GetStateByName(string stateName)
+        {
+            if (stateName == null)
+            {
+                throw new ArgumentNullException("stateName");
+            }
+            stateName = stateName.ToLower().Trim();
+            foreach (USState state in States)
+            {
+                if (state.Name.ToLower().Equals(stateName))
+                {
+                    return state;
+                }
+            }
+            throw new StateNotFoundException(stateName);
+        }
+
         [Serializable]
         public struct USState
         {
             public int UniqueId;
             public string Name;
-            public string TwoLetterAbbreviation;
+            public string Abbreviation;
 
-            public USState(int uniqueId, string name, string twoLetterAbbreviation)
+            public USState(int uniqueId, string name, string abbreviation)
             {
                 this.UniqueId = uniqueId;
                 this.Name = name;
-                this.TwoLetterAbbreviation = twoLetterAbbreviation;
+                this.Abbreviation = abbreviation;
             }
+
+            public string GetName(bool toUpperCase)
+            {
+                return toUpperCase ? Name.ToUpper() : Name.ToLower();
+            }
+
+            public string GetAbbreviation(bool toUpperCase)
+            {
+                return toUpperCase ? Abbreviation.ToUpper() : Abbreviation.ToLower();
+            }
+        }
+
+        [Serializable]
+        public class StateNotFoundException : Exception
+        {
+            public StateNotFoundException() { }
+            public StateNotFoundException(string message) : base(message) { }
+            public StateNotFoundException(string message, Exception inner) : base(message, inner) { }
+            protected StateNotFoundException(
+              System.Runtime.Serialization.SerializationInfo info,
+              System.Runtime.Serialization.StreamingContext context)
+                : base(info, context) { }
         }
     }
 #endif
+
+    #region Enums
+
+    public enum Month
+    {
+        January = 1,
+        February = 2,
+        March = 3,
+        April = 4,
+        May = 5,
+        June = 6,
+        July = 7,
+        August = 8,
+        September = 9,
+        October = 10,
+        November = 11,
+        December = 12
+    }
+
+    public enum Language
+    {
+        CSharp,
+        PHP,
+        JSharp,
+        CPlusPlus,
+        JScript,
+        VisualBasic,
+        Java,
+        Ruby,
+    }
+
+    public enum DistanceType
+    {
+        StatuteMiles,
+        NauticalMiles,
+        Kilometers
+    }
+
+    #endregion
 }
 
 #if !(NOCLSCOMPLIANTWARNINGSOFF)
 #pragma warning restore 3001
+#pragma warning restore 3002
 #pragma warning restore 3003
 #pragma warning restore 3006
 #pragma warning restore 3009
