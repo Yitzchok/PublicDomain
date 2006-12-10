@@ -1,67 +1,67 @@
-/// PublicDomain
-///  PublicDomain, Version=0.0.1.0, Culture=neutral, PublicKeyToken=fd3f43b5776a962b
-/// ======================================
-///  Original Author: Kevin Grigorenko (kevgrig@gmail.com)
-///  Contributing Authors:
-///   * William M. Leszczuk (billl@eden.rutgers.edu)
-/// 
-///  - "Be free Jedi, be free!"
-/// ======================================
-/// The purpose of the PublicDomain package is to solve two problems or annoyances
-/// of .NET development:
-/// 
-/// 1. .NET projects and utilities are scattered, difficult to
-/// deploy and integrate, difficult to find, difficult to contribute to, and
-/// 2. Licenses are confusing and/or restrictive
-/// 
-/// This package solves these two problems as follows (in reverse order):
-/// 
-/// 2. This code is in the Public Domain (http://www.copyright.gov/help/faq/faq-definitions.html),
-/// meaning that the code has no legal authority, will ask nothing for its use, and
-/// has absolutely no restrictions! That is true open source. It may be included
-/// in commercial applications, redistributed, altered, or even eaten without any worries.
-/// Its use need not be attributed in any way. This package is inherently provided
-/// 'as-is', without any express or implied warranty. In no event will any authors
-/// be held liable for any damages arising from the use of this package.
-/// 
-/// 1. This package explicitly breaks some fundamental paradigms of software engineering
-/// to solve problem #1. One major goal is that I should be able to embed a single file
-/// into my project and harness this package, without adding too much bloat to my application.
-/// For this, precompiler directives are used to include or exclude code that is
-/// unnecessary or necessitates DLL dependencies that I cannot take on. Second,
-/// everything is packaged in a single file to make using this package dead simple,
-/// especially in a C# context (non-C# projects will need a built version of this file
-/// and reference the DLL). There are no obfuscated build or install procedures,
-/// or the complexity of managing 10 referenced open source projects in my solution.
-/// I simply place this file anywhere I need its useful code.
-/// 
-/// Any additions to this file must not introduce non-Public Domain code, or code
-/// that must be externally attributed in any way (i.e. attributed by consumers of this package).
-/// If you have taken code from someone else which has a similar license and
-/// does not require external attribution, make sure with the author that this
-/// is truly a proper place for the code, that external attribution is not necessary,
-/// and finally make sure to internally attribute the code with a #region to the author(s).
-///
-/// Version History:
-/// ======================================
-/// V0.0.1.1
-///  [kevgrig@gmail.com]
-///   * Added bunch of methods to ConversionUtilities courtesy of
-///     William M. Leszczuk (billl@eden.rutgers.edu)
-///   * Parsing of tz files works
-/// V0.0.1.0
-///  [kevgrig@gmail.com]
-///   * Project creation in CodePlex (http://www.codeplex.com/PublicDomain)
-///   * Added various code from my projects
-///   * tz database code unfinished
-/// V0.0.0.1
-///  [kevgrig@gmail.com]
-///   * Added Win32 class and some ExitWindowsEx calls
-/// V0.0.0.0
-///  [kevgrig@gmail.com]
-///   * Wrapper around vjslib for zip file reading
-///   * java.io.InputStream <-> System.IO.Stream wrappers
-///
+// PublicDomain
+//  PublicDomain, Version=0.0.1.0, Culture=neutral, PublicKeyToken=fd3f43b5776a962b
+// ======================================
+//  Original Author: Kevin Grigorenko (kevgrig@gmail.com)
+//  Contributing Authors:
+//   * William M. Leszczuk (billl@eden.rutgers.edu)
+// 
+//  - "Be free Jedi, be free!"
+// ======================================
+// The purpose of the PublicDomain package is to solve two problems or annoyances
+// of .NET development:
+// 
+// 1. .NET projects and utilities are scattered, difficult to
+// deploy and integrate, difficult to find, difficult to contribute to, and
+// 2. Licenses are confusing and/or restrictive
+// 
+// This package solves these two problems as follows (in reverse order):
+// 
+// 2. This code is in the Public Domain (http://www.copyright.gov/help/faq/faq-definitions.html),
+// meaning that the code has no legal authority, will ask nothing for its use, and
+// has absolutely no restrictions! That is true open source. It may be included
+// in commercial applications, redistributed, altered, or even eaten without any worries.
+// Its use need not be attributed in any way. This package is inherently provided
+// 'as-is', without any express or implied warranty. In no event will any authors
+// be held liable for any damages arising from the use of this package.
+// 
+// 1. This package explicitly breaks some fundamental paradigms of software engineering
+// to solve problem #1. One major goal is that I should be able to embed a single file
+// into my project and harness this package, without adding too much bloat to my application.
+// For this, precompiler directives are used to include or exclude code that is
+// unnecessary or necessitates DLL dependencies that I cannot take on. Second,
+// everything is packaged in a single file to make using this package dead simple,
+// especially in a C# context (non-C# projects will need a built version of this file
+// and reference the DLL). There are no obfuscated build or install procedures,
+// or the complexity of managing 10 referenced open source projects in my solution.
+// I simply place this file anywhere I need its useful code.
+// 
+// Any additions to this file must not introduce non-Public Domain code, or code
+// that must be externally attributed in any way (i.e. attributed by consumers of this package).
+// If you have taken code from someone else which has a similar license and
+// does not require external attribution, make sure with the author that this
+// is truly a proper place for the code, that external attribution is not necessary,
+// and finally make sure to internally attribute the code with a #region to the author(s).
+//
+// Version History:
+// ======================================
+// V0.0.1.1
+//  [kevgrig@gmail.com]
+//   * Added bunch of methods to ConversionUtilities courtesy of
+//     William M. Leszczuk (billl@eden.rutgers.edu)
+//   * Parsing of tz files works
+// V0.0.1.0
+//  [kevgrig@gmail.com]
+//   * Project creation in CodePlex (http://www.codeplex.com/PublicDomain)
+//   * Added various code from my projects
+//   * tz database code unfinished
+// V0.0.0.1
+//  [kevgrig@gmail.com]
+//   * Added Win32 class and some ExitWindowsEx calls
+// V0.0.0.0
+//  [kevgrig@gmail.com]
+//   * Wrapper around vjslib for zip file reading
+//   * java.io.InputStream <-> System.IO.Stream wrappers
+//
 
 #region Directives
 // The following section provides
@@ -77,6 +77,7 @@
 // Commonly non-referenced projects:
 #define NOSYSTEMWEB
 #define NONUNIT
+#define NOTZPARSER
 
 // Other switches:
 //#define NOSCREENSCRAPER
@@ -94,6 +95,10 @@
 
 #if NOSYSTEMWEB
 #define NOSCREENSCRAPER
+#endif
+
+#if NOTZ
+#define NOTZPARSER
 #endif
 
 #endregion // Directives
@@ -148,16 +153,44 @@ namespace PublicDomain
     /// </summary>
     public static class GlobalConstants
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public const int StreamBlockSize = 1024;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const int ExecuteSmallProcessTimeout = 60000;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const double EarthRadiusStatuteMiles = 3963.1D;
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const double EarthRadiusNauticalMiles = 3443.9D;
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const double EarthRadiusKilometers = 6376D;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const double EarthDiameterStatuteMiles = EarthRadiusStatuteMiles * 2;
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const double EarthDiameterNauticalMiles = EarthRadiusNauticalMiles * 2;
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const double EarthDiameterKilometers = EarthRadiusKilometers * 2;
     }
 
@@ -169,19 +202,40 @@ namespace PublicDomain
     [Serializable]
     public class Pair<T, U>
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public T First;
+
+        /// <summary>
+        /// 
+        /// </summary>
         public U Second;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Pair&lt;T, U&gt;"/> class.
+        /// </summary>
         public Pair()
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Pair&lt;T, U&gt;"/> class.
+        /// </summary>
+        /// <param name="first">The first.</param>
+        /// <param name="second">The second.</param>
         public Pair(T first, U second)
         {
             First = first;
             Second = second;
         }
 
+        /// <summary>
+        /// Finds the pair by key.
+        /// </summary>
+        /// <param name="search">The search.</param>
+        /// <param name="find">The find.</param>
+        /// <returns></returns>
         public static Pair<T, U> FindPairByKey(Pair<T, U>[] search, T find)
         {
             if (search != null)
@@ -207,14 +261,34 @@ namespace PublicDomain
     [Serializable]
     public class Triple<T, U, V>
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public T First;
+
+        /// <summary>
+        /// 
+        /// </summary>
         public U Second;
+
+        /// <summary>
+        /// 
+        /// </summary>
         public V Third;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Triple&lt;T, U, V&gt;"/> class.
+        /// </summary>
         public Triple()
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Triple&lt;T, U, V&gt;"/> class.
+        /// </summary>
+        /// <param name="first">The first.</param>
+        /// <param name="second">The second.</param>
+        /// <param name="third">The third.</param>
         public Triple(T first, U second, V third)
         {
             First = first;
@@ -233,8 +307,8 @@ namespace PublicDomain
         /// with random ASCII characters in the range A-Z, a-z. If <paramref name="lowerCase"/>
         /// is <c>true</c>, then the range is only a-z.
         /// </summary>
-        /// <param name="size"></param>
-        /// <param name="lowerCase"></param>
+        /// <param name="size">The size.</param>
+        /// <param name="lowerCase">if set to <c>true</c> [lower case].</param>
         /// <returns></returns>
         public static string RandomString(int size, bool lowerCase)
         {
@@ -257,14 +331,21 @@ namespace PublicDomain
         /// Returns a string of length <paramref name="length"/> with
         /// 0's padded to the left, if necessary.
         /// </summary>
-        /// <param name="val"></param>
-        /// <param name="length"></param>
+        /// <param name="val">The val.</param>
+        /// <param name="length">The length.</param>
         /// <returns></returns>
         public static string PadIntegerLeft(int val, int length)
         {
             return PadIntegerLeft(val, length, '0');
         }
 
+        /// <summary>
+        /// Pads the integer left.
+        /// </summary>
+        /// <param name="val">The val.</param>
+        /// <param name="length">The length.</param>
+        /// <param name="pad">The pad.</param>
+        /// <returns></returns>
         public static string PadIntegerLeft(int val, int length, char pad)
         {
             string result = val.ToString();
@@ -279,9 +360,9 @@ namespace PublicDomain
         /// Replace the first occurrence of <paramref name="find"/> (case sensitive) with
         /// <paramref name="replace"/>.
         /// </summary>
-        /// <param name="str"></param>
-        /// <param name="find"></param>
-        /// <param name="replace"></param>
+        /// <param name="str">The STR.</param>
+        /// <param name="find">The find.</param>
+        /// <param name="replace">The replace.</param>
         /// <returns></returns>
         public static string ReplaceFirst(string str, string find, string replace)
         {
@@ -292,10 +373,10 @@ namespace PublicDomain
         /// Replace the first occurrence of <paramref name="find"/> with
         /// <paramref name="replace"/>.
         /// </summary>
-        /// <param name="str"></param>
-        /// <param name="find"></param>
-        /// <param name="replace"></param>
-        /// <param name="findComparison"></param>
+        /// <param name="str">The STR.</param>
+        /// <param name="find">The find.</param>
+        /// <param name="replace">The replace.</param>
+        /// <param name="findComparison">The find comparison.</param>
         /// <returns></returns>
         public static string ReplaceFirst(string str, string find, string replace, StringComparison findComparison)
         {
@@ -326,6 +407,13 @@ namespace PublicDomain
             return str;
         }
 
+        /// <summary>
+        /// Splits the specified pieces.
+        /// </summary>
+        /// <param name="pieces">The pieces.</param>
+        /// <param name="splitChar">The split char.</param>
+        /// <param name="indices">The indices.</param>
+        /// <returns></returns>
         public static string[] Split(string[] pieces, char splitChar, params int[] indices)
         {
             if (pieces == null)
@@ -361,7 +449,7 @@ namespace PublicDomain
         /// Ensures that within <paramref name="str"/> there are no two
         /// consecutive whitespace characters.
         /// </summary>
-        /// <param name="str"></param>
+        /// <param name="str">The STR.</param>
         /// <returns></returns>
         public static string RemoveConsecutiveWhitespace(string str)
         {
@@ -372,13 +460,19 @@ namespace PublicDomain
         /// Ensures that within <paramref name="str"/> there are no two
         /// consecutive whitespace characters.
         /// </summary>
-        /// <param name="str"></param>
+        /// <param name="str">The STR.</param>
+        /// <param name="replacement">The replacement.</param>
         /// <returns></returns>
         public static string ReplaceConsecutiveWhitespace(string str, string replacement)
         {
             return Regex.Replace(str, @"\s+", replacement, RegexOptions.Compiled);
         }
 
+        /// <summary>
+        /// Removes the empty pieces.
+        /// </summary>
+        /// <param name="array">The array.</param>
+        /// <returns></returns>
         public static string[] RemoveEmptyPieces(string[] array)
         {
             int index = IndexOfEmptyPiece(array);
@@ -390,11 +484,22 @@ namespace PublicDomain
             return array;
         }
 
+        /// <summary>
+        /// Indexes the of empty piece.
+        /// </summary>
+        /// <param name="array">The array.</param>
+        /// <returns></returns>
         public static int IndexOfEmptyPiece(string[] array)
         {
             return IndexOfEmptyPiece(array, 0);
         }
 
+        /// <summary>
+        /// Indexes the of empty piece.
+        /// </summary>
+        /// <param name="array">The array.</param>
+        /// <param name="startIndex">The start index.</param>
+        /// <returns></returns>
         public static int IndexOfEmptyPiece(string[] array, int startIndex)
         {
             for (int i = startIndex; i < array.Length; i++)
@@ -441,8 +546,14 @@ namespace PublicDomain
 #endif
     public class CharUtilities
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public static readonly char[] AsciiCharacters;
 
+        /// <summary>
+        /// Initializes the <see cref="CharUtilities"/> class.
+        /// </summary>
         static CharUtilities()
         {
             AsciiCharacters = GetAsciiCharacters().ToArray();
@@ -451,6 +562,9 @@ namespace PublicDomain
 #if !(NONUNIT)
         [Test]
 #endif
+        /// <summary>
+        /// Prints the ASCII table.
+        /// </summary>
         public void PrintAsciiTable()
         {
             for (int i = 0; i < AsciiCharacters.Length; i++)
@@ -459,6 +573,10 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// Gets the ASCII characters.
+        /// </summary>
+        /// <returns></returns>
         public static List<char> GetAsciiCharacters()
         {
             List<char> result = new List<char>(256);
@@ -475,88 +593,191 @@ namespace PublicDomain
     /// </summary>
     public static class ConversionUtilities
     {
+        /// <summary>
+        /// Determines whether [is string an integer] [the specified STR].
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns>
+        /// 	<c>true</c> if [is string an integer] [the specified STR]; otherwise, <c>false</c>.
+        /// </returns>
         public static bool IsStringAnInteger(string str)
         {
             return IsStringAnInteger64(str);
         }
 
+        /// <summary>
+        /// Determines whether [is string an integer16] [the specified STR].
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns>
+        /// 	<c>true</c> if [is string an integer16] [the specified STR]; otherwise, <c>false</c>.
+        /// </returns>
         public static bool IsStringAnInteger16(string str)
         {
             Int16 trash;
             return Int16.TryParse(str, out trash);
         }
 
+        /// <summary>
+        /// Determines whether [is string an integer32] [the specified STR].
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns>
+        /// 	<c>true</c> if [is string an integer32] [the specified STR]; otherwise, <c>false</c>.
+        /// </returns>
         public static bool IsStringAnInteger32(string str)
         {
             Int32 trash;
             return Int32.TryParse(str, out trash);
         }
 
+        /// <summary>
+        /// Determines whether [is string an integer64] [the specified STR].
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns>
+        /// 	<c>true</c> if [is string an integer64] [the specified STR]; otherwise, <c>false</c>.
+        /// </returns>
         public static bool IsStringAnInteger64(string str)
         {
             Int64 trash;
             return Int64.TryParse(str, out trash);
         }
 
+        /// <summary>
+        /// Determines whether [is string an unsigned integer any] [the specified STR].
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns>
+        /// 	<c>true</c> if [is string an unsigned integer any] [the specified STR]; otherwise, <c>false</c>.
+        /// </returns>
         public static bool IsStringAnUnsignedIntegerAny(string str)
         {
             return IsStringAnUnsignedInteger64(str);
         }
 
+        /// <summary>
+        /// Determines whether [is string an unsigned integer16] [the specified STR].
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns>
+        /// 	<c>true</c> if [is string an unsigned integer16] [the specified STR]; otherwise, <c>false</c>.
+        /// </returns>
         public static bool IsStringAnUnsignedInteger16(string str)
         {
             UInt16 trash;
             return UInt16.TryParse(str, out trash);
         }
 
+        /// <summary>
+        /// Determines whether [is string an unsigned integer32] [the specified STR].
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns>
+        /// 	<c>true</c> if [is string an unsigned integer32] [the specified STR]; otherwise, <c>false</c>.
+        /// </returns>
         public static bool IsStringAnUnsignedInteger32(string str)
         {
             UInt32 trash;
             return UInt32.TryParse(str, out trash);
         }
 
+        /// <summary>
+        /// Determines whether [is string an unsigned integer64] [the specified STR].
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns>
+        /// 	<c>true</c> if [is string an unsigned integer64] [the specified STR]; otherwise, <c>false</c>.
+        /// </returns>
         public static bool IsStringAnUnsignedInteger64(string str)
         {
             UInt64 trash;
             return UInt64.TryParse(str, out trash);
         }
 
+        /// <summary>
+        /// Determines whether [is string A double] [the specified STR].
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns>
+        /// 	<c>true</c> if [is string A double] [the specified STR]; otherwise, <c>false</c>.
+        /// </returns>
         public static bool IsStringADouble(string str)
         {
             double trash;
             return double.TryParse(str, out trash);
         }
 
+        /// <summary>
+        /// Determines whether [is string A decimal] [the specified STR].
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns>
+        /// 	<c>true</c> if [is string A decimal] [the specified STR]; otherwise, <c>false</c>.
+        /// </returns>
         public static bool IsStringADecimal(string str)
         {
             decimal trash;
             return decimal.TryParse(str, out trash);
         }
 
+        /// <summary>
+        /// Determines whether [is string A float] [the specified STR].
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns>
+        /// 	<c>true</c> if [is string A float] [the specified STR]; otherwise, <c>false</c>.
+        /// </returns>
         public static bool IsStringAFloat(string str)
         {
             float trash;
             return float.TryParse(str, out trash);
         }
 
+        /// <summary>
+        /// Determines whether [is string A char] [the specified STR].
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns>
+        /// 	<c>true</c> if [is string A char] [the specified STR]; otherwise, <c>false</c>.
+        /// </returns>
         public static bool IsStringAChar(string str)
         {
             char trash;
             return char.TryParse(str, out trash);
         }
 
+        /// <summary>
+        /// Determines whether [is string A boolean] [the specified STR].
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns>
+        /// 	<c>true</c> if [is string A boolean] [the specified STR]; otherwise, <c>false</c>.
+        /// </returns>
         public static bool IsStringABoolean(string str)
         {
             bool trash;
             return bool.TryParse(str, out trash);
         }
 
+        /// <summary>
+        /// Determines whether [is string A byte] [the specified STR].
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns>
+        /// 	<c>true</c> if [is string A byte] [the specified STR]; otherwise, <c>false</c>.
+        /// </returns>
         public static bool IsStringAByte(string str)
         {
             byte trash;
             return byte.TryParse(str, out trash);
         }
 
+        /// <summary>
+        /// Parses the int.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns></returns>
         public static int ParseInt(string str)
         {
             int result;
@@ -564,6 +785,11 @@ namespace PublicDomain
             return result;
         }
 
+        /// <summary>
+        /// Parses the short.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns></returns>
         public static short ParseShort(string str)
         {
             short result;
@@ -571,6 +797,11 @@ namespace PublicDomain
             return result;
         }
 
+        /// <summary>
+        /// Parses the long.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns></returns>
         public static long ParseLong(string str)
         {
             long result;
@@ -578,6 +809,11 @@ namespace PublicDomain
             return result;
         }
 
+        /// <summary>
+        /// Parses the float.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns></returns>
         public static float ParseFloat(string str)
         {
             float result;
@@ -585,6 +821,11 @@ namespace PublicDomain
             return result;
         }
 
+        /// <summary>
+        /// Parses the double.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns></returns>
         public static double ParseDouble(string str)
         {
             double result;
@@ -592,6 +833,11 @@ namespace PublicDomain
             return result;
         }
 
+        /// <summary>
+        /// Parses the decimal.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns></returns>
         public static decimal ParseDecimal(string str)
         {
             decimal result;
@@ -599,6 +845,11 @@ namespace PublicDomain
             return result;
         }
 
+        /// <summary>
+        /// Parses the U int.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns></returns>
         public static uint ParseUInt(string str)
         {
             uint result;
@@ -606,6 +857,11 @@ namespace PublicDomain
             return result;
         }
 
+        /// <summary>
+        /// Parses the U short.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns></returns>
         public static ushort ParseUShort(string str)
         {
             ushort result;
@@ -613,6 +869,11 @@ namespace PublicDomain
             return result;
         }
 
+        /// <summary>
+        /// Parses the U long.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns></returns>
         public static ulong ParseULong(string str)
         {
             ulong result;
@@ -620,6 +881,11 @@ namespace PublicDomain
             return result;
         }
 
+        /// <summary>
+        /// Parses the byte.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns></returns>
         public static byte ParseByte(string str)
         {
             byte result;
@@ -627,6 +893,11 @@ namespace PublicDomain
             return result;
         }
 
+        /// <summary>
+        /// Parses the char.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns></returns>
         public static char ParseChar(string str)
         {
             char result;
@@ -640,6 +911,13 @@ namespace PublicDomain
     /// </summary>
     public static class ArrayUtilities
     {
+        /// <summary>
+        /// Inserts the replace.
+        /// </summary>
+        /// <param name="array">The array.</param>
+        /// <param name="index">The index.</param>
+        /// <param name="insert">The insert.</param>
+        /// <returns></returns>
         public static T[] InsertReplace<T>(T[] array, int index, T[] insert)
         {
             int newLength = array.Length + insert.Length - 1;
@@ -663,6 +941,12 @@ namespace PublicDomain
             return array;
         }
 
+        /// <summary>
+        /// Removes the specified array.
+        /// </summary>
+        /// <param name="array">The array.</param>
+        /// <param name="index">The index.</param>
+        /// <returns></returns>
         public static T[] Remove<T>(ref T[] array, int index)
         {
             if (array == null)
@@ -690,11 +974,20 @@ namespace PublicDomain
     /// </summary>
     public static class ExceptionUtilities
     {
+        /// <summary>
+        /// Writes the exceptions.
+        /// </summary>
+        /// <param name="ex">The ex.</param>
         public static void WriteExceptions(Exception ex)
         {
             WriteExceptions(ex, Console.Error);
         }
 
+        /// <summary>
+        /// Writes the exceptions.
+        /// </summary>
+        /// <param name="ex">The ex.</param>
+        /// <param name="writer">The writer.</param>
         public static void WriteExceptions(Exception ex, TextWriter writer)
         {
             while (ex != null)
@@ -711,6 +1004,11 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// Gets the exception details as string.
+        /// </summary>
+        /// <param name="ex">The ex.</param>
+        /// <returns></returns>
         public static string GetExceptionDetailsAsString(Exception ex)
         {
             StringBuilder sb = new StringBuilder();
@@ -733,6 +1031,10 @@ namespace PublicDomain
     {
         private static char[] trackbackChars = new char[] { '\\', '/' };
 
+        /// <summary>
+        /// Ensures the directory ending.
+        /// </summary>
+        /// <param name="directory">The directory.</param>
         public static void EnsureDirectoryEnding(ref string directory)
         {
             if (directory != null && directory[directory.Length - 1] != '\\')
@@ -741,12 +1043,23 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// Ensures the directory ending.
+        /// </summary>
+        /// <param name="directory">The directory.</param>
+        /// <returns></returns>
         public static string EnsureDirectoryEnding(string directory)
         {
             EnsureDirectoryEnding(ref directory);
             return directory;
         }
 
+        /// <summary>
+        /// Pathes the combine.
+        /// </summary>
+        /// <param name="path1">The path1.</param>
+        /// <param name="path2">The path2.</param>
+        /// <returns></returns>
         public static string PathCombine(string path1, string path2)
         {
             if (string.IsNullOrEmpty(path2))
@@ -762,6 +1075,10 @@ namespace PublicDomain
             return Path.Combine(path1, path2);
         }
 
+        /// <summary>
+        /// Gets the temporary directory.
+        /// </summary>
+        /// <returns></returns>
         public static string GetTemporaryDirectory()
         {
             string ret = PathCombine(Path.GetTempPath(), "t" + new Random((int)unchecked(DateTime.Now.Ticks)).Next(1, 10000).ToString() + @"\");
@@ -769,11 +1086,22 @@ namespace PublicDomain
             return ret;
         }
 
+        /// <summary>
+        /// Gets the name of the temp file.
+        /// </summary>
+        /// <param name="extension">The extension.</param>
+        /// <returns></returns>
         public static string GetTempFileName(string extension)
         {
             return GetTempFileName(extension, null);
         }
 
+        /// <summary>
+        /// Gets the name of the temp file.
+        /// </summary>
+        /// <param name="extension">The extension.</param>
+        /// <param name="fileName">Name of the file.</param>
+        /// <returns></returns>
         public static string GetTempFileName(string extension, string fileName)
         {
             string tempFile = Path.GetTempFileName();
@@ -816,6 +1144,10 @@ namespace PublicDomain
             return tempFile;
         }
 
+        /// <summary>
+        /// Deletes the directory forcefully.
+        /// </summary>
+        /// <param name="dir">The dir.</param>
         public static void DeleteDirectoryForcefully(string dir)
         {
             RemoveReadOnly(dir);
@@ -823,6 +1155,10 @@ namespace PublicDomain
             Directory.Delete(dir, true);
         }
 
+        /// <summary>
+        /// Removes the read only.
+        /// </summary>
+        /// <param name="path">The path.</param>
         private static void RemoveReadOnly(string path)
         {
             DirectoryInfo current = new DirectoryInfo(path);
@@ -839,6 +1175,11 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// Saves the input stream to file.
+        /// </summary>
+        /// <param name="stream">The stream.</param>
+        /// <param name="newFile">The new file.</param>
         public static void SaveInputStreamToFile(Stream stream, string newFile)
         {
             // Now, write out the file
@@ -856,6 +1197,11 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// Combines the trackbacks in path.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        /// <returns></returns>
         public static string CombineTrackbacksInPath(string uri)
         {
             int trackbackIndex = GetTrackbackIndex(uri);
@@ -877,6 +1223,11 @@ namespace PublicDomain
             return uri;
         }
 
+        /// <summary>
+        /// Gets the index of the trackback.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        /// <returns></returns>
         private static int GetTrackbackIndex(string uri)
         {
             int index = uri.IndexOf("../");
@@ -896,6 +1247,11 @@ namespace PublicDomain
     /// </summary>
     public static class ObjectUtilities
     {
+        /// <summary>
+        /// Serializes the object to binary stream.
+        /// </summary>
+        /// <param name="o">The o.</param>
+        /// <returns></returns>
         public static MemoryStream SerializeObjectToBinaryStream(object o)
         {
             MemoryStream ms = new MemoryStream();
@@ -904,11 +1260,21 @@ namespace PublicDomain
             return ms;
         }
 
+        /// <summary>
+        /// Serializes the object to binary.
+        /// </summary>
+        /// <param name="o">The o.</param>
+        /// <returns></returns>
         public static byte[] SerializeObjectToBinary(object o)
         {
             return SerializeObjectToBinaryStream(o).GetBuffer();
         }
 
+        /// <summary>
+        /// Deserializes the object from binary.
+        /// </summary>
+        /// <param name="data">The data.</param>
+        /// <returns></returns>
         public static T DeserializeObjectFromBinary<T>(byte[] data)
         {
             MemoryStream ms = new MemoryStream(data);
@@ -922,6 +1288,11 @@ namespace PublicDomain
     /// </summary>
     public static class ReflectionUtilities
     {
+        /// <summary>
+        /// Gets the name of the strong.
+        /// </summary>
+        /// <param name="assembly">The assembly.</param>
+        /// <returns></returns>
         public static StrongName GetStrongName(Assembly assembly)
         {
             if (assembly == null)
@@ -944,6 +1315,11 @@ namespace PublicDomain
                 keyBlob, assemblyName.Name, assemblyName.Version);
         }
 
+        /// <summary>
+        /// Finds the type by interface.
+        /// </summary>
+        /// <param name="assembly">The assembly.</param>
+        /// <returns></returns>
         public static Type FindTypeByInterface<T>(Assembly assembly) where T : class
         {
             Type[] types = assembly.GetTypes();
@@ -959,6 +1335,11 @@ namespace PublicDomain
             return null;
         }
 
+        /// <summary>
+        /// Finds the instance by interface.
+        /// </summary>
+        /// <param name="assembly">The assembly.</param>
+        /// <returns></returns>
         public static T FindInstanceByInterface<T>(Assembly assembly) where T : class
         {
             Type type = FindTypeByInterface<T>(assembly);
@@ -1435,6 +1816,9 @@ namespace PublicDomain
     /// </summary>
     public static class Win32
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public static class Win32Constants
         {
             /// <summary>
@@ -1661,6 +2045,9 @@ namespace PublicDomain
             public const uint SHTDN_REASON_FLAG_PLANNED = 0x80000000;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public static class ExternalMethods
         {
             /// <summary>
@@ -1676,12 +2063,34 @@ namespace PublicDomain
             public static extern bool ExitWindowsEx(uint uFlags, uint dwReason);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public enum WindowsControl : uint
         {
+            /// <summary>
+            /// 
+            /// </summary>
             Logoff = Win32Constants.EWX_LOGOFF,
+
+            /// <summary>
+            /// 
+            /// </summary>
             ShutdownAndPowerOff = Win32Constants.EWX_POWEROFF,
+
+            /// <summary>
+            /// 
+            /// </summary>
             ShutdownNoPowerOff = Win32Constants.EWX_SHUTDOWN,
+
+            /// <summary>
+            /// 
+            /// </summary>
             Restart = Win32Constants.EWX_REBOOT,
+
+            /// <summary>
+            /// 
+            /// </summary>
             RestartApps = Win32Constants.EWX_RESTARTAPPS,
         }
 
@@ -1690,56 +2099,104 @@ namespace PublicDomain
             throw new Win32Exception(Marshal.GetLastWin32Error());
         }
 
+        /// <summary>
+        /// Logoffs the current user.
+        /// </summary>
         public static void LogoffCurrentUser()
         {
             LogoffCurrentUser(false);
         }
 
+        /// <summary>
+        /// Logoffs the current user.
+        /// </summary>
+        /// <param name="force">if set to <c>true</c> [force].</param>
         public static void LogoffCurrentUser(bool force)
         {
             ExitWindows(WindowsControl.Logoff, force);
         }
 
+        /// <summary>
+        /// Shutdowns this instance.
+        /// </summary>
         public static void Shutdown()
         {
             Shutdown(false);
         }
 
+        /// <summary>
+        /// Shutdowns the specified force.
+        /// </summary>
+        /// <param name="force">if set to <c>true</c> [force].</param>
         public static void Shutdown(bool force)
         {
             Shutdown(true);
         }
 
+        /// <summary>
+        /// Shutdowns the specified force.
+        /// </summary>
+        /// <param name="force">if set to <c>true</c> [force].</param>
+        /// <param name="powerOff">if set to <c>true</c> [power off].</param>
         public static void Shutdown(bool force, bool powerOff)
         {
             ExitWindows(powerOff ? WindowsControl.ShutdownAndPowerOff : WindowsControl.ShutdownNoPowerOff, force);
         }
 
+        /// <summary>
+        /// Restarts the windows.
+        /// </summary>
         public static void RestartWindows()
         {
             RestartWindows(false);
         }
 
+        /// <summary>
+        /// Restarts the windows.
+        /// </summary>
+        /// <param name="force">if set to <c>true</c> [force].</param>
         public static void RestartWindows(bool force)
         {
             RestartWindows(false);
         }
 
+        /// <summary>
+        /// Restarts the windows.
+        /// </summary>
+        /// <param name="force">if set to <c>true</c> [force].</param>
+        /// <param name="restartApps">if set to <c>true</c> [restart apps].</param>
         public static void RestartWindows(bool force, bool restartApps)
         {
             ExitWindows(restartApps ? WindowsControl.RestartApps : WindowsControl.Restart, force);
         }
 
+        /// <summary>
+        /// Exits the windows.
+        /// </summary>
+        /// <param name="control">The control.</param>
         public static void ExitWindows(WindowsControl control)
         {
             ExitWindows(control, false);
         }
 
+        /// <summary>
+        /// Exits the windows.
+        /// </summary>
+        /// <param name="control">The control.</param>
+        /// <param name="force">if set to <c>true</c> [force].</param>
         public static void ExitWindows(WindowsControl control, bool force)
         {
             ExitWindows(control, force, true, Win32Constants.SHTDN_REASON_MAJOR_OTHER, Win32Constants.SHTDN_REASON_MINOR_OTHER);
         }
 
+        /// <summary>
+        /// Exits the windows.
+        /// </summary>
+        /// <param name="control">The control.</param>
+        /// <param name="force">if set to <c>true</c> [force].</param>
+        /// <param name="planned">if set to <c>true</c> [planned].</param>
+        /// <param name="majorReason">The major reason.</param>
+        /// <param name="minorReason">The minor reason.</param>
         public static void ExitWindows(WindowsControl control, bool force, bool planned, uint majorReason, uint minorReason)
         {
             uint flags = (uint)control;
@@ -1776,11 +2233,18 @@ namespace PublicDomain
         private StringBuilder m_outBuilder;
         private StringBuilder m_errorBuilder;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ProcessHelper"/> class.
+        /// </summary>
         public ProcessHelper()
             : this(true)
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ProcessHelper"/> class.
+        /// </summary>
+        /// <param name="sendStreamsToStrings">if set to <c>true</c> [send streams to strings].</param>
         public ProcessHelper(bool sendStreamsToStrings)
         {
             m_process.StartInfo.WorkingDirectory = Environment.CurrentDirectory;
@@ -1800,6 +2264,10 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// Gets or sets the name of the file.
+        /// </summary>
+        /// <value>The name of the file.</value>
         public string FileName
         {
             get
@@ -1812,6 +2280,10 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// Gets or sets the arguments.
+        /// </summary>
+        /// <value>The arguments.</value>
         public string Arguments
         {
             get
@@ -1824,6 +2296,10 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// Sets the arguments.
+        /// </summary>
+        /// <param name="args">The args.</param>
         public void SetArguments(params string[] args)
         {
             if (args != null)
@@ -1833,6 +2309,11 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// Gets the mangled arguments.
+        /// </summary>
+        /// <param name="args">The args.</param>
+        /// <returns></returns>
         private static StringBuilder GetMangledArguments(string[] args)
         {
             StringBuilder sb = new StringBuilder();
@@ -1859,6 +2340,10 @@ namespace PublicDomain
             return sb;
         }
 
+        /// <summary>
+        /// Adds the arguments.
+        /// </summary>
+        /// <param name="args">The args.</param>
         public void AddArguments(params string[] args)
         {
             if (args != null)
@@ -1895,6 +2380,11 @@ namespace PublicDomain
             }
         }*/
 
+        /// <summary>
+        /// Handles the OutputDataReceived event of the process control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Diagnostics.DataReceivedEventArgs"/> instance containing the event data.</param>
         protected virtual void process_OutputDataReceived(object sender, DataReceivedEventArgs e)
         {
             if (e.Data != null)
@@ -1903,6 +2393,11 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// Handles the ErrorDataReceived event of the process control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Diagnostics.DataReceivedEventArgs"/> instance containing the event data.</param>
         protected virtual void process_ErrorDataReceived(object sender, DataReceivedEventArgs e)
         {
             if (e.Data != null)
@@ -1911,6 +2406,10 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// Gets or sets the process.
+        /// </summary>
+        /// <value>The process.</value>
         public Process Process
         {
             get
@@ -1923,6 +2422,10 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// Gets the start info.
+        /// </summary>
+        /// <value>The start info.</value>
         public ProcessStartInfo StartInfo
         {
             get
@@ -1931,6 +2434,9 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// Starts this instance.
+        /// </summary>
         public void Start()
         {
             Start(true);
@@ -1940,6 +2446,7 @@ namespace PublicDomain
         /// Starts the process, begins asynchronous reads on
         /// both standard output and standard error.
         /// </summary>
+        /// <param name="useRedirect">if set to <c>true</c> [use redirect].</param>
         public void Start(bool useRedirect)
         {
             // Initialize the asynchronous stuff
@@ -1971,6 +2478,11 @@ namespace PublicDomain
             return StartAndWaitForExit(false);
         }
 
+        /// <summary>
+        /// Starts the and wait for exit.
+        /// </summary>
+        /// <param name="timeoutMs">The timeout ms.</param>
+        /// <returns></returns>
         public int StartAndWaitForExit(int timeoutMs)
         {
             return StartAndWaitForExit(timeoutMs, false);
@@ -1982,6 +2494,8 @@ namespace PublicDomain
         /// waits for the process to exit. The return code
         /// of the process is returned.
         /// </summary>
+        /// <param name="timeoutMs">The timeout ms.</param>
+        /// <param name="throwOnError">if set to <c>true</c> [throw on error].</param>
         /// <returns>Return code of completed process</returns>
         public int StartAndWaitForExit(int timeoutMs, bool throwOnError)
         {
@@ -2005,12 +2519,17 @@ namespace PublicDomain
         /// waits for the process to exit. The return code
         /// of the process is returned.
         /// </summary>
+        /// <param name="throwOnError">if set to <c>true</c> [throw on error].</param>
         /// <returns>Return code of completed process</returns>
         public int StartAndWaitForExit(bool throwOnError)
         {
             return StartAndWaitForExit(GlobalConstants.ExecuteSmallProcessTimeout, throwOnError);
         }
 
+        /// <summary>
+        /// Gets or sets the error.
+        /// </summary>
+        /// <value>The error.</value>
         public TextWriter Error
         {
             get
@@ -2023,6 +2542,10 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// Gets or sets the out.
+        /// </summary>
+        /// <value>The out.</value>
         public TextWriter Out
         {
             get
@@ -2035,6 +2558,10 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// Gets the exit code.
+        /// </summary>
+        /// <value>The exit code.</value>
         public int ExitCode
         {
             get
@@ -2043,6 +2570,10 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// Gets the standard output.
+        /// </summary>
+        /// <value>The standard output.</value>
         public string StandardOutput
         {
             get
@@ -2051,6 +2582,10 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// Gets the standard error.
+        /// </summary>
+        /// <value>The standard error.</value>
         public string StandardError
         {
             get
@@ -2059,6 +2594,12 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// Returns a <see cref="T:System.String"></see> that represents the current <see cref="T:System.Object"></see>.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="T:System.String"></see> that represents the current <see cref="T:System.Object"></see>.
+        /// </returns>
         public override string ToString()
         {
             if (!string.IsNullOrEmpty(FileName))
@@ -2078,11 +2619,20 @@ namespace PublicDomain
             return base.ToString();
         }
 
+        /// <summary>
+        /// Checks for error.
+        /// </summary>
+        /// <returns></returns>
         public string CheckForError()
         {
             return CheckForError(true);
         }
 
+        /// <summary>
+        /// Checks for error.
+        /// </summary>
+        /// <param name="throwOnError">if set to <c>true</c> [throw on error].</param>
+        /// <returns></returns>
         public string CheckForError(bool throwOnError)
         {
             string error = null;
@@ -2110,610 +2660,2024 @@ namespace PublicDomain
     /// </summary>
     public class CultureConstants
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureInvariant = "";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureInvariantIdentifier = 127;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralAfrikaans = "af";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralAfrikaansIdentifier = 54;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificAfrikaansSouthAfrica = "af-ZA";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificAfrikaansSouthAfricaIdentifier = 1078;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralAlbanian = "sq";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralAlbanianIdentifier = 28;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificAlbanianAlbania = "sq-AL";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificAlbanianAlbaniaIdentifier = 1052;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralArabic = "ar";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralArabicIdentifier = 1;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralArabicAlgeria = "ar-DZ";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralArabicAlgeriaIdentifier = 5121;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificArabicBahrain = "ar-BH";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificArabicBahrainIdentifier = 15361;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificArabicEgypt = "ar-EG";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificArabicEgyptIdentifier = 3073;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificArabicIraq = "ar-IQ";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificArabicIraqIdentifier = 2049;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificArabicJordan = "ar-JO";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificArabicJordanIdentifier = 11265;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificArabicKuwait = "ar-KW";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificArabicKuwaitIdentifier = 13313;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificArabicLebanon = "ar-LB";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificArabicLebanonIdentifier = 12289;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificArabicLibya = "ar-LY";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificArabicLibyaIdentifier = 4097;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificArabicMorocco = "ar-MA";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificArabicMoroccoIdentifier = 6145;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificArabicOman = "ar-OM";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificArabicOmanIdentifier = 8193;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificArabicQatar = "ar-QA";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificArabicQatarIdentifier = 16385;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificArabicSaudiArabia = "ar-SA";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificArabicSaudiArabiaIdentifier = 1025;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificArabicSyria = "ar-SY";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificArabicSyriaIdentifier = 10241;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificArabicTunisia = "ar-TN";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificArabicTunisiaIdentifier = 7169;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificArabicUnitedArabEmirates = "ar-AE";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificArabicUnitedArabEmiratesIdentifier = 14337;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificArabicYemen = "ar-YE";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificArabicYemenIdentifier = 9217;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralArmenian = "hy";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralArmenianIdentifier = 43;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificArmenianArmenia = "hy-AM";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificArmenianArmeniaIdentifier = 1067;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralAzeri = "az";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralAzeriIdentifier = 44;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificAzeriCyrillicAzerbaijan = "az-AZ-Cyrl";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificAzeriCyrillicAzerbaijanIdentifier = 2092;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificAzeriLatinAzerbaijan = "az-AZ-Latn";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificAzeriLatinAzerbaijanIdentifier = 1068;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralBasque = "eu";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralBasqueIdentifier = 45;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificBasqueBasque = "eu-ES";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificBasqueBasqueIdentifier = 1069;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralBelarusian = "be";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralBelarusianIdentifier = 35;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificBelarusianBelarus = "be-BY";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificBelarusianBelarusIdentifier = 1059;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralBulgarian = "bg";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralBulgarianIdentifier = 2;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificBulgarianBulgaria = "bg-BG";
+        
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificBulgarianBulgariaIdentifier = 1026;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralCatalan = "ca";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralCatalanIdentifier = 3;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificCatalanCatalan = "ca-ES";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificCatalanCatalanIdentifier = 1027;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificChineseHongKongSar = "zh-HK";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificChineseHongKongSarIdentifier = 3076;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificChineseMacaoSar = "zh-MO";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificChineseMacaoSarIdentifier = 5124;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificChineseChina = "zh-CN";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificChineseChinaIdentifier = 2052;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificChineseSimplified = "zh-CHS";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificChineseSimplifiedIdentifier = 4;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificChineseSingapore = "zh-SG";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificChineseSingaporeIdentifier = 4100;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificChineseTaiwan = "zh-TW";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificChineseTaiwanIdentifier = 1028;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificChineseTraditional = "zh-CHT";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificChineseTraditionalIdentifier = 31748;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralCroatian = "hr";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralCroatianIdentifier = 26;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificCroatianCroatia = "hr-HR";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificCroatianCroatiaIdentifier = 1050;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralCzech = "cs";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralCzechIdentifier = 5;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificCzechCzechRepublic = "cs-CZ";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificCzechCzechRepublicIdentifier = 1029;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralDanish = "da";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralDanishIdentifier = 6;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificDanishDenmark = "da-DK";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificDanishDenmarkIdentifier = 1030;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralDhivehi = "div";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralDhivehiIdentifier = 101;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificDhivehiMaldives = "div-MV";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificDhivehiMaldivesIdentifier = 1125;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralDutch = "nl";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralDutchIdentifier = 19;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificDutchBelgium = "nl-BE";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificDutchBelgiumIdentifier = 2067;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificDutchTheNetherlands = "nl-NL";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificDutchTheNetherlandsIdentifier = 1043;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralEnglish = "en";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralEnglishIdentifier = 9;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificEnglishAustralia = "en-AU";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificEnglishAustraliaIdentifier = 3081;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificEnglishBelize = "en-BZ";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificEnglishBelizeIdentifier = 10249;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificEnglishCanada = "en-CA";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificEnglishCanadaIdentifier = 4105;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificEnglishCaribbean = "en-CB";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificEnglishCaribbeanIdentifier = 9225;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificEnglishIreland = "en-IE";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificEnglishIrelandIdentifier = 6153;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificEnglishJamaica = "en-JM";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificEnglishJamaicaIdentifier = 8201;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificEnglishNewZealand = "en-NZ";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificEnglishNewZealandIdentifier = 5129;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificEnglishPhilippines = "en-PH";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificEnglishPhilippinesIdentifier = 13321;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificEnglishSouthAfrica = "en-ZA";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificEnglishSouthAfricaIdentifier = 7177;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificEnglishTrinidadAndTobago = "en-TT";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificEnglishTrinidadAndTobagoIdentifier = 11273;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificEnglishUnitedKingdom = "en-GB";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificEnglishUnitedKingdomIdentifier = 2057;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificEnglishUnitedStates = "en-US";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificEnglishUnitedStatesIdentifier = 1033;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificEnglishZimbabwe = "en-ZW";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificEnglishZimbabweIdentifier = 12297;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralEstonian = "et";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralEstonianIdentifier = 37;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificEstonianEstonia = "et-EE";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificEstonianEstoniaIdentifier = 1061;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralFaroese = "fo";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralFaroeseIdentifier = 56;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificFaroeseFaroeIslands = "fo-FO";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificFaroeseFaroeIslandsIdentifier = 1080;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralFarsi = "fa";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralFarsiIdentifier = 41;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificFarsiIran = "fa-IR";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificFarsiIranIdentifier = 1065;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralFinnish = "fi";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralFinnishIdentifier = 11;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificFinnishFinland = "fi-FI";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificFinnishFinlandIdentifier = 1035;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralFrench = "fr";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralFrenchIdentifier = 12;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificFrenchBelgium = "fr-BE";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificFrenchBelgiumIdentifier = 2060;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificFrenchCanada = "fr-CA";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificFrenchCanadaIdentifier = 3084;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificFrenchFrance = "fr-FR";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificFrenchFranceIdentifier = 1036;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificFrenchLuxembourg = "fr-LU";
+        
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificFrenchLuxembourgIdentifier = 5132;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificFrenchMonaco = "fr-MC";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificFrenchMonacoIdentifier = 6156;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificFrenchSwitzerland = "fr-CH";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificFrenchSwitzerlandIdentifier = 4108;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralGalician = "gl";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralGalicianIdentifier = 86;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificGalicianGalician = "gl-ES";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificGalicianGalicianIdentifier = 1110;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralGeorgian = "ka";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralGeorgianIdentifier = 55;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificGeorgianGeorgia = "ka-GE";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificGeorgianGeorgiaIdentifier = 1079;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralGerman = "de";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralGermanIdentifier = 7;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificGermanAustria = "de-AT";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificGermanAustriaIdentifier = 3079;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificGermanGermany = "de-DE";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificGermanGermanyIdentifier = 1031;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificGermanLiechtenstein = "de-LI";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificGermanLiechtensteinIdentifier = 5127;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificGermanLuxembourg = "de-LU";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificGermanLuxembourgIdentifier = 4103;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificGermanSwitzerland = "de-CH";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificGermanSwitzerlandIdentifier = 2055;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralGreek = "el";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralGreekIdentifier = 8;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificGreekGreece = "el-GR";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificGreekGreeceIdentifier = 1032;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralGujarati = "gu";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralGujaratiIdentifier = 71;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificGujaratiIndia = "gu-IN";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificGujaratiIndiaIdentifier = 1095;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralHebrew = "he";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralHebrewIdentifier = 13;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificHebrewIsrael = "he-IL";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificHebrewIsraelIdentifier = 1037;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralHindi = "hi";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralHindiIdentifier = 57;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificHindiIndia = "hi-IN";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificHindiIndiaIdentifier = 1081;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralHungarian = "hu";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralHungarianIdentifier = 14;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificHungarianHungary = "hu-HU";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificHungarianHungaryIdentifier = 1038;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralIcelandic = "is";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralIcelandicIdentifier = 15;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificIcelandicIceland = "is-IS";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificIcelandicIcelandIdentifier = 1039;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralIndonesian = "id";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralIndonesianIdentifier = 33;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificIndonesianIndonesia = "id-ID";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificIndonesianIndonesiaIdentifier = 1057;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralItalian = "it";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralItalianIdentifier = 16;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificItalianItaly = "it-IT";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificItalianItalyIdentifier = 1040;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificItalianSwitzerland = "it-CH";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificItalianSwitzerlandIdentifier = 2064;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralJapanese = "ja";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralJapaneseIdentifier = 17;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificJapaneseJapan = "ja-JP";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificJapaneseJapanIdentifier = 1041;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralKannada = "kn";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralKannadaIdentifier = 75;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificKannadaIndia = "kn-IN";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificKannadaIndiaIdentifier = 1099;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralKazakh = "kk";
+        
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralKazakhIdentifier = 63;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificKazakhKazakhstan = "kk-KZ";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificKazakhKazakhstanIdentifier = 1087;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralKonkani = "kok";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralKonkaniIdentifier = 87;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificKonkaniIndia = "kok-IN";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificKonkaniIndiaIdentifier = 1111;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralKorean = "ko";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralKoreanIdentifier = 18;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificKoreanKorea = "ko-KR";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificKoreanKoreaIdentifier = 1042;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralKyrgyz = "ky";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralKyrgyzIdentifier = 64;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificKyrgyzKyrgyzstan = "ky-KG";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificKyrgyzKyrgyzstanIdentifier = 1088;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralLatvian = "lv";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralLatvianIdentifier = 38;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificLatvianLatvia = "lv-LV";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificLatvianLatviaIdentifier = 1062;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralLithuanian = "lt";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralLithuanianIdentifier = 39;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificLithuanianLithuania = "lt-LT";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificLithuanianLithuaniaIdentifier = 1063;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralMacedonian = "mk";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralMacedonianIdentifier = 47;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificMacedonianFormerYugoslavRepublicOfMacedonia = "mk-MK";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificMacedonianFormerYugoslavRepublicOfMacedoniaIdentifier = 1071;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralMalay = "ms";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralMalayIdentifier = 62;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificMalayBrunei = "ms-BN";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificMalayBruneiIdentifier = 2110;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificMalayMalaysia = "ms-MY";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificMalayMalaysiaIdentifier = 1086;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralMarathi = "mr";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralMarathiIdentifier = 78;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificMarathiIndia = "mr-IN";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificMarathiIndiaIdentifier = 1102;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralMongolian = "mn";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralMongolianIdentifier = 80;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificMongolianMongolia = "mn-MN";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificMongolianMongoliaIdentifier = 1104;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralNorwegian = "no";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralNorwegianIdentifier = 20;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificNorwegianBokmlNorway = "nb-NO";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificNorwegianBokmlNorwayIdentifier = 1044;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificNorwegianNynorskNorway = "nn-NO";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificNorwegianNynorskNorwayIdentifier = 2068;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralPolish = "pl";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralPolishIdentifier = 21;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificPolishPoland = "pl-PL";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificPolishPolandIdentifier = 1045;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralPortuguese = "pt";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralPortugueseIdentifier = 22;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificPortugueseBrazil = "pt-BR";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificPortugueseBrazilIdentifier = 1046;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificPortuguesePortugal = "pt-PT";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificPortuguesePortugalIdentifier = 2070;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralPunjabi = "pa";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralPunjabiIdentifier = 70;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificPunjabiIndia = "pa-IN";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificPunjabiIndiaIdentifier = 1094;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralRomanian = "ro";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralRomanianIdentifier = 24;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificRomanianRomania = "ro-RO";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificRomanianRomaniaIdentifier = 1048;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralRussian = "ru";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralRussianIdentifier = 25;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificRussianRussia = "ru-RU";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificRussianRussiaIdentifier = 1049;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralSanskrit = "sa";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralSanskritIdentifier = 79;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificSanskritIndia = "sa-IN";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificSanskritIndiaIdentifier = 1103;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificSerbianCyrrilicSerbia = "sr-SP-Cyrl";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificSerbianCyrrilicSerbiaIdentifier = 3098;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificSerbianLatinSerbia = "sr-SP-Latn";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificSerbianLatinSerbiaIdentifier = 2074;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralSlovak = "sk";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralSLOVAKIdentifier = 27;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificSlovakSlovakia = "sk-SK";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificSlovakSlovakiaIdentifier = 1051;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralSlovenian = "sl";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralSlovenianIdentifier = 36;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificSlovenianSlovenia = "sl-SI";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificSlovenianSloveniaIdentifier = 1060;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralSpanish = "es";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralSPANISHIdentifier = 10;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificSpanishArgentina = "es-AR";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificSpanishArgentinaIdentifier = 11274;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificSpanishBolivia = "es-BO";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificSpanishBoliviaIdentifier = 16394;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificSpanishChile = "es-CL";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificSpanishChileIdentifier = 13322;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificSpanishColombia = "es-CO";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificSpanishColombiaIdentifier = 9226;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificSpanishCostaRica = "es-CR";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificSpanishCostaRicaIdentifier = 5130;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificSpanishDominicanRepublic = "es-DO";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificSpanishDominicanRepublicIdentifier = 7178;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificSpanishEcuador = "es-EC";
+        
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificSpanishEcuadorIdentifier = 12298;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificSpanishElSalvador = "es-SV";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificSpanishElSalvadorIdentifier = 17418;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificSpanishGuatemala = "es-GT";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificSpanishGuatemalaIdentifier = 4106;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificSpanishHonduras = "es-HN";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificSpanishHondurasIdentifier = 18442;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificSpanishMexico = "es-MX";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificSpanishMexicoIdentifier = 2058;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificSpanishNicaragua = "es-NI";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificSpanishNicaraguaIdentifier = 19466;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificSpanishPanama = "es-PA";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificSpanishPanamaIdentifier = 6154;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificSpanishParaguay = "es-PY";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificSpanishParaguayIdentifier = 15370;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificSpanishPeru = "es-PE";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificSpanishPeruIdentifier = 10250;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificSpanishPuertoRico = "es-PR";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificSpanishPuertoRicoIdentifier = 20490;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificSpanishSpain = "es-ES";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificSpanishSpainIdentifier = 3082;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificSpanishUruguay = "es-UY";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificSpanishUruguayIdentifier = 14346;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificSpanishVenezuela = "es-VE";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificSpanishVenezuelaIdentifier = 8202;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralSwahili = "sw";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralSwahiliIdentifier = 65;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificSwahiliKenya = "sw-KE";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificSwahiliKenyaIdentifier = 1089;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralSwedish = "sv";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralSwedishIdentifier = 29;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificSwedishFinland = "sv-FI";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificSwedishFinlandIdentifier = 2077;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificSwedishSweden = "sv-SE";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificSwedishSwedenIdentifier = 1053;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralSyriac = "syr";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralSyriacIdentifier = 90;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificSyriacSyria = "syr-SY";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificSyriacSyriaIdentifier = 1114;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralTamil = "ta";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralTamilIdentifier = 73;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificTamilIndia = "ta-IN";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificTamilIndiaIdentifier = 1097;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralTatar = "tt";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralTatarIdentifier = 68;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificTatarRussia = "tt-RU";
+        
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificTatarRussiaIdentifier = 1092;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralTelugu = "te";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralTeluguIdentifier = 74;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificTeluguIndia = "te-IN";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificTeluguIndiaIdentifier = 1098;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralThai = "th";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralThaiIdentifier = 30;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificThaiThailand = "th-TH";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificThaiThailandIdentifier = 1054;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralTurkish = "tr";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralTurkishIdentifier = 31;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificTurkishTurkey = "tr-TR";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificTurkishTurkeyIdentifier = 1055;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralUkrainian = "uk";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralUkrainianIdentifier = 34;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificUkrainianUkraine = "uk-UA";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificUkrainianUkraineIdentifier = 1058;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralUrdu = "ur";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralUrduIdentifier = 32;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificUrduPakistan = "ur-PK";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificUrduPakistanIdentifier = 1056;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralUzbek = "uz";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralUzbekIdentifier = 67;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificUzbekCyrillicUzbekistan = "uz-UZ-Cyrl";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificUzbekCyrillicUzbekistanIdentifier = 2115;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificUzbekLatinUzbekistan = "uz-UZ-Latn";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificUzbekLatinUzbekistanIdentifier = 1091;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureNeutralVietnamese = "vi";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureNeutralVietnameseIdentifier = 42;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string CultureSpecificVietnameseVietnam = "vi-VN";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const int CultureSpecificVietnameseVietnamIdentifier = 1066;
 
         /// <summary>
@@ -2771,7 +4735,16 @@ namespace PublicDomain
     /// </summary>
     public interface IExposesReaderWriterLock
     {
+        /// <summary>
+        /// Gets the sync.
+        /// </summary>
+        /// <value>The sync.</value>
         ReaderWriterLock Sync { get; }
+
+        /// <summary>
+        /// Called when [before acquire].
+        /// </summary>
+        /// <param name="desiredType">Type of the desired.</param>
         void OnBeforeAcquire(ReaderWriterLockSynchronizeType desiredType);
     }
 
@@ -2780,6 +4753,11 @@ namespace PublicDomain
     /// </summary>
     public class DisposableReaderWriter : IDisposable
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DisposableReaderWriter"/> class.
+        /// </summary>
+        /// <param name="root">The root.</param>
+        /// <param name="type">The type.</param>
         public DisposableReaderWriter(IExposesReaderWriterLock root, ReaderWriterLockSynchronizeType type)
         {
             m_Root = root;
@@ -2788,11 +4766,17 @@ namespace PublicDomain
             AcquireLock();
         }
 
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
         public virtual void Dispose()
         {
             ReleaseLock();
         }
 
+        /// <summary>
+        /// Acquires the lock.
+        /// </summary>
         protected virtual void AcquireLock()
         {
             m_Root.OnBeforeAcquire(m_SynchronizeType);
@@ -2807,6 +4791,9 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// Releases the lock.
+        /// </summary>
         protected virtual void ReleaseLock()
         {
             DowngradeFromWriterLock();
@@ -2821,32 +4808,50 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// Acquires the reader lock.
+        /// </summary>
         protected virtual void AcquireReaderLock()
         {
             m_Root.Sync.AcquireReaderLock(DefaultLockTimeout);
         }
 
+        /// <summary>
+        /// Acquires the writer lock.
+        /// </summary>
         protected virtual void AcquireWriterLock()
         {
             m_Root.Sync.AcquireWriterLock(DefaultLockTimeout);
         }
 
+        /// <summary>
+        /// Releases the reader lock.
+        /// </summary>
         protected virtual void ReleaseReaderLock()
         {
             m_Root.Sync.ReleaseReaderLock();
         }
 
+        /// <summary>
+        /// Releases the writer lock.
+        /// </summary>
         protected virtual void ReleaseWriterLock()
         {
             m_Root.Sync.ReleaseWriterLock();
         }
 
+        /// <summary>
+        /// Upgrades to writer lock.
+        /// </summary>
         public virtual void UpgradeToWriterLock()
         {
             m_SynchronizeType = ReaderWriterLockSynchronizeType.Write;
             m_UpgradeLockCookie = m_Root.Sync.UpgradeToWriterLock(DefaultLockTimeout);
         }
 
+        /// <summary>
+        /// Downgrades from writer lock.
+        /// </summary>
         public virtual void DowngradeFromWriterLock()
         {
             if (m_UpgradeLockCookie != null)
@@ -2858,9 +4863,19 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const int DefaultLockTimeout = 100;
 
+        /// <summary>
+        /// 
+        /// </summary>
         protected ReaderWriterLockSynchronizeType m_SynchronizeType;
+
+        /// <summary>
+        /// 
+        /// </summary>
         protected IExposesReaderWriterLock m_Root;
 
         private LockCookie? m_UpgradeLockCookie;
@@ -2879,6 +4894,9 @@ namespace PublicDomain
         private CultureInfo oldCulture;
         private CultureInfo oldUICulture;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InvariantCultureContext"/> class.
+        /// </summary>
         public InvariantCultureContext()
         {
             oldCulture = Thread.CurrentThread.CurrentCulture;
@@ -2888,6 +4906,9 @@ namespace PublicDomain
             Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
         }
 
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
         public void Dispose()
         {
             Thread.CurrentThread.CurrentCulture = oldCulture;
@@ -2901,24 +4922,69 @@ namespace PublicDomain
     /// </summary>
     public static class RegexUtilities
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public const string HtmlBreakExpression = @"<\s*br\s*/?\s*>";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const string HtmlParagraphExpression = @"<\s*p\s*/?\s*>";
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const string HtmlBreakOrParagraphExpression = @"<\s*([bp]r?)\s*/?\s*>";
 
+        /// <summary>
+        /// 
+        /// </summary>
         public static Regex HtmlBreak = new Regex(HtmlBreakExpression, RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+        /// <summary>
+        /// 
+        /// </summary>
         public static Regex HtmlParagraph = new Regex(HtmlParagraphExpression, RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+        /// <summary>
+        /// 
+        /// </summary>
         public static Regex HtmlBreakOrParagraph = new Regex(HtmlBreakOrParagraphExpression, RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string HtmlBreakOrParagraphTrimLeftExpression = @"^" + HtmlBreakOrParagraphExpression;
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const string HtmlBreakOrParagraphTrimRightExpression = HtmlBreakOrParagraphExpression + @"$";
 
+        /// <summary>
+        /// 
+        /// </summary>
         public static Regex HtmlBreakOrParagraphTrim = new Regex(string.Format("({0})|({1})", HtmlBreakOrParagraphTrimLeftExpression, HtmlBreakOrParagraphTrimRightExpression), RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const string UriChars = @"[^\s)<>\]}!([]+";
 
+        /// <summary>
+        /// 
+        /// </summary>
         public static readonly Regex Uri = new Regex(@"\w+://" + UriChars, RegexOptions.Compiled);
+
+        /// <summary>
+        /// 
+        /// </summary>
         public static readonly Regex UriLenient = new Regex(@"(\w+://)?" + UriChars, RegexOptions.Compiled);
 
+        /// <summary>
+        /// 
+        /// </summary>
         public static readonly Regex Email = new Regex(@"^[\w-\.]{1,}\@([\da-zA-Z-]{1,}\.){1,}[\da-zA-Z-]{2,3}$", RegexOptions.Compiled);
     }
 
@@ -2976,6 +5042,11 @@ namespace PublicDomain
             return "Compiler returned exit code " + results.NativeCompilerReturnValue;
         }
 
+        /// <summary>
+        /// Gets the compiler errors as string.
+        /// </summary>
+        /// <param name="errors">The errors.</param>
+        /// <returns></returns>
         public static string GetCompilerErrorsAsString(CompilerErrorCollection errors)
         {
             StringBuilder sb = new StringBuilder(errors.Count * 10);
@@ -2992,25 +5063,75 @@ namespace PublicDomain
             return sb.ToString();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         [Serializable]
         public class CompileException : Exception
         {
+            /// <summary>
+            /// Initializes a new instance of the <see cref="CompileException"/> class.
+            /// </summary>
             public CompileException() { }
+            
+            /// <summary>
+            /// Initializes a new instance of the <see cref="CompileException"/> class.
+            /// </summary>
+            /// <param name="message">The message.</param>
+            
             public CompileException(string message) : base(message) { }
+            /// <summary>
+            /// Initializes a new instance of the <see cref="CompileException"/> class.
+            /// </summary>
+            /// <param name="message">The message.</param>
+            /// <param name="inner">The inner.</param>
+            
             public CompileException(string message, Exception inner) : base(message, inner) { }
+            /// <summary>
+            /// Initializes a new instance of the <see cref="CompileException"/> class.
+            /// </summary>
+            /// <param name="info">The <see cref="T:System.Runtime.Serialization.SerializationInfo"></see> that holds the serialized object data about the exception being thrown.</param>
+            /// <param name="context">The <see cref="T:System.Runtime.Serialization.StreamingContext"></see> that contains contextual information about the source or destination.</param>
+            /// <exception cref="T:System.Runtime.Serialization.SerializationException">The class name is null or <see cref="P:System.Exception.HResult"></see> is zero (0). </exception>
+            /// <exception cref="T:System.ArgumentNullException">The info parameter is null. </exception>
+            
             protected CompileException(
               System.Runtime.Serialization.SerializationInfo info,
               System.Runtime.Serialization.StreamingContext context)
                 : base(info, context) { }
         }
 
-
+        /// <summary>
+        /// 
+        /// </summary>
         [Serializable]
         public class NativeCompileException : CompileException
         {
+            /// <summary>
+            /// Initializes a new instance of the <see cref="NativeCompileException"/> class.
+            /// </summary>
             public NativeCompileException() { }
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="NativeCompileException"/> class.
+            /// </summary>
+            /// <param name="message">The message.</param>
             public NativeCompileException(string message) : base(message) { }
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="NativeCompileException"/> class.
+            /// </summary>
+            /// <param name="message">The message.</param>
+            /// <param name="inner">The inner.</param>
             public NativeCompileException(string message, Exception inner) : base(message, inner) { }
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="NativeCompileException"/> class.
+            /// </summary>
+            /// <param name="info">The <see cref="T:System.Runtime.Serialization.SerializationInfo"></see> that holds the serialized object data about the exception being thrown.</param>
+            /// <param name="context">The <see cref="T:System.Runtime.Serialization.StreamingContext"></see> that contains contextual information about the source or destination.</param>
+            /// <exception cref="T:System.Runtime.Serialization.SerializationException">The class name is null or <see cref="P:System.Exception.HResult"></see> is zero (0). </exception>
+            /// <exception cref="T:System.ArgumentNullException">The info parameter is null. </exception>
             protected NativeCompileException(
               System.Runtime.Serialization.SerializationInfo info,
               System.Runtime.Serialization.StreamingContext context)
@@ -3829,15 +5950,33 @@ namespace PublicDomain
     [Serializable]
     public struct Iso3166
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public string TwoLetterCode;
+
+        /// <summary>
+        /// 
+        /// </summary>
         public string CountryName;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Iso3166"/> class.
+        /// </summary>
+        /// <param name="twoLetterCode">The two letter code.</param>
+        /// <param name="countryName">Name of the country.</param>
         public Iso3166(string twoLetterCode, string countryName)
         {
             TwoLetterCode = twoLetterCode;
             CountryName = countryName;
         }
 
+        /// <summary>
+        /// Returns the fully qualified type name of this instance.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="T:System.String"></see> containing a fully qualified type name.
+        /// </returns>
         public override string ToString()
         {
             return TwoLetterCode;
@@ -3850,19 +5989,61 @@ namespace PublicDomain
     [Serializable]
     public struct Iso6709
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public int LatitudeDegrees;
+
+        /// <summary>
+        /// 
+        /// </summary>
         public int LatitudeMinutes;
+
+        /// <summary>
+        /// 
+        /// </summary>
         public int LatitudeSeconds;
+
+        /// <summary>
+        /// 
+        /// </summary>
         public bool IsLatitudeNorth;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public int LongitudeDegrees;
+
+        /// <summary>
+        /// 
+        /// </summary>
         public int LongitudeMinutes;
+
+        /// <summary>
+        /// 
+        /// </summary>
         public int LongitudeSeconds;
+
+        /// <summary>
+        /// 
+        /// </summary>
         public bool IsLongitudeEast;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public static Regex Iso6709Form1 = new Regex(@"(\+|-)(\d\d)(\d\d)(\+|-)(\d\d\d)(\d\d)", RegexOptions.Compiled);
+
+        /// <summary>
+        /// 
+        /// </summary>
         public static Regex Iso6709Form2 = new Regex(@"(\+|-)(\d\d)(\d\d)(\d\d)(\+|-)(\d\d\d)(\d\d)(\d\d)", RegexOptions.Compiled);
 
+        /// <summary>
+        /// Parses the specified STR.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns></returns>
         public static Iso6709 Parse(string str)
         {
             Iso6709 result = new Iso6709();
@@ -3899,6 +6080,12 @@ namespace PublicDomain
             return result;
         }
 
+        /// <summary>
+        /// Returns the fully qualified type name of this instance.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="T:System.String"></see> containing a fully qualified type name.
+        /// </returns>
         public override string ToString()
         {
             if (LatitudeSeconds != 0 && LongitudeSeconds != 0)
@@ -3934,25 +6121,49 @@ namespace PublicDomain
     [Serializable]
     public class LatitudeLongitudePoint
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public double m_latitude;
+
+        /// <summary>
+        /// 
+        /// </summary>
         public double m_longitude;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LatitudeLongitudePoint"/> class.
+        /// </summary>
         public LatitudeLongitudePoint()
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LatitudeLongitudePoint"/> class.
+        /// </summary>
+        /// <param name="latitude">The latitude.</param>
+        /// <param name="longitude">The longitude.</param>
         public LatitudeLongitudePoint(double latitude, double longitude)
         {
             Latitude = latitude;
             Longitude = longitude;
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LatitudeLongitudePoint"/> class.
+        /// </summary>
+        /// <param name="latitude">The latitude.</param>
+        /// <param name="longitude">The longitude.</param>
         public LatitudeLongitudePoint(string latitude, string longitude)
         {
             Latitude = double.Parse(latitude);
             Longitude = double.Parse(longitude);
         }
 
+        /// <summary>
+        /// Gets or sets the latitude.
+        /// </summary>
+        /// <value>The latitude.</value>
         public double Latitude
         {
             get
@@ -3965,6 +6176,10 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// Gets or sets the longitude.
+        /// </summary>
+        /// <value>The longitude.</value>
         public double Longitude
         {
             get
@@ -3977,6 +6192,10 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// Gets or sets the latitude decimal.
+        /// </summary>
+        /// <value>The latitude decimal.</value>
         public Decimal LatitudeDecimal
         {
             get
@@ -3989,6 +6208,10 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// Gets or sets the longitude decimal.
+        /// </summary>
+        /// <value>The longitude decimal.</value>
         public Decimal LongitudeDecimal
         {
             get
@@ -4009,6 +6232,7 @@ namespace PublicDomain
         /// 3. 37. + .416666 + .01125
         /// 4. So 37 degrees, 25 minutes, 40.5 seconds = 37.427916 in decimal degrees.
         /// </summary>
+        /// <value>The latitude degrees.</value>
         public int LatitudeDegrees
         {
             get
@@ -4017,6 +6241,10 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// Gets the latitude minutes.
+        /// </summary>
+        /// <value>The latitude minutes.</value>
         public int LatitudeMinutes
         {
             get
@@ -4025,6 +6253,10 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// Gets the latitude seconds.
+        /// </summary>
+        /// <value>The latitude seconds.</value>
         public double LatitudeSeconds
         {
             get
@@ -4033,6 +6265,10 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// Gets the longitude degrees.
+        /// </summary>
+        /// <value>The longitude degrees.</value>
         public int LongitudeDegrees
         {
             get
@@ -4041,6 +6277,10 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// Gets the longitude minutes.
+        /// </summary>
+        /// <value>The longitude minutes.</value>
         public int LongitudeMinutes
         {
             get
@@ -4049,6 +6289,10 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// Gets the longitude seconds.
+        /// </summary>
+        /// <value>The longitude seconds.</value>
         public double LongitudeSeconds
         {
             get
@@ -4057,11 +6301,23 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// Returns a <see cref="T:System.String"></see> that represents the current <see cref="T:System.Object"></see>.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="T:System.String"></see> that represents the current <see cref="T:System.Object"></see>.
+        /// </returns>
         public override string ToString()
         {
             return "(" + Latitude + "," + Longitude + ")";
         }
 
+        /// <summary>
+        /// Parses the specified latitude.
+        /// </summary>
+        /// <param name="latitude">The latitude.</param>
+        /// <param name="longitude">The longitude.</param>
+        /// <returns></returns>
         public static LatitudeLongitudePoint Parse(string latitude, string longitude)
         {
             if (!(latitude == null || longitude == null || latitude.ToLower() == "na" || longitude.ToLower() == "na"))
@@ -4109,6 +6365,13 @@ namespace PublicDomain
             return DistanceBetween(point1, point2, DistanceType.StatuteMiles);
         }
 
+        /// <summary>
+        /// Distances the between.
+        /// </summary>
+        /// <param name="point1">The point1.</param>
+        /// <param name="point2">The point2.</param>
+        /// <param name="returnType">Type of the return.</param>
+        /// <returns></returns>
         public static double DistanceBetween(LatitudeLongitudePoint point1, LatitudeLongitudePoint point2, DistanceType returnType)
         {
             // see http://www.mathforum.com/library/drmath/view/51711.html
@@ -4144,6 +6407,11 @@ namespace PublicDomain
     /// </summary>
     public static class DateTimeUtlities
     {
+        /// <summary>
+        /// Parses the month.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns></returns>
         public static Month ParseMonth(string str)
         {
             if (string.IsNullOrEmpty(str))
@@ -4186,6 +6454,11 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// Parses the day of week.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns></returns>
         public static DayOfWeek ParseDayOfWeek(string str)
         {
             if (string.IsNullOrEmpty(str))
@@ -4218,12 +6491,37 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         [Serializable]
         public class DateException : Exception
         {
+            /// <summary>
+            /// Initializes a new instance of the <see cref="DateException"/> class.
+            /// </summary>
             public DateException() { }
+            
+            /// <summary>
+            /// Initializes a new instance of the <see cref="DateException"/> class.
+            /// </summary>
+            /// <param name="message">The message.</param>
             public DateException(string message) : base(message) { }
+            
+            /// <summary>
+            /// Initializes a new instance of the <see cref="DateException"/> class.
+            /// </summary>
+            /// <param name="message">The message.</param>
+            /// <param name="inner">The inner.</param>
             public DateException(string message, Exception inner) : base(message, inner) { }
+            
+            /// <summary>
+            /// Initializes a new instance of the <see cref="DateException"/> class.
+            /// </summary>
+            /// <param name="info">The <see cref="T:System.Runtime.Serialization.SerializationInfo"></see> that holds the serialized object data about the exception being thrown.</param>
+            /// <param name="context">The <see cref="T:System.Runtime.Serialization.StreamingContext"></see> that contains contextual information about the source or destination.</param>
+            /// <exception cref="T:System.Runtime.Serialization.SerializationException">The class name is null or <see cref="P:System.Exception.HResult"></see> is zero (0). </exception>
+            /// <exception cref="T:System.ArgumentNullException">The info parameter is null. </exception>
             protected DateException(
               System.Runtime.Serialization.SerializationInfo info,
               System.Runtime.Serialization.StreamingContext context)
@@ -4232,10 +6530,162 @@ namespace PublicDomain
     }
 
 #if !(NOTZ)
-    /// From http://www.twinsun.com/tz/tz-link.htm
-    /// "The public-domain time zone database contains code
-    /// and data that represent the history of local time
-    /// for many representative locations around the globe."
+    // From http://www.twinsun.com/tz/tz-link.htm
+    // "The public-domain time zone database contains code
+    // and data that represent the history of local time
+    // for many representative locations around the globe."
+
+
+    /// <summary>
+    /// Represents a Time Zone from the Olson tz database.
+    /// </summary>
+    [Serializable]
+    public class TzTimeZone : TimeZone
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        public const string TimzoneUsEastern = "US/Eastern";
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public const string TimezoneUsCentral = "US/Central";
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public const string TimezoneUsMountain = "US/Mountain";
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public const string TimezoneUsPacific = "US/Pacific";
+
+        private string m_standardName;
+        private string m_daylightName;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TzTimeZone"/> class.
+        /// </summary>
+        /// <param name="standardName">Name of the standard.</param>
+        public TzTimeZone(string standardName)
+        {
+            m_standardName = standardName;
+            m_daylightName = standardName;
+        }
+
+        /// <summary>
+        /// Gets the standard time zone name.
+        /// </summary>
+        /// <value></value>
+        /// <returns>The standard time zone name.</returns>
+        /// <exception cref="T:System.ArgumentNullException">Attempted to set this property to null. </exception>
+        public override string StandardName
+        {
+            get
+            {
+                return m_standardName;
+            }
+        }
+
+        /// <summary>
+        /// Gets the daylight saving time zone name.
+        /// </summary>
+        /// <value></value>
+        /// <returns>The daylight saving time zone name.</returns>
+        public override string DaylightName
+        {
+            get
+            {
+                return m_daylightName;
+            }
+        }
+
+        /// <summary>
+        /// Returns the daylight saving time period for a particular year.
+        /// </summary>
+        /// <param name="year">The year to which the daylight saving time period applies.</param>
+        /// <returns>
+        /// A <see cref="T:System.Globalization.DaylightTime"></see> instance containing the start and end date for daylight saving time in year.
+        /// </returns>
+        /// <exception cref="T:System.ArgumentOutOfRangeException">year is less than 1 or greater than 9999. </exception>
+        public override DaylightTime GetDaylightChanges(int year)
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// Returns the coordinated universal time (UTC) offset for the specified local time.
+        /// </summary>
+        /// <param name="time">The local date and time.</param>
+        /// <returns>
+        /// The UTC offset from time, measured in ticks.
+        /// </returns>
+        public override TimeSpan GetUtcOffset(DateTime time)
+        {
+            return new TimeSpan();
+        }
+
+        /// <summary>
+        /// Returns a value indicating whether the specified date and time is within a daylight saving time period.
+        /// </summary>
+        /// <param name="time">A date and time.</param>
+        /// <returns>
+        /// true if time is in a daylight saving time period; false otherwise, or if time is null.
+        /// </returns>
+        public override bool IsDaylightSavingTime(DateTime time)
+        {
+            return base.IsDaylightSavingTime(time);
+        }
+
+        /// <summary>
+        /// Returns the local time that corresponds to a specified coordinated universal time (UTC).
+        /// </summary>
+        /// <param name="time">A UTC time.</param>
+        /// <returns>
+        /// A <see cref="T:System.DateTime"></see> instance whose value is the local time that corresponds to time.
+        /// </returns>
+        public override DateTime ToLocalTime(DateTime time)
+        {
+            return base.ToLocalTime(time);
+        }
+
+        /// <summary>
+        /// Returns the coordinated universal time (UTC) that corresponds to a specified local time.
+        /// </summary>
+        /// <param name="time">The local date and time.</param>
+        /// <returns>
+        /// A <see cref="T:System.DateTime"></see> instance whose value is the UTC time that corresponds to time.
+        /// </returns>
+        public override DateTime ToUniversalTime(DateTime time)
+        {
+            return base.ToUniversalTime(time);
+        }
+
+        /// <summary>
+        /// Returns a <see cref="T:System.String"></see> that represents the current <see cref="T:System.Object"></see>.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="T:System.String"></see> that represents the current <see cref="T:System.Object"></see>.
+        /// </returns>
+        public override string ToString()
+        {
+            return base.ToString();
+        }
+    }
+
+    /// <summary>
+    /// Wraps DateTime to provide time zone information
+    /// with an <see cref="PublicDomain.TzTimeZone" /> from
+    /// the Olson tz database.
+    /// </summary>
+    [Serializable]
+    public class TzDateTime
+    {
+    }
+
+#if !(NOTZPARSER)
 
 #if !(NONUNIT)
     [TestFixture]
@@ -4731,82 +7181,7 @@ namespace PublicDomain
         }
     }
 
-    /// <summary>
-    /// Represents a Time Zone from the Olson tz database.
-    /// </summary>
-    [Serializable]
-    public class TzTimeZone : TimeZone
-    {
-        public const string TimzoneUsEastern = "US/Eastern";
-        public const string TimezoneUsCentral = "US/Central";
-        public const string TimezoneUsMountain = "US/Mountain";
-        public const string TimezoneUsPacific = "US/Pacific";
-
-        private string m_standardName;
-        private string m_daylightName;
-
-        public TzTimeZone(string standardName)
-        {
-            m_standardName = standardName;
-            m_daylightName = standardName;
-        }
-
-        public override string StandardName
-        {
-            get
-            {
-                return m_standardName;
-            }
-        }
-
-        public override string DaylightName
-        {
-            get
-            {
-                return m_daylightName;
-            }
-        }
-
-        public override DaylightTime GetDaylightChanges(int year)
-        {
-            return null;
-        }
-
-        public override TimeSpan GetUtcOffset(DateTime time)
-        {
-            return new TimeSpan();
-        }
-
-        public override bool IsDaylightSavingTime(DateTime time)
-        {
-            return base.IsDaylightSavingTime(time);
-        }
-
-        public override DateTime ToLocalTime(DateTime time)
-        {
-            return base.ToLocalTime(time);
-        }
-
-        public override DateTime ToUniversalTime(DateTime time)
-        {
-            return base.ToUniversalTime(time);
-        }
-
-        public override string ToString()
-        {
-            return base.ToString();
-        }
-    }
-
-    /// <summary>
-    /// Wraps DateTime to provide time zone information
-    /// with an <see cref="PublicDomain.TzTimeZone"> from
-    /// the Olson tz database.
-    /// </summary>
-    [Serializable]
-    public class TzDateTime
-    {
-    }
+#endif
 
 #endif
 
@@ -4817,6 +7192,9 @@ namespace PublicDomain
 #if !(NOSTATES)
     public static class UnitedStatesUtilities
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public static readonly USState[] States;
 
         static UnitedStatesUtilities()
@@ -4882,8 +7260,10 @@ namespace PublicDomain
         /// by its abbreviate.
         /// </summary>
         /// <param name="abbreviation">The abbreviation of the state to search for. Not case sensitive.</param>
-        /// <returns>The <see cref="PublicDomain.UnitedStatesUtilities.USState"/> that represents the
-        /// <c>abbreviation</c>, or if it is not found, throws a <see cref="PublicDomain.UnitedStatesUtilities.StateNotFoundException"/></returns>
+        /// <returns>
+        /// The <see cref="PublicDomain.UnitedStatesUtilities.USState"/> that represents the
+        /// <c>abbreviation</c>, or if it is not found, throws a <see cref="PublicDomain.UnitedStatesUtilities.StateNotFoundException"/>
+        /// </returns>
         /// <exception cref="PublicDomain.UnitedStatesUtilities.StateNotFoundException"></exception>
         public static USState GetStateByAbbrivation(string abbreviation)
         {
@@ -4907,8 +7287,10 @@ namespace PublicDomain
         /// by its name.
         /// </summary>
         /// <param name="stateName">The name of the state to search for. Not case sensitive.</param>
-        /// <returns>The <see cref="PublicDomain.UnitedStatesUtilities.USState"/> that represents the
-        /// <c>abbreviation</c>, or if it is not found, throws a <see cref="PublicDomain.UnitedStatesUtilities.StateNotFoundException"/></returns>
+        /// <returns>
+        /// The <see cref="PublicDomain.UnitedStatesUtilities.USState"/> that represents the
+        /// <c>abbreviation</c>, or if it is not found, throws a <see cref="PublicDomain.UnitedStatesUtilities.StateNotFoundException"/>
+        /// </returns>
         /// <exception cref="PublicDomain.UnitedStatesUtilities.StateNotFoundException"></exception>
         public static USState GetStateByName(string stateName)
         {
@@ -4927,13 +7309,33 @@ namespace PublicDomain
             throw new StateNotFoundException(stateName);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         [Serializable]
         public struct USState
         {
+            /// <summary>
+            /// 
+            /// </summary>
             public int UniqueId;
+
+            /// <summary>
+            /// 
+            /// </summary>
             public string Name;
+
+            /// <summary>
+            /// 
+            /// </summary>
             public string Abbreviation;
 
+            /// <summary>
+            /// Initializes a new instance of the <see cref="USState"/> class.
+            /// </summary>
+            /// <param name="uniqueId">The unique id.</param>
+            /// <param name="name">The name.</param>
+            /// <param name="abbreviation">The abbreviation.</param>
             public USState(int uniqueId, string name, string abbreviation)
             {
                 this.UniqueId = uniqueId;
@@ -4941,23 +7343,58 @@ namespace PublicDomain
                 this.Abbreviation = abbreviation;
             }
 
+            /// <summary>
+            /// Gets the name.
+            /// </summary>
+            /// <param name="toUpperCase">if set to <c>true</c> [to upper case].</param>
+            /// <returns></returns>
             public string GetName(bool toUpperCase)
             {
                 return toUpperCase ? Name.ToUpper() : Name.ToLower();
             }
 
+            /// <summary>
+            /// Gets the abbreviation.
+            /// </summary>
+            /// <param name="toUpperCase">if set to <c>true</c> [to upper case].</param>
+            /// <returns></returns>
             public string GetAbbreviation(bool toUpperCase)
             {
                 return toUpperCase ? Abbreviation.ToUpper() : Abbreviation.ToLower();
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         [Serializable]
         public class StateNotFoundException : Exception
         {
+            /// <summary>
+            /// Initializes a new instance of the <see cref="StateNotFoundException"/> class.
+            /// </summary>
             public StateNotFoundException() { }
+            
+            /// <summary>
+            /// Initializes a new instance of the <see cref="StateNotFoundException"/> class.
+            /// </summary>
+            /// <param name="message">The message.</param>
             public StateNotFoundException(string message) : base(message) { }
+            
+            /// <summary>
+            /// Initializes a new instance of the <see cref="StateNotFoundException"/> class.
+            /// </summary>
+            /// <param name="message">The message.</param>
+            /// <param name="inner">The inner.</param>
             public StateNotFoundException(string message, Exception inner) : base(message, inner) { }
+            
+            /// <summary>
+            /// Initializes a new instance of the <see cref="StateNotFoundException"/> class.
+            /// </summary>
+            /// <param name="info">The <see cref="T:System.Runtime.Serialization.SerializationInfo"></see> that holds the serialized object data about the exception being thrown.</param>
+            /// <param name="context">The <see cref="T:System.Runtime.Serialization.StreamingContext"></see> that contains contextual information about the source or destination.</param>
+            /// <exception cref="T:System.Runtime.Serialization.SerializationException">The class name is null or <see cref="P:System.Exception.HResult"></see> is zero (0). </exception>
+            /// <exception cref="T:System.ArgumentNullException">The info parameter is null. </exception>
             protected StateNotFoundException(
               System.Runtime.Serialization.SerializationInfo info,
               System.Runtime.Serialization.StreamingContext context)
@@ -4968,44 +7405,153 @@ namespace PublicDomain
 
     #region Enums
 
+    /// <summary>
+    /// 
+    /// </summary>
     public enum Month
     {
+        /// <summary>
+        /// 
+        /// </summary>
         January = 1,
+
+        /// <summary>
+        /// 
+        /// </summary>
         February = 2,
+
+        /// <summary>
+        /// 
+        /// </summary>
         March = 3,
+
+        /// <summary>
+        /// 
+        /// </summary>
         April = 4,
+
+        /// <summary>
+        /// 
+        /// </summary>
         May = 5,
+
+        /// <summary>
+        /// 
+        /// </summary>
         June = 6,
+
+        /// <summary>
+        /// 
+        /// </summary>
         July = 7,
+
+        /// <summary>
+        /// 
+        /// </summary>
         August = 8,
+        
+        /// <summary>
+        /// 
+        /// </summary>
         September = 9,
+
+        /// <summary>
+        /// 
+        /// </summary>
         October = 10,
+        
+        /// <summary>
+        /// 
+        /// </summary>
         November = 11,
+
+        /// <summary>
+        /// 
+        /// </summary>
         December = 12
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public enum Language
     {
+        /// <summary>
+        /// 
+        /// </summary>
         CSharp,
+
+        /// <summary>
+        /// 
+        /// </summary>
         PHP,
+
+        /// <summary>
+        /// 
+        /// </summary>
         JSharp,
+
+        /// <summary>
+        /// 
+        /// </summary>
         CPlusPlus,
+
+        /// <summary>
+        /// 
+        /// </summary>
         JScript,
+
+        /// <summary>
+        /// 
+        /// </summary>
         VisualBasic,
+
+        /// <summary>
+        /// 
+        /// </summary>
         Java,
+
+        /// <summary>
+        /// 
+        /// </summary>
         Ruby,
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public enum DistanceType
     {
+        /// <summary>
+        /// 
+        /// </summary>
         StatuteMiles,
+
+        /// <summary>
+        /// 
+        /// </summary>
         NauticalMiles,
+
+        /// <summary>
+        /// 
+        /// </summary>
         Kilometers
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public enum ReaderWriterLockSynchronizeType
     {
-        Read, Write
+        /// <summary>
+        /// 
+        /// </summary>
+        Read,
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        Write
     }
 
     #endregion
