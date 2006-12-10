@@ -21,6 +21,18 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_3F7F0874ADA049C4BD1D8C615F511723"
+        "OwnerKey" = "8:_232751C70EAD4554B7412280C921C0AC"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_3F7F0874ADA049C4BD1D8C615F511723"
+        "OwnerKey" = "8:_4DA056F41EEF41BAB6C1A1B2A7C8B906"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_4DA056F41EEF41BAB6C1A1B2A7C8B906"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -45,18 +57,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_F7155CE968B944C988E3D9F3B751D6EA"
-        "OwnerKey" = "8:_232751C70EAD4554B7412280C921C0AC"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_F7155CE968B944C988E3D9F3B751D6EA"
-        "OwnerKey" = "8:_4DA056F41EEF41BAB6C1A1B2A7C8B906"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_9859F56BCF5695F94D26FAFE3EE75E90"
         "MsmSig" = "8:_UNDEFINED"
@@ -76,7 +76,7 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_F7155CE968B944C988E3D9F3B751D6EA"
+        "OwnerKey" = "8:_3F7F0874ADA049C4BD1D8C615F511723"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -87,7 +87,7 @@
         "DisplayName" = "8:Debug"
         "IsDebugOnly" = "11:TRUE"
         "IsReleaseOnly" = "11:FALSE"
-        "OutputFilename" = "8:Debug\\pdsetup.msi"
+        "OutputFilename" = "8:Debug\\PublicDomain.msi"
         "PackageFilesAs" = "3:2"
         "PackageFileSize" = "3:-2147483648"
         "CabType" = "3:1"
@@ -97,13 +97,24 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+                "Items"
+                {
+                }
+            }
         }
         "Release"
         {
         "DisplayName" = "8:Release"
         "IsDebugOnly" = "11:FALSE"
         "IsReleaseOnly" = "11:TRUE"
-        "OutputFilename" = "8:Release\\pdsetup.msi"
+        "OutputFilename" = "8:Release\\PublicDomain.msi"
         "PackageFilesAs" = "3:2"
         "PackageFileSize" = "3:-2147483648"
         "CabType" = "3:1"
@@ -113,6 +124,22 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:Microsoft.Net.Framework.2.0"
+                    {
+                    "Name" = "8:Microsoft .NET Framework 2.0"
+                    "ProductCode" = "8:Microsoft.Net.Framework.2.0"
+                    }
+                }
+            }
         }
     }
     "Deployable"
@@ -158,7 +185,7 @@
             "SourcePath" = "8:nunit.framework.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
-            "Folder" = "8:_C4684F407DB743C290D1888D967091D8"
+            "Folder" = "8:_936A46F267F043AD8D6D39970AEB0810"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -214,7 +241,7 @@
             }
             "{3C67513D-01DD-4637-8A68-80971EB9504F}:_C4684F407DB743C290D1888D967091D8"
             {
-            "DefaultLocation" = "8:[ProgramFilesFolder][Manufacturer]\\[ProductName]"
+            "DefaultLocation" = "8:[ProgramFilesFolder][ProductName]"
             "Name" = "8:#1925"
             "AlwaysCreate" = "11:FALSE"
             "Condition" = "8:"
@@ -246,14 +273,14 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Public Domain"
-        "ProductCode" = "8:{871EF333-C20F-4CD7-AFFB-142D93F74133}"
-        "PackageCode" = "8:{DFF95057-F8F1-4DCA-9B87-F2DBA3DF858A}"
+        "ProductCode" = "8:{2CBE7CB0-3817-4BDA-9413-4AD01FFF462F}"
+        "PackageCode" = "8:{5AF67DFB-CADE-4C43-B5A0-AB0405001D39}"
         "UpgradeCode" = "8:{1DFA6A0E-52E0-4DDC-8B97-584FBFB16243}"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:TRUE"
-        "ProductVersion" = "8:0.0.12"
+        "ProductVersion" = "8:0.0.13"
         "Manufacturer" = "8:Public Domain"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:http://www.codeplex.com/publicdomain"
@@ -439,54 +466,6 @@
                             }
                         }
                     }
-                    "{688940B3-5CA9-4162-8DEE-2993FA9D8CBC}:_ED2A19EEF72D40D7AA8658AFCE967166"
-                    {
-                    "Sequence" = "3:100"
-                    "DisplayName" = "8:Welcome"
-                    "UseDynamicProperties" = "11:TRUE"
-                    "IsDependency" = "11:FALSE"
-                    "SourcePath" = "8:<VsdDialogDir>\\VsdWelcomeDlg.wid"
-                        "Properties"
-                        {
-                            "BannerBitmap"
-                            {
-                            "Name" = "8:BannerBitmap"
-                            "DisplayName" = "8:#1001"
-                            "Description" = "8:#1101"
-                            "Type" = "3:8"
-                            "ContextData" = "8:Bitmap"
-                            "Attributes" = "3:4"
-                            "Setting" = "3:1"
-                            "UsePlugInResources" = "11:TRUE"
-                            }
-                            "CopyrightWarning"
-                            {
-                            "Name" = "8:CopyrightWarning"
-                            "DisplayName" = "8:#1002"
-                            "Description" = "8:#1102"
-                            "Type" = "3:3"
-                            "ContextData" = "8:"
-                            "Attributes" = "3:0"
-                            "Setting" = "3:1"
-                            "Value" = "8:#1202"
-                            "DefaultValue" = "8:#1202"
-                            "UsePlugInResources" = "11:TRUE"
-                            }
-                            "Welcome"
-                            {
-                            "Name" = "8:Welcome"
-                            "DisplayName" = "8:#1003"
-                            "Description" = "8:#1103"
-                            "Type" = "3:3"
-                            "ContextData" = "8:"
-                            "Attributes" = "3:0"
-                            "Setting" = "3:1"
-                            "Value" = "8:#1203"
-                            "DefaultValue" = "8:#1203"
-                            "UsePlugInResources" = "11:TRUE"
-                            }
-                        }
-                    }
                 }
             }
             "{DF760B10-853B-4699-99F2-AFF7185B4A62}:_455DFDA3C9354D0A911A3C0ADC11AA6A"
@@ -496,7 +475,7 @@
             "Attributes" = "3:3"
                 "Dialogs"
                 {
-                    "{688940B3-5CA9-4162-8DEE-2993FA9D8CBC}:_928DF79214DD4297BA372E1BDB1DE7E3"
+                    "{688940B3-5CA9-4162-8DEE-2993FA9D8CBC}:_8698BB989E2A4DCE917A2621FD8F77C2"
                     {
                     "Sequence" = "3:100"
                     "DisplayName" = "8:Finished"
@@ -762,7 +741,7 @@
         }
         "MergeModule"
         {
-            "{CEE29DC0-9FBA-4B99-8D47-5BC643D9B626}:_F7155CE968B944C988E3D9F3B751D6EA"
+            "{CEE29DC0-9FBA-4B99-8D47-5BC643D9B626}:_3F7F0874ADA049C4BD1D8C615F511723"
             {
             "UseDynamicProperties" = "11:TRUE"
             "IsDependency" = "11:TRUE"
@@ -889,6 +868,8 @@
             "ShowKeyOutput" = "11:TRUE"
                 "ExcludeFilters"
                 {
+                "ExcludeFilter" = "8:PublicDomain.csproj"
+                "ExcludeFilter" = "8:AssemblyInfo.cs"
                 }
             }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_D1FB44BE241E44DAAC7B3B64BBA4E7F2"
