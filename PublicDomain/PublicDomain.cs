@@ -44,6 +44,9 @@
 //
 // Version History:
 // ======================================
+// V0.0.1.2
+//  [kevgrig@gmail.com]
+//   * Added pdsetup project
 // V0.0.1.1
 //  [kevgrig@gmail.com]
 //   * Added bunch of methods to ConversionUtilities courtesy of
@@ -71,8 +74,8 @@
 
 // !!!EDIT DIRECTIVES HERE START!!!
 
+#if !(PD)
 #define NOVJSLIB
-#define NOBROKEN
 
 // Commonly non-referenced projects:
 #define NOSYSTEMWEB
@@ -84,6 +87,7 @@
 //#define NOCLSCOMPLIANTWARNINGSOFF
 //#define NOTZ
 //#define NOSTATES
+#endif
 
 // !!!EDIT DIRECTIVES HERE END!!!!!
 
@@ -513,9 +517,15 @@ namespace PublicDomain
         }
 
 #if !(NONUNIT)
+        /// <summary>
+        /// Tests for <see cref="PublicDomain.StringUtilities"/>
+        /// </summary>
         [TestFixture]
         public class Tests
         {
+            /// <summary>
+            /// Tests the replace first.
+            /// </summary>
             [Test]
             public void TestReplaceFirst()
             {
@@ -559,12 +569,12 @@ namespace PublicDomain
             AsciiCharacters = GetAsciiCharacters().ToArray();
         }
 
-#if !(NONUNIT)
-        [Test]
-#endif
         /// <summary>
         /// Prints the ASCII table.
         /// </summary>
+#if !(NONUNIT)
+        [Test]
+#endif
         public void PrintAsciiTable()
         {
             for (int i = 0; i < AsciiCharacters.Length; i++)
@@ -1352,11 +1362,21 @@ namespace PublicDomain
     /// Callback that gets called after a zip file entry is read.
     /// </summary>
     /// <param name="entry"></param>
+    /// <param name="zipEntryStream"></param>
     /// <param name="rock">Arbitrary data</param>
     public delegate void CallbackZip(ZipEntryE entry, ZipEntryInputStream zipEntryStream, object rock);
 
+    /// <summary>
+    /// Provides methods for manipulating archive files, such as ZIPs.
+    /// </summary>
     public static class Archiver
     {
+        /// <summary>
+        /// Reads the zip stream.
+        /// </summary>
+        /// <param name="jInputStream">The j input stream.</param>
+        /// <param name="callback">The callback.</param>
+        /// <param name="rock">The rock.</param>
         public static void ReadZipStream(java.io.InputStream jInputStream, CallbackZip callback, object rock)
         {
             ZipInputStream zis = null;
@@ -1384,11 +1404,22 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// Extracts the specified zip file path.
+        /// </summary>
+        /// <param name="zipFilePath">The zip file path.</param>
+        /// <param name="destinationDirectory">The destination directory.</param>
         public static void Extract(string zipFilePath, string destinationDirectory)
         {
             Extract(zipFilePath, destinationDirectory, false);
         }
 
+        /// <summary>
+        /// Extracts the specified zip file path.
+        /// </summary>
+        /// <param name="zipFilePath">The zip file path.</param>
+        /// <param name="destinationDirectory">The destination directory.</param>
+        /// <param name="truncatePaths">if set to <c>true</c> [truncate paths].</param>
         public static void Extract(string zipFilePath, string destinationDirectory, bool truncatePaths)
         {
             using (FileStream stream = new FileStream(zipFilePath, FileMode.Open))
@@ -1400,6 +1431,12 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// Extracts the specified j input stream.
+        /// </summary>
+        /// <param name="jInputStream">The j input stream.</param>
+        /// <param name="destinationDirectory">The destination directory.</param>
+        /// <param name="truncatePaths">if set to <c>true</c> [truncate paths].</param>
         public static void Extract(java.io.InputStream jInputStream, string destinationDirectory, bool truncatePaths)
         {
             if (string.IsNullOrEmpty(destinationDirectory))
@@ -1420,8 +1457,15 @@ namespace PublicDomain
     /// </summary>
     public class ZipEntryE : ZipEntry
     {
+        /// <summary>
+        /// 
+        /// </summary>
         protected ZipEntry m_entry;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ZipEntryE"/> class.
+        /// </summary>
+        /// <param name="entry">The entry.</param>
         public ZipEntryE(ZipEntry entry)
             : base(entry.getName())
         {
@@ -1432,41 +1476,78 @@ namespace PublicDomain
             m_entry = entry;
         }
 
+        /// <summary>
+        /// Gets the comment.
+        /// </summary>
+        /// <returns></returns>
         public override string getComment()
         {
             return m_entry.getComment();
         }
 
+        /// <summary>
+        /// Gets the size of the compressed.
+        /// </summary>
+        /// <returns></returns>
         public override long getCompressedSize()
         {
             return m_entry.getCompressedSize();
         }
 
+        /// <summary>
+        /// Gets the CRC.
+        /// </summary>
+        /// <returns></returns>
         public override long getCrc()
         {
             return m_entry.getCrc();
         }
 
+        /// <summary>
+        /// Gets the extra.
+        /// </summary>
+        /// <returns></returns>
         public override sbyte[] getExtra()
         {
             return m_entry.getExtra();
         }
 
+        /// <summary>
+        /// Gets the method.
+        /// </summary>
+        /// <returns></returns>
         public override int getMethod()
         {
             return m_entry.getMethod();
         }
 
+        /// <summary>
+        /// Determines whether the specified <see cref="T:System.Object"></see> is equal to the current <see cref="T:System.Object"></see>.
+        /// </summary>
+        /// <param name="obj">The <see cref="T:System.Object"></see> to compare with the current <see cref="T:System.Object"></see>.</param>
+        /// <returns>
+        /// true if the specified <see cref="T:System.Object"></see> is equal to the current <see cref="T:System.Object"></see>; otherwise, false.
+        /// </returns>
         public override bool Equals(object obj)
         {
             return m_entry.Equals(obj);
         }
 
+        /// <summary>
+        /// Serves as a hash function for a particular type. <see cref="M:System.Object.GetHashCode"></see> is suitable for use in hashing algorithms and data structures like a hash table.
+        /// </summary>
+        /// <returns>
+        /// A hash code for the current <see cref="T:System.Object"></see>.
+        /// </returns>
         public override int GetHashCode()
         {
             return m_entry.GetHashCode();
         }
 
+        /// <summary>
+        /// Gets the name.
+        /// </summary>
+        /// <returns></returns>
         public override string getName()
         {
             return getName(false);
@@ -1496,61 +1577,113 @@ namespace PublicDomain
             return result;
         }
 
+        /// <summary>
+        /// Gets the size.
+        /// </summary>
+        /// <returns></returns>
         public override long getSize()
         {
             return m_entry.getSize();
         }
 
+        /// <summary>
+        /// Gets the time.
+        /// </summary>
+        /// <returns></returns>
         public override long getTime()
         {
             return m_entry.getTime();
         }
 
+        /// <summary>
+        /// Determines whether this instance is directory.
+        /// </summary>
+        /// <returns>
+        /// 	<c>true</c> if this instance is directory; otherwise, <c>false</c>.
+        /// </returns>
         public override bool isDirectory()
         {
             return m_entry.isDirectory();
         }
 
+        /// <summary>
+        /// Sets the comment.
+        /// </summary>
+        /// <param name="comment">The comment.</param>
         public override void setComment(string comment)
         {
             m_entry.setComment(comment);
         }
 
+        /// <summary>
+        /// Sets the CRC.
+        /// </summary>
+        /// <param name="crc">The CRC.</param>
         public override void setCrc(long crc)
         {
             m_entry.setCrc(crc);
         }
 
+        /// <summary>
+        /// Sets the extra.
+        /// </summary>
+        /// <param name="extra">The extra.</param>
         public override void setExtra(sbyte[] extra)
         {
             m_entry.setExtra(extra);
         }
 
+        /// <summary>
+        /// Sets the method.
+        /// </summary>
+        /// <param name="m">The m.</param>
         public override void setMethod(int m)
         {
             m_entry.setMethod(m);
         }
 
+        /// <summary>
+        /// Sets the size.
+        /// </summary>
+        /// <param name="sz">The sz.</param>
         public override void setSize(long sz)
         {
             m_entry.setSize(sz);
         }
 
+        /// <summary>
+        /// Sets the time.
+        /// </summary>
+        /// <param name="t">The t.</param>
         public override void setTime(long t)
         {
             m_entry.setTime(t);
         }
 
+        /// <summary>
+        /// Toes the string.
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
             return m_entry.ToString();
         }
     }
 
+    /// <summary>
+    /// Abstraction over a <see cref="java.util.zip.ZipInputStream"/>
+    /// </summary>
     public class ZipEntryInputStream : JInputStream
     {
+        /// <summary>
+        /// 
+        /// </summary>
         protected ZipInputStream m_zis;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ZipEntryInputStream"/> class.
+        /// </summary>
+        /// <param name="zis">The zis.</param>
         public ZipEntryInputStream(ZipInputStream zis)
             : base(zis)
         {
@@ -1561,6 +1694,10 @@ namespace PublicDomain
             m_zis = zis;
         }
 
+        /// <summary>
+        /// Disposes the specified disposing.
+        /// </summary>
+        /// <param name="disposing">if set to <c>true</c> [disposing].</param>
         protected override void Dispose(bool disposing)
         {
             // We don't want to close the underlying ZipInputStream,
@@ -1572,7 +1709,7 @@ namespace PublicDomain
         /// to the specified file and returns the number of bytes written.
         /// <c>FileMode.Create</c> is used when opening the file for writing.
         /// </summary>
-        /// <param name="file"></param>
+        /// <param name="file">The file.</param>
         /// <returns></returns>
         public int WriteTo(string file)
         {
@@ -1586,7 +1723,7 @@ namespace PublicDomain
         /// Convenience method which writes the contents of the ZipEntry
         /// to the specified stream and returns the number of bytes written.
         /// </summary>
-        /// <param name="stream"></param>
+        /// <param name="stream">The stream.</param>
         /// <returns></returns>
         public int WriteTo(Stream stream)
         {
@@ -1607,8 +1744,15 @@ namespace PublicDomain
     /// </summary>
     public class JStream : InputStream, IDisposable
     {
+        /// <summary>
+        /// 
+        /// </summary>
         protected Stream m_stream;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="JStream"/> class.
+        /// </summary>
+        /// <param name="stream">The stream.</param>
         public JStream(Stream stream)
         {
             if (stream == null)
@@ -1618,46 +1762,90 @@ namespace PublicDomain
             m_stream = stream;
         }
 
+        /// <summary>
+        /// Reads this instance.
+        /// </summary>
+        /// <returns></returns>
         public override int read()
         {
             return m_stream.ReadByte();
         }
 
+        /// <summary>
+        /// Availables this instance.
+        /// </summary>
+        /// <returns></returns>
         public override int available()
         {
             return unchecked((int)(m_stream.Length - m_stream.Position));
         }
 
+        /// <summary>
+        /// Closes this instance.
+        /// </summary>
         public override void close()
         {
             m_stream.Close();
         }
 
+        /// <summary>
+        /// Determines whether the specified <see cref="T:System.Object"></see> is equal to the current <see cref="T:System.Object"></see>.
+        /// </summary>
+        /// <param name="obj">The <see cref="T:System.Object"></see> to compare with the current <see cref="T:System.Object"></see>.</param>
+        /// <returns>
+        /// true if the specified <see cref="T:System.Object"></see> is equal to the current <see cref="T:System.Object"></see>; otherwise, false.
+        /// </returns>
         public override bool Equals(object obj)
         {
             return m_stream.Equals(obj);
         }
 
+        /// <summary>
+        /// Serves as a hash function for a particular type. <see cref="M:System.Object.GetHashCode"></see> is suitable for use in hashing algorithms and data structures like a hash table.
+        /// </summary>
+        /// <returns>
+        /// A hash code for the current <see cref="T:System.Object"></see>.
+        /// </returns>
         public override int GetHashCode()
         {
             return m_stream.GetHashCode();
         }
 
+        /// <summary>
+        /// Marks the specified readlimit.
+        /// </summary>
+        /// <param name="readlimit">The readlimit.</param>
         public override void mark(int readlimit)
         {
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Marks the supported.
+        /// </summary>
+        /// <returns></returns>
         public override bool markSupported()
         {
             return false;
         }
 
+        /// <summary>
+        /// Reads the specified b.
+        /// </summary>
+        /// <param name="b">The b.</param>
+        /// <returns></returns>
         public override int read(sbyte[] b)
         {
             return read(b, 0, b.Length);
         }
 
+        /// <summary>
+        /// Reads the specified b.
+        /// </summary>
+        /// <param name="b">The b.</param>
+        /// <param name="off">The off.</param>
+        /// <param name="count">The count.</param>
+        /// <returns></returns>
         public override int read(sbyte[] b, int off, int count)
         {
             if (b == null)
@@ -1679,21 +1867,36 @@ namespace PublicDomain
             return bytesRead;
         }
 
+        /// <summary>
+        /// Resets this instance.
+        /// </summary>
         public override void reset()
         {
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Skips the specified count.
+        /// </summary>
+        /// <param name="count">The count.</param>
+        /// <returns></returns>
         public override long skip(long count)
         {
             return m_stream.Seek(count, SeekOrigin.Current);
         }
 
+        /// <summary>
+        /// Toes the string.
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
             return m_stream.ToString();
         }
 
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
         public void Dispose()
         {
             // We assume the caller is managing the stream passed in, so we
@@ -1701,10 +1904,21 @@ namespace PublicDomain
         }
     }
 
+    /// <summary>
+    /// This class allows one to transparently pass a java.io.InputStream class where
+    /// a .NET System.IO.Stream class is expected.
+    /// </summary>
     public class JInputStream : Stream
     {
+        /// <summary>
+        /// 
+        /// </summary>
         protected InputStream m_jis;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="JInputStream"/> class.
+        /// </summary>
+        /// <param name="javaInputStream">The java input stream.</param>
         public JInputStream(java.io.InputStream javaInputStream)
         {
             if (javaInputStream == null)
@@ -1714,6 +1928,11 @@ namespace PublicDomain
             m_jis = javaInputStream;
         }
 
+        /// <summary>
+        /// When overridden in a derived class, gets a value indicating whether the current stream supports reading.
+        /// </summary>
+        /// <value></value>
+        /// <returns>true if the stream supports reading; otherwise, false.</returns>
         public override bool CanRead
         {
             get
@@ -1722,26 +1941,55 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// When overridden in a derived class, gets a value indicating whether the current stream supports seeking.
+        /// </summary>
+        /// <value></value>
+        /// <returns>true if the stream supports seeking; otherwise, false.</returns>
         public override bool CanSeek
         {
             get { throw new Exception("The method or operation is not implemented."); }
         }
 
+        /// <summary>
+        /// When overridden in a derived class, gets a value indicating whether the current stream supports writing.
+        /// </summary>
+        /// <value></value>
+        /// <returns>true if the stream supports writing; otherwise, false.</returns>
         public override bool CanWrite
         {
             get { throw new Exception("The method or operation is not implemented."); }
         }
 
+        /// <summary>
+        /// When overridden in a derived class, clears all buffers for this stream and causes any buffered data to be written to the underlying device.
+        /// </summary>
+        /// <exception cref="T:System.IO.IOException">An I/O error occurs. </exception>
         public override void Flush()
         {
             throw new Exception("The method or operation is not implemented.");
         }
 
+        /// <summary>
+        /// When overridden in a derived class, gets the length in bytes of the stream.
+        /// </summary>
+        /// <value></value>
+        /// <returns>A long value representing the length of the stream in bytes.</returns>
+        /// <exception cref="T:System.NotSupportedException">A class derived from Stream does not support seeking. </exception>
+        /// <exception cref="T:System.ObjectDisposedException">Methods were called after the stream was closed. </exception>
         public override long Length
         {
             get { throw new Exception("The method or operation is not implemented."); }
         }
 
+        /// <summary>
+        /// When overridden in a derived class, gets or sets the position within the current stream.
+        /// </summary>
+        /// <value></value>
+        /// <returns>The current position within the stream.</returns>
+        /// <exception cref="T:System.IO.IOException">An I/O error occurs. </exception>
+        /// <exception cref="T:System.NotSupportedException">The stream does not support seeking. </exception>
+        /// <exception cref="T:System.ObjectDisposedException">Methods were called after the stream was closed. </exception>
         public override long Position
         {
             get
@@ -1754,6 +2002,21 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// When overridden in a derived class, reads a sequence of bytes from the current stream and advances the position within the stream by the number of bytes read.
+        /// </summary>
+        /// <param name="buffer">An array of bytes. When this method returns, the buffer contains the specified byte array with the values between offset and (offset + count - 1) replaced by the bytes read from the current source.</param>
+        /// <param name="offset">The zero-based byte offset in buffer at which to begin storing the data read from the current stream.</param>
+        /// <param name="count">The maximum number of bytes to be read from the current stream.</param>
+        /// <returns>
+        /// The total number of bytes read into the buffer. This can be less than the number of bytes requested if that many bytes are not currently available, or zero (0) if the end of the stream has been reached.
+        /// </returns>
+        /// <exception cref="T:System.ArgumentException">The sum of offset and count is larger than the buffer length. </exception>
+        /// <exception cref="T:System.ObjectDisposedException">Methods were called after the stream was closed. </exception>
+        /// <exception cref="T:System.NotSupportedException">The stream does not support reading. </exception>
+        /// <exception cref="T:System.ArgumentNullException">buffer is null. </exception>
+        /// <exception cref="T:System.IO.IOException">An I/O error occurs. </exception>
+        /// <exception cref="T:System.ArgumentOutOfRangeException">offset or count is negative. </exception>
         public override int Read(byte[] buffer, int offset, int count)
         {
             if (buffer == null)
@@ -1776,32 +2039,77 @@ namespace PublicDomain
             return bytesRead;
         }
 
+        /// <summary>
+        /// When overridden in a derived class, sets the position within the current stream.
+        /// </summary>
+        /// <param name="offset">A byte offset relative to the origin parameter.</param>
+        /// <param name="origin">A value of type <see cref="T:System.IO.SeekOrigin"></see> indicating the reference point used to obtain the new position.</param>
+        /// <returns>
+        /// The new position within the current stream.
+        /// </returns>
+        /// <exception cref="T:System.IO.IOException">An I/O error occurs. </exception>
+        /// <exception cref="T:System.NotSupportedException">The stream does not support seeking, such as if the stream is constructed from a pipe or console output. </exception>
+        /// <exception cref="T:System.ObjectDisposedException">Methods were called after the stream was closed. </exception>
         public override long Seek(long offset, SeekOrigin origin)
         {
             throw new Exception("The method or operation is not implemented.");
         }
 
+        /// <summary>
+        /// When overridden in a derived class, sets the length of the current stream.
+        /// </summary>
+        /// <param name="value">The desired length of the current stream in bytes.</param>
+        /// <exception cref="T:System.NotSupportedException">The stream does not support both writing and seeking, such as if the stream is constructed from a pipe or console output. </exception>
+        /// <exception cref="T:System.IO.IOException">An I/O error occurs. </exception>
+        /// <exception cref="T:System.ObjectDisposedException">Methods were called after the stream was closed. </exception>
         public override void SetLength(long value)
         {
             throw new Exception("The method or operation is not implemented.");
         }
 
+        /// <summary>
+        /// When overridden in a derived class, writes a sequence of bytes to the current stream and advances the current position within this stream by the number of bytes written.
+        /// </summary>
+        /// <param name="buffer">An array of bytes. This method copies count bytes from buffer to the current stream.</param>
+        /// <param name="offset">The zero-based byte offset in buffer at which to begin copying bytes to the current stream.</param>
+        /// <param name="count">The number of bytes to be written to the current stream.</param>
+        /// <exception cref="T:System.IO.IOException">An I/O error occurs. </exception>
+        /// <exception cref="T:System.NotSupportedException">The stream does not support writing. </exception>
+        /// <exception cref="T:System.ObjectDisposedException">Methods were called after the stream was closed. </exception>
+        /// <exception cref="T:System.ArgumentNullException">buffer is null. </exception>
+        /// <exception cref="T:System.ArgumentException">The sum of offset and count is greater than the buffer length. </exception>
+        /// <exception cref="T:System.ArgumentOutOfRangeException">offset or count is negative. </exception>
         public override void Write(byte[] buffer, int offset, int count)
         {
             throw new Exception("The method or operation is not implemented.");
         }
 
+        /// <summary>
+        /// Closes the current stream and releases any resources (such as sockets and file handles) associated with the current stream.
+        /// </summary>
         public override void Close()
         {
             m_jis.close();
             base.Close();
         }
 
+        /// <summary>
+        /// Reads a byte from the stream and advances the position within the stream by one byte, or returns -1 if at the end of the stream.
+        /// </summary>
+        /// <returns>
+        /// The unsigned byte cast to an Int32, or -1 if at the end of the stream.
+        /// </returns>
+        /// <exception cref="T:System.NotSupportedException">The stream does not support reading. </exception>
+        /// <exception cref="T:System.ObjectDisposedException">Methods were called after the stream was closed. </exception>
         public override int ReadByte()
         {
             return m_jis.read();
         }
 
+        /// <summary>
+        /// Releases the unmanaged resources used by the <see cref="T:System.IO.Stream"></see> and optionally releases the managed resources.
+        /// </summary>
+        /// <param name="disposing">true to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
         protected override void Dispose(bool disposing)
         {
             m_jis.close();
@@ -1817,7 +2125,7 @@ namespace PublicDomain
     public static class Win32
     {
         /// <summary>
-        /// 
+        /// Win32 constants
         /// </summary>
         public static class Win32Constants
         {
@@ -2046,7 +2354,7 @@ namespace PublicDomain
         }
 
         /// <summary>
-        /// 
+        /// Class that contains PInvoke methods into Win32
         /// </summary>
         public static class ExternalMethods
         {
@@ -2064,7 +2372,7 @@ namespace PublicDomain
         }
 
         /// <summary>
-        /// 
+        /// Enumeration that directs a windows control action.
         /// </summary>
         public enum WindowsControl : uint
         {
@@ -2259,8 +2567,8 @@ namespace PublicDomain
                 m_outBuilder = new StringBuilder(512);
                 m_errorBuilder = new StringBuilder();
 
-                Out = new StringWriter(m_outBuilder);
-                Error = new StringWriter(m_errorBuilder);
+                Out = new System.IO.StringWriter(m_outBuilder);
+                Error = new System.IO.StringWriter(m_errorBuilder);
             }
         }
 
@@ -5064,7 +5372,7 @@ namespace PublicDomain
         }
 
         /// <summary>
-        /// 
+        /// Thrown when an error is encountered compiling.
         /// </summary>
         [Serializable]
         public class CompileException : Exception
@@ -5102,7 +5410,7 @@ namespace PublicDomain
         }
 
         /// <summary>
-        /// 
+        /// Thrown when the compiler returns an unexpected value.
         /// </summary>
         [Serializable]
         public class NativeCompileException : CompileException
@@ -5140,12 +5448,27 @@ namespace PublicDomain
     }
 
 #if !(NOSCREENSCRAPER)
+    /// <summary>
+    /// Represents a scraped HTML tag.
+    /// </summary>
     [Serializable]
     public class ScreenScraperTag
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public string Name;
+
+        /// <summary>
+        /// 
+        /// </summary>
         public NameValueCollection Attributes = new NameValueCollection();
 
+        /// <summary>
+        /// Finds the attribute value.
+        /// </summary>
+        /// <param name="attributeName">Name of the attribute.</param>
+        /// <returns></returns>
         public string FindAttributeValue(string attributeName)
         {
             foreach (string key in Attributes.AllKeys)
@@ -5159,10 +5482,21 @@ namespace PublicDomain
         }
     }
 
+    /// <summary>
+    /// Represents a scraped HTML page.
+    /// </summary>
     [Serializable]
     public class ScrapedPage
     {
+        /// <summary>
+        /// 
+        /// </summary>
         protected string m_RawStream;
+
+        /// <summary>
+        /// Gets or sets the raw stream.
+        /// </summary>
+        /// <value>The raw stream.</value>
         public string RawStream
         {
             get
@@ -5175,7 +5509,15 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         private string _RawStreamLowercase;
+
+        /// <summary>
+        /// Gets the raw stream lowercase.
+        /// </summary>
+        /// <value>The raw stream lowercase.</value>
         public string RawStreamLowercase
         {
             get
@@ -5188,7 +5530,15 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         protected Uri m_Url;
+        
+        /// <summary>
+        /// Gets or sets the URL.
+        /// </summary>
+        /// <value>The URL.</value>
         public Uri Url
         {
             get
@@ -5201,7 +5551,15 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         private NameValueCollection _QueryParameters;
+
+        /// <summary>
+        /// Gets or sets the query parameters.
+        /// </summary>
+        /// <value>The query parameters.</value>
         public NameValueCollection QueryParameters
         {
             get
@@ -5214,7 +5572,15 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         private ScrapeType _ScrapeType;
+
+        /// <summary>
+        /// Gets or sets the type of the scrape.
+        /// </summary>
+        /// <value>The type of the scrape.</value>
         public ScrapeType ScrapeType
         {
             get
@@ -5227,7 +5593,15 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         private string _Title;
+
+        /// <summary>
+        /// Gets the title.
+        /// </summary>
+        /// <value>The title.</value>
         public string Title
         {
             get
@@ -5253,11 +5627,26 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// Finds the substring.
+        /// </summary>
+        /// <param name="pretext">The pretext.</param>
+        /// <param name="posttext">The posttext.</param>
+        /// <param name="caseSensitive">if set to <c>true</c> [case sensitive].</param>
+        /// <returns></returns>
         public string FindSubstring(string pretext, string posttext, bool caseSensitive)
         {
             return FindSubstring(GetSubject(ref pretext, ref posttext, null, caseSensitive), pretext, posttext, caseSensitive);
         }
 
+        /// <summary>
+        /// Gets the subject.
+        /// </summary>
+        /// <param name="pretext">The pretext.</param>
+        /// <param name="posttext">The posttext.</param>
+        /// <param name="contextFind">The context find.</param>
+        /// <param name="caseSensitive">if set to <c>true</c> [case sensitive].</param>
+        /// <returns></returns>
         private string GetSubject(ref string pretext, ref string posttext, string contextFind, bool caseSensitive)
         {
             string subject = RawStream;
@@ -5294,8 +5683,10 @@ namespace PublicDomain
         /// This searches the content stream for any piece of text that is surrounded
         /// by the prettext and posttext arguments
         /// </summary>
-        /// <param name="Pretext"></param>
-        /// <param name="Posttext"></param>
+        /// <param name="subject">The subject.</param>
+        /// <param name="pretext">The pretext.</param>
+        /// <param name="posttext">The posttext.</param>
+        /// <param name="caseSensitive">if set to <c>true</c> [case sensitive].</param>
         /// <returns></returns>
         public string FindSubstring(string subject, string pretext, string posttext, bool caseSensitive)
         {
@@ -5325,11 +5716,26 @@ namespace PublicDomain
             return null;
         }
 
+        /// <summary>
+        /// Finds the substring by context.
+        /// </summary>
+        /// <param name="contextFind">The context find.</param>
+        /// <param name="prettext">The prettext.</param>
+        /// <param name="posttext">The posttext.</param>
+        /// <param name="caseSensitive">if set to <c>true</c> [case sensitive].</param>
+        /// <returns></returns>
         public string FindSubstringByContext(string contextFind, string prettext, string posttext, bool caseSensitive)
         {
             return FindSubstring(GetSubject(ref prettext, ref posttext, contextFind, caseSensitive), prettext, posttext, caseSensitive);
         }
 
+        /// <summary>
+        /// Splits the by encapsulating tags.
+        /// </summary>
+        /// <param name="subject">The subject.</param>
+        /// <param name="tagName">Name of the tag.</param>
+        /// <param name="caseSensitive">if set to <c>true</c> [case sensitive].</param>
+        /// <returns></returns>
         public IList<string> SplitByEncapsulatingTags(string subject, string tagName, bool caseSensitive)
         {
             string subjectSearch = subject;
@@ -5380,6 +5786,11 @@ namespace PublicDomain
             return ret;
         }
 
+        /// <summary>
+        /// Creates the end tag.
+        /// </summary>
+        /// <param name="tagName">Name of the tag.</param>
+        /// <returns></returns>
         private string CreateEndTag(string tagName)
         {
             int ltindex = tagName.IndexOf("<");
@@ -5390,6 +5801,11 @@ namespace PublicDomain
             return null;
         }
 
+        /// <summary>
+        /// Converts the link to pair.
+        /// </summary>
+        /// <param name="subject">The subject.</param>
+        /// <returns></returns>
         public Pair<string, string> ConvertLinkToPair(string subject)
         {
             return ConvertLinkToPair(subject, true);
@@ -5399,7 +5815,8 @@ namespace PublicDomain
         /// The first element in the pair is the HREF Link, and the second element
         /// is the text of the link.
         /// </summary>
-        /// <param name="subject"></param>
+        /// <param name="subject">The subject.</param>
+        /// <param name="decodeLink">if set to <c>true</c> [decode link].</param>
         /// <returns></returns>
         public Pair<string, string> ConvertLinkToPair(string subject, bool decodeLink)
         {
@@ -5421,6 +5838,12 @@ namespace PublicDomain
             return null;
         }
 
+        /// <summary>
+        /// Splits the string.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <param name="split">The split.</param>
+        /// <returns></returns>
         public static IList<string> SplitString(string str, string split)
         {
             IList<string> pieces = new List<string>();
@@ -5444,13 +5867,19 @@ namespace PublicDomain
         /// <summary>
         /// Basically removes extraneous characters like padding, newlines, tabs, etc.
         /// </summary>
-        /// <param name="str"></param>
+        /// <param name="str">The STR.</param>
         /// <returns></returns>
         public static string CanonicalizeString(string str)
         {
             return str == null ? null : str.Trim().Replace("\n", "").Replace("\r", "").Replace("\t", "");
         }
 
+        /// <summary>
+        /// Finds the childless tags.
+        /// </summary>
+        /// <param name="tagName">Name of the tag.</param>
+        /// <param name="caseSensitive">if set to <c>true</c> [case sensitive].</param>
+        /// <returns></returns>
         public IList<string> FindChildlessTags(string tagName, bool caseSensitive)
         {
             IList<string> ret = new List<string>();
@@ -5487,11 +5916,22 @@ namespace PublicDomain
             return ret;
         }
 
+        /// <summary>
+        /// Matches the specified regex.
+        /// </summary>
+        /// <param name="regex">The regex.</param>
+        /// <returns></returns>
         public Match Match(string regex)
         {
             return Match(regex, true);
         }
 
+        /// <summary>
+        /// Matches the specified regex.
+        /// </summary>
+        /// <param name="regex">The regex.</param>
+        /// <param name="caseSensitive">if set to <c>true</c> [case sensitive].</param>
+        /// <returns></returns>
         public Match Match(string regex, bool caseSensitive)
         {
             return new Regex(regex, caseSensitive ? RegexOptions.None : RegexOptions.IgnoreCase).Match(RawStream);
@@ -5500,6 +5940,12 @@ namespace PublicDomain
         private static Regex tagRegex = new Regex(@"<([\w\-]+)(\s+([\w\-]+)\s*=\s*[""]([^""]*)[""])*\s*/?\s*>", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         private static Regex nameValueRegex = new Regex(@"([\w\-]+)\s*=\s*[""]([^""]*)[""]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
+        /// <summary>
+        /// Converts to tag.
+        /// </summary>
+        /// <param name="html">The HTML.</param>
+        /// <param name="lowerNames">if set to <c>true</c> [lower names].</param>
+        /// <returns></returns>
         public static ScreenScraperTag ConvertToTag(string html, bool lowerNames)
         {
             Match m = tagRegex.Match(html);
@@ -5532,6 +5978,12 @@ namespace PublicDomain
             return null;
         }
 
+        /// <summary>
+        /// Converts to tag list.
+        /// </summary>
+        /// <param name="tags">The tags.</param>
+        /// <param name="lowerNames">if set to <c>true</c> [lower names].</param>
+        /// <returns></returns>
         public static IList<ScreenScraperTag> ConvertToTagList(IList<string> tags, bool lowerNames)
         {
             IList<ScreenScraperTag> ret = new List<ScreenScraperTag>();
@@ -5547,6 +5999,12 @@ namespace PublicDomain
         }
 
         private static Regex CurrencyRegex = new Regex(@"\$([\d\.,]+)", RegexOptions.Compiled | RegexOptions.Singleline);
+
+        /// <summary>
+        /// Finds the currency.
+        /// </summary>
+        /// <param name="subject">The subject.</param>
+        /// <returns></returns>
         public static string FindCurrency(string subject)
         {
             Match m = CurrencyRegex.Match(subject);
@@ -5557,12 +6015,24 @@ namespace PublicDomain
             return null;
         }
 
+        /// <summary>
+        /// Converts the currency string to decimal.
+        /// </summary>
+        /// <param name="subject">The subject.</param>
+        /// <param name="ret">The ret.</param>
+        /// <returns></returns>
         public static bool ConvertCurrencyStringToDecimal(string subject, out decimal ret)
         {
             ret = 0;
             return subject == null ? false : decimal.TryParse(subject, out ret);
         }
 
+        /// <summary>
+        /// Converts the currency string to double.
+        /// </summary>
+        /// <param name="subject">The subject.</param>
+        /// <param name="ret">The ret.</param>
+        /// <returns></returns>
         public static bool ConvertCurrencyStringToDouble(string subject, out double ret)
         {
             decimal dec;
@@ -5575,18 +6045,31 @@ namespace PublicDomain
             return success;
         }
 
-#if !(NOBROKEN)
-        public static bool ConvertStringToDateTime(string subject, OlsonTimeZone timeZone, out OlsonDateTime ret)
+        /// <summary>
+        /// Converts the string to date time.
+        /// </summary>
+        /// <param name="subject">The subject.</param>
+        /// <param name="timeZone">The time zone.</param>
+        /// <param name="ret">The ret.</param>
+        /// <returns></returns>
+        public static bool ConvertStringToDateTime(string subject, TzTimeZone timeZone, out TzDateTime ret)
         {
-            return OlsonDateTime.TryParseLenient(subject, timeZone, System.Globalization.DateTimeStyles.AssumeUniversal, out ret);
+            return TzDateTime.TryParseLenient(subject, timeZone, System.Globalization.DateTimeStyles.AssumeUniversal, out ret);
         }
-#endif
     }
 
+    /// <summary>
+    /// Represents an HTTP session during a scraping of a page.
+    /// </summary>
     [Serializable]
     public class ScrapeSession
     {
         private Scraper _ContainingScraper;
+        
+        /// <summary>
+        /// Gets or sets the containing scraper.
+        /// </summary>
+        /// <value>The containing scraper.</value>
         protected Scraper ContainingScraper
         {
             get
@@ -5599,12 +6082,24 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ScrapeSession"/> class.
+        /// </summary>
+        /// <param name="scraper">The scraper.</param>
         public ScrapeSession(Scraper scraper)
         {
             ContainingScraper = scraper;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         protected CookieContainer m_Cookies = new CookieContainer();
+
+        /// <summary>
+        /// Gets the cookies.
+        /// </summary>
+        /// <value>The cookies.</value>
         public CookieContainer Cookies
         {
             get
@@ -5613,23 +6108,55 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// Adds the cookie.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <param name="value">The value.</param>
         public void AddCookie(string name, string value)
         {
             Cookies.Add(new Cookie(name, value, "/", ContainingScraper.Domain));
         }
     }
 
+    /// <summary>
+    /// The method of the scraping
+    /// </summary>
     public enum ScrapeType
     {
-        GET, POST
+        /// <summary>
+        /// 
+        /// </summary>
+        GET,
+
+        /// <summary>
+        /// 
+        /// </summary>
+        POST
     }
 
+    /// <summary>
+    /// Entry point to scrape an HTML page.
+    /// </summary>
     [Serializable]
     public class Scraper
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public static int DefaultExternalCallTimeout = 12000;
 
+        /// <summary>
+        /// 
+        /// </summary>
         protected bool m_FollowEquivRefreshes = true;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether [follow equiv refreshes].
+        /// </summary>
+        /// <value>
+        /// 	<c>true</c> if [follow equiv refreshes]; otherwise, <c>false</c>.
+        /// </value>
         public bool FollowEquivRefreshes
         {
             get
@@ -5642,7 +6169,15 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         protected ScrapeSession m_Session;
+
+        /// <summary>
+        /// Gets the session.
+        /// </summary>
+        /// <value>The session.</value>
         public ScrapeSession Session
         {
             get
@@ -5651,7 +6186,15 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         protected string m_Referer;
+
+        /// <summary>
+        /// Gets or sets the referer.
+        /// </summary>
+        /// <value>The referer.</value>
         public string Referer
         {
             get
@@ -5664,7 +6207,15 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         private Uri _LastProcessResponseUri;
+
+        /// <summary>
+        /// Gets or sets the last process response URI.
+        /// </summary>
+        /// <value>The last process response URI.</value>
         public Uri LastProcessResponseUri
         {
             get
@@ -5677,15 +6228,23 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         private string LastMetaFollow;
 
+        /// <summary>
+        /// 
+        /// </summary>
         private ScrapeType? _MetaRefreshScrapeType;
+
         /// <summary>
         /// If there is a meta refresh, then this specified
         /// the scrape type to use to follow the link. If this
         /// value is null, then the scrape type of the previous request
         /// is used.
         /// </summary>
+        /// <value>The type of the meta refresh scrape.</value>
         public ScrapeType? MetaRefreshScrapeType
         {
             get
@@ -5698,12 +6257,16 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         private string _Domain;
 
         /// <summary>
         /// This is used for a requests referer attribute as well as setting any cookies.
         /// This should be in the form "www.domain.com," without the prepended scheme.
         /// </summary>
+        /// <value>The domain.</value>
         public string Domain
         {
             get
@@ -5720,6 +6283,9 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Scraper"/> class.
+        /// </summary>
         public Scraper()
             : this(null)
         {
@@ -5729,7 +6295,7 @@ namespace PublicDomain
         /// This is used for a requests referer attribute as well as setting any cookies.
         /// This should be in the form "www.domain.com," without the prepended scheme.
         /// </summary>
-        /// <param name="Domain"></param>
+        /// <param name="domain">The domain.</param>
         public Scraper(string domain)
         {
             this.Domain = domain;
@@ -5740,6 +6306,13 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// Scrapes the specified type.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <param name="uri">The URI.</param>
+        /// <param name="keyAndValuePairs">The key and value pairs.</param>
+        /// <returns></returns>
         public ScrapedPage Scrape(ScrapeType type, string uri, params string[] keyAndValuePairs)
         {
             NameValueCollection query = new NameValueCollection();
@@ -5753,6 +6326,13 @@ namespace PublicDomain
             return Scrape(type, uri, query);
         }
 
+        /// <summary>
+        /// Scrapes the specified type.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <param name="uri">The URI.</param>
+        /// <param name="query">The query.</param>
+        /// <returns></returns>
         public ScrapedPage Scrape(ScrapeType type, string uri, NameValueCollection query)
         {
             ScrapedPage page = new ScrapedPage();
@@ -5785,6 +6365,11 @@ namespace PublicDomain
             return page;
         }
 
+        /// <summary>
+        /// Posts the process data.
+        /// </summary>
+        /// <param name="page">The page.</param>
+        /// <returns></returns>
         private ScrapedPage PostProcessData(ScrapedPage page)
         {
             if (FollowEquivRefreshes)
@@ -5863,6 +6448,11 @@ namespace PublicDomain
             return page;
         }
 
+        /// <summary>
+        /// Builds the query string.
+        /// </summary>
+        /// <param name="keyAndValuePairs">The key and value pairs.</param>
+        /// <returns></returns>
         public static string BuildQueryString(params string[] keyAndValuePairs)
         {
             NameValueCollection query = new NameValueCollection();
@@ -5876,6 +6466,11 @@ namespace PublicDomain
             return BuildQueryString(query);
         }
 
+        /// <summary>
+        /// Builds the query string.
+        /// </summary>
+        /// <param name="query">The query.</param>
+        /// <returns></returns>
         public static string BuildQueryString(NameValueCollection query)
         {
             string ret = "";
@@ -5890,12 +6485,23 @@ namespace PublicDomain
             return ret;
         }
 
+        /// <summary>
+        /// HTTPs the get.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        /// <returns></returns>
         public string HttpGet(string uri)
         {
             System.Net.HttpWebRequest req = CreateWebRequest(uri);
             return ProcessResponseStream(req);
         }
 
+        /// <summary>
+        /// HTTPs the post.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        /// <param name="parameters">The parameters.</param>
+        /// <returns></returns>
         public string HttpPost(string uri, string parameters)
         {
             System.Net.HttpWebRequest req = CreateWebRequest(uri);
@@ -5910,6 +6516,11 @@ namespace PublicDomain
             return ProcessResponseStream(req);
         }
 
+        /// <summary>
+        /// Processes the response stream.
+        /// </summary>
+        /// <param name="req">The req.</param>
+        /// <returns></returns>
         private string ProcessResponseStream(System.Net.HttpWebRequest req)
         {
             using (System.Net.WebResponse resp = req.GetResponse())
@@ -5928,6 +6539,11 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// Creates the web request.
+        /// </summary>
+        /// <param name="URI">The URI.</param>
+        /// <returns></returns>
         private HttpWebRequest CreateWebRequest(string URI)
         {
             HttpWebRequest req = (HttpWebRequest)System.Net.WebRequest.Create(URI);
@@ -6683,10 +7299,17 @@ namespace PublicDomain
     [Serializable]
     public class TzDateTime
     {
+        internal static bool TryParseLenient(string subject, TzTimeZone timeZone, DateTimeStyles dateTimeStyles, out TzDateTime ret)
+        {
+            throw new Exception("The method or operation is not implemented.");
+        }
     }
 
 #if !(NOTZPARSER)
 
+    /// <summary>
+    /// Parses the tz database files
+    /// </summary>
 #if !(NONUNIT)
     [TestFixture]
 #endif
@@ -6695,6 +7318,9 @@ namespace PublicDomain
         private const string Iso3166TabFile = @"C:\temp\tzdata\iso3166.tab";
         private const string ZoneTabFile = @"C:\temp\tzdata\zone.tab";
 
+        /// <summary>
+        /// Parse3166s the tab.
+        /// </summary>
 #if !(NONUNIT)
         [Test]
 #endif
@@ -6708,6 +7334,9 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// Parses the zone tab.
+        /// </summary>
 #if !(NONUNIT)
         [Test]
 #endif
@@ -6720,6 +7349,9 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// Reads the database.
+        /// </summary>
 #if !(NONUNIT)
         [Test]
 #endif
@@ -6738,6 +7370,12 @@ namespace PublicDomain
 
         }
 
+        /// <summary>
+        /// Reads the database.
+        /// </summary>
+        /// <param name="dir">The dir.</param>
+        /// <param name="rules">The rules.</param>
+        /// <param name="zones">The zones.</param>
         public static void ReadDatabase(string dir, List<TzDataRule> rules, List<TzDataZone> zones)
         {
             if (dir == null)
@@ -6769,13 +7407,16 @@ namespace PublicDomain
         }
 
         /// <summary>
-        /// 
+        /// Reads the database file.
         /// </summary>
-        /// <param name="file"></param>
-        /// <exception cref="PublicDomain.TzException" />
+        /// <param name="file">The file.</param>
+        /// <param name="rules">The rules.</param>
+        /// <param name="zones">The zones.</param>
+        /// <param name="links">The links.</param>
+        /// <exception cref="PublicDomain.TzException"/>
         private static void ReadDatabaseFile(FileInfo file, List<TzDataRule> rules, List<TzDataZone> zones, List<string[]> links)
         {
-            string[] lines = File.ReadAllLines(file.FullName);
+            string[] lines = System.IO.File.ReadAllLines(file.FullName);
             foreach (string line in lines)
             {
                 // This line may be a continuation Zone
@@ -6831,6 +7472,9 @@ namespace PublicDomain
             throw new TzParseException("Could not find LINKed zone " + zoneName);
         }
 
+        /// <summary>
+        /// Logical representation of a ZONE data field in the tz database.
+        /// </summary>
         [Serializable]
         public class TzDataZone : ICloneable
         {
@@ -6850,20 +7494,46 @@ namespace PublicDomain
             /// </summary>
             public string RuleName;
 
+            /// <summary>
+            /// 
+            /// </summary>
             public string Format;
 
+            /// <summary>
+            /// 
+            /// </summary>
             public int UntilYear;
 
+            /// <summary>
+            /// 
+            /// </summary>
             public Month UntilMonth = 0;
 
+            /// <summary>
+            /// 
+            /// </summary>
             public int UntilDay;
 
+            /// <summary>
+            /// 
+            /// </summary>
             public DayOfWeek? UntilDay_DayOfWeek;
 
+            /// <summary>
+            /// 
+            /// </summary>
             public TimeSpan UntilTime;
 
+            /// <summary>
+            /// 
+            /// </summary>
             public string Comment;
 
+            /// <summary>
+            /// Parses the specified STR.
+            /// </summary>
+            /// <param name="str">The STR.</param>
+            /// <returns></returns>
             public static TzDataZone Parse(string str)
             {
                 if (string.IsNullOrEmpty(str))
@@ -6875,6 +7545,11 @@ namespace PublicDomain
                 return z;
             }
 
+            /// <summary>
+            /// Parses the pieces.
+            /// </summary>
+            /// <param name="str">The STR.</param>
+            /// <param name="z">The z.</param>
             private static void ParsePieces(string str, TzDataZone z)
             {
                 string[] pieces = str.Split('\t');
@@ -6928,11 +7603,22 @@ namespace PublicDomain
                 }
             }
 
+            /// <summary>
+            /// Creates a new object that is a copy of the current instance.
+            /// </summary>
+            /// <returns>
+            /// A new object that is a copy of this instance.
+            /// </returns>
             public object Clone()
             {
                 return (TzDataZone)MemberwiseClone();
             }
 
+            /// <summary>
+            /// Clones the specified line.
+            /// </summary>
+            /// <param name="line">The line.</param>
+            /// <returns></returns>
             public TzDataZone Clone(string line)
             {
                 TzDataZone z = (TzDataZone)Clone();
@@ -6942,6 +7628,9 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// Logical representation of a RULE field in the tz database.
+        /// </summary>
         [Serializable]
         public class TzDataRule
         {
@@ -6989,10 +7678,21 @@ namespace PublicDomain
             /// </summary>
             public TimeSpan SaveTime;
 
+            /// <summary>
+            /// 
+            /// </summary>
             public string Modifier;
 
+            /// <summary>
+            /// 
+            /// </summary>
             public string Comment;
 
+            /// <summary>
+            /// Parses the specified STR.
+            /// </summary>
+            /// <param name="str">The STR.</param>
+            /// <returns></returns>
             public static TzDataRule Parse(string str)
             {
                 if (string.IsNullOrEmpty(str))
@@ -7054,12 +7754,12 @@ namespace PublicDomain
         /// which maps the ISO 3166 two letter country code to the
         /// country name.
         /// </summary>
-        /// <param name="tabFile"></param>
+        /// <param name="iso3166TabFile">The iso3166 tab file.</param>
         /// <returns></returns>
         public static Dictionary<string, Iso3166> ParseIso3166Tab(string iso3166TabFile)
         {
             Dictionary<string, Iso3166> map = new Dictionary<string, Iso3166>();
-            string[] lines = File.ReadAllLines(iso3166TabFile);
+            string[] lines = System.IO.File.ReadAllLines(iso3166TabFile);
             foreach (string line in lines)
             {
                 if (!string.IsNullOrEmpty(line) && line[0] != '#')
@@ -7081,7 +7781,7 @@ namespace PublicDomain
         public static List<TzZoneDescription> ParseZoneTab(string tabFile)
         {
             List<TzZoneDescription> result = new List<TzZoneDescription>();
-            string[] lines = File.ReadAllLines(tabFile);
+            string[] lines = System.IO.File.ReadAllLines(tabFile);
             foreach (string line in lines)
             {
                 if (!string.IsNullOrEmpty(line) && line[0] != '#')
@@ -7093,14 +7793,39 @@ namespace PublicDomain
             return result;
         }
 
+        /// <summary>
+        /// Logical zone description taken from the zone tab file in the tz database.
+        /// </summary>
         [Serializable]
         public struct TzZoneDescription
         {
+            /// <summary>
+            /// 
+            /// </summary>
             public string TwoLetterCode;
+
+            /// <summary>
+            /// 
+            /// </summary>
             public Iso6709 Location;
+
+            /// <summary>
+            /// 
+            /// </summary>
             public string ZoneName;
+
+            /// <summary>
+            /// 
+            /// </summary>
             public string Comments;
 
+            /// <summary>
+            /// Initializes a new instance of the <see cref="TzZoneDescription"/> class.
+            /// </summary>
+            /// <param name="twoLetterCode">The two letter code.</param>
+            /// <param name="location">The location.</param>
+            /// <param name="zoneName">Name of the zone.</param>
+            /// <param name="comments">The comments.</param>
             public TzZoneDescription(string twoLetterCode, Iso6709 location, string zoneName, string comments)
             {
                 TwoLetterCode = twoLetterCode;
@@ -7109,12 +7834,24 @@ namespace PublicDomain
                 Comments = comments;
             }
 
+            /// <summary>
+            /// Returns the fully qualified type name of this instance.
+            /// </summary>
+            /// <returns>
+            /// A <see cref="T:System.String"></see> containing a fully qualified type name.
+            /// </returns>
             public override string ToString()
             {
                 return string.Format("{0}\t{1}\t{2}\t{3}", TwoLetterCode, Location, ZoneName, Comments);
             }
         }
 
+        /// <summary>
+        /// Gets the tz data day.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <param name="startDay">The start day.</param>
+        /// <param name="startDay_dayOfWeek">The start day_day of week.</param>
         private static void GetTzDataDay(string str, out int startDay, out DayOfWeek? startDay_dayOfWeek)
         {
             startDay = 0;
@@ -7137,6 +7874,11 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// Gets the tz data time.
+        /// </summary>
+        /// <param name="saveTime">The save time.</param>
+        /// <returns></returns>
         private static TimeSpan GetTzDataTime(string saveTime)
         {
             if (char.IsLetter(saveTime[saveTime.Length - 1]))
@@ -7147,38 +7889,78 @@ namespace PublicDomain
         }
     }
 
+    /// <summary>
+    /// Thrown when there is an error interpreting the tz database.
+    /// </summary>
     [Serializable]
     public class TzException : Exception
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TzException"/> class.
+        /// </summary>
         public TzException() { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TzException"/> class.
+        /// </summary>
+        /// <param name="message">The message.</param>
         public TzException(string message) : base(message) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TzException"/> class.
+        /// </summary>
+        /// <param name="message">The message.</param>
+        /// <param name="inner">The inner.</param>
         public TzException(string message, Exception inner) : base(message, inner) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TzException"/> class.
+        /// </summary>
+        /// <param name="info">The <see cref="T:System.Runtime.Serialization.SerializationInfo"></see> that holds the serialized object data about the exception being thrown.</param>
+        /// <param name="context">The <see cref="T:System.Runtime.Serialization.StreamingContext"></see> that contains contextual information about the source or destination.</param>
+        /// <exception cref="T:System.Runtime.Serialization.SerializationException">The class name is null or <see cref="P:System.Exception.HResult"></see> is zero (0). </exception>
+        /// <exception cref="T:System.ArgumentNullException">The info parameter is null. </exception>
         protected TzException(
           System.Runtime.Serialization.SerializationInfo info,
           System.Runtime.Serialization.StreamingContext context)
             : base(info, context) { }
     }
 
-
+    /// <summary>
+    /// Thrown when there is a parse exception parsing the tz databse.
+    /// </summary>
     [Serializable]
     public class TzParseException : TzException
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TzParseException"/> class.
+        /// </summary>
         public TzParseException() { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TzParseException"/> class.
+        /// </summary>
+        /// <param name="message">The message.</param>
         public TzParseException(string message) : base(message) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TzParseException"/> class.
+        /// </summary>
+        /// <param name="message">The message.</param>
+        /// <param name="inner">The inner.</param>
         public TzParseException(string message, Exception inner) : base(message, inner) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TzParseException"/> class.
+        /// </summary>
+        /// <param name="info">The <see cref="T:System.Runtime.Serialization.SerializationInfo"></see> that holds the serialized object data about the exception being thrown.</param>
+        /// <param name="context">The <see cref="T:System.Runtime.Serialization.StreamingContext"></see> that contains contextual information about the source or destination.</param>
+        /// <exception cref="T:System.Runtime.Serialization.SerializationException">The class name is null or <see cref="P:System.Exception.HResult"></see> is zero (0). </exception>
+        /// <exception cref="T:System.ArgumentNullException">The info parameter is null. </exception>
         protected TzParseException(
           System.Runtime.Serialization.SerializationInfo info,
           System.Runtime.Serialization.StreamingContext context)
             : base(info, context) { }
-    }
-
-    [Serializable]
-    public class StandardTime : DaylightTime
-    {
-        public StandardTime(DateTime start, DateTime end, TimeSpan delta)
-            : base(start, end, delta)
-        {
-        }
     }
 
 #endif
@@ -7310,7 +8092,8 @@ namespace PublicDomain
         }
 
         /// <summary>
-        /// 
+        /// Represents information about a state from the United States
+        /// of America.
         /// </summary>
         [Serializable]
         public struct USState
@@ -7365,7 +8148,7 @@ namespace PublicDomain
         }
 
         /// <summary>
-        /// 
+        /// Thrown when the state being searched for does not exist.
         /// </summary>
         [Serializable]
         public class StateNotFoundException : Exception
@@ -7406,7 +8189,8 @@ namespace PublicDomain
     #region Enums
 
     /// <summary>
-    /// 
+    /// Enumeration of the 12 months of a Gregorian calendar.
+    /// Names are in English and values are from 1 to 12.
     /// </summary>
     public enum Month
     {
@@ -7472,7 +8256,7 @@ namespace PublicDomain
     }
 
     /// <summary>
-    /// 
+    /// Programming language enumeration (non-exchaustive)
     /// </summary>
     public enum Language
     {
@@ -7518,7 +8302,7 @@ namespace PublicDomain
     }
 
     /// <summary>
-    /// 
+    /// Measurement of distance
     /// </summary>
     public enum DistanceType
     {
@@ -7539,7 +8323,7 @@ namespace PublicDomain
     }
 
     /// <summary>
-    /// 
+    /// The type of lock to acquire on a <see cref="PublicDomain.DisposableReaderWriter"/> lock.
     /// </summary>
     public enum ReaderWriterLockSynchronizeType
     {

@@ -3,14 +3,19 @@ Microsoft Visual Studio Solution File, Format Version 9.00
 # Visual Studio 2005
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PublicDomain", "PublicDomain.csproj", "{DB173085-8CC4-4C49-8AA4-328442ABC887}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "pdsetup", "pdsetup\pdsetup.vdproj", "{88516D04-2270-4D4D-8B50-A38B1EF0BF82}"
+EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 2
+		SccNumberOfProjects = 3
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = https://tfs01.codeplex.com/
 		SccLocalPath0 = .
 		SccProjectUniqueName1 = PublicDomain.csproj
 		SccLocalPath1 = .
+		SccProjectUniqueName2 = pdsetup\\pdsetup.vdproj
+		SccProjectName2 = pdsetup
+		SccLocalPath2 = pdsetup
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +26,9 @@ Global
 		{DB173085-8CC4-4C49-8AA4-328442ABC887}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DB173085-8CC4-4C49-8AA4-328442ABC887}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DB173085-8CC4-4C49-8AA4-328442ABC887}.Release|Any CPU.Build.0 = Release|Any CPU
+		{88516D04-2270-4D4D-8B50-A38B1EF0BF82}.Debug|Any CPU.ActiveCfg = Debug
+		{88516D04-2270-4D4D-8B50-A38B1EF0BF82}.Release|Any CPU.ActiveCfg = Release
+		{88516D04-2270-4D4D-8B50-A38B1EF0BF82}.Release|Any CPU.Build.0 = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
