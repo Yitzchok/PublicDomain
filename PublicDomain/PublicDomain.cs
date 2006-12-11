@@ -10193,66 +10193,6 @@ namespace PublicDomain
         }
 
         /// <summary>
-        /// Parses the specified STR.
-        /// </summary>
-        /// <param name="str">The STR.</param>
-        /// <returns></returns>
-        public static TzDataRule Parse(string str)
-        {
-            if (string.IsNullOrEmpty(str))
-            {
-                throw new ArgumentNullException("str");
-            }
-            TzDataRule t = new TzDataRule();
-            string[] pieces = str.Split('\t');
-            pieces = StringUtilities.Split(pieces, ' ', 0);
-            if (pieces.Length == 11 && pieces[10][0] == '#')
-            {
-                // the comment was tabbed off the end
-                string comment = pieces[10];
-                Array.Resize<string>(ref pieces, 10);
-                pieces[9] += " " + comment;
-            }
-            if (pieces.Length != 10)
-            {
-                throw new TzParseException("Rule has an invalid number of pieces: " + pieces.Length + " (" + str + ")");
-            }
-            t.RuleName = pieces[1];
-            if (pieces[2] == "min")
-            {
-                t.From = 0;
-            }
-            else
-            {
-                t.From = int.Parse(pieces[2]);
-            }
-            switch (pieces[3])
-            {
-                case "only":
-                    t.To = t.From;
-                    break;
-                case "max":
-                    t.To = int.MaxValue;
-                    break;
-                default:
-                    t.To = int.Parse(pieces[3]);
-                    break;
-            }
-            t.StartMonth = DateTimeUtlities.ParseMonth(pieces[5]);
-
-            int startDay;
-            DayOfWeek? startDay_dayOfWeek;
-            TzParser.GetTzDataDay(pieces[6], out startDay, out startDay_dayOfWeek);
-            t.StartDay = startDay;
-            t.StartDay_DayOfWeek = startDay_dayOfWeek;
-
-            t.StartTime = TzParser.GetTzDataTime(pieces[7], out t.StartTimeModifier);
-            t.SaveTime = TimeSpan.Parse(pieces[8]);
-            t.Modifier = pieces[9];
-            return t;
-        }
-
-        /// <summary>
         /// Returns a <see cref="T:System.String"></see> that represents the current <see cref="T:System.Object"></see>.
         /// </summary>
         /// <returns>
@@ -10426,80 +10366,6 @@ namespace PublicDomain
         }
 
         /// <summary>
-        /// Parses the specified STR.
-        /// </summary>
-        /// <param name="str">The STR.</param>
-        /// <returns></returns>
-        public static TzDataZone Parse(string str)
-        {
-            if (string.IsNullOrEmpty(str))
-            {
-                throw new ArgumentNullException("str");
-            }
-            TzDataZone z = new TzDataZone();
-            ParsePieces(str, z);
-            return z;
-        }
-
-        /// <summary>
-        /// Parses the pieces.
-        /// </summary>
-        /// <param name="str">The STR.</param>
-        /// <param name="z">The z.</param>
-        private static void ParsePieces(string str, TzDataZone z)
-        {
-            string[] pieces = str.Split('\t');
-            if (pieces[0].Contains(" ") || pieces[1].Contains(" ") || pieces[2].Contains(" "))
-            {
-                pieces = StringUtilities.Split(pieces, ' ', 0, 1, 2);
-            }
-            pieces = StringUtilities.RemoveEmptyPieces(pieces);
-            z.ZoneName = pieces[1];
-
-            if (z.ZoneName != "Factory")
-            {
-                z.UtcOffset = TimeSpan.Parse(pieces[2]);
-                z.RuleName = pieces[3];
-                z.Format = pieces[4];
-
-                // The rest of the format is optional an erratic, so we combine
-                // the rest of the array into a big string
-                if (pieces.Length > 5)
-                {
-                    string ending = String.Join(" ", pieces, 5, pieces.Length - 5);
-                    int poundIndex;
-                    if ((poundIndex = ending.IndexOf('#')) != -1)
-                    {
-                        z.Comment = ending.Substring(poundIndex + 1).Trim();
-                        ending = ending.Substring(0, poundIndex).Trim();
-                        if (ending != "")
-                        {
-                            string[] untilPieces = StringUtilities.RemoveEmptyPieces(ending.Split(' '));
-                            z.UntilYear = int.Parse(untilPieces[0]);
-                            if (untilPieces.Length > 1)
-                            {
-                                z.UntilMonth = DateTimeUtlities.ParseMonth(untilPieces[1]);
-                                if (untilPieces.Length > 2)
-                                {
-                                    int untilDay;
-                                    DayOfWeek? untilDay_dayOfWeek;
-                                    TzParser.GetTzDataDay(untilPieces[2], out untilDay, out untilDay_dayOfWeek);
-                                    z.UntilDay = untilDay;
-                                    z.UntilDay_DayOfWeek = untilDay_dayOfWeek;
-
-                                    if (untilPieces.Length > 3)
-                                    {
-                                        z.UntilTime = TzParser.GetTzDataTime(untilPieces[3], out z.UntilTimeModifier);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        /// <summary>
         /// Creates a new object that is a copy of the current instance.
         /// </summary>
         /// <returns>
@@ -10508,19 +10374,6 @@ namespace PublicDomain
         public object Clone()
         {
             return (TzDataZone)MemberwiseClone();
-        }
-
-        /// <summary>
-        /// Clones the specified line.
-        /// </summary>
-        /// <param name="line">The line.</param>
-        /// <returns></returns>
-        public TzDataZone Clone(string line)
-        {
-            TzDataZone z = (TzDataZone)Clone();
-            line = "Zone\t" + z.ZoneName + "\t" + string.Join("\t", StringUtilities.RemoveEmptyPieces(line.Split('\t')));
-            ParsePieces(line, z);
-            return z;
         }
 
         /// <summary>
@@ -10916,7 +10769,7 @@ namespace PublicDomain
                             if (line.Trim() != string.Empty)
                             {
                                 // This is a continuation of a previous Zone
-                                zones.Add(zones[zones.Count - 1].Clone(line));
+                                zones.Add(TzParser.CloneDataZone(zones[zones.Count - 1], line));
                             }
                         }
                         else
@@ -10929,12 +10782,12 @@ namespace PublicDomain
                                 {
                                     case "rule":
                                         //Console.WriteLine(line);
-                                        rules.Add(TzDataRule.Parse(line));
+                                        rules.Add(TzParser.ParseDataRule(line));
                                         //Console.WriteLine(rules[rules.Count - 1]);
                                         //Console.WriteLine();
                                         break;
                                     case "zone":
-                                        zones.Add(TzDataZone.Parse(line));
+                                        zones.Add(TzParser.ParseDataZone(line));
                                         break;
                                     case "link":
                                         links.Add(StringUtilities.RemoveEmptyPieces(pieces));
@@ -11102,6 +10955,154 @@ namespace PublicDomain
                 saveTime = saveTime.Substring(0, saveTime.Length - 1);
             }
             return TimeSpan.Parse(saveTime);
+        }
+
+        /// <summary>
+        /// Parses the specified STR.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns></returns>
+        public static TzDataRule ParseDataRule(string str)
+        {
+            if (string.IsNullOrEmpty(str))
+            {
+                throw new ArgumentNullException("str");
+            }
+            TzDataRule t = new TzDataRule();
+            string[] pieces = str.Split('\t');
+            pieces = StringUtilities.Split(pieces, ' ', 0);
+            if (pieces.Length == 11 && pieces[10][0] == '#')
+            {
+                // the comment was tabbed off the end
+                string comment = pieces[10];
+                Array.Resize<string>(ref pieces, 10);
+                pieces[9] += " " + comment;
+            }
+            if (pieces.Length != 10)
+            {
+                throw new TzParseException("Rule has an invalid number of pieces: " + pieces.Length + " (" + str + ")");
+            }
+            t.RuleName = pieces[1];
+            if (pieces[2] == "min")
+            {
+                t.From = 0;
+            }
+            else
+            {
+                t.From = int.Parse(pieces[2]);
+            }
+            switch (pieces[3])
+            {
+                case "only":
+                    t.To = t.From;
+                    break;
+                case "max":
+                    t.To = int.MaxValue;
+                    break;
+                default:
+                    t.To = int.Parse(pieces[3]);
+                    break;
+            }
+            t.StartMonth = DateTimeUtlities.ParseMonth(pieces[5]);
+
+            int startDay;
+            DayOfWeek? startDay_dayOfWeek;
+            TzParser.GetTzDataDay(pieces[6], out startDay, out startDay_dayOfWeek);
+            t.StartDay = startDay;
+            t.StartDay_DayOfWeek = startDay_dayOfWeek;
+
+            t.StartTime = TzParser.GetTzDataTime(pieces[7], out t.StartTimeModifier);
+            t.SaveTime = TimeSpan.Parse(pieces[8]);
+            t.Modifier = pieces[9];
+            return t;
+        }
+
+        /// <summary>
+        /// Parses the specified STR.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns></returns>
+        public static TzDataZone ParseDataZone(string str)
+        {
+            if (string.IsNullOrEmpty(str))
+            {
+                throw new ArgumentNullException("str");
+            }
+            TzDataZone z = new TzDataZone();
+            ParsePieces(str, z);
+            return z;
+        }
+
+        /// <summary>
+        /// Parses the pieces.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <param name="z">The z.</param>
+        private static void ParsePieces(string str, TzDataZone z)
+        {
+            string[] pieces = str.Split('\t');
+            if (pieces[0].Contains(" ") || pieces[1].Contains(" ") || pieces[2].Contains(" "))
+            {
+                pieces = StringUtilities.Split(pieces, ' ', 0, 1, 2);
+            }
+            pieces = StringUtilities.RemoveEmptyPieces(pieces);
+            z.ZoneName = pieces[1];
+
+            if (z.ZoneName != "Factory")
+            {
+                z.UtcOffset = TimeSpan.Parse(pieces[2]);
+                z.RuleName = pieces[3];
+                z.Format = pieces[4];
+
+                // The rest of the format is optional an erratic, so we combine
+                // the rest of the array into a big string
+                if (pieces.Length > 5)
+                {
+                    string ending = String.Join(" ", pieces, 5, pieces.Length - 5);
+                    int poundIndex;
+                    if ((poundIndex = ending.IndexOf('#')) != -1)
+                    {
+                        z.Comment = ending.Substring(poundIndex + 1).Trim();
+                        ending = ending.Substring(0, poundIndex).Trim();
+                        if (ending != "")
+                        {
+                            string[] untilPieces = StringUtilities.RemoveEmptyPieces(ending.Split(' '));
+                            z.UntilYear = int.Parse(untilPieces[0]);
+                            if (untilPieces.Length > 1)
+                            {
+                                z.UntilMonth = DateTimeUtlities.ParseMonth(untilPieces[1]);
+                                if (untilPieces.Length > 2)
+                                {
+                                    int untilDay;
+                                    DayOfWeek? untilDay_dayOfWeek;
+                                    TzParser.GetTzDataDay(untilPieces[2], out untilDay, out untilDay_dayOfWeek);
+                                    z.UntilDay = untilDay;
+                                    z.UntilDay_DayOfWeek = untilDay_dayOfWeek;
+
+                                    if (untilPieces.Length > 3)
+                                    {
+                                        z.UntilTime = TzParser.GetTzDataTime(untilPieces[3], out z.UntilTimeModifier);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Clones the specified line.
+        /// </summary>
+        /// <param name="zone">The zone.</param>
+        /// <param name="line">The line.</param>
+        /// <returns></returns>
+        public static TzDataZone CloneDataZone(TzDataZone zone, string line)
+        {
+            TzDataZone z = (TzDataZone)zone.Clone();
+            line = "Zone\t" + z.ZoneName + "\t" + string.Join("\t", StringUtilities.RemoveEmptyPieces(line.Split('\t')));
+            ParsePieces(line, z);
+            return z;
         }
     }
 
