@@ -27,20 +27,20 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_950F1C21072148368AA9FE5C333401D3"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_961DB091401A40A888B04A79BF9BE564"
+        "MsmKey" = "8:_4FAC1AEB44C34B2D8E08ABC1F36333AD"
         "OwnerKey" = "8:_232751C70EAD4554B7412280C921C0AC"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_961DB091401A40A888B04A79BF9BE564"
+        "MsmKey" = "8:_4FAC1AEB44C34B2D8E08ABC1F36333AD"
         "OwnerKey" = "8:_4DA056F41EEF41BAB6C1A1B2A7C8B906"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_950F1C21072148368AA9FE5C333401D3"
+        "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -76,7 +76,7 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_961DB091401A40A888B04A79BF9BE564"
+        "OwnerKey" = "8:_4FAC1AEB44C34B2D8E08ABC1F36333AD"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -173,7 +173,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:TRUE"
-            "AssemblyAsmDisplayName" = "8:nunit.framework, Version=2.2.8.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77"
+            "AssemblyAsmDisplayName" = "8:nunit.framework, Version=2.2.8.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
                     "_9859F56BCF5695F94D26FAFE3EE75E90"
@@ -273,18 +273,18 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Public Domain"
-        "ProductCode" = "8:{6F23B0D1-1790-470C-A69C-4C35AAB5199D}"
-        "PackageCode" = "8:{EDDF0F19-E732-414C-A27F-EB4FDF275509}"
+        "ProductCode" = "8:{37BE474D-4D64-4401-A32F-80BFE329DC0A}"
+        "PackageCode" = "8:{C092E18C-43E7-44BE-9D6D-59E211F52672}"
         "UpgradeCode" = "8:{1DFA6A0E-52E0-4DDC-8B97-584FBFB16243}"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:TRUE"
-        "ProductVersion" = "8:0.0.14"
+        "ProductVersion" = "8:0.0.20"
         "Manufacturer" = "8:Public Domain"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:http://www.codeplex.com/publicdomain"
-        "Title" = "8:Public Domain"
+        "Title" = "8:Public Domain v0.0.2"
         "Subject" = "8:Public Domain"
         "ARPCONTACT" = "8:Public Domain"
         "Keywords" = "8:Public Domain"
@@ -741,7 +741,7 @@
         }
         "MergeModule"
         {
-            "{CEE29DC0-9FBA-4B99-8D47-5BC643D9B626}:_961DB091401A40A888B04A79BF9BE564"
+            "{CEE29DC0-9FBA-4B99-8D47-5BC643D9B626}:_4FAC1AEB44C34B2D8E08ABC1F36333AD"
             {
             "UseDynamicProperties" = "11:TRUE"
             "IsDependency" = "11:TRUE"
@@ -760,7 +760,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_232751C70EAD4554B7412280C921C0AC"
             {
-            "SourcePath" = "8:..\\obj\\Release\\PublicDomain.dll"
+            "SourcePath" = "8:..\\obj\\Debug\\PublicDomain.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_C4684F407DB743C290D1888D967091D8"
@@ -788,7 +788,7 @@
             }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_4DA056F41EEF41BAB6C1A1B2A7C8B906"
             {
-            "SourcePath" = "8:..\\obj\\Release\\PublicDomain.dll"
+            "SourcePath" = "8:..\\obj\\Debug\\PublicDomain.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_936A46F267F043AD8D6D39970AEB0810"
@@ -816,7 +816,7 @@
             }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_950F1C21072148368AA9FE5C333401D3"
             {
-            "SourcePath" = "8:..\\bin\\Release\\PublicDomain.XML"
+            "SourcePath" = "8:..\\bin\\Debug\\PublicDomain.XML"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_C4684F407DB743C290D1888D967091D8"
