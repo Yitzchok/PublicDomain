@@ -1,5 +1,4 @@
 // PublicDomain
-//  PublicDomain, Version=0.0.2.0, Culture=neutral, PublicKeyToken=fd3f43b5776a962b
 // ======================================
 //  Original Author: Kevin Grigorenko (kevgrig@gmail.com)
 //  Contributing Authors:
@@ -44,6 +43,22 @@
 //
 // Version History:
 // ======================================
+// V0.0.2.22
+//  [kevgrig@gmail.com]
+//   * Added Cryptography, Encoding, and Hashing utilities on strings
+//   * Fixed bugs in PublicDomain.Logging.FileSizeRolloverStrategy
+// V0.0.2.5
+//  [kevgrig@gmail.com]
+//   * Added CompositeLogger
+// V0.0.2.4
+//  [kevgrig@gmail.com]
+//   * Added my logging package, PublicDomain.Logging
+// V0.0.2.3
+//  [kevgrig@gmail.com]
+//   * Added RSS, Atom, and OPML parsing and serialization support in the Feeder package
+// V0.0.2.2
+//  [kevgrig@gmail.com]
+//   * TzDateTime creation methods
 // V0.0.2.0
 //  [kevgrig@gmail.com]
 //   * TzTimeZone is very limited but functional. Get a time zone with TzTimeZone.GetTimeZone(string)
@@ -83,7 +98,7 @@
 // of various sections of the code.
 // ======================================
 
-// !!!EDIT DIRECTIVES HERE START!!!
+// !!!EDIT DIRECTIVES START!!!
 
 #if !(PD)
 
@@ -94,14 +109,16 @@
 
 // Other switches:
 //#define NOSCREENSCRAPER
+//#define NOFEEDER
 //#define NOCLSCOMPLIANTWARNINGSOFF
 //#define NOTZ
 //#define NOSTATES
 //#define NOCODECOUNT
+//#define NOLOGGING
 
 #endif
 
-// !!!EDIT DIRECTIVES HERE END!!!!!
+// !!!EDIT DIRECTIVES END!!!!!
 
 // Dependency directives -- do not modify as they
 // are very easy to break
@@ -134,23 +151,28 @@ using NUnit.Framework;
 // Core includes (at the bottom for Visual Studio's sake [place optional includes above])
 using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Text;
-using System.ComponentModel;
 using System.Net;
 using System.Reflection;
+using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Security.Cryptography;
 using System.Security.Permissions;
 using System.Security.Policy;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Collections.ObjectModel;
-using System.Runtime.Serialization;
-using System.Collections;
+using System.Xml;
+using PublicDomain.Feeder.Opml;
+using PublicDomain.Feeder.Rss;
+using PublicDomain.Feeder.Atom;
 
 #if !(NOCLSCOMPLIANTWARNINGSOFF)
 #pragma warning disable 3001
@@ -170,12 +192,47 @@ namespace PublicDomain
         /// <summary>
         /// 
         /// </summary>
-        public const string PublicDomainStrongName = "PublicDomain, Version=0.0.2.0, Culture=neutral, PublicKeyToken=fd3f43b5776a962b";
+        public const string PublicDomainVersion = "0.0.2.22";
+
+        /// <summary>
+        /// Strong, public name of the PublicDomain assembly.
+        /// </summary>
+        public const string PublicDomainStrongName = "PublicDomain, Version=" + PublicDomainVersion + ", Culture=neutral, PublicKeyToken=FD3F43B5776A962B";
+
+        /// <summary>
+        /// The number of bits in a byte.
+        /// </summary>
+        public const int BitsInAByte = 8;
+
+        /// <summary>
+        /// The number of bytes in 1KB
+        /// </summary>
+        public const int BytesInAKilobyte = BitsInAByte * 1000;
+
+        /// <summary>
+        /// The number of bytes in 1MB
+        /// </summary>
+        public const int BytesInAMegabyte = BytesInAKilobyte * 1000;
+
+        /// <summary>
+        /// The number of bytes in 1GB
+        /// </summary>
+        public const long BytesInAGigabyte = (long)BytesInAMegabyte * (long)1000;
+
+        /// <summary>
+        /// The number of bytes in 1TB
+        /// </summary>
+        public const long BytesInATerabyte = BytesInAGigabyte * 1000;
+
+        /// <summary>
+        /// The number of bytes in 1PB
+        /// </summary>
+        public const long BytesInAPetabyte = BytesInATerabyte * 1000;
 
         /// <summary>
         /// 
         /// </summary>
-        public const int StreamBlockSize = 1024;
+        public const int DefaultStreamBlockSize = 1024;
 
         /// <summary>
         /// 
@@ -211,11 +268,16 @@ namespace PublicDomain
         /// 
         /// </summary>
         public const double EarthDiameterKilometers = EarthRadiusKilometers * 2;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public static char DirectorySeparator = '\\';
     }
 
     /// <summary>
     /// Generic class that encapsulates a pair of objects of any types. This class is similar
-    /// to <see cred="System.Collections.Generic.KeyValuePair" /> except that it is a class, not
+    /// to System.Collections.Generic.KeyValuePair except that it is a class, not
     /// a struct and also exposes the values as public fields and more generically than a "key" and
     /// a "value."
     /// </summary>
@@ -316,6 +378,61 @@ namespace PublicDomain
             First = first;
             Second = second;
             Third = third;
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static class CryptographyUtilities
+    {
+        /// <summary>
+        /// Computes the SHA1 hash.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns></returns>
+        public static byte[] ComputeSHA1Hash(string str)
+        {
+            byte[] data = EncodingUtilities.GetBytesFromString(str);
+            return ComputeSHA1Hash(data);
+        }
+
+        /// <summary>
+        /// Computes the SHA1 hash.
+        /// </summary>
+        /// <param name="data">The data.</param>
+        /// <returns></returns>
+        public static byte[] ComputeSHA1Hash(byte[] data)
+        {
+            SHA1 shaM = new SHA1Managed();
+            return shaM.ComputeHash(data);
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static class EncodingUtilities
+    {
+        /// <summary>
+        /// Gets the bytes from string.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns></returns>
+        public static byte[] GetBytesFromString(string str)
+        {
+            // Strings in .NET are always UTF16
+            return Encoding.Unicode.GetBytes(str);
+        }
+
+        /// <summary>
+        /// Gets the string from bytes.
+        /// </summary>
+        /// <param name="data">The data.</param>
+        /// <returns></returns>
+        public static string GetStringFromBytes(byte[] data)
+        {
+            return Encoding.Unicode.GetString(data);
         }
     }
 
@@ -609,6 +726,64 @@ namespace PublicDomain
                     piece2 = piece2.Trim();
                 }
             }
+        }
+
+        /// <summary>
+        /// Extracts the first number in the string, discarding the rest.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns></returns>
+        public static int ExtractFirstNumber(string str)
+        {
+            int result = 0;
+            bool foundDigit = false;
+            foreach (char c in str)
+            {
+                if (char.IsDigit(c))
+                {
+                    result = (result * 10) + int.Parse(c.ToString());
+                    foundDigit = true;
+                }
+                else if (foundDigit)
+                {
+                    break;
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Searches for all matches to the <paramref name="searches"/>
+        /// parameters, and returns the index which is the furthest to
+        /// the end of the string. Returns -1 if none of the strings
+        /// can be found.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <param name="searches">The searches.</param>
+        /// <returns></returns>
+        public static int LastIndexOfAny(string str, params string[] searches)
+        {
+            int result = -1;
+            foreach (string search in searches)
+            {
+                int index = str.LastIndexOf(search);
+                if (index > result)
+                {
+                    result = index;
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Computes the non colliding hash
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns></returns>
+        public static string ComputeNonCollidingHash(string str)
+        {
+            byte[] data = CryptographyUtilities.ComputeSHA1Hash(str);
+            return EncodingUtilities.GetStringFromBytes(data);
         }
 
 #if !(NONUNIT)
@@ -1790,6 +1965,103 @@ namespace PublicDomain
             }
             return sb.ToString();
         }
+
+        /// <summary>
+        /// Throws the exception list.
+        /// </summary>
+        /// <param name="exceptions">The exceptions.</param>
+        public static void ThrowExceptionList(ICollection<Exception> exceptions)
+        {
+            if (exceptions != null && exceptions.Count > 0)
+            {
+                List<Exception> exceptionList = new List<Exception>(exceptions);
+                if (exceptionList.Count == 1)
+                {
+                    throw exceptionList[0];
+                }
+                else
+                {
+                    // Build a list of exceptions, with the first of the list at the top
+                    Exception exception = null;
+                    for (int i = exceptionList.Count - 1; i >= 0; i--)
+                    {
+                        if (exception == null)
+                        {
+                            exception = exceptionList[i];
+                        }
+                        else
+                        {
+                            exception = new WrappedException(exceptionList[i], exception);
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        [Serializable]
+        public class WrappedException : Exception
+        {
+            private Exception m_wrappedException;
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="WrappedException"/> class.
+            /// </summary>
+            public WrappedException() { }
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="WrappedException"/> class.
+            /// </summary>
+            /// <param name="exception">The exception.</param>
+            public WrappedException(Exception exception)
+                : this(exception, null)
+            {
+            }
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="WrappedException"/> class.
+            /// </summary>
+            /// <param name="exception">The exception.</param>
+            /// <param name="innerException">The inner exception.</param>
+            public WrappedException(Exception exception, Exception innerException)
+                : base(null, innerException)
+            {
+                m_wrappedException = exception;
+                Data["WrappedException"] = exception;
+            }
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="WrappedException"/> class.
+            /// </summary>
+            /// <param name="message">The message.</param>
+            public WrappedException(string message) : base(message) { }
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="WrappedException"/> class.
+            /// </summary>
+            /// <param name="info">The <see cref="T:System.Runtime.Serialization.SerializationInfo"></see> that holds the serialized object data about the exception being thrown.</param>
+            /// <param name="context">The <see cref="T:System.Runtime.Serialization.StreamingContext"></see> that contains contextual information about the source or destination.</param>
+            /// <exception cref="T:System.Runtime.Serialization.SerializationException">The class name is null or <see cref="P:System.Exception.HResult"></see> is zero (0). </exception>
+            /// <exception cref="T:System.ArgumentNullException">The info parameter is null. </exception>
+            protected WrappedException(
+              SerializationInfo info,
+              StreamingContext context)
+                : base(info, context) { }
+
+            /// <summary>
+            /// Gets the wrapped exception.
+            /// </summary>
+            /// <value>The wrapped exception.</value>
+            public Exception ExceptionWrapped
+            {
+                get
+                {
+                    return m_wrappedException;
+                }
+            }
+        }
     }
 
     /// <summary>
@@ -1823,7 +2095,7 @@ namespace PublicDomain
         }
 
         /// <summary>
-        /// Pathes the combine.
+        /// Combines the two paths, making sure no two slashes are combined.
         /// </summary>
         /// <param name="path1">The path1.</param>
         /// <param name="path2">The path2.</param>
@@ -1841,6 +2113,85 @@ namespace PublicDomain
             }
 
             return Path.Combine(path1, path2);
+        }
+
+        /// <summary>
+        /// Checks whether the specified <paramref name="path"/>
+        /// points to an existing file system object such as a
+        /// directory or a file.
+        /// </summary>
+        /// <param name="path">The path.</param>
+        /// <returns></returns>
+        public static bool DoesFileSystemObjectExist(string path)
+        {
+            return File.Exists(path) || Directory.Exists(path);
+        }
+
+        /// <summary>
+        /// Moves the file system object from <paramref name="fromPath"/>
+        /// to <paramref name="toPath"/> whether the object is a file
+        /// or a directory.
+        /// </summary>
+        /// <param name="fromPath">From path.</param>
+        /// <param name="toPath">To path.</param>
+        /// <returns></returns>
+        public static bool MoveFileSystemObject(string fromPath, string toPath)
+        {
+            if (File.Exists(fromPath))
+            {
+                File.Move(fromPath, toPath);
+                return true;
+            }
+            if (Directory.Exists(fromPath))
+            {
+                Directory.Move(fromPath, toPath);
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Deletes the file system object, whether it is a file or
+        /// a directory. If it is a directory, the directory is
+        /// recursively deleted.
+        /// </summary>
+        /// <param name="path">The path.</param>
+        /// <returns></returns>
+        public static bool DeleteFileSystemObject(string path)
+        {
+            return DeleteFileSystemObject(path, true);
+        }
+
+        /// <summary>
+        /// Deletes the file system object, whether it is a file or
+        /// a directory. If it is a directory, <paramref name="recurseIfDirectory"/>
+        /// dictates whether the delete is recursive.
+        /// </summary>
+        /// <param name="path">The path.</param>
+        /// <param name="recurseIfDirectory">if set to <c>true</c> [recurse if directory].</param>
+        /// <returns></returns>
+        public static bool DeleteFileSystemObject(string path, bool recurseIfDirectory)
+        {
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+                return true;
+            }
+
+            if (Directory.Exists(path))
+            {
+                if (recurseIfDirectory)
+                {
+                    DeleteDirectoryForcefully(path);
+                }
+                else
+                {
+                    Directory.Delete(path, false);
+                }
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -2006,6 +2357,118 @@ namespace PublicDomain
             }
 
             return index;
+        }
+
+        /// <summary>
+        /// Replaces all occurrences of <paramref name="search"/> with
+        /// <paramref name="replace"/> in the file located at <paramref name="path"/>.
+        /// </summary>
+        /// <param name="search">The search.</param>
+        /// <param name="replace">The replace.</param>
+        /// <param name="path">The path.</param>
+        public static void ReplaceInFile(string search, string replace, string path)
+        {
+            string text = File.ReadAllText(path);
+            text = text.Replace(search, replace);
+            File.WriteAllText(path, text);
+        }
+
+        /// <summary>
+        /// Replaces all occurrences of <paramref name="search"/> with
+        /// <paramref name="replace"/> in the file located at <paramref name="path"/>.
+        /// Returns true if the file has been changed, false otherwise.
+        /// </summary>
+        /// <param name="search">The search.</param>
+        /// <param name="replace">The replace.</param>
+        /// <param name="path">The path.</param>
+        /// <returns>true if the file has been changed, false otherwise.</returns>
+        public static bool ReplaceInFileDiff(string search, string replace, string path)
+        {
+            string oldText = File.ReadAllText(path);
+            string newText = oldText.Replace(search, replace);
+            File.WriteAllText(path, newText);
+
+            // First, simply check the file lengths
+            if (oldText.Length != newText.Length)
+            {
+                return true;
+            }
+            else
+            {
+                // Now, we need to generate unique hashes for both, this can take some time
+                if (!StringUtilities.ComputeNonCollidingHash(oldText).Equals(StringUtilities.ComputeNonCollidingHash(newText)))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Splits <paramref name="path"/> based on the last directory
+        /// separator, return a string array of length 2. The first element
+        /// is the left portion, the directory, and the second element
+        /// is the right portion, the file name. The directory separator is
+        /// stripped from both, so the first element does not end with a trailing
+        /// separator, nor does the second element begin with a directory
+        /// separator. The return result is never null, and the elements
+        /// are never null, so one of the elements may be an empty string.
+        /// </summary>
+        /// <param name="path">The path.</param>
+        /// <returns></returns>
+        public static string[] SplitFileIntoDirectoryAndName(string path)
+        {
+            return SplitFileIntoDirectoryAndName(path, false);
+        }
+
+        /// <summary>
+        /// Splits <paramref name="path"/> based on the last directory
+        /// separator, return a string array of length 2. The first element
+        /// is the left portion, the directory, and the second element
+        /// is the right portion, the file name. The directory separator is
+        /// stripped from the second element, so the second element never begins with a directory
+        /// separator. <paramref name="ensureDirectoryElementEndingSlash"/> controls
+        /// whether or not the first element retains a trailing directory separator.
+        /// The return result is never null, and the elements
+        /// are never null, so one of the elements may be an empty string.
+        /// </summary>
+        /// <param name="path">The path.</param>
+        /// <param name="ensureDirectoryElementEndingSlash">if set to <c>true</c> [ensure directory element ending slash].</param>
+        /// <returns></returns>
+        public static string[] SplitFileIntoDirectoryAndName(string path, bool ensureDirectoryElementEndingSlash)
+        {
+            string one, two;
+            int lastIndex = path.LastIndexOfAny(trackbackChars);
+            if (lastIndex == -1)
+            {
+                one = "";
+                two = path;
+            }
+            else
+            {
+                if (lastIndex == 0)
+                {
+                    one = "";
+                    two = path.Substring(1);
+                }
+                else if (lastIndex == path.Length - 1)
+                {
+                    one = path.Substring(0, path.Length - 1);
+                    two = "";
+                }
+                else
+                {
+                    one = path.Substring(0, lastIndex);
+                    two = path.Substring(lastIndex + 1);
+                }
+            }
+
+            if (ensureDirectoryElementEndingSlash)
+            {
+                one = one + GlobalConstants.DirectorySeparator;
+            }
+
+            return new string[] { one, two };
         }
     }
 
@@ -2503,9 +2966,9 @@ namespace PublicDomain
         /// <returns></returns>
         public int WriteTo(Stream stream)
         {
-            byte[] buffer = new byte[GlobalConstants.StreamBlockSize];
+            byte[] buffer = new byte[GlobalConstants.DefaultStreamBlockSize];
             int bytesRead, totalBytesRead = 0;
-            while ((bytesRead = Read(buffer, 0, GlobalConstants.StreamBlockSize)) > -1)
+            while ((bytesRead = Read(buffer, 0, GlobalConstants.DefaultStreamBlockSize)) > -1)
             {
                 stream.Write(buffer, 0, bytesRead);
                 totalBytesRead += bytesRead;
@@ -6174,6 +6637,74 @@ namespace PublicDomain
         }
 
         /// <summary>
+        /// Gets the display name of the language.
+        /// </summary>
+        /// <param name="lang">The language.</param>
+        /// <returns></returns>
+        public static string GetLanguageDisplayName(Language lang)
+        {
+            switch (lang)
+            {
+                case Language.CPlusPlus:
+                    return "C++";
+                case Language.CSharp:
+                    return "C#";
+                case Language.Java:
+                    return "Java";
+                case Language.JScript:
+                    return "JScript";
+                case Language.JSharp:
+                    return "J#";
+                case Language.PHP:
+                    return "PHP";
+                case Language.Ruby:
+                    return "Ruby";
+                case Language.VisualBasic:
+                    return "Visual Basic";
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        /// <summary>
+        /// Gets a <seealso cref="PublicDomain.Language"/> given a string name.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <returns></returns>
+        public static Language GetLanguageByName(string name)
+        {
+            name = name.ToLower().Trim();
+            switch (name)
+            {
+                case "cplusplus":
+                case "c++":
+                    return Language.CPlusPlus;
+                case "c#":
+                case "csharp":
+                    return Language.CSharp;
+                case "java":
+                    return Language.Java;
+                case "js":
+                case "jscript":
+                    return Language.JScript;
+                case "vj#":
+                case "j#":
+                case "jsharp":
+                    return Language.JSharp;
+                case "php":
+                    return Language.PHP;
+                case "vb":
+                case "visual basic":
+                case "visualbasic":
+                    return Language.VisualBasic;
+                case "ruby":
+                    return Language.Ruby;
+                default:
+                    throw new ArgumentException("Could not find language by name " + name);
+            }
+        }
+
+        /// <summary>
         /// Thrown when an error is encountered compiling.
         /// </summary>
         [Serializable]
@@ -7257,6 +7788,11 @@ namespace PublicDomain
         /// <summary>
         /// 
         /// </summary>
+        public static bool TreatUnspecifiedKindAsLocal = true;
+
+        /// <summary>
+        /// 
+        /// </summary>
         public static ReadOnlyDictionary<string, TzZoneInfo> Zones
         {
             get
@@ -7290,11 +7826,48 @@ namespace PublicDomain
             }
         }
 
+        /// <summary>
+        /// Gets the time zone utc.
+        /// </summary>
+        /// <value>The time zone utc.</value>
+        public static TzTimeZone TimeZoneUtc
+        {
+            get
+            {
+                return m_utcTimeZone;
+            }
+        }
+
+        /// <summary>
+        /// Gets all zone names.
+        /// </summary>
+        /// <value>All zone names.</value>
+        public static string[] AllZoneNames
+        {
+            get
+            {
+                if (m_allZoneNames == null)
+                {
+                    lock (m_loadLock)
+                    {
+                        List<string> zoneNames = new List<string>(Zones.Keys);
+                        zoneNames.Sort();
+                        m_allZoneNames = zoneNames.ToArray();
+                    }
+                }
+                return m_allZoneNames;
+            }
+        }
+
         private static ReadOnlyDictionary<string, TzZoneInfo> m_zones;
 
         private static ReadOnlyCollection<TzZoneInfo> m_zoneList;
 
         private static object m_loadLock = new object();
+
+        private static TzTimeZone m_utcTimeZone = TzTimeZone.GetTimeZone(TzConstants.TimezoneUtc);
+
+        private static string[] m_allZoneNames;
 
         private TzZoneInfo m_info;
 
@@ -7459,7 +8032,11 @@ namespace PublicDomain
                 case DateTimeKind.Utc:
                     return TimeSpan.Zero;
                 case DateTimeKind.Unspecified:
-                    throw new ArgumentException("unspecified type");
+                    if (!TreatUnspecifiedKindAsLocal)
+                    {
+                        throw new ArgumentException("unspecified type");
+                    }
+                    break;
             }
 
             // Figure out the offset for the local time
@@ -7499,7 +8076,15 @@ namespace PublicDomain
                     // Nothing necessary to change
                     return time;
                 case DateTimeKind.Unspecified:
-                    throw new ArgumentException("unspecified kind");
+                    if (TreatUnspecifiedKindAsLocal)
+                    {
+                        // Nothing necessary to change
+                        return time;
+                    }
+                    else
+                    {
+                        throw new ArgumentException("unspecified kind");
+                    }
                 case DateTimeKind.Utc:
                     // Subtract the UTC
                     return ToUTC(ref time, false);
@@ -7523,13 +8108,43 @@ namespace PublicDomain
                     // Apply the UTC offset
                     return ToUTC(ref time, true);
                 case DateTimeKind.Unspecified:
-                    // Either assume a certain Kind, or throw an exception
-                    throw new ArgumentException("unspecified kind");
+                    if (TreatUnspecifiedKindAsLocal)
+                    {
+                        return ToUTC(ref time, true);
+                    }
+                    else
+                    {
+                        throw new ArgumentException("unspecified kind");
+                    }
                 case DateTimeKind.Utc:
                     // It is already UTC
                     return time;
                 default:
                     throw new NotImplementedException(time.Kind.ToString());
+            }
+        }
+
+        /// <summary>
+        /// Gets the current time in this time zone.
+        /// </summary>
+        /// <value>The now.</value>
+        public TzDateTime Now
+        {
+            get
+            {
+                return new TzDateTime(DateTime.Now, this);
+            }
+        }
+
+        /// <summary>
+        /// Gets the name of the zone.
+        /// </summary>
+        /// <value>The name of the zone.</value>
+        public string ZoneName
+        {
+            get
+            {
+                return this.m_info.ZoneName;
             }
         }
 
@@ -7550,7 +8165,6 @@ namespace PublicDomain
         {
             return base.ToString();
         }
-
 
         /// <summary>
         /// Gets the time zone.
@@ -12202,6 +12816,11 @@ namespace PublicDomain
             /// 
             /// </summary>
             public const string TimezoneUsPacific = "US/Pacific";
+
+            /// <summary>
+            /// 
+            /// </summary>
+            public const string TimezoneUtc = "UTC";
         }
 
 #if !(NONUNIT)
@@ -12292,9 +12911,505 @@ namespace PublicDomain
     [Serializable]
     public class TzDateTime
     {
-        internal static bool TryParseLenient(string subject, TzTimeZone timeZone, DateTimeStyles dateTimeStyles, out TzDateTime ret)
+        private DateTime m_dateTimeUtc;
+        private TzTimeZone m_timeZone;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TzDateTime"/> class.
+        /// </summary>
+        public TzDateTime()
         {
-            throw new Exception("The method or operation is not implemented.");
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TzDateTime"/> class.
+        /// </summary>
+        /// <param name="time">The time.</param>
+        public TzDateTime(DateTime time)
+            : this(time, null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TzDateTime"/> class.
+        /// </summary>
+        /// <param name="time">The time.</param>
+        /// <param name="forceTimeAsUtc">if set to <c>true</c> [force time as utc].</param>
+        public TzDateTime(DateTime time, bool forceTimeAsUtc)
+            : this(forceTimeAsUtc ? DateTimeUtlities.CloneDateTimeAsUTC(time) : time)
+        {
+        }
+
+        /// <summary>
+        /// Assumes a local date/time. Initializes a new instance of the <see cref="TzDateTime"/> class.
+        /// </summary>
+        /// <param name="year">The year.</param>
+        /// <param name="month">The month.</param>
+        /// <param name="day">The day.</param>
+        public TzDateTime(int year, int month, int day)
+            : this(year, month, day, null)
+        {
+        }
+
+        /// <summary>
+        /// Assumes a local date/time. Initializes a new instance of the <see cref="TzDateTime"/> class.
+        /// </summary>
+        /// <param name="year">The year.</param>
+        /// <param name="month">The month.</param>
+        /// <param name="day">The day.</param>
+        /// <param name="timeZone">The time zone.</param>
+        public TzDateTime(int year, int month, int day, TzTimeZone timeZone)
+            : this(year, month, day, 0, 0, 0, timeZone)
+        {
+        }
+
+        /// <summary>
+        /// Assumes a local date/time. Initializes a new instance of the <see cref="TzDateTime"/> class.
+        /// </summary>
+        /// <param name="year">The year.</param>
+        /// <param name="month">The month.</param>
+        /// <param name="day">The day.</param>
+        /// <param name="hour">The hour.</param>
+        /// <param name="minutes">The minutes.</param>
+        /// <param name="seconds">The seconds.</param>
+        public TzDateTime(int year, int month, int day, int hour, int minutes, int seconds)
+            : this(year, month, day, hour, minutes, seconds, null)
+        {
+        }
+
+        /// <summary>
+        /// Assumes a local date/time. Initializes a new instance of the <see cref="TzDateTime"/> class.
+        /// </summary>
+        /// <param name="year">The year.</param>
+        /// <param name="month">The month.</param>
+        /// <param name="day">The day.</param>
+        /// <param name="hour">The hour.</param>
+        /// <param name="minutes">The minutes.</param>
+        /// <param name="seconds">The seconds.</param>
+        /// <param name="timeZone">The time zone.</param>
+        public TzDateTime(int year, int month, int day, int hour, int minutes, int seconds, TzTimeZone timeZone)
+            : this(year, month, day, hour, minutes, seconds, DateTimeKind.Local, timeZone)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TzDateTime"/> class.
+        /// </summary>
+        /// <param name="year">The year.</param>
+        /// <param name="month">The month.</param>
+        /// <param name="day">The day.</param>
+        /// <param name="hour">The hour.</param>
+        /// <param name="minutes">The minutes.</param>
+        /// <param name="seconds">The seconds.</param>
+        /// <param name="kind">The kind.</param>
+        /// <param name="timeZone">The time zone.</param>
+        public TzDateTime(int year, int month, int day, int hour, int minutes, int seconds, DateTimeKind kind, TzTimeZone timeZone)
+            : this(new DateTime(year, month, day, hour, minutes, seconds, kind), timeZone)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TzDateTime"/> class.
+        /// </summary>
+        /// <param name="time">The time.</param>
+        /// <param name="timeZone">The time zone.</param>
+        public TzDateTime(DateTime time, TzTimeZone timeZone)
+        {
+            m_timeZone = timeZone;
+            SetDateTime(time);
+        }
+
+        private void SetDateTime(DateTime time)
+        {
+            switch (time.Kind)
+            {
+                case DateTimeKind.Local:
+                    ThrowIfNullTimeZone();
+                    m_dateTimeUtc = m_timeZone.ToUniversalTime(time);
+                    break;
+                case DateTimeKind.Unspecified:
+                    if (TzTimeZone.TreatUnspecifiedKindAsLocal)
+                    {
+                        ThrowIfNullTimeZone();
+                        m_dateTimeUtc = m_timeZone.ToUniversalTime(time);
+                        break;
+                    }
+                    else
+                    {
+                        throw new ArgumentException("unspecified kind");
+                    }
+                case DateTimeKind.Utc:
+                    m_dateTimeUtc = time;
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        /// <summary>
+        /// Gets the date time utc.
+        /// </summary>
+        /// <value>The date time utc.</value>
+        public DateTime DateTimeUtc
+        {
+            get
+            {
+                return m_dateTimeUtc;
+            }
+            set
+            {
+                SetDateTime(value);
+            }
+        }
+
+        /// <summary>
+        /// Gets the date time local.
+        /// </summary>
+        /// <value>The date time local.</value>
+        public DateTime DateTimeLocal
+        {
+            get
+            {
+                ThrowIfNullTimeZone();
+                return m_timeZone.ToLocalTime(m_dateTimeUtc);
+            }
+            set
+            {
+                SetDateTime(value);
+            }
+        }
+
+        private void ThrowIfNullTimeZone()
+        {
+            if (m_timeZone == null)
+            {
+                throw new Exception("Time zone not specified to retrieve local date.");
+            }
+        }
+
+        /// <summary>
+        /// Gets the time zone.
+        /// </summary>
+        /// <value>The time zone.</value>
+        public TzTimeZone TimeZone
+        {
+            get
+            {
+                return m_timeZone;
+            }
+            set
+            {
+                m_timeZone = value;
+            }
+        }
+
+        /// <summary>
+        /// Parses the specified input. By default, this does
+        /// not assume any time zone -- not even UTC. If the time
+        /// zone cannot be parsed from the input, a null time zone
+        /// is set in the date.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <returns></returns>
+        public static TzDateTime Parse(string input)
+        {
+            return Parse(input, null, DateTimeStyles.None);
+        }
+
+        /// <summary>
+        /// Parses the specified input.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <param name="styles">The styles.</param>
+        /// <returns></returns>
+        public static TzDateTime Parse(string input, DateTimeStyles styles)
+        {
+            return Parse(input, null, styles);
+        }
+
+        /// <summary>
+        /// Parses the specified input.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <param name="timeZone">The time zone.</param>
+        /// <returns></returns>
+        public static TzDateTime Parse(string input, TzTimeZone timeZone)
+        {
+            return Parse(input, timeZone, DateTimeStyles.None);
+        }
+
+        /// <summary>
+        /// Parses the specified input.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <param name="timeZone">The time zone.</param>
+        /// <param name="styles">The styles.</param>
+        /// <returns></returns>
+        public static TzDateTime Parse(string input, TzTimeZone timeZone, DateTimeStyles styles)
+        {
+            return new TzDateTime(DateTime.Parse(input), timeZone);
+        }
+
+        /// <summary>
+        /// Tries the parse.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <param name="styles">The styles.</param>
+        /// <param name="val">The val.</param>
+        /// <returns></returns>
+        public static bool TryParse(string input, DateTimeStyles styles, out TzDateTime val)
+        {
+            return TryParse(input, null, styles, out val);
+        }
+
+        /// <summary>
+        /// Tries the parse.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <param name="timeZone">The time zone.</param>
+        /// <param name="val">The val.</param>
+        /// <returns></returns>
+        public static bool TryParse(string input, TzTimeZone timeZone, out TzDateTime val)
+        {
+            return TryParse(input, timeZone, DateTimeStyles.None, out val);
+        }
+
+        /// <summary>
+        /// Tries the parse.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <param name="timeZone">The time zone.</param>
+        /// <param name="styles">The styles.</param>
+        /// <param name="val">The val.</param>
+        /// <returns></returns>
+        public static bool TryParse(string input, TzTimeZone timeZone, DateTimeStyles styles, out TzDateTime val)
+        {
+            val = null;
+            try
+            {
+                val = Parse(input, timeZone, styles);
+                return true;
+            }
+            catch (Exception)
+            {
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Returns the UTC form of this date time. Returns a <see cref="T:System.String"></see> that represents the current <see cref="T:System.Object"></see>.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="T:System.String"></see> that represents the current <see cref="T:System.Object"></see>.
+        /// </returns>
+        public override string ToString()
+        {
+            return DateTimeUtc.ToString();
+        }
+
+        /// <summary>
+        /// Determines whether the specified <see cref="T:System.Object"></see> is equal to the current <see cref="T:System.Object"></see>.
+        /// </summary>
+        /// <param name="obj">The <see cref="T:System.Object"></see> to compare with the current <see cref="T:System.Object"></see>.</param>
+        /// <returns>
+        /// true if the specified <see cref="T:System.Object"></see> is equal to the current <see cref="T:System.Object"></see>; otherwise, false.
+        /// </returns>
+        public override bool Equals(object obj)
+        {
+            TzDateTime y = obj as TzDateTime;
+            if (y != null)
+            {
+                return DateTimeUtc.Equals(y.DateTimeUtc);
+            }
+            return base.Equals(obj);
+        }
+
+        /// <summary>
+        /// Serves as a hash function for a particular type. <see cref="M:System.Object.GetHashCode"></see> is suitable for use in hashing algorithms and data structures like a hash table.
+        /// </summary>
+        /// <returns>
+        /// A hash code for the current <see cref="T:System.Object"></see>.
+        /// </returns>
+        public override int GetHashCode()
+        {
+            return DateTimeUtc.GetHashCode();
+        }
+
+        /// <summary>
+        /// Gets the utc now.
+        /// </summary>
+        /// <param name="timeZone">The time zone.</param>
+        /// <returns></returns>
+        public static TzDateTime GetUtcNow(TzTimeZone timeZone)
+        {
+            return new TzDateTime(DateTime.UtcNow, timeZone);
+        }
+
+        /// <summary>
+        /// Adds the days.
+        /// </summary>
+        /// <param name="days">The days.</param>
+        /// <returns></returns>
+        public TzDateTime AddDays(double days)
+        {
+            return new TzDateTime(DateTimeUtc.AddDays(days), TimeZone);
+        }
+
+        /// <summary>
+        /// Adds the hours.
+        /// </summary>
+        /// <param name="hours">The hours.</param>
+        /// <returns></returns>
+        public TzDateTime AddHours(double hours)
+        {
+            return new TzDateTime(DateTimeUtc.AddHours(hours), TimeZone);
+        }
+
+        /// <summary>
+        /// Adds the months.
+        /// </summary>
+        /// <param name="months">The months.</param>
+        /// <returns></returns>
+        public TzDateTime AddMonths(int months)
+        {
+            return new TzDateTime(DateTimeUtc.AddMonths(months), TimeZone);
+        }
+
+        /// <summary>
+        /// Adds the seconds.
+        /// </summary>
+        /// <param name="seconds">The seconds.</param>
+        /// <returns></returns>
+        public TzDateTime AddSeconds(double seconds)
+        {
+            return new TzDateTime(DateTimeUtc.AddSeconds(seconds), TimeZone);
+        }
+
+        /// <summary>
+        /// Adds the minutes.
+        /// </summary>
+        /// <param name="minutes">The minutes.</param>
+        /// <returns></returns>
+        public TzDateTime AddMinutes(double minutes)
+        {
+            return new TzDateTime(DateTimeUtc.AddMinutes(minutes), TimeZone);
+        }
+
+        /// <summary>
+        /// Clones this instance.
+        /// </summary>
+        /// <returns></returns>
+        public TzDateTime Clone()
+        {
+            TzDateTime ret = (TzDateTime)MemberwiseClone();
+            return ret;
+        }
+
+        /// <summary>
+        /// Compares to.
+        /// </summary>
+        /// <param name="y">The y.</param>
+        /// <returns></returns>
+        public int CompareTo(TzDateTime y)
+        {
+            return DateTimeUtc.CompareTo(y.DateTimeUtc);
+        }
+
+        /// <summary>
+        /// Returns a new instance with the saved time zone, but
+        /// with the hours, minutes, and seconds set to 0.
+        /// </summary>
+        /// <returns></returns>
+        public TzDateTime GetDate()
+        {
+            return new TzDateTime(DateTimeUtc.Date, TimeZone);
+        }
+
+        /// <summary>
+        /// Returns a new instance with the saved time zone, but
+        /// with the hours, minutes, and seconds set to 0.
+        /// </summary>
+        /// <returns></returns>
+        public TzDateTime GetDateLocal()
+        {
+            return new TzDateTime(DateTimeLocal.Date, TimeZone);
+        }
+
+        /// <summary>
+        /// Gets the date local.
+        /// </summary>
+        /// <param name="dt">The dt.</param>
+        /// <param name="tz">The tz.</param>
+        /// <returns></returns>
+        public static DateTime GetDateLocal(TzDateTime dt, TzTimeZone tz)
+        {
+            return tz.ToLocalTime(dt.DateTimeUtc);
+        }
+
+        /// <summary>
+        /// Subtracts the specified x.
+        /// </summary>
+        /// <param name="x">The x.</param>
+        /// <param name="y">The y.</param>
+        /// <returns></returns>
+        public static TimeSpan Subtract(TzDateTime x, TzDateTime y)
+        {
+            return x.DateTimeUtc - y.DateTimeUtc;
+        }
+
+        /// <summary>
+        /// Adds the specified x.
+        /// </summary>
+        /// <param name="x">The x.</param>
+        /// <param name="y">The y.</param>
+        /// <returns></returns>
+        public static TzDateTime Add(TzDateTime x, TimeSpan y)
+        {
+            return new TzDateTime(x.DateTimeUtc + y, x.TimeZone);
+        }
+
+        /// <summary>
+        /// Greaters the than equal to.
+        /// </summary>
+        /// <param name="x">The x.</param>
+        /// <param name="y">The y.</param>
+        /// <returns></returns>
+        public static bool GreaterThanEqualTo(TzDateTime x, TzDateTime y)
+        {
+            return x.DateTimeUtc >= y.DateTimeUtc;
+        }
+
+        /// <summary>
+        /// Greaters the than.
+        /// </summary>
+        /// <param name="x">The x.</param>
+        /// <param name="y">The y.</param>
+        /// <returns></returns>
+        public static bool GreaterThan(TzDateTime x, TzDateTime y)
+        {
+            return x.DateTimeUtc > y.DateTimeUtc;
+        }
+
+        /// <summary>
+        /// Lesses the than.
+        /// </summary>
+        /// <param name="x">The x.</param>
+        /// <param name="y">The y.</param>
+        /// <returns></returns>
+        public static bool LessThan(TzDateTime x, TzDateTime y)
+        {
+            return x.DateTimeUtc < y.DateTimeUtc;
+        }
+
+        /// <summary>
+        /// Lesses the than equal to.
+        /// </summary>
+        /// <param name="x">The x.</param>
+        /// <param name="y">The y.</param>
+        /// <returns></returns>
+        public static bool LessThanEqualTo(TzDateTime x, TzDateTime y)
+        {
+            return x.DateTimeUtc <= y.DateTimeUtc;
         }
     }
 
@@ -13603,6 +14718,233 @@ namespace PublicDomain
         }
     }
 #endif
+
+    /// <summary>
+    /// This class
+    /// also provides a cache of property names to objects, similar in concept
+    /// to the Properties collection, but representing concrete properties.
+    /// </summary>
+    public interface ICachedPropertiesProvider
+    {
+        /// <summary>
+        /// Gets or sets the properties.
+        /// </summary>
+        /// <value>The properties.</value>
+        IDictionary<string, string> Properties { get; set; }
+
+        /// <summary>
+        /// Setters the specified property name.
+        /// </summary>
+        /// <param name="propertyName">Name of the property.</param>
+        /// <param name="value">The value.</param>
+        void Setter(string propertyName, object value);
+
+        /// <summary>
+        /// Getters the specified property name.
+        /// </summary>
+        /// <param name="propertyName">Name of the property.</param>
+        /// <returns></returns>
+        string Getter(string propertyName);
+
+        /// <summary>
+        /// Getters the specified property name.
+        /// </summary>
+        /// <param name="propertyName">Name of the property.</param>
+        /// <param name="convertDelegate">The convert delegate.</param>
+        /// <returns></returns>
+        T Getter<T>(string propertyName, Converter<string, T> convertDelegate);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class CachedPropertiesProvider : ICachedPropertiesProvider
+    {
+        private IDictionary<string, string> m_properties = new Dictionary<string, string>();
+        private IDictionary<string, object> m_cache = new Dictionary<string, object>();
+
+        /// <summary>
+        /// Gets or sets the properties.
+        /// </summary>
+        /// <value>The properties.</value>
+        public IDictionary<string, string> Properties
+        {
+            get
+            {
+                return m_properties;
+            }
+            set
+            {
+                m_properties = value;
+            }
+        }
+
+        /// <summary>
+        /// Setters the specified property name.
+        /// </summary>
+        /// <param name="propertyName">Name of the property.</param>
+        /// <param name="value">The value.</param>
+        public virtual void Setter(string propertyName, object value)
+        {
+            m_cache[propertyName] = value;
+            Properties[propertyName] = value == null ? null : value.ToString();
+        }
+
+        /// <summary>
+        /// Getters the specified property name.
+        /// </summary>
+        /// <param name="propertyName">Name of the property.</param>
+        /// <returns></returns>
+        public virtual string Getter(string propertyName)
+        {
+            return Getter<string>(propertyName, ConvertStringToString);
+        }
+
+        /// <summary>
+        /// Getters the specified property name.
+        /// </summary>
+        /// <param name="propertyName">Name of the property.</param>
+        /// <param name="convertDelegate">The convert delegate.</param>
+        /// <returns></returns>
+        public virtual T Getter<T>(string propertyName, Converter<string, T> convertDelegate)
+        {
+            T returnValue = default(T);
+            object dicValue;
+
+            // try the cache
+            if (!m_cache.TryGetValue(propertyName, out dicValue))
+            {
+                if (convertDelegate != null)
+                {
+                    // We want this to throw an exception if it has a problem
+                    // (e.g. Uri can't be parsed).
+                    string strVal;
+                    if (Properties.TryGetValue(propertyName, out strVal))
+                    {
+                        returnValue = convertDelegate.Invoke(strVal);
+                        m_cache[propertyName] = returnValue;
+                    }
+                }
+            }
+            else
+            {
+                returnValue = (T)dicValue;
+            }
+            return returnValue;
+        }
+
+        /// <summary>
+        /// Converts the string to string.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <returns></returns>
+        public static string ConvertStringToString(string input)
+        {
+            return input;
+        }
+
+        /// <summary>
+        /// Assumes input is in UTC.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <returns></returns>
+        public static TzDateTime ConvertToTzDateTime(string input)
+        {
+            return TzDateTime.Parse(input);
+        }
+
+        /// <summary>
+        /// Converts to URI.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <returns></returns>
+        public static Uri ConvertToUri(string input)
+        {
+            return string.IsNullOrEmpty(input) ? null : new Uri(input);
+        }
+
+        /// <summary>
+        /// Converts to culture info.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <returns></returns>
+        public static CultureInfo ConvertToCultureInfo(string input)
+        {
+            return string.IsNullOrEmpty(input) ? CultureInfo.InvariantCulture : CultureInfo.CreateSpecificCulture(input);
+        }
+
+        /// <summary>
+        /// Converts to U int nullable.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <returns></returns>
+        public static uint? ConvertToUIntNullable(string input)
+        {
+            return string.IsNullOrEmpty(input) ? (uint?)null : uint.Parse(input);
+        }
+
+        /// <summary>
+        /// Converts to int nullable.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <returns></returns>
+        public static int? ConvertToIntNullable(string input)
+        {
+            return string.IsNullOrEmpty(input) ? (int?)null : int.Parse(input);
+        }
+
+        /// <summary>
+        /// Converts to U int.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <returns></returns>
+        public static uint ConvertToUInt(string input)
+        {
+            return uint.Parse(input);
+        }
+
+        /// <summary>
+        /// Converts to int.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <returns></returns>
+        public static int ConvertToInt(string input)
+        {
+            return int.Parse(input);
+        }
+
+        /// <summary>
+        /// Converts to bool nullable.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <returns></returns>
+        public static bool? ConvertToBoolNullable(string input)
+        {
+            return string.IsNullOrEmpty(input) ? (bool?)null : bool.Parse(input);
+        }
+
+        /// <summary>
+        /// Converts to URI.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <param name="baseUri">The base URI.</param>
+        /// <returns></returns>
+        public static Uri ConvertToUri(string input, string baseUri)
+        {
+            if (!string.IsNullOrEmpty(input))
+            {
+                if (string.IsNullOrEmpty(baseUri))
+                {
+                    return new Uri(input);
+                }
+                else
+                {
+                    return new Uri(new Uri(baseUri), input);
+                }
+            }
+            return null;
+        }
+    }
 }
 
 #if !(NOCODECOUNT)
@@ -14870,7 +16212,7 @@ namespace PublicDomain.ScreenScraper
         /// <returns></returns>
         public static bool ConvertStringToDateTime(string subject, TzTimeZone timeZone, out TzDateTime ret)
         {
-            return TzDateTime.TryParseLenient(subject, timeZone, System.Globalization.DateTimeStyles.AssumeUniversal, out ret);
+            return TzDateTime.TryParse(subject, timeZone, DateTimeStyles.AssumeUniversal, out ret);
         }
     }
 
@@ -15371,6 +16713,6438 @@ namespace PublicDomain.ScreenScraper
             req.CookieContainer = Session.Cookies;
             req.AllowAutoRedirect = true;
             return req;
+        }
+    }
+}
+#endif
+
+#if !(NOFEEDER)
+namespace PublicDomain.Feeder
+{
+    /// <summary>
+    /// Attempts to distill any feed format (RSS, Atom, etc.) into
+    /// a form that can be dealt with more logically. Information IS
+    /// lost in this process, and very few fields can be assumed to
+    /// have any data. Actually, almost none *must* have content.
+    /// </summary>
+    public interface IDistilledFeed : ICachedPropertiesProvider
+    {
+        /// <summary>
+        /// Gets or sets the feed URI.
+        /// </summary>
+        /// <value>The feed URI.</value>
+        Uri FeedUri { get; set; }
+
+        /// <summary>
+        /// Gets or sets the title.
+        /// </summary>
+        /// <value>The title.</value>
+        string Title { get; set; }
+
+        /// <summary>
+        /// Gets or sets the description.
+        /// </summary>
+        /// <value>The description.</value>
+        string Description { get; set; }
+
+        /// <summary>
+        /// Gets or sets the culture.
+        /// </summary>
+        /// <value>The culture.</value>
+        CultureInfo Culture { get; set; }
+
+        /// <summary>
+        /// Gets or sets the copyright.
+        /// </summary>
+        /// <value>The copyright.</value>
+        string Copyright { get; set; }
+
+        /// <summary>
+        /// Gets or sets the generator.
+        /// </summary>
+        /// <value>The generator.</value>
+        string Generator { get; set; }
+
+        /// <summary>
+        /// Gets or sets the category.
+        /// </summary>
+        /// <value>The category.</value>
+        string Category { get; set; }
+
+        /// <summary>
+        /// Gets or sets the publication date.
+        /// </summary>
+        /// <value>The publication date.</value>
+        TzDateTime PublicationDate { get; set; }
+
+        /// <summary>
+        /// Gets or sets the last changed.
+        /// </summary>
+        /// <value>The last changed.</value>
+        TzDateTime LastChanged { get; set; }
+
+        /// <summary>
+        /// Gets or sets the time to live.
+        /// </summary>
+        /// <value>The time to live.</value>
+        int? TimeToLive { get; set; }
+
+        /// <summary>
+        /// Gets or sets the items.
+        /// </summary>
+        /// <value>The items.</value>
+        IList<IDistilledFeedItem> Items { get; set; }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class DistilledFeed : CachedPropertiesProvider, IDistilledFeed
+    {
+        private IList<IDistilledFeedItem> m_items = new List<IDistilledFeedItem>();
+
+        #region IDistilledFeed Members
+
+        /// <summary>
+        /// Gets or sets the feed URI.
+        /// </summary>
+        /// <value>The feed URI.</value>
+        public Uri FeedUri
+        {
+            get
+            {
+                return Getter<Uri>("DistilledFeedUri", CachedPropertiesProvider.ConvertToUri);
+            }
+            set
+            {
+                Setter("DistilledFeedUri", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the title.
+        /// </summary>
+        /// <value>The title.</value>
+        public string Title
+        {
+            get
+            {
+                return Getter("DistilledTitle");
+            }
+            set
+            {
+                Setter("DistilledTitle", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the description.
+        /// </summary>
+        /// <value>The description.</value>
+        public string Description
+        {
+            get
+            {
+                return Getter("DistilledDescription");
+            }
+            set
+            {
+                Setter("DistilledDescription", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the culture.
+        /// </summary>
+        /// <value>The culture.</value>
+        public System.Globalization.CultureInfo Culture
+        {
+            get
+            {
+                return Getter<System.Globalization.CultureInfo>("DistilledCulture", CachedPropertiesProvider.ConvertToCultureInfo);
+            }
+            set
+            {
+                Setter("DistilledCulture", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the copyright.
+        /// </summary>
+        /// <value>The copyright.</value>
+        public string Copyright
+        {
+            get
+            {
+                return Getter("DistilledCopyright");
+            }
+            set
+            {
+                Setter("DistilledCopyright", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the generator.
+        /// </summary>
+        /// <value>The generator.</value>
+        public string Generator
+        {
+            get
+            {
+                return Getter("DistilledGenerator");
+            }
+            set
+            {
+                Setter("DistilledGenerator", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the category.
+        /// </summary>
+        /// <value>The category.</value>
+        public string Category
+        {
+            get
+            {
+                return Getter("DistilledCategory");
+            }
+            set
+            {
+                Setter("DistilledCategory", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the publication date.
+        /// </summary>
+        /// <value>The publication date.</value>
+        public TzDateTime PublicationDate
+        {
+            get
+            {
+                return Getter<TzDateTime>("DistilledPublicationDate", CachedPropertiesProvider.ConvertToTzDateTime);
+            }
+            set
+            {
+                Setter("DistilledPublicationDate", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the last changed.
+        /// </summary>
+        /// <value>The last changed.</value>
+        public TzDateTime LastChanged
+        {
+            get
+            {
+                return Getter<TzDateTime>("DistilledLastChanged", CachedPropertiesProvider.ConvertToTzDateTime);
+            }
+            set
+            {
+                Setter("DistilledLastChanged", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the time to live.
+        /// </summary>
+        /// <value>The time to live.</value>
+        public int? TimeToLive
+        {
+            get
+            {
+                return Getter<int?>("DistilledTimeToLive", CachedPropertiesProvider.ConvertToIntNullable);
+            }
+            set
+            {
+                Setter("DistilledTimeToLive", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the items.
+        /// </summary>
+        /// <value>The items.</value>
+        public IList<IDistilledFeedItem> Items
+        {
+            get
+            {
+                return m_items;
+            }
+            set
+            {
+                m_items = value;
+            }
+        }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// Similar to IDistilledFeed, this
+    /// attempts to find the common denominator for a 
+    /// feed entry or item. Few of these fields may be
+    /// assumed to contain data.
+    /// </summary>
+    public interface IDistilledFeedItem : ICachedPropertiesProvider
+    {
+        /// <summary>
+        /// Gets or sets the title.
+        /// </summary>
+        /// <value>The title.</value>
+        string Title { get; set; }
+
+        /// <summary>
+        /// Gets or sets the description.
+        /// </summary>
+        /// <value>The description.</value>
+        string Description { get; set; }
+
+        /// <summary>
+        /// Gets or sets the link.
+        /// </summary>
+        /// <value>The link.</value>
+        Uri Link { get; set; }
+
+        /// <summary>
+        /// Gets or sets the publication date.
+        /// </summary>
+        /// <value>The publication date.</value>
+        TzDateTime PublicationDate { get; set; }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class DistilledFeedItem : CachedPropertiesProvider, IDistilledFeedItem
+    {
+        #region IDistilledFeedItem Members
+
+        /// <summary>
+        /// Gets or sets the title.
+        /// </summary>
+        /// <value>The title.</value>
+        public string Title
+        {
+            get
+            {
+                return Getter("DistilledTitle");
+            }
+            set
+            {
+                Setter("DistilledTitle", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the description.
+        /// </summary>
+        /// <value>The description.</value>
+        public string Description
+        {
+            get
+            {
+                return Getter("DistilledDescription");
+            }
+            set
+            {
+                Setter("DistilledDescription", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the link.
+        /// </summary>
+        /// <value>The link.</value>
+        public Uri Link
+        {
+            get
+            {
+                return Getter<Uri>("DistilledLink", CachedPropertiesProvider.ConvertToUri);
+            }
+            set
+            {
+                Setter("DistilledLink", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the publication date.
+        /// </summary>
+        /// <value>The publication date.</value>
+        public TzDateTime PublicationDate
+        {
+            get
+            {
+                return Getter<TzDateTime>("DistilledPublicationDate", CachedPropertiesProvider.ConvertToTzDateTime);
+            }
+            set
+            {
+                Setter("DistilledPublicationDate", value);
+            }
+        }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public interface IXmlFeed : ICachedPropertiesProvider
+    {
+        /// <summary>
+        /// Gets or sets the raw contents.
+        /// </summary>
+        /// <value>The raw contents.</value>
+        string RawContents { get; set; }
+    }
+
+    /// <summary>
+    /// Common denominator for a feed. If you are looking for
+    /// specific properties, yet you don't want to lose information
+    /// through distilling, then you need to conditionally check
+    /// the dynamic type of this instance and cast to that type
+    /// (e.g. IRssFeed or IAtomFeed). If you are expecting a specific
+    /// type of feed, then you can just cast to that type of feed; however,
+    /// note that you can never guarantee the dynamic type of the
+    /// instance, since the type that is instantiated is determined at
+    /// run-time by sniffing out the feed.
+    /// </summary>
+    public interface IFeed : IXmlFeed
+    {
+        /// <summary>
+        /// Gets or sets the feed URI.
+        /// </summary>
+        /// <value>The feed URI.</value>
+        Uri FeedUri { get; set; }
+
+        /// <summary>
+        /// Gets or sets the items.
+        /// </summary>
+        /// <value>The items.</value>
+        IList<IFeedItem> Items { get; set; }
+
+        /// <summary>
+        /// Distills this instance.
+        /// </summary>
+        /// <returns></returns>
+        IDistilledFeed Distill();
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public abstract class Feed : CachedPropertiesProvider, IFeed
+    {
+        private IList<IFeedItem> m_items = new List<IFeedItem>();
+        private string rawContents;
+
+        #region IFeed Members
+
+        /// <summary>
+        /// Gets or sets the feed URI.
+        /// </summary>
+        /// <value>The feed URI.</value>
+        public Uri FeedUri
+        {
+            get
+            {
+                return Getter<Uri>("FeedUri", CachedPropertiesProvider.ConvertToUri);
+            }
+            set
+            {
+                Setter("FeedUri", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the raw contents.
+        /// </summary>
+        /// <value>The raw contents.</value>
+        public string RawContents
+        {
+            get
+            {
+                return rawContents;
+            }
+            set
+            {
+                rawContents = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the items.
+        /// </summary>
+        /// <value>The items.</value>
+        public IList<IFeedItem> Items
+        {
+            get
+            {
+                return m_items;
+            }
+            set
+            {
+                m_items = value;
+            }
+        }
+
+        /// <summary>
+        /// Distills this instance.
+        /// </summary>
+        /// <returns></returns>
+        public abstract IDistilledFeed Distill();
+
+        #endregion
+    }
+
+    /// <summary>
+    /// Base interface that represents a feed item or entry.
+    /// As for IFeed, the best way to get to intelligible properties,
+    /// if not distilling into a IDistilledFeedItem, is
+    /// to cast to specific sub-interfaces of IFeedItem and conditionally
+    /// use those or assume that it is a specific item type. Again,
+    /// casting to a specific sub-interface is not completely predictable.
+    /// </summary>
+    public interface IFeedItem : ICachedPropertiesProvider
+    {
+        /// <summary>
+        /// Distills this instance.
+        /// </summary>
+        /// <returns></returns>
+        IDistilledFeedItem Distill();
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public abstract class FeedItem : CachedPropertiesProvider, IFeedItem
+    {
+        /// <summary>
+        /// Distills this instance.
+        /// </summary>
+        /// <returns></returns>
+        public abstract IDistilledFeedItem Distill();
+    }
+
+    /// <summary>
+    /// The FeedParser is, from the client's perspective, the
+    /// entry point into the framework. The static methods of
+    /// this class should be used to instantiate IFeeds
+    /// which can then be manipulated.
+    /// </summary>
+    public class FeedParser : Parser
+    {
+        /// <summary>
+        /// Creates the feed base.
+        /// </summary>
+        /// <param name="feedReader">The feed reader.</param>
+        /// <returns></returns>
+        protected override T CreateFeedBase<T>(XmlReader feedReader)
+        {
+            feedReader.MoveToContent();
+            return new FeedParser().Parse<T>(feedReader);
+        }
+
+        #region IFeedParser Members
+
+        /// <summary>
+        /// Parses the specified reader.
+        /// </summary>
+        /// <param name="reader">The reader.</param>
+        /// <returns></returns>
+        public override T Parse<T>(System.Xml.XmlReader reader)
+        {
+            // Need a specific parser
+            IParser subparser = null;
+            IFeed ret = null;
+
+            string localRootName = reader.LocalName.ToLower().Trim();
+            if (localRootName == "rss" || localRootName == "rdf")
+            {
+                subparser = new RssFeedParser();
+            }
+            else if (localRootName == "feed")
+            {
+                subparser = new AtomFeedParser();
+            }
+            if (subparser != null)
+            {
+                using (XmlReader subreader = reader.ReadSubtree())
+                {
+                    ret = (IFeed)subparser.Parse<T>(subreader);
+                }
+            }
+            else
+            {
+                throw new Exception(string.Format("Unknown feed type '{0}'.", reader.Name));
+            }
+            reader.Close();
+            return (T)ret;
+        }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public interface IParser
+    {
+        /// <summary>
+        /// Creates the feed.
+        /// </summary>
+        /// <param name="feedUri">The feed URI.</param>
+        /// <param name="saveStream">if set to <c>true</c> [save stream].</param>
+        /// <returns></returns>
+        T CreateFeed<T>(Uri feedUri, bool saveStream) where T : IXmlFeed;
+
+        /// <summary>
+        /// Creates the feed.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <returns></returns>
+        T CreateFeed<T>(System.IO.Stream input) where T : IXmlFeed;
+
+        /// <summary>
+        /// Creates the feed.
+        /// </summary>
+        /// <param name="feedUri">The feed URI.</param>
+        /// <returns></returns>
+        T CreateFeed<T>(string feedUri) where T : IXmlFeed;
+
+        /// <summary>
+        /// Creates the feed from stream.
+        /// </summary>
+        /// <param name="rawContent">Content of the raw.</param>
+        /// <returns></returns>
+        T CreateFeedFromStream<T>(string rawContent) where T : IXmlFeed;
+
+        /// <summary>
+        /// Parses the specified reader.
+        /// </summary>
+        /// <param name="reader">The reader.</param>
+        /// <returns></returns>
+        T Parse<T>(System.Xml.XmlReader reader);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public abstract class Parser : Feeder.IParser
+    {
+        /// <summary>
+        /// Gets the default XML reader settings.
+        /// </summary>
+        /// <returns></returns>
+        protected static XmlReaderSettings GetDefaultXmlReaderSettings()
+        {
+            XmlReaderSettings settings = new XmlReaderSettings();
+            settings.IgnoreComments = true;
+            settings.IgnoreWhitespace = true;
+
+            // MSDN doesn't prefer this, but it seems to avoid a lot
+            // of issues.
+            settings.ProhibitDtd = false;
+            return settings;
+        }
+
+        internal static void UnhandledElement(ICachedPropertiesProvider propsProvider, XmlReader reader)
+        {
+            string name = reader.Name;
+            string val = reader.ReadOuterXml();
+            if (propsProvider.Properties.ContainsKey(name))
+            {
+                val = propsProvider.Properties[name] + val;
+            }
+            propsProvider.Properties[name] = val;
+        }
+
+        /// <summary>
+        /// Creates the XML reader from string.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <returns></returns>
+        protected static XmlReader CreateXmlReaderFromString(string input)
+        {
+            StringReader stringReader = new StringReader(input);
+            return XmlReader.Create(stringReader);
+        }
+
+        /// <summary>
+        /// Reads the URI stream.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        /// <returns></returns>
+        public static string ReadUriStream(string uri)
+        {
+            return ReadUriStream(new Uri(uri));
+        }
+
+        /// <summary>
+        /// Reads the URI stream.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        /// <param name="timeout">The timeout.</param>
+        /// <returns></returns>
+        public static string ReadUriStream(string uri, int timeout)
+        {
+            return ReadUriStream(new Uri(uri));
+        }
+
+        /// <summary>
+        /// Reads the URI stream.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        /// <returns></returns>
+        public static string ReadUriStream(Uri uri)
+        {
+            return ReadUriStream(uri, 2000);
+        }
+
+        /// <summary>
+        /// Reads the URI stream.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        /// <param name="timeout">The timeout.</param>
+        /// <returns></returns>
+        public static string ReadUriStream(Uri uri, int timeout)
+        {
+            string wholeResponse = null;
+            HttpWebRequest hwr = (HttpWebRequest)WebRequest.Create(uri);
+            //hwr.UserAgent = "User-Agent: Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; Maxthon; .NET CLR 1.1.4322)";
+            hwr.Timeout = timeout;
+            HttpWebResponse wr = null;
+            try
+            {
+                wr = (HttpWebResponse)hwr.GetResponse();
+                Stream responseStream = wr.GetResponseStream();
+                StreamReader reader = new StreamReader(responseStream);
+                wholeResponse = reader.ReadToEnd();
+                reader.Close();
+                responseStream.Close();
+                wr.Close();
+                wr = null;
+            }
+            finally
+            {
+                if (wr != null) wr.Close();
+            }
+            return wholeResponse;
+        }
+
+        /// <summary>
+        /// Creates the feed from stream.
+        /// </summary>
+        /// <param name="rawContent">Content of the raw.</param>
+        /// <returns></returns>
+        public T CreateFeedFromStream<T>(string rawContent) where T : IXmlFeed
+        {
+            byte[] b = new byte[rawContent.Length];
+            Encoding.ASCII.GetBytes(rawContent.ToCharArray(),
+                        0,
+                        rawContent.Length,
+                        b,
+                        0);
+            using (MemoryStream ms = new MemoryStream(b))
+            {
+                T ret = (T)CreateFeed<T>(ms);
+                ret.RawContents = rawContent;
+                return ret;
+            }
+        }
+
+        /// <summary>
+        /// Parses the specified URI into an IFeed.
+        /// </summary>
+        /// <param name="feedUri">Valid URI to an accessible resource stream.</param>
+        /// <returns>IFeed representing the feed.</returns>
+        public T CreateFeed<T>(string feedUri) where T : IXmlFeed
+        {
+            return CreateFeed<T>(new Uri(feedUri), true);
+        }
+
+        /// <summary>
+        /// Parses the specified URI into an IFeed.
+        /// </summary>
+        /// <param name="feedUri">Valid URI to an accessible resource stream.</param>
+        /// <param name="saveStream">if set to <c>true</c> [save stream].</param>
+        /// <returns>IFeed representing the feed.</returns>
+        public T CreateFeed<T>(Uri feedUri, bool saveStream) where T : IXmlFeed
+        {
+            if (saveStream)
+            {
+                string stream = ReadUriStream(feedUri);
+                using (StringReader reader = new StringReader(stream))
+                {
+                    T feed = CreateFeedBase<T>(XmlReader.Create(reader, GetDefaultXmlReaderSettings()));
+                    feed.RawContents = stream;
+                    return feed;
+                }
+            }
+            else
+            {
+                return CreateFeedBase<T>(XmlReader.Create(feedUri.ToString(), GetDefaultXmlReaderSettings()));
+            }
+        }
+
+        /// <summary>
+        /// Parses the specified stream into an IFeed.
+        /// The parser does not close the stream.
+        /// </summary>
+        /// <param name="input">An open stream to a feed stream.</param>
+        /// <returns>IFeed representing the feed.</returns>
+        public T CreateFeed<T>(Stream input) where T : IXmlFeed
+        {
+            return CreateFeedBase<T>(XmlReader.Create(input, GetDefaultXmlReaderSettings()));
+        }
+
+        /// <summary>
+        /// Creates the feed base.
+        /// </summary>
+        /// <param name="feedReader">The feed reader.</param>
+        /// <returns></returns>
+        protected abstract T CreateFeedBase<T>(XmlReader feedReader) where T : IXmlFeed;
+
+        /// <summary>
+        /// Parses the specified reader.
+        /// </summary>
+        /// <param name="reader">The reader.</param>
+        /// <returns></returns>
+        public abstract T Parse<T>(System.Xml.XmlReader reader);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public abstract class Serializer
+    {
+        /// <summary>
+        /// Appends the new element.
+        /// </summary>
+        /// <param name="doc">The doc.</param>
+        /// <param name="parent">The parent.</param>
+        /// <param name="elementName">Name of the element.</param>
+        /// <returns></returns>
+        public static XmlElement AppendNewElement(XmlDocument doc, XmlNode parent, string elementName)
+        {
+            return AppendNewElement(doc, parent, elementName, null);
+        }
+
+        /// <summary>
+        /// Appends the new element.
+        /// </summary>
+        /// <param name="doc">The doc.</param>
+        /// <param name="parent">The parent.</param>
+        /// <param name="elementName">Name of the element.</param>
+        /// <param name="elementValue">The element value.</param>
+        /// <returns></returns>
+        public static XmlElement AppendNewElement(XmlDocument doc, XmlNode parent, string elementName, string elementValue)
+        {
+            return AppendNewElement(doc, parent, elementName, elementValue, doc.NamespaceURI);
+        }
+
+        /// <summary>
+        /// Appends the new element.
+        /// </summary>
+        /// <param name="doc">The doc.</param>
+        /// <param name="parent">The parent.</param>
+        /// <param name="elementName">Name of the element.</param>
+        /// <param name="elementValue">The element value.</param>
+        /// <param name="elementNamespace">The element namespace.</param>
+        /// <returns></returns>
+        public static XmlElement AppendNewElement(XmlDocument doc, XmlNode parent, string elementName, string elementValue, string elementNamespace)
+        {
+            XmlElement ret = doc.CreateElement(elementName, elementNamespace);
+            parent.AppendChild(ret);
+            if (elementValue != null)
+            {
+                ret.InnerText = elementValue;
+            }
+            return ret;
+        }
+
+        /// <summary>
+        /// Appends the new attribute.
+        /// </summary>
+        /// <param name="doc">The doc.</param>
+        /// <param name="parent">The parent.</param>
+        /// <param name="attributeName">Name of the attribute.</param>
+        /// <param name="attributeValue">The attribute value.</param>
+        /// <returns></returns>
+        public static XmlAttribute AppendNewAttribute(XmlDocument doc, XmlNode parent, string attributeName, string attributeValue)
+        {
+            return AppendNewAttribute(doc, parent, attributeName, attributeValue, doc.NamespaceURI);
+        }
+
+        /// <summary>
+        /// Appends the new attribute.
+        /// </summary>
+        /// <param name="doc">The doc.</param>
+        /// <param name="parent">The parent.</param>
+        /// <param name="attributeName">Name of the attribute.</param>
+        /// <param name="attributeValue">The attribute value.</param>
+        /// <param name="attributeNamespace">The attribute namespace.</param>
+        /// <returns></returns>
+        public static XmlAttribute AppendNewAttribute(XmlDocument doc, XmlNode parent, string attributeName, string attributeValue, string attributeNamespace)
+        {
+            XmlAttribute ret = doc.CreateAttribute(attributeName, attributeNamespace);
+            if (attributeValue != null)
+            {
+                ret.Value = attributeValue;
+            }
+            parent.Attributes.Append(ret);
+            return ret;
+        }
+    }
+
+    /// <summary>
+    /// Represents an OPML feed. http://www.opml.org/spec
+    /// </summary>
+    public interface IOpmlFeed : IXmlFeed
+    {
+        /// <summary>
+        /// Gets or sets the head.
+        /// </summary>
+        /// <value>The head.</value>
+        IOpmlHead Head { get; set; }
+
+        /// <summary>
+        /// Gets or sets the body.
+        /// </summary>
+        /// <value>The body.</value>
+        IOpmlBody Body { get; set; }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class OpmlFeed : CachedPropertiesProvider, IOpmlFeed
+    {
+        private string rawContents;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OpmlFeed"/> class.
+        /// </summary>
+        public OpmlFeed()
+        {
+            Head = new OpmlHead();
+            Body = new OpmlBody();
+        }
+
+        #region IOpmlFeed Members
+
+        /// <summary>
+        /// Gets or sets the head.
+        /// </summary>
+        /// <value>The head.</value>
+        public IOpmlHead Head
+        {
+            get
+            {
+                return Getter<IOpmlHead>("Head", OpmlParser.ConvertToIOpmlHead);
+            }
+            set
+            {
+                Setter("Head", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the body.
+        /// </summary>
+        /// <value>The body.</value>
+        public IOpmlBody Body
+        {
+            get
+            {
+                return Getter<IOpmlBody>("Body", OpmlParser.ConvertToIOpmlBody);
+            }
+            set
+            {
+                Setter("Body", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the raw contents.
+        /// </summary>
+        /// <value>The raw contents.</value>
+        public string RawContents
+        {
+            get
+            {
+                return rawContents;
+            }
+            set
+            {
+                rawContents = value;
+            }
+        }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public interface IRssFeed : IFeed
+    {
+        /// <summary>
+        /// Required.
+        /// </summary>
+        /// <value>The title.</value>
+        string Title { get; set; }
+
+        /// <summary>
+        /// Required.
+        /// </summary>
+        /// <value>The description.</value>
+        string Description { get; set; }
+
+        /// <summary>
+        /// Gets or sets the culture.
+        /// </summary>
+        /// <value>The culture.</value>
+        CultureInfo Culture { get; set; }
+
+        /// <summary>
+        /// Gets or sets the copyright.
+        /// </summary>
+        /// <value>The copyright.</value>
+        string Copyright { get; set; }
+
+        /// <summary>
+        /// Gets or sets the managing editor.
+        /// </summary>
+        /// <value>The managing editor.</value>
+        string ManagingEditor { get; set; }
+
+        /// <summary>
+        /// Gets or sets the web master.
+        /// </summary>
+        /// <value>The web master.</value>
+        string WebMaster { get; set; }
+
+        /// <summary>
+        /// Gets or sets the generator.
+        /// </summary>
+        /// <value>The generator.</value>
+        string Generator { get; set; }
+
+        /// <summary>
+        /// Gets or sets the publication date.
+        /// </summary>
+        /// <value>The publication date.</value>
+        TzDateTime PublicationDate { get; set; }
+
+        /// <summary>
+        /// Gets or sets the last changed.
+        /// </summary>
+        /// <value>The last changed.</value>
+        TzDateTime LastChanged { get; set; }
+
+        /// <summary>
+        /// Gets or sets the doc.
+        /// </summary>
+        /// <value>The doc.</value>
+        Uri Doc { get; set; }
+
+        /// <summary>
+        /// Gets or sets the time to live.
+        /// </summary>
+        /// <value>The time to live.</value>
+        int? TimeToLive { get; set; }
+
+        // TODO PICS rating
+        /// <summary>
+        /// Gets or sets the cloud.
+        /// </summary>
+        /// <value>The cloud.</value>
+        IRssCloud Cloud { get; set; }
+
+        /// <summary>
+        /// Gets or sets the category.
+        /// </summary>
+        /// <value>The category.</value>
+        IRssCategory Category { get; set; }
+
+        /// <summary>
+        /// Gets or sets the text input.
+        /// </summary>
+        /// <value>The text input.</value>
+        IRssTextInput TextInput { get; set; }
+
+        /// <summary>
+        /// Gets or sets the skip hours.
+        /// </summary>
+        /// <value>The skip hours.</value>
+        IList<uint> SkipHours { get; set; }
+
+        /// <summary>
+        /// Gets or sets the skip days.
+        /// </summary>
+        /// <value>The skip days.</value>
+        IList<DayOfWeek> SkipDays { get; set; }
+
+        /// <summary>
+        /// Gets or sets the image.
+        /// </summary>
+        /// <value>The image.</value>
+        IRssImage Image { get; set; }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class RssFeed : Feed, IRssFeed
+    {
+        #region IRssFeed Members
+
+        /// <summary>
+        /// Required.
+        /// </summary>
+        /// <value>The title.</value>
+        public string Title
+        {
+            get
+            {
+                return Getter("Title");
+            }
+            set
+            {
+                Setter("Title", value);
+            }
+        }
+
+        /// <summary>
+        /// Required.
+        /// </summary>
+        /// <value>The description.</value>
+        public string Description
+        {
+            get
+            {
+                return Getter("Description");
+            }
+            set
+            {
+                Setter("Description", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the culture.
+        /// </summary>
+        /// <value>The culture.</value>
+        public CultureInfo Culture
+        {
+            get
+            {
+                return Getter<CultureInfo>("Culture", CachedPropertiesProvider.ConvertToCultureInfo);
+            }
+            set
+            {
+                Setter("Culture", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the copyright.
+        /// </summary>
+        /// <value>The copyright.</value>
+        public string Copyright
+        {
+            get
+            {
+                return Getter("Copyright");
+            }
+            set
+            {
+                Setter("Copyright", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the managing editor.
+        /// </summary>
+        /// <value>The managing editor.</value>
+        public string ManagingEditor
+        {
+            get
+            {
+                return Getter("ManagingEditor");
+            }
+            set
+            {
+                Setter("ManagingEditor", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the web master.
+        /// </summary>
+        /// <value>The web master.</value>
+        public string WebMaster
+        {
+            get
+            {
+                return Getter("WebMaster");
+            }
+            set
+            {
+                Setter("WebMaster", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the generator.
+        /// </summary>
+        /// <value>The generator.</value>
+        public string Generator
+        {
+            get
+            {
+                return Getter("Generator");
+            }
+            set
+            {
+                Setter("Generator", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the publication date.
+        /// </summary>
+        /// <value>The publication date.</value>
+        public TzDateTime PublicationDate
+        {
+            get
+            {
+                return Getter<TzDateTime>("PublicationDate", CachedPropertiesProvider.ConvertToTzDateTime);
+            }
+            set
+            {
+                Setter("PublicationDate", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the last changed.
+        /// </summary>
+        /// <value>The last changed.</value>
+        public TzDateTime LastChanged
+        {
+            get
+            {
+                return Getter<TzDateTime>("LastChanged", CachedPropertiesProvider.ConvertToTzDateTime);
+            }
+            set
+            {
+                Setter("LastChanged", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the doc.
+        /// </summary>
+        /// <value>The doc.</value>
+        public Uri Doc
+        {
+            get
+            {
+                return Getter<Uri>("Doc", CachedPropertiesProvider.ConvertToUri);
+            }
+            set
+            {
+                Setter("Doc", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the time to live.
+        /// </summary>
+        /// <value>The time to live.</value>
+        public int? TimeToLive
+        {
+            get
+            {
+                return Getter<int?>("TimeToLive", CachedPropertiesProvider.ConvertToIntNullable);
+            }
+            set
+            {
+                Setter("TimeToLive", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the cloud.
+        /// </summary>
+        /// <value>The cloud.</value>
+        public Feeder.Rss.IRssCloud Cloud
+        {
+            get
+            {
+                return Getter<IRssCloud>("Cloud", RssFeedParser.ConvertToIRssCloud);
+            }
+            set
+            {
+                Setter("Cloud", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the category.
+        /// </summary>
+        /// <value>The category.</value>
+        public Feeder.Rss.IRssCategory Category
+        {
+            get
+            {
+                return Getter<IRssCategory>("Category", RssFeedParser.ConvertToIRssCategory);
+            }
+            set
+            {
+                Setter("Category", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the text input.
+        /// </summary>
+        /// <value>The text input.</value>
+        public Feeder.Rss.IRssTextInput TextInput
+        {
+            get
+            {
+                return Getter<IRssTextInput>("TextInput", RssFeedParser.ConvertToIRssTextInput);
+            }
+            set
+            {
+                Setter("TextInput", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the skip hours.
+        /// </summary>
+        /// <value>The skip hours.</value>
+        public IList<uint> SkipHours
+        {
+            get
+            {
+                return Getter<IList<uint>>("SkipHours", RssFeedParser.ConvertToSkipHourList);
+            }
+            set
+            {
+                Setter("SkipHours", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the skip days.
+        /// </summary>
+        /// <value>The skip days.</value>
+        public IList<DayOfWeek> SkipDays
+        {
+            get
+            {
+                return Getter<IList<DayOfWeek>>("SkipDays", RssFeedParser.ConvertToDayOfWeekList);
+            }
+            set
+            {
+                Setter("SkipDays", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the image.
+        /// </summary>
+        /// <value>The image.</value>
+        public Feeder.Rss.IRssImage Image
+        {
+            get
+            {
+                return Getter<IRssImage>("Image", RssFeedParser.ConvertToIRssImage);
+            }
+            set
+            {
+                Setter("Image", value);
+            }
+        }
+
+        #endregion
+
+        /// <summary>
+        /// Distills this instance.
+        /// </summary>
+        /// <returns></returns>
+        public override IDistilledFeed Distill()
+        {
+            IDistilledFeed distilled = new DistilledFeed();
+            distilled.Properties = Properties;
+            if (Category != null)
+            {
+                distilled.Category = Category.CategoryName;
+            }
+            distilled.Copyright = Copyright;
+            distilled.Culture = Culture;
+            distilled.Description = Description;
+            distilled.FeedUri = FeedUri;
+            distilled.Generator = Generator;
+            distilled.LastChanged = LastChanged;
+            distilled.PublicationDate = PublicationDate;
+            distilled.TimeToLive = TimeToLive;
+            distilled.Title = Title;
+            distilled.Items.Clear();
+
+            foreach (IFeedItem feedItem in Items)
+            {
+                distilled.Items.Add(feedItem.Distill());
+            }
+            return distilled;
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public interface IRssFeedItem : IFeedItem
+    {
+        /// <summary>
+        /// Gets or sets the title.
+        /// </summary>
+        /// <value>The title.</value>
+        string Title { get; set; }
+
+        /// <summary>
+        /// Gets or sets the description.
+        /// </summary>
+        /// <value>The description.</value>
+        string Description { get; set; }
+
+        /// <summary>
+        /// Gets or sets the link.
+        /// </summary>
+        /// <value>The link.</value>
+        Uri Link { get; set; }
+
+        /// <summary>
+        /// Gets or sets the author.
+        /// </summary>
+        /// <value>The author.</value>
+        string Author { get; set; }
+
+        /// <summary>
+        /// Gets or sets the category.
+        /// </summary>
+        /// <value>The category.</value>
+        IRssCategory Category { get; set; }
+
+        /// <summary>
+        /// Gets or sets the comments.
+        /// </summary>
+        /// <value>The comments.</value>
+        Uri Comments { get; set; }
+
+        /// <summary>
+        /// Gets or sets the enclosure.
+        /// </summary>
+        /// <value>The enclosure.</value>
+        IRssEnclosure Enclosure { get; set; }
+
+        /// <summary>
+        /// Gets or sets the GUID.
+        /// </summary>
+        /// <value>The GUID.</value>
+        IRssGuid Guid { get; set; }
+
+        /// <summary>
+        /// Gets or sets the publication date.
+        /// </summary>
+        /// <value>The publication date.</value>
+        TzDateTime PublicationDate { get; set; }
+
+        /// <summary>
+        /// Gets or sets the source.
+        /// </summary>
+        /// <value>The source.</value>
+        IRssSource Source { get; set; }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class RssFeedItem : FeedItem, IRssFeedItem
+    {
+        #region IRssFeedItem Members
+
+        /// <summary>
+        /// Gets or sets the title.
+        /// </summary>
+        /// <value>The title.</value>
+        public string Title
+        {
+            get
+            {
+                return Getter("Title");
+            }
+            set
+            {
+                Setter("Title", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the description.
+        /// </summary>
+        /// <value>The description.</value>
+        public string Description
+        {
+            get
+            {
+                return Getter("Description");
+            }
+            set
+            {
+                Setter("Description", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the link.
+        /// </summary>
+        /// <value>The link.</value>
+        public Uri Link
+        {
+            get
+            {
+                return Getter<Uri>("Link", CachedPropertiesProvider.ConvertToUri);
+            }
+            set
+            {
+                Setter("Link", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the author.
+        /// </summary>
+        /// <value>The author.</value>
+        public string Author
+        {
+            get
+            {
+                return Getter("Author");
+            }
+            set
+            {
+                Setter("Author", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the category.
+        /// </summary>
+        /// <value>The category.</value>
+        public Feeder.Rss.IRssCategory Category
+        {
+            get
+            {
+                return Getter<IRssCategory>("Category", RssFeedParser.ConvertToIRssCategory);
+            }
+            set
+            {
+                Setter("Category", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the comments.
+        /// </summary>
+        /// <value>The comments.</value>
+        public Uri Comments
+        {
+            get
+            {
+                return Getter<Uri>("Comments", CachedPropertiesProvider.ConvertToUri);
+            }
+            set
+            {
+                Setter("Comments", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the enclosure.
+        /// </summary>
+        /// <value>The enclosure.</value>
+        public Feeder.Rss.IRssEnclosure Enclosure
+        {
+            get
+            {
+                return Getter<IRssEnclosure>("Enclosure", RssFeedParser.ConvertToIRssEnclosure);
+            }
+            set
+            {
+                Setter("Enclosure", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the GUID.
+        /// </summary>
+        /// <value>The GUID.</value>
+        public Feeder.Rss.IRssGuid Guid
+        {
+            get
+            {
+                return Getter<IRssGuid>("Guid", RssFeedParser.ConvertToIRssGuid);
+            }
+            set
+            {
+                Setter("Guid", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the publication date.
+        /// </summary>
+        /// <value>The publication date.</value>
+        public TzDateTime PublicationDate
+        {
+            get
+            {
+                return Getter<TzDateTime>("PublicationDate", CachedPropertiesProvider.ConvertToTzDateTime);
+            }
+            set
+            {
+                Setter("PublicationDate", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the source.
+        /// </summary>
+        /// <value>The source.</value>
+        public Feeder.Rss.IRssSource Source
+        {
+            get
+            {
+                return Getter<IRssSource>("Source", RssFeedParser.ConvertToIRssSource);
+            }
+            set
+            {
+                Setter("Source", value);
+            }
+        }
+
+        #endregion
+
+        /// <summary>
+        /// Distills this instance.
+        /// </summary>
+        /// <returns></returns>
+        public override IDistilledFeedItem Distill()
+        {
+            IDistilledFeedItem distilled = new DistilledFeedItem();
+            distilled.Properties = Properties;
+            distilled.Description = Description;
+            distilled.Link = Link;
+            distilled.PublicationDate = PublicationDate;
+            distilled.Title = Title;
+            return distilled;
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public interface IAtomFeed : IFeed
+    {
+        /// <summary>
+        /// Gets or sets the title.
+        /// </summary>
+        /// <value>The title.</value>
+        string Title { get; set; }
+
+        /// <summary>
+        /// Gets or sets the last updated.
+        /// </summary>
+        /// <value>The last updated.</value>
+        TzDateTime LastUpdated { get; set; }
+
+        /// <summary>
+        /// Gets or sets the authors.
+        /// </summary>
+        /// <value>The authors.</value>
+        IList<IAtomPerson> Authors { get; set; }
+
+        /// <summary>
+        /// Gets or sets the links.
+        /// </summary>
+        /// <value>The links.</value>
+        IList<IAtomLink> Links { get; set; }
+
+        /// <summary>
+        /// Gets or sets the categories.
+        /// </summary>
+        /// <value>The categories.</value>
+        IList<IAtomCategory> Categories { get; set; }
+
+        /// <summary>
+        /// Gets or sets the contributors.
+        /// </summary>
+        /// <value>The contributors.</value>
+        IList<IAtomPerson> Contributors { get; set; }
+
+        /// <summary>
+        /// Gets or sets the generator.
+        /// </summary>
+        /// <value>The generator.</value>
+        IAtomGenerator Generator { get; set; }
+
+        /// <summary>
+        /// Gets or sets the icon.
+        /// </summary>
+        /// <value>The icon.</value>
+        string Icon { get; set; }
+
+        /// <summary>
+        /// Gets or sets the logo.
+        /// </summary>
+        /// <value>The logo.</value>
+        string Logo { get; set; }
+
+        /// <summary>
+        /// Gets or sets the rights.
+        /// </summary>
+        /// <value>The rights.</value>
+        IAtomText Rights { get; set; }
+
+        /// <summary>
+        /// Gets or sets the subtitle.
+        /// </summary>
+        /// <value>The subtitle.</value>
+        IAtomText Subtitle { get; set; }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class AtomFeed : Feed, IAtomFeed
+    {
+        private IList<IAtomPerson> m_authors = new List<IAtomPerson>();
+        private IList<IAtomLink> m_links = new List<IAtomLink>();
+        private IList<IAtomCategory> m_categories = new List<IAtomCategory>();
+        private IList<IAtomPerson> m_contributors = new List<IAtomPerson>();
+
+        #region IAtomFeed Members
+
+        /// <summary>
+        /// Gets or sets the title.
+        /// </summary>
+        /// <value>The title.</value>
+        public string Title
+        {
+            get
+            {
+                return Getter("Title");
+            }
+            set
+            {
+                Setter("Title", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the last updated.
+        /// </summary>
+        /// <value>The last updated.</value>
+        public TzDateTime LastUpdated
+        {
+            get
+            {
+                return Getter<TzDateTime>("LastUpdated", CachedPropertiesProvider.ConvertToTzDateTime);
+            }
+            set
+            {
+                Setter("LastUpdated", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the authors.
+        /// </summary>
+        /// <value>The authors.</value>
+        public IList<IAtomPerson> Authors
+        {
+            get
+            {
+                return m_authors;
+            }
+            set
+            {
+                m_authors = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the links.
+        /// </summary>
+        /// <value>The links.</value>
+        public IList<IAtomLink> Links
+        {
+            get
+            {
+                return m_links;
+            }
+            set
+            {
+                m_links = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the categories.
+        /// </summary>
+        /// <value>The categories.</value>
+        public IList<IAtomCategory> Categories
+        {
+            get
+            {
+                return m_categories;
+            }
+            set
+            {
+                m_categories = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the contributors.
+        /// </summary>
+        /// <value>The contributors.</value>
+        public IList<IAtomPerson> Contributors
+        {
+            get
+            {
+                return m_contributors;
+            }
+            set
+            {
+                m_contributors = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the generator.
+        /// </summary>
+        /// <value>The generator.</value>
+        public IAtomGenerator Generator
+        {
+            get
+            {
+                return Getter<IAtomGenerator>("Generator", AtomFeedParser.ConvertToIAtomGenerator);
+            }
+            set
+            {
+                Setter("Generator", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the icon.
+        /// </summary>
+        /// <value>The icon.</value>
+        public string Icon
+        {
+            get
+            {
+                return Getter("Icon");
+            }
+            set
+            {
+                Setter("Icon", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the logo.
+        /// </summary>
+        /// <value>The logo.</value>
+        public string Logo
+        {
+            get
+            {
+                return Getter("Logo");
+            }
+            set
+            {
+                Setter("Logo", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the rights.
+        /// </summary>
+        /// <value>The rights.</value>
+        public IAtomText Rights
+        {
+            get
+            {
+                return Getter<IAtomText>("Rights", AtomFeedParser.ConvertToIAtomText);
+            }
+            set
+            {
+                Setter("Rights", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the subtitle.
+        /// </summary>
+        /// <value>The subtitle.</value>
+        public IAtomText Subtitle
+        {
+            get
+            {
+                return Getter<IAtomText>("Subtitle", AtomFeedParser.ConvertToIAtomText);
+            }
+            set
+            {
+                Setter("Subtitle", value);
+            }
+        }
+
+        #endregion
+
+        /// <summary>
+        /// Distills this instance.
+        /// </summary>
+        /// <returns></returns>
+        public override IDistilledFeed Distill()
+        {
+            IDistilledFeed distilled = new Feeder.DistilledFeed();
+            if (Categories != null && Categories.Count == 1)
+            {
+                distilled.Category = Categories[0].Term;
+            }
+            if (Rights != null)
+            {
+                distilled.Copyright = Rights.Text;
+            }
+            if (Subtitle != null)
+            {
+                distilled.Description = Subtitle.Text;
+            }
+            distilled.FeedUri = FeedUri;
+            if (Generator != null)
+            {
+                distilled.Generator = Generator.Description;
+            }
+            distilled.LastChanged = LastUpdated;
+            distilled.Properties = Properties;
+            distilled.PublicationDate = LastUpdated;
+            distilled.Title = Title;
+            distilled.Items.Clear();
+            foreach (IAtomFeedItem item in Items)
+            {
+                distilled.Items.Add(item.Distill());
+            }
+            return distilled;
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public interface IAtomFeedItem : IFeedItem
+    {
+        /// <summary>
+        /// Gets or sets the id.
+        /// </summary>
+        /// <value>The id.</value>
+        Uri Id { get; set; }
+
+        /// <summary>
+        /// Gets or sets the title.
+        /// </summary>
+        /// <value>The title.</value>
+        string Title { get; set; }
+
+        /// <summary>
+        /// Gets or sets the last updated.
+        /// </summary>
+        /// <value>The last updated.</value>
+        TzDateTime LastUpdated { get; set; }
+
+        /// <summary>
+        /// Gets or sets the authors.
+        /// </summary>
+        /// <value>The authors.</value>
+        IList<IAtomPerson> Authors { get; set; }
+
+        /// <summary>
+        /// Gets or sets the content.
+        /// </summary>
+        /// <value>The content.</value>
+        IAtomContent Content { get; set; }
+
+        /// <summary>
+        /// Gets or sets the links.
+        /// </summary>
+        /// <value>The links.</value>
+        IList<IAtomLink> Links { get; set; }
+
+        /// <summary>
+        /// Gets or sets the summary.
+        /// </summary>
+        /// <value>The summary.</value>
+        IAtomText Summary { get; set; }
+
+        /// <summary>
+        /// Gets or sets the categories.
+        /// </summary>
+        /// <value>The categories.</value>
+        IList<IAtomCategory> Categories { get; set; }
+
+        /// <summary>
+        /// Gets or sets the contributors.
+        /// </summary>
+        /// <value>The contributors.</value>
+        IList<IAtomPerson> Contributors { get; set; }
+
+        /// <summary>
+        /// Gets or sets the published.
+        /// </summary>
+        /// <value>The published.</value>
+        TzDateTime Published { get; set; }
+
+        /// <summary>
+        /// Gets or sets the source.
+        /// </summary>
+        /// <value>The source.</value>
+        IAtomFeed Source { get; set; }
+
+        /// <summary>
+        /// Gets or sets the rights.
+        /// </summary>
+        /// <value>The rights.</value>
+        IAtomText Rights { get; set; }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class AtomFeedItem : FeedItem, IAtomFeedItem
+    {
+        private IList<IAtomPerson> m_authors = new List<IAtomPerson>();
+        private IList<IAtomLink> m_links = new List<IAtomLink>();
+        private IList<IAtomCategory> m_categories = new List<IAtomCategory>();
+        private IList<IAtomPerson> m_contributors = new List<IAtomPerson>();
+
+        #region IAtomFeedItem Members
+
+        /// <summary>
+        /// Gets or sets the id.
+        /// </summary>
+        /// <value>The id.</value>
+        public Uri Id
+        {
+            get
+            {
+                return Getter<Uri>("Id", CachedPropertiesProvider.ConvertToUri);
+            }
+            set
+            {
+                Setter("Id", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the title.
+        /// </summary>
+        /// <value>The title.</value>
+        public string Title
+        {
+            get
+            {
+                return Getter("Title");
+            }
+            set
+            {
+                Setter("Title", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the last updated.
+        /// </summary>
+        /// <value>The last updated.</value>
+        public TzDateTime LastUpdated
+        {
+            get
+            {
+                return Getter<TzDateTime>("LastUpdated", CachedPropertiesProvider.ConvertToTzDateTime);
+            }
+            set
+            {
+                Setter("LastUpdated", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the authors.
+        /// </summary>
+        /// <value>The authors.</value>
+        public IList<IAtomPerson> Authors
+        {
+            get
+            {
+                return m_authors;
+            }
+            set
+            {
+                m_authors = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the content.
+        /// </summary>
+        /// <value>The content.</value>
+        public IAtomContent Content
+        {
+            get
+            {
+                return Getter<IAtomContent>("Content", AtomFeedParser.ConvertToIAtomContent);
+            }
+            set
+            {
+                Setter("Content", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the links.
+        /// </summary>
+        /// <value>The links.</value>
+        public IList<IAtomLink> Links
+        {
+            get
+            {
+                return m_links;
+            }
+            set
+            {
+                m_links = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the summary.
+        /// </summary>
+        /// <value>The summary.</value>
+        public IAtomText Summary
+        {
+            get
+            {
+                return Getter<IAtomText>("Summary", AtomFeedParser.ConvertToIAtomText);
+            }
+            set
+            {
+                Setter("Summary", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the categories.
+        /// </summary>
+        /// <value>The categories.</value>
+        public IList<IAtomCategory> Categories
+        {
+            get
+            {
+                return m_categories;
+            }
+            set
+            {
+                m_categories = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the contributors.
+        /// </summary>
+        /// <value>The contributors.</value>
+        public IList<IAtomPerson> Contributors
+        {
+            get
+            {
+                return m_contributors;
+            }
+            set
+            {
+                m_contributors = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the published.
+        /// </summary>
+        /// <value>The published.</value>
+        public TzDateTime Published
+        {
+            get
+            {
+                return Getter<TzDateTime>("Published", CachedPropertiesProvider.ConvertToTzDateTime);
+            }
+            set
+            {
+                Setter("Published", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the source.
+        /// </summary>
+        /// <value>The source.</value>
+        public IAtomFeed Source
+        {
+            get
+            {
+                return Getter<IAtomFeed>("Source", AtomFeedParser.ConvertToIAtomFeed);
+            }
+            set
+            {
+                Setter("Source", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the rights.
+        /// </summary>
+        /// <value>The rights.</value>
+        public IAtomText Rights
+        {
+            get
+            {
+                return Getter<IAtomText>("Rights", AtomFeedParser.ConvertToIAtomText);
+            }
+            set
+            {
+                Setter("Rights", value);
+            }
+        }
+
+        #endregion
+
+        /// <summary>
+        /// Distills this instance.
+        /// </summary>
+        /// <returns></returns>
+        public override IDistilledFeedItem Distill()
+        {
+            IDistilledFeedItem distilled = new DistilledFeedItem();
+            distilled.Link = Id;
+            distilled.Properties = Properties;
+            distilled.PublicationDate = LastUpdated;
+            distilled.Title = Title;
+
+            // TODO the "description" needs some logic to
+            // it as per the spec
+            distilled.Description = Title;
+            return distilled;
+        }
+    }
+
+    /// <summary>
+    /// http://www.kbcafe.com/rss/?guid=20051003145153
+    /// </summary>
+    public class OpmlSerializer : Serializer
+    {
+        /// <summary>
+        /// Serializes to string.
+        /// </summary>
+        /// <param name="feed">The feed.</param>
+        /// <returns></returns>
+        public static string SerializeToString(IOpmlFeed feed)
+        {
+            return Serialize(feed).OuterXml;
+        }
+
+        /// <summary>
+        /// Serializes the specified feed.
+        /// </summary>
+        /// <param name="feed">The feed.</param>
+        /// <returns></returns>
+        public static XmlDocument Serialize(IOpmlFeed feed)
+        {
+            XmlDocument doc = new XmlDocument();
+            XmlElement root = AppendNewElement(doc, doc, "opml");
+            AppendNewAttribute(doc, root, "version", "1.0");
+            XmlElement head = AppendNewElement(doc, root, "head");
+            if (feed.Head != null)
+            {
+                if (feed.Head.Title != null)
+                {
+                    AppendNewElement(doc, head, "title", feed.Head.Title);
+                }
+                if (feed.Head.DateCreated != null)
+                {
+                    AppendNewElement(doc, head, "dateCreated", feed.Head.DateCreated.DateTimeUtc.ToString("r"));
+                }
+                if (feed.Head.DateModified != null)
+                {
+                    AppendNewElement(doc, head, "dateModified", feed.Head.DateModified.DateTimeUtc.ToString("r"));
+                }
+                if (feed.Head.Owner != null)
+                {
+                    AppendNewElement(doc, head, "ownerName", feed.Head.Owner);
+                }
+                if (feed.Head.OwnerEmail != null)
+                {
+                    AppendNewElement(doc, head, "ownerEmail", feed.Head.OwnerEmail);
+                }
+                if (feed.Head.ExpansionState != null)
+                {
+                    AppendNewElement(doc, head, "expansionState", feed.Head.ExpansionState);
+                }
+                if (feed.Head.VerticalScrollState != null)
+                {
+                    AppendNewElement(doc, head, "vertScrollState", feed.Head.VerticalScrollState.Value.ToString());
+                }
+                if (feed.Head.WindowBottom != null)
+                {
+                    AppendNewElement(doc, head, "windowBottom", feed.Head.WindowBottom.Value.ToString());
+                }
+                if (feed.Head.WindowTop != null)
+                {
+                    AppendNewElement(doc, head, "windowTop", feed.Head.WindowTop.Value.ToString());
+                }
+                if (feed.Head.WindowLeft != null)
+                {
+                    AppendNewElement(doc, head, "windowLeft", feed.Head.WindowLeft.Value.ToString());
+                }
+                if (feed.Head.WindowRight != null)
+                {
+                    AppendNewElement(doc, head, "windowRight", feed.Head.WindowRight.Value.ToString());
+                }
+            }
+
+            XmlElement body = AppendNewElement(doc, root, "body");
+            SerializeOutlines(doc, body, feed.Body);
+            return doc;
+        }
+
+        private static void SerializeOutlines(XmlDocument doc, XmlElement parent, IOpmlOutlineProvider outlineProvider)
+        {
+            if (outlineProvider != null)
+            {
+                foreach (IOpmlOutline outline in outlineProvider.Outlines)
+                {
+                    XmlElement outlineElement = AppendNewElement(doc, parent, "outline");
+                    if (outline.Type != null)
+                    {
+                        AppendNewAttribute(doc, outlineElement, "type", outline.Type);
+                    }
+                    if (outline.Text != null)
+                    {
+                        AppendNewAttribute(doc, outlineElement, "text", outline.Text);
+                    }
+                    SerializeOutlines(doc, outlineElement, outline);
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public enum SerializeType
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        Rss2
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class FeedSerializer : Serializer
+    {
+        /// <summary>
+        /// Serializes the specified feed.
+        /// </summary>
+        /// <param name="feed">The feed.</param>
+        /// <param name="type">The type.</param>
+        /// <returns></returns>
+        public static XmlDocument Serialize(IFeed feed, SerializeType type)
+        {
+            XmlDocument doc = new XmlDocument();
+            switch (type)
+            {
+                case SerializeType.Rss2:
+                    SerializeRss2(doc, (IRssFeed)feed);
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
+            return doc;
+        }
+
+        /// <summary>
+        /// Serializes to string.
+        /// </summary>
+        /// <param name="feed">The feed.</param>
+        /// <param name="type">The type.</param>
+        /// <returns></returns>
+        public static string SerializeToString(IFeed feed, SerializeType type)
+        {
+            return Serialize(feed, type).OuterXml;
+        }
+
+        /// <summary>
+        /// Serializes the RSS2.
+        /// </summary>
+        /// <param name="doc">The doc.</param>
+        /// <param name="feed">The feed.</param>
+        public static void SerializeRss2(XmlDocument doc, IRssFeed feed)
+        {
+            XmlElement root = AppendNewElement(doc, doc, "rss");
+            AppendNewAttribute(doc, root, "version", "2.0");
+            XmlElement channel = AppendNewElement(doc, root, "channel");
+            AppendNewElement(doc, channel, "title", feed.Title);
+            if (feed.FeedUri != null)
+            {
+                AppendNewElement(doc, channel, "link", feed.FeedUri.ToString());
+            }
+            AppendNewElement(doc, channel, "description", feed.Description);
+            AppendNewElement(doc, channel, "copyright", feed.Copyright);
+            foreach (IRssFeedItem item in feed.Items)
+            {
+                XmlElement itemel = AppendNewElement(doc, channel, "item");
+                AppendNewElement(doc, itemel, "title", item.Title);
+                if (item.Link != null)
+                {
+                    AppendNewElement(doc, itemel, "link", item.Link.ToString());
+                }
+                AppendNewElement(doc, itemel, "description", item.Description);
+                if (item.PublicationDate != null)
+                {
+                    AppendNewElement(doc, itemel, "pubDate", item.PublicationDate.DateTimeUtc.ToString("r"));
+                }
+            }
+        }
+    }
+}
+
+namespace PublicDomain.Feeder.Atom
+{
+    /// <summary>
+    /// Specifies a category that the feed belongs to. A feed may have multiple category elements.
+    /// Taken verbatim from http://www.atomenabled.org/developers/syndication/.
+    /// </summary>
+    public interface IAtomCategory
+    {
+        /// <summary>
+        /// Gets or sets the term.
+        /// </summary>
+        /// <value>The term.</value>
+        string Term { get; set; }
+
+        /// <summary>
+        /// Gets or sets the scheme.
+        /// </summary>
+        /// <value>The scheme.</value>
+        Uri Scheme { get; set; }
+
+        /// <summary>
+        /// Gets or sets the label.
+        /// </summary>
+        /// <value>The label.</value>
+        string Label { get; set; }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class AtomCategory : CachedPropertiesProvider, Feeder.Atom.IAtomCategory
+    {
+        #region IAtomCategory Members
+
+        /// <summary>
+        /// Gets or sets the term.
+        /// </summary>
+        /// <value>The term.</value>
+        public string Term
+        {
+            get
+            {
+                return Getter("Term");
+            }
+            set
+            {
+                Setter("Term", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the scheme.
+        /// </summary>
+        /// <value>The scheme.</value>
+        public Uri Scheme
+        {
+            get
+            {
+                return Getter<Uri>("Scheme", CachedPropertiesProvider.ConvertToUri);
+            }
+            set
+            {
+                Setter("Scheme", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the label.
+        /// </summary>
+        /// <value>The label.</value>
+        public string Label
+        {
+            get
+            {
+                return Getter("Label");
+            }
+            set
+            {
+                Setter("Label", value);
+            }
+        }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// Contains or links to the complete content of the entry. Content must be provided if there is no alternate link, and should be provided if there is no summary.
+    /// Taken verbatim from http://www.atomenabled.org/developers/syndication/.
+    /// </summary>
+    public interface IAtomContent
+    {
+        /// <summary>
+        /// Gets or sets the type.
+        /// </summary>
+        /// <value>The type.</value>
+        string Type { get; set; }
+
+        /// <summary>
+        /// Gets or sets the SRC.
+        /// </summary>
+        /// <value>The SRC.</value>
+        Uri Src { get; set; }
+
+        /// <summary>
+        /// Gets or sets the content.
+        /// </summary>
+        /// <value>The content.</value>
+        string Content { get; set; }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class AtomContent : CachedPropertiesProvider, IAtomContent
+    {
+        #region IAtomContent Members
+
+        /// <summary>
+        /// Gets or sets the type.
+        /// </summary>
+        /// <value>The type.</value>
+        public string Type
+        {
+            get
+            {
+                return Getter("Type");
+            }
+            set
+            {
+                Setter("Type", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the SRC.
+        /// </summary>
+        /// <value>The SRC.</value>
+        public Uri Src
+        {
+            get
+            {
+                return Getter<Uri>("Src", CachedPropertiesProvider.ConvertToUri);
+            }
+            set
+            {
+                Setter("Src", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the content.
+        /// </summary>
+        /// <value>The content.</value>
+        public string Content
+        {
+            get
+            {
+                return Getter("Content");
+            }
+            set
+            {
+                Setter("Content", value);
+            }
+        }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// Identifies the software used to generate the feed, for debugging and other purposes. Both the uri and version attributes are optional.
+    /// Taken verbatim from http://www.atomenabled.org/developers/syndication/.
+    /// </summary>
+    public interface IAtomGenerator
+    {
+        /// <summary>
+        /// Gets or sets the generator URI.
+        /// </summary>
+        /// <value>The generator URI.</value>
+        Uri GeneratorUri { get; set; }
+
+        /// <summary>
+        /// Gets or sets the version.
+        /// </summary>
+        /// <value>The version.</value>
+        string Version { get; set; }
+
+        /// <summary>
+        /// Gets or sets the description.
+        /// </summary>
+        /// <value>The description.</value>
+        string Description { get; set; }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class AtomGenerator : CachedPropertiesProvider, Feeder.Atom.IAtomGenerator
+    {
+        #region IAtomGenerator Members
+
+        /// <summary>
+        /// Gets or sets the generator URI.
+        /// </summary>
+        /// <value>The generator URI.</value>
+        public Uri GeneratorUri
+        {
+            get
+            {
+                return Getter<Uri>("GeneratorUri", CachedPropertiesProvider.ConvertToUri);
+            }
+            set
+            {
+                Setter("GeneratorUri", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the version.
+        /// </summary>
+        /// <value>The version.</value>
+        public string Version
+        {
+            get
+            {
+                return Getter("Version");
+            }
+            set
+            {
+                Setter("Version", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the description.
+        /// </summary>
+        /// <value>The description.</value>
+        public string Description
+        {
+            get
+            {
+                return Getter("Description");
+            }
+            set
+            {
+                Setter("Description", value);
+            }
+        }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// Identifies a related Web page.
+    /// Taken verbatim from http://www.atomenabled.org/developers/syndication/.
+    /// </summary>
+    public interface IAtomLink
+    {
+        /// <summary>
+        /// Gets or sets the href.
+        /// </summary>
+        /// <value>The href.</value>
+        Uri Href { get; set; }
+
+        /// <summary>
+        /// Gets or sets the relationship.
+        /// </summary>
+        /// <value>The relationship.</value>
+        string Relationship { get; set; }
+
+        /// <summary>
+        /// Gets or sets the type.
+        /// </summary>
+        /// <value>The type.</value>
+        string Type { get; set; }
+
+        /// <summary>
+        /// Gets or sets the link language.
+        /// </summary>
+        /// <value>The link language.</value>
+        string LinkLanguage { get; set; }
+
+        /// <summary>
+        /// Gets or sets the title.
+        /// </summary>
+        /// <value>The title.</value>
+        string Title { get; set; }
+
+        /// <summary>
+        /// Gets or sets the length.
+        /// </summary>
+        /// <value>The length.</value>
+        int? Length { get; set; }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class AtomLink : CachedPropertiesProvider, Feeder.Atom.IAtomLink
+    {
+        #region IAtomLink Members
+
+        /// <summary>
+        /// Gets or sets the href.
+        /// </summary>
+        /// <value>The href.</value>
+        public Uri Href
+        {
+            get
+            {
+                return Getter<Uri>("Href", CachedPropertiesProvider.ConvertToUri);
+            }
+            set
+            {
+                Setter("Href", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the relationship.
+        /// </summary>
+        /// <value>The relationship.</value>
+        public string Relationship
+        {
+            get
+            {
+                return Getter("Relationship");
+            }
+            set
+            {
+                Setter("Relationship", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the type.
+        /// </summary>
+        /// <value>The type.</value>
+        public string Type
+        {
+            get
+            {
+                return Getter("Type");
+            }
+            set
+            {
+                Setter("Type", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the link language.
+        /// </summary>
+        /// <value>The link language.</value>
+        public string LinkLanguage
+        {
+            get
+            {
+                return Getter("LinkLanguage");
+            }
+            set
+            {
+                Setter("LinkLanguage", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the title.
+        /// </summary>
+        /// <value>The title.</value>
+        public string Title
+        {
+            get
+            {
+                return Getter("Title");
+            }
+            set
+            {
+                Setter("Title", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the length.
+        /// </summary>
+        /// <value>The length.</value>
+        public int? Length
+        {
+            get
+            {
+                return Getter<int?>("Length", CachedPropertiesProvider.ConvertToIntNullable);
+            }
+            set
+            {
+                Setter("Length", value);
+            }
+        }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// Describes a person, corporation, or similar entity. It has one required element, name, and two optional elements: uri, email.
+    /// Taken verbatim from http://www.atomenabled.org/developers/syndication/.
+    /// </summary>
+    public interface IAtomPerson
+    {
+        /// <summary>
+        /// Gets or sets the name.
+        /// </summary>
+        /// <value>The name.</value>
+        string Name { get; set; }
+
+        /// <summary>
+        /// Gets or sets the homepage.
+        /// </summary>
+        /// <value>The homepage.</value>
+        Uri Homepage { get; set; }
+
+        /// <summary>
+        /// Gets or sets the email.
+        /// </summary>
+        /// <value>The email.</value>
+        string Email { get; set; }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class AtomPerson : CachedPropertiesProvider, Feeder.Atom.IAtomPerson
+    {
+        #region IAtomPerson Members
+
+        /// <summary>
+        /// Gets or sets the name.
+        /// </summary>
+        /// <value>The name.</value>
+        public string Name
+        {
+            get
+            {
+                return Getter("Name");
+            }
+            set
+            {
+                Setter("Name", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the homepage.
+        /// </summary>
+        /// <value>The homepage.</value>
+        public Uri Homepage
+        {
+            get
+            {
+                return Getter<Uri>("Homepage", CachedPropertiesProvider.ConvertToUri);
+            }
+            set
+            {
+                Setter("Homepage", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the email.
+        /// </summary>
+        /// <value>The email.</value>
+        public string Email
+        {
+            get
+            {
+                return Getter("Email");
+            }
+            set
+            {
+                Setter("Email", value);
+            }
+        }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// Contains human-readable text, usually in small quantities. The type attribute determines how this information is encoded (default="text")
+    /// Taken verbatim from http://www.atomenabled.org/developers/syndication/.
+    /// </summary>
+    public interface IAtomText
+    {
+        /// <summary>
+        /// Gets or sets the type.
+        /// </summary>
+        /// <value>The type.</value>
+        string Type { get; set; }
+
+        /// <summary>
+        /// Gets or sets the text.
+        /// </summary>
+        /// <value>The text.</value>
+        string Text { get; set; }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class AtomText : CachedPropertiesProvider, Feeder.Atom.IAtomText
+    {
+        #region IAtomText Members
+
+        /// <summary>
+        /// Gets or sets the type.
+        /// </summary>
+        /// <value>The type.</value>
+        public string Type
+        {
+            get
+            {
+                return Getter("Type");
+            }
+            set
+            {
+                Setter("Type", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the text.
+        /// </summary>
+        /// <value>The text.</value>
+        public string Text
+        {
+            get
+            {
+                return Getter("Text");
+            }
+            set
+            {
+                Setter("Text", value);
+            }
+        }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class AtomFeedParser : FeedParser
+    {
+        /// <summary>
+        /// Parses the specified reader.
+        /// </summary>
+        /// <param name="reader">The reader.</param>
+        /// <returns></returns>
+        public override T Parse<T>(System.Xml.XmlReader reader)
+        {
+            IAtomFeed ret = (IAtomFeed)new AtomFeed();
+            reader.Read();
+
+            bool readContent = false;
+            while (readContent || reader.Read())
+            {
+                readContent = false;
+                if (reader.NodeType == XmlNodeType.Element)
+                {
+                    readContent = true;
+                    switch (reader.Name)
+                    {
+                        case "id":
+                            ret.FeedUri = CachedPropertiesProvider.ConvertToUri(reader.ReadElementContentAsString(), reader.BaseURI);
+                            break;
+                        case "title":
+                            ret.Title = reader.ReadElementContentAsString();
+                            break;
+                        case "updated":
+                            ret.LastUpdated = CachedPropertiesProvider.ConvertToTzDateTime(reader.ReadElementContentAsString());
+                            break;
+                        case "generator":
+                            using (XmlReader subReader = reader.ReadSubtree())
+                            {
+                                ret.Generator = ConvertToIAtomGenerator(subReader);
+                            }
+                            if (reader.IsEmptyElement)
+                            {
+                                readContent = false;
+                            }
+                            break;
+                        case "author":
+                            using (XmlReader subReader = reader.ReadSubtree())
+                            {
+                                ret.Authors.Add(ConvertToIAtomPerson(subReader));
+                            }
+                            if (reader.IsEmptyElement)
+                            {
+                                readContent = false;
+                            }
+                            break;
+                        case "link":
+                            using (XmlReader subReader = reader.ReadSubtree())
+                            {
+                                ret.Links.Add(ConvertToIAtomLink(subReader));
+                            }
+                            if (reader.IsEmptyElement)
+                            {
+                                readContent = false;
+                            }
+                            break;
+                        case "category":
+                            using (XmlReader subReader = reader.ReadSubtree())
+                            {
+                                ret.Categories.Add(ConvertToIAtomCategory(subReader));
+                            }
+                            if (reader.IsEmptyElement)
+                            {
+                                readContent = false;
+                            }
+                            break;
+                        case "entry":
+                            using (XmlReader subReader = reader.ReadSubtree())
+                            {
+                                ret.Items.Add(ParseItem(subReader));
+                            }
+                            if (reader.IsEmptyElement)
+                            {
+                                readContent = false;
+                            }
+                            break;
+                        case "contributor":
+                            using (XmlReader subReader = reader.ReadSubtree())
+                            {
+                                ret.Contributors.Add(ConvertToIAtomPerson(subReader));
+                            }
+                            if (reader.IsEmptyElement)
+                            {
+                                readContent = false;
+                            }
+                            break;
+                        case "logo":
+                            ret.Logo = reader.ReadElementContentAsString();
+                            break;
+                        case "icon":
+                            ret.Icon = reader.ReadElementContentAsString();
+                            break;
+                        case "rights":
+                            using (XmlReader subReader = reader.ReadSubtree())
+                            {
+                                ret.Rights = ConvertToIAtomText(subReader);
+                            }
+                            if (reader.IsEmptyElement)
+                            {
+                                readContent = false;
+                            }
+                            break;
+                        case "subtitle":
+                            using (XmlReader subReader = reader.ReadSubtree())
+                            {
+                                ret.Subtitle = ConvertToIAtomText(subReader);
+                            }
+                            if (reader.IsEmptyElement)
+                            {
+                                readContent = false;
+                            }
+                            break;
+                        default:
+                            UnhandledElement(ret, reader);
+                            break;
+                    }
+                }
+            }
+            reader.Close();
+            return (T)ret;
+        }
+
+        /// <summary>
+        /// Parses the item.
+        /// </summary>
+        /// <param name="reader">The reader.</param>
+        /// <returns></returns>
+        public IFeedItem ParseItem(XmlReader reader)
+        {
+            IAtomFeedItem item = new AtomFeedItem();
+            reader.ReadToDescendant("entry");
+
+            bool readContent = false;
+            while (readContent || reader.Read())
+            {
+                readContent = false;
+                if (reader.NodeType == XmlNodeType.Element)
+                {
+                    readContent = true;
+                    switch (reader.Name)
+                    {
+                        case "id":
+                            item.Id = CachedPropertiesProvider.ConvertToUri(reader.ReadElementContentAsString(), reader.BaseURI);
+                            break;
+                        case "title":
+                            item.Title = reader.ReadElementContentAsString();
+                            break;
+                        case "updated":
+                            item.LastUpdated = CachedPropertiesProvider.ConvertToTzDateTime(reader.ReadElementContentAsString());
+                            break;
+                        case "author":
+                            using (XmlReader subReader = reader.ReadSubtree())
+                            {
+                                item.Authors.Add(ConvertToIAtomPerson(subReader));
+                            }
+                            if (reader.IsEmptyElement)
+                            {
+                                readContent = false;
+                            }
+                            break;
+                        case "link":
+                            using (XmlReader subReader = reader.ReadSubtree())
+                            {
+                                item.Links.Add(ConvertToIAtomLink(subReader));
+                            }
+                            if (reader.IsEmptyElement)
+                            {
+                                readContent = false;
+                            }
+                            break;
+                        case "category":
+                            using (XmlReader subReader = reader.ReadSubtree())
+                            {
+                                item.Categories.Add(ConvertToIAtomCategory(subReader));
+                            }
+                            if (reader.IsEmptyElement)
+                            {
+                                readContent = false;
+                            }
+                            break;
+                        case "contributor":
+                            using (XmlReader subReader = reader.ReadSubtree())
+                            {
+                                item.Contributors.Add(ConvertToIAtomPerson(subReader));
+                            }
+                            if (reader.IsEmptyElement)
+                            {
+                                readContent = false;
+                            }
+                            break;
+                        case "rights":
+                            using (XmlReader subReader = reader.ReadSubtree())
+                            {
+                                item.Rights = ConvertToIAtomText(subReader);
+                            }
+                            if (reader.IsEmptyElement)
+                            {
+                                readContent = false;
+                            }
+                            break;
+                        case "summary":
+                            using (XmlReader subReader = reader.ReadSubtree())
+                            {
+                                item.Summary = ConvertToIAtomText(subReader);
+                            }
+                            if (reader.IsEmptyElement)
+                            {
+                                readContent = false;
+                            }
+                            break;
+                        case "content":
+                            using (XmlReader subReader = reader.ReadSubtree())
+                            {
+                                item.Content = ConvertToIAtomContent(subReader);
+                            }
+                            if (reader.IsEmptyElement)
+                            {
+                                readContent = false;
+                            }
+                            break;
+                        case "published":
+                            item.Published = CachedPropertiesProvider.ConvertToTzDateTime(reader.ReadElementContentAsString());
+                            break;
+                        case "source":
+                            item.Source = ConvertToIAtomFeed(reader.ReadOuterXml());
+                            break;
+                        default:
+                            UnhandledElement(item, reader);
+                            break;
+                    }
+                }
+            }
+            reader.Close();
+            return item;
+        }
+
+        /// <summary>
+        /// Converts to I atom generator.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <returns></returns>
+        public static IAtomGenerator ConvertToIAtomGenerator(XmlReader input)
+        {
+            AtomGenerator gen = new AtomGenerator();
+            input.ReadToDescendant("generator");
+            gen.GeneratorUri = CachedPropertiesProvider.ConvertToUri(input.GetAttribute("uri"), input.BaseURI);
+            gen.Version = input.GetAttribute("version");
+            gen.Description = input.ReadElementContentAsString();
+            input.Close();
+            return gen;
+        }
+
+        /// <summary>
+        /// Converts to I atom generator.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <returns></returns>
+        public static IAtomGenerator ConvertToIAtomGenerator(string input)
+        {
+            return ConvertToIAtomGenerator(CreateXmlReaderFromString(input));
+        }
+
+        /// <summary>
+        /// Converts to I atom text.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <returns></returns>
+        public static IAtomText ConvertToIAtomText(XmlReader input)
+        {
+            AtomText text = new AtomText();
+            input.Read();
+            text.Type = input.GetAttribute("type");
+            text.Text = input.ReadInnerXml();
+            input.Close();
+            return text;
+        }
+
+        /// <summary>
+        /// Converts to I atom text.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <returns></returns>
+        public static IAtomText ConvertToIAtomText(string input)
+        {
+            return ConvertToIAtomText(CreateXmlReaderFromString(input));
+        }
+
+        /// <summary>
+        /// Converts the content of to I atom.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <returns></returns>
+        public static IAtomContent ConvertToIAtomContent(XmlReader input)
+        {
+            AtomContent content = new AtomContent();
+            input.ReadToDescendant("content");
+            content.Type = input.GetAttribute("type");
+            content.Src = CachedPropertiesProvider.ConvertToUri(input.GetAttribute("src"), input.BaseURI);
+            content.Content = input.ReadInnerXml();
+            input.Close();
+            return content;
+        }
+
+        /// <summary>
+        /// Converts the content of to I atom.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <returns></returns>
+        public static IAtomContent ConvertToIAtomContent(string input)
+        {
+            return ConvertToIAtomContent(CreateXmlReaderFromString(input));
+        }
+
+        /// <summary>
+        /// Converts to I atom feed.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <returns></returns>
+        public static IAtomFeed ConvertToIAtomFeed(string input)
+        {
+            using (StringReader stringReader = new StringReader(input))
+            {
+                return new AtomFeedParser().CreateFeed<IAtomFeed>(input);
+            }
+        }
+
+        /// <summary>
+        /// Converts to I atom person.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <returns></returns>
+        public static IAtomPerson ConvertToIAtomPerson(XmlReader input)
+        {
+            AtomPerson person = new AtomPerson();
+            input.Read();
+            bool readContent = false;
+            while (readContent || input.Read())
+            {
+                readContent = false;
+                if (input.NodeType == XmlNodeType.Element)
+                {
+                    readContent = true;
+                    switch (input.Name)
+                    {
+                        case "name":
+                            person.Name = input.ReadElementContentAsString();
+                            break;
+                        case "uri":
+                            person.Homepage = CachedPropertiesProvider.ConvertToUri(input.ReadElementContentAsString(), input.BaseURI);
+                            break;
+                        case "email":
+                            person.Email = input.ReadElementContentAsString();
+                            break;
+                        default:
+                            readContent = false;
+                            break;
+                    }
+                }
+            }
+            input.Close();
+            return person;
+        }
+
+        /// <summary>
+        /// Converts to I atom link.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <returns></returns>
+        public static IAtomLink ConvertToIAtomLink(XmlReader input)
+        {
+            AtomLink link = new AtomLink();
+            input.ReadToDescendant("link");
+            link.Href = CachedPropertiesProvider.ConvertToUri(input.GetAttribute("href"), input.BaseURI);
+            link.Relationship = input.GetAttribute("rel");
+            link.Type = input.GetAttribute("type");
+            link.LinkLanguage = input.GetAttribute("hreflang");
+            link.Title = input.GetAttribute("title");
+            link.Length = CachedPropertiesProvider.ConvertToIntNullable(input.GetAttribute("length"));
+            input.Close();
+            return link;
+        }
+
+        /// <summary>
+        /// Converts to I atom category.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <returns></returns>
+        public static IAtomCategory ConvertToIAtomCategory(XmlReader input)
+        {
+            AtomCategory cat = new AtomCategory();
+            input.ReadToDescendant("link");
+            cat.Label = input.GetAttribute("label");
+            cat.Term = input.GetAttribute("term");
+            cat.Scheme = CachedPropertiesProvider.ConvertToUri(input.GetAttribute("scheme"), input.BaseURI);
+            input.Close();
+            return cat;
+        }
+    }
+}
+
+namespace PublicDomain.Feeder.Opml
+{
+    /// <summary>
+    /// 
+    /// </summary>
+    public interface IOpmlBody : IOpmlOutlineProvider
+    {
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class OpmlBody : OpmlOutlineProvider, IOpmlBody
+    {
+    }
+
+    /// <summary>
+    /// A head contains zero or more optional element.
+    /// 
+    /// All the sub-elements of head may be ignored by the processor.
+    /// If an outline is opened within another outline, the processor
+    /// must ignore the windowXxx elements, those elements only control
+    /// the size and position of outlines that are opened in their own windows.
+    /// 
+    /// If you load an OPML document into your client, you may choose to
+    /// respect expansionState, or not. We're not in any way trying to
+    /// dictate user experience. The expansionState info is there because
+    /// it's needed in certain contexts. It's easy to imagine contexts where
+    /// it would make sense to completely ignore it.
+    /// 
+    /// Taken verbatim from http://www.opml.org/spec
+    /// </summary>
+    public interface IOpmlHead : ICachedPropertiesProvider
+    {
+        /// <summary>
+        /// Gets or sets the title.
+        /// </summary>
+        /// <value>The title.</value>
+        string Title { get; set; }
+
+        /// <summary>
+        /// Gets or sets the date created.
+        /// </summary>
+        /// <value>The date created.</value>
+        TzDateTime DateCreated { get; set; }
+
+        /// <summary>
+        /// Gets or sets the date modified.
+        /// </summary>
+        /// <value>The date modified.</value>
+        TzDateTime DateModified { get; set; }
+
+        /// <summary>
+        /// Gets or sets the owner.
+        /// </summary>
+        /// <value>The owner.</value>
+        string Owner { get; set; }
+
+        /// <summary>
+        /// Gets or sets the owner email.
+        /// </summary>
+        /// <value>The owner email.</value>
+        string OwnerEmail { get; set; }
+
+        /// <summary>
+        /// Gets or sets the state of the expansion.
+        /// </summary>
+        /// <value>The state of the expansion.</value>
+        string ExpansionState { get; set; }
+
+        /// <summary>
+        /// Gets or sets the state of the vertical scroll.
+        /// </summary>
+        /// <value>The state of the vertical scroll.</value>
+        int? VerticalScrollState { get; set; }
+
+        /// <summary>
+        /// Gets or sets the window top.
+        /// </summary>
+        /// <value>The window top.</value>
+        int? WindowTop { get; set; }
+
+        /// <summary>
+        /// Gets or sets the window left.
+        /// </summary>
+        /// <value>The window left.</value>
+        int? WindowLeft { get; set; }
+
+        /// <summary>
+        /// Gets or sets the window bottom.
+        /// </summary>
+        /// <value>The window bottom.</value>
+        int? WindowBottom { get; set; }
+
+        /// <summary>
+        /// Gets or sets the window right.
+        /// </summary>
+        /// <value>The window right.</value>
+        int? WindowRight { get; set; }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class OpmlHead : CachedPropertiesProvider, IOpmlHead
+    {
+        #region IOpmlHead Members
+
+        /// <summary>
+        /// Gets or sets the title.
+        /// </summary>
+        /// <value>The title.</value>
+        public string Title
+        {
+            get
+            {
+                return Getter("Title");
+            }
+            set
+            {
+                Setter("Title", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the date created.
+        /// </summary>
+        /// <value>The date created.</value>
+        public TzDateTime DateCreated
+        {
+            get
+            {
+                return Getter<TzDateTime>("DateCreated", CachedPropertiesProvider.ConvertToTzDateTime);
+            }
+            set
+            {
+                Setter("DateCreated", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the date modified.
+        /// </summary>
+        /// <value>The date modified.</value>
+        public TzDateTime DateModified
+        {
+            get
+            {
+                return Getter<TzDateTime>("DateModified", CachedPropertiesProvider.ConvertToTzDateTime);
+            }
+            set
+            {
+                Setter("DateModified", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the owner.
+        /// </summary>
+        /// <value>The owner.</value>
+        public string Owner
+        {
+            get
+            {
+                return Getter("Owner");
+            }
+            set
+            {
+                Setter("Owner", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the owner email.
+        /// </summary>
+        /// <value>The owner email.</value>
+        public string OwnerEmail
+        {
+            get
+            {
+                return Getter("OwnerEmail");
+            }
+            set
+            {
+                Setter("OwnerEmail", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the state of the expansion.
+        /// </summary>
+        /// <value>The state of the expansion.</value>
+        public string ExpansionState
+        {
+            get
+            {
+                return Getter("ExpansionState");
+            }
+            set
+            {
+                Setter("ExpansionState", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the state of the vertical scroll.
+        /// </summary>
+        /// <value>The state of the vertical scroll.</value>
+        public int? VerticalScrollState
+        {
+            get
+            {
+                return Getter<int?>("VerticalScrollState", CachedPropertiesProvider.ConvertToIntNullable);
+            }
+            set
+            {
+                Setter("VerticalScrollState", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the window top.
+        /// </summary>
+        /// <value>The window top.</value>
+        public int? WindowTop
+        {
+            get
+            {
+                return Getter<int?>("WindowTop", CachedPropertiesProvider.ConvertToIntNullable);
+            }
+            set
+            {
+                Setter("WindowTop", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the window left.
+        /// </summary>
+        /// <value>The window left.</value>
+        public int? WindowLeft
+        {
+            get
+            {
+                return Getter<int?>("WindowLeft", CachedPropertiesProvider.ConvertToIntNullable);
+            }
+            set
+            {
+                Setter("WindowLeft", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the window bottom.
+        /// </summary>
+        /// <value>The window bottom.</value>
+        public int? WindowBottom
+        {
+            get
+            {
+                return Getter<int?>("WindowBottom", CachedPropertiesProvider.ConvertToIntNullable);
+            }
+            set
+            {
+                Setter("WindowBottom", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the window right.
+        /// </summary>
+        /// <value>The window right.</value>
+        public int? WindowRight
+        {
+            get
+            {
+                return Getter<int?>("WindowRight", CachedPropertiesProvider.ConvertToIntNullable);
+            }
+            set
+            {
+                Setter("WindowRight", value);
+            }
+        }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public interface IOpmlOutline : IOpmlOutlineProvider
+    {
+        /// <summary>
+        /// Gets or sets the text.
+        /// </summary>
+        /// <value>The text.</value>
+        string Text { get; set; }
+
+        /// <summary>
+        /// Gets or sets the type.
+        /// </summary>
+        /// <value>The type.</value>
+        string Type { get; set; }
+
+        /// <summary>
+        /// Gets or sets the is comment.
+        /// </summary>
+        /// <value>The is comment.</value>
+        bool? IsComment { get; set; }
+
+        /// <summary>
+        /// Gets or sets the is breakpoint.
+        /// </summary>
+        /// <value>The is breakpoint.</value>
+        bool? IsBreakpoint { get; set; }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class OpmlOutline : OpmlOutlineProvider, IOpmlOutline
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OpmlOutline"/> class.
+        /// </summary>
+        public OpmlOutline()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OpmlOutline"/> class.
+        /// </summary>
+        /// <param name="text">The text.</param>
+        public OpmlOutline(string text)
+        {
+            this.Text = text;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OpmlOutline"/> class.
+        /// </summary>
+        /// <param name="text">The text.</param>
+        /// <param name="type">The type.</param>
+        public OpmlOutline(string text, string type)
+        {
+            this.Text = text;
+            this.Type = type;
+        }
+
+        #region IOpmlOutline Members
+
+        /// <summary>
+        /// Gets or sets the text.
+        /// </summary>
+        /// <value>The text.</value>
+        public string Text
+        {
+            get
+            {
+                return Getter("Text");
+            }
+            set
+            {
+                Setter("Text", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the type.
+        /// </summary>
+        /// <value>The type.</value>
+        public string Type
+        {
+            get
+            {
+                return Getter("Type");
+            }
+            set
+            {
+                Setter("Type", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the is comment.
+        /// </summary>
+        /// <value>The is comment.</value>
+        public bool? IsComment
+        {
+            get
+            {
+                return Getter<bool?>("IsComment", CachedPropertiesProvider.ConvertToBoolNullable);
+            }
+            set
+            {
+                Setter("IsComment", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the is breakpoint.
+        /// </summary>
+        /// <value>The is breakpoint.</value>
+        public bool? IsBreakpoint
+        {
+            get
+            {
+                return Getter<bool?>("IsBreakpoint", CachedPropertiesProvider.ConvertToBoolNullable);
+            }
+            set
+            {
+                Setter("IsBreakpoint", value);
+            }
+        }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public interface IOpmlOutlineProvider
+    {
+        /// <summary>
+        /// Gets or sets the outlines.
+        /// </summary>
+        /// <value>The outlines.</value>
+        IList<IOpmlOutline> Outlines { get; set; }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class OpmlOutlineProvider : CachedPropertiesProvider, IOpmlOutlineProvider
+    {
+        #region IOpmlOutlineProvider Members
+
+        private IList<IOpmlOutline> _Outlines = new List<IOpmlOutline>();
+
+        /// <summary>
+        /// Gets or sets the outlines.
+        /// </summary>
+        /// <value>The outlines.</value>
+        public IList<IOpmlOutline> Outlines
+        {
+            get
+            {
+                return _Outlines;
+            }
+            set
+            {
+                _Outlines = value;
+            }
+        }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class OpmlParser : Parser
+    {
+        /// <summary>
+        /// Creates the feed base.
+        /// </summary>
+        /// <param name="feedReader">The feed reader.</param>
+        /// <returns></returns>
+        protected override T CreateFeedBase<T>(XmlReader feedReader)
+        {
+            feedReader.MoveToContent();
+            return new OpmlParser().Parse<T>(feedReader);
+        }
+
+        /// <summary>
+        /// Parses the specified reader.
+        /// </summary>
+        /// <param name="reader">The reader.</param>
+        /// <returns></returns>
+        public override T Parse<T>(System.Xml.XmlReader reader)
+        {
+            IOpmlFeed ret = new OpmlFeed();
+
+            bool readContent = false;
+            while (readContent || reader.Read())
+            {
+                readContent = false;
+                if (reader.NodeType == XmlNodeType.Element)
+                {
+                    readContent = true;
+                    switch (reader.Name)
+                    {
+                        case "head":
+                            using (XmlReader subReader = reader.ReadSubtree())
+                            {
+                                ret.Head = ConvertToIOpmlHead(subReader);
+                            }
+                            if (reader.IsEmptyElement)
+                            {
+                                readContent = false;
+                            }
+                            break;
+                        case "body":
+                            using (XmlReader subReader = reader.ReadSubtree())
+                            {
+                                ret.Body = ConvertToIOpmlBody(subReader);
+                            }
+                            if (reader.IsEmptyElement)
+                            {
+                                readContent = false;
+                            }
+                            break;
+                        default:
+                            UnhandledElement(ret, reader);
+                            break;
+                    }
+                }
+            }
+            reader.Close();
+            return (T)ret;
+        }
+
+        internal static IOpmlOutline ConvertToIOpmlOutline(string input)
+        {
+            return ConvertToIOpmlOutline(CreateXmlReaderFromString(input));
+        }
+
+        internal static IOpmlOutline ConvertToIOpmlOutline(XmlReader input)
+        {
+            OpmlOutline outline = new OpmlOutline();
+            input.ReadToDescendant("outline");
+            outline.Text = input.GetAttribute("text");
+            outline.Type = input.GetAttribute("type");
+            outline.IsBreakpoint = CachedPropertiesProvider.ConvertToBoolNullable(input.GetAttribute("isBreakpoint"));
+            outline.IsComment = CachedPropertiesProvider.ConvertToBoolNullable(input.GetAttribute("isComment"));
+            ReadOutlines(input, outline);
+            input.Close();
+            return outline;
+        }
+
+        internal static IOpmlBody ConvertToIOpmlBody(string input)
+        {
+            return ConvertToIOpmlBody(CreateXmlReaderFromString(input));
+        }
+
+        internal static IOpmlBody ConvertToIOpmlBody(XmlReader input)
+        {
+            OpmlBody body = new OpmlBody();
+            input.ReadToDescendant("body");
+            ReadOutlines(input, body);
+            input.Close();
+            return body;
+        }
+
+        private static void ReadOutlines(XmlReader input, IOpmlOutlineProvider outlineProvider)
+        {
+            bool readContent = false;
+            while (readContent || input.Read())
+            {
+                readContent = false;
+                if (input.NodeType == XmlNodeType.Element)
+                {
+                    readContent = true;
+                    switch (input.Name)
+                    {
+                        case "outline":
+                            using (XmlReader subReader = input.ReadSubtree())
+                            {
+                                outlineProvider.Outlines.Add(ConvertToIOpmlOutline(subReader));
+                            }
+                            if (input.IsEmptyElement)
+                            {
+                                readContent = false;
+                            }
+                            break;
+                        default:
+                            readContent = false;
+                            break;
+                    }
+                }
+            }
+        }
+
+        internal static IOpmlHead ConvertToIOpmlHead(string input)
+        {
+            return ConvertToIOpmlHead(CreateXmlReaderFromString(input));
+        }
+
+        internal static IOpmlHead ConvertToIOpmlHead(XmlReader input)
+        {
+            OpmlHead head = new OpmlHead();
+            input.ReadToDescendant("head");
+            bool readContent = false;
+            while (readContent || input.Read())
+            {
+                readContent = false;
+                if (input.NodeType == XmlNodeType.Element)
+                {
+                    readContent = true;
+                    switch (input.Name)
+                    {
+                        case "title":
+                            head.Title = input.ReadElementContentAsString();
+                            break;
+                        case "dateCreated":
+                            head.DateCreated = CachedPropertiesProvider.ConvertToTzDateTime(input.ReadElementContentAsString());
+                            break;
+                        case "dateModified":
+                            head.DateModified = CachedPropertiesProvider.ConvertToTzDateTime(input.ReadElementContentAsString());
+                            break;
+                        case "ownerName":
+                            head.Owner = input.ReadElementContentAsString();
+                            break;
+                        case "ownerEmail":
+                            head.OwnerEmail = input.ReadElementContentAsString();
+                            break;
+                        case "expansionState":
+                            head.ExpansionState = input.ReadElementContentAsString();
+                            break;
+                        case "vertScrollState":
+                            head.VerticalScrollState = CachedPropertiesProvider.ConvertToIntNullable(input.ReadElementContentAsString());
+                            break;
+                        case "windowTop":
+                            head.WindowTop = CachedPropertiesProvider.ConvertToIntNullable(input.ReadElementContentAsString());
+                            break;
+                        case "windowLeft":
+                            head.WindowLeft = CachedPropertiesProvider.ConvertToIntNullable(input.ReadElementContentAsString());
+                            break;
+                        case "windowBottom":
+                            head.WindowBottom = CachedPropertiesProvider.ConvertToIntNullable(input.ReadElementContentAsString());
+                            break;
+                        case "windowRight":
+                            head.WindowRight = CachedPropertiesProvider.ConvertToIntNullable(input.ReadElementContentAsString());
+                            break;
+                        default:
+                            readContent = false;
+                            break;
+                    }
+                }
+            }
+            input.Close();
+            return head;
+        }
+    }
+}
+
+namespace PublicDomain.Feeder.Rss
+{
+    /// <summary>
+    /// In RSS 2.0, a provision is made for linking a channel to its identifier in a cataloging system, using the channel-level category feature. For example, to link a channel to its Syndic8 identifier, include a category element as a sub-element of channel, with domain "Syndic8", and value the identifier for your channel in the Syndic8 database. The appropriate category element for Scripting News would be <category domain="Syndic8">1765</category>.
+    /// Taken verbatim from http://blogs.law.harvard.edu/tech/rss.
+    /// </summary>
+    public interface IRssCategory
+    {
+        /// <summary>
+        /// Gets or sets the domain.
+        /// </summary>
+        /// <value>The domain.</value>
+        string Domain
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the name of the category.
+        /// </summary>
+        /// <value>The name of the category.</value>
+        string CategoryName
+        {
+            get;
+            set;
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class RssCategory : CachedPropertiesProvider, Feeder.Rss.IRssCategory
+    {
+        #region IRssCategory Members
+
+        /// <summary>
+        /// Gets or sets the domain.
+        /// </summary>
+        /// <value>The domain.</value>
+        public string Domain
+        {
+            get
+            {
+                return Getter("Domain");
+            }
+            set
+            {
+                Setter("Domain", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the name of the category.
+        /// </summary>
+        /// <value>The name of the category.</value>
+        public string CategoryName
+        {
+            get
+            {
+                return Getter("CategoryName");
+            }
+            set
+            {
+                Setter("CategoryName", value);
+            }
+        }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// Specifies a web service that supports the rssCloud interface which can be implemented in HTTP-POST, XML-RPC or SOAP 1.1. 
+    /// Its purpose is to allow processes to register with a cloud to be notified of updates to the channel, implementing a lightweight publish-subscribe protocol for RSS feeds.
+    /// Taken verbatim from http://blogs.law.harvard.edu/tech/rss.
+    /// </summary>
+    public interface IRssCloud
+    {
+        /// <summary>
+        /// Gets or sets the domain.
+        /// </summary>
+        /// <value>The domain.</value>
+        string Domain
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the port.
+        /// </summary>
+        /// <value>The port.</value>
+        int Port
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the path.
+        /// </summary>
+        /// <value>The path.</value>
+        string Path
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the register procedure.
+        /// </summary>
+        /// <value>The register procedure.</value>
+        string RegisterProcedure
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the protocol.
+        /// </summary>
+        /// <value>The protocol.</value>
+        RssCloudProtocol Protocol
+        {
+            get;
+            set;
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public enum RssCloudProtocol
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        Unknown,
+
+        /// <summary>
+        /// 
+        /// </summary>
+        XmlRpc,
+
+        /// <summary>
+        /// 
+        /// </summary>
+        HttpPost,
+
+        /// <summary>
+        /// /
+        /// </summary>
+        Soap
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class RssCloud : CachedPropertiesProvider, Feeder.Rss.IRssCloud
+    {
+        #region IRssCloud Members
+
+        /// <summary>
+        /// Gets or sets the domain.
+        /// </summary>
+        /// <value>The domain.</value>
+        public string Domain
+        {
+            get
+            {
+                return Getter("Domain");
+            }
+            set
+            {
+                Setter("Domain", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the port.
+        /// </summary>
+        /// <value>The port.</value>
+        public int Port
+        {
+            get
+            {
+                return Getter<int>("Port", CachedPropertiesProvider.ConvertToInt);
+            }
+            set
+            {
+                Setter("Port", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the path.
+        /// </summary>
+        /// <value>The path.</value>
+        public string Path
+        {
+            get
+            {
+                return Getter("Path");
+            }
+            set
+            {
+                Setter("Path", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the register procedure.
+        /// </summary>
+        /// <value>The register procedure.</value>
+        public string RegisterProcedure
+        {
+            get
+            {
+                return Getter("RegisterProcedure");
+            }
+            set
+            {
+                Setter("RegisterProcedure", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the protocol.
+        /// </summary>
+        /// <value>The protocol.</value>
+        public Feeder.Rss.RssCloudProtocol Protocol
+        {
+            get
+            {
+                return Getter<RssCloudProtocol>("Protocol", RssFeedParser.ConvertToRssCloudProtocol);
+            }
+            set
+            {
+                Setter("Protocol", value);
+            }
+        }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// Describes a media object that is attached to the item.
+    /// Taken verbatim from http://blogs.law.harvard.edu/tech/rss.
+    /// </summary>
+    public interface IRssEnclosure
+    {
+        /// <summary>
+        /// Gets or sets the link.
+        /// </summary>
+        /// <value>The link.</value>
+        Uri Link
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the length.
+        /// </summary>
+        /// <value>The length.</value>
+        int Length
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the type.
+        /// </summary>
+        /// <value>The type.</value>
+        string Type
+        {
+            get;
+            set;
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class RssEnclosure : CachedPropertiesProvider, Feeder.Rss.IRssEnclosure
+    {
+        #region IRssEnclosure Members
+
+        /// <summary>
+        /// Gets or sets the link.
+        /// </summary>
+        /// <value>The link.</value>
+        public Uri Link
+        {
+            get
+            {
+                return Getter<Uri>("Link", CachedPropertiesProvider.ConvertToUri);
+            }
+            set
+            {
+                Setter("Link", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the length.
+        /// </summary>
+        /// <value>The length.</value>
+        public int Length
+        {
+            get
+            {
+                return Getter<int>("Length", CachedPropertiesProvider.ConvertToInt);
+            }
+            set
+            {
+                Setter("Length", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the type.
+        /// </summary>
+        /// <value>The type.</value>
+        public string Type
+        {
+            get
+            {
+                return Getter("Type");
+            }
+            set
+            {
+                Setter("Type", value);
+            }
+        }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// guid stands for globally unique identifier. It's a string that uniquely identifies the item. When present, an aggregator may choose to use this string to determine if an item is new.
+    /// Taken verbatim from http://blogs.law.harvard.edu/tech/rss.
+    /// </summary>
+    public interface IRssGuid
+    {
+        /// <summary>
+        /// Gets or sets the unique identifier.
+        /// </summary>
+        /// <value>The unique identifier.</value>
+        string UniqueIdentifier
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the is perma link.
+        /// </summary>
+        /// <value>The is perma link.</value>
+        bool? IsPermaLink
+        {
+            get;
+            set;
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class RssGuid : CachedPropertiesProvider, Feeder.Rss.IRssGuid
+    {
+        #region IRssGuid Members
+
+        /// <summary>
+        /// Gets or sets the unique identifier.
+        /// </summary>
+        /// <value>The unique identifier.</value>
+        public string UniqueIdentifier
+        {
+            get
+            {
+                return Getter("UniqueIdentifier");
+            }
+            set
+            {
+                Setter("UniqueIdentifier", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the is perma link.
+        /// </summary>
+        /// <value>The is perma link.</value>
+        public bool? IsPermaLink
+        {
+            get
+            {
+                return Getter<bool?>("IsPermaLink", CachedPropertiesProvider.ConvertToBoolNullable);
+            }
+            set
+            {
+                Setter("IsPermaLink", value);
+            }
+        }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// Specifies a GIF, JPEG or PNG image that can be displayed with the channel.
+    /// Taken verbatim from http://blogs.law.harvard.edu/tech/rss.
+    /// </summary>
+    public interface IRssImage
+    {
+        /// <summary>
+        /// Gets or sets the location.
+        /// </summary>
+        /// <value>The location.</value>
+        Uri Location
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the title.
+        /// </summary>
+        /// <value>The title.</value>
+        string Title
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the link.
+        /// </summary>
+        /// <value>The link.</value>
+        Uri Link
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the width.
+        /// </summary>
+        /// <value>The width.</value>
+        int? Width
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the height.
+        /// </summary>
+        /// <value>The height.</value>
+        int? Height
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the description.
+        /// </summary>
+        /// <value>The description.</value>
+        string Description
+        {
+            get;
+            set;
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class RssImage : CachedPropertiesProvider, Feeder.Rss.IRssImage
+    {
+        #region IRssImage Members
+
+        /// <summary>
+        /// Gets or sets the location.
+        /// </summary>
+        /// <value>The location.</value>
+        public Uri Location
+        {
+            get
+            {
+                return Getter<Uri>("Location", CachedPropertiesProvider.ConvertToUri);
+            }
+            set
+            {
+                Setter("Location", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the title.
+        /// </summary>
+        /// <value>The title.</value>
+        public string Title
+        {
+            get
+            {
+                return Getter("Title");
+            }
+            set
+            {
+                Setter("Title", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the link.
+        /// </summary>
+        /// <value>The link.</value>
+        public Uri Link
+        {
+            get
+            {
+                return Getter<Uri>("Link", CachedPropertiesProvider.ConvertToUri);
+            }
+            set
+            {
+                Setter("Link", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the width.
+        /// </summary>
+        /// <value>The width.</value>
+        public int? Width
+        {
+            get
+            {
+                return Getter<int?>("Width", CachedPropertiesProvider.ConvertToIntNullable);
+            }
+            set
+            {
+                Setter("Width", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the height.
+        /// </summary>
+        /// <value>The height.</value>
+        public int? Height
+        {
+            get
+            {
+                return Getter<int?>("Height", CachedPropertiesProvider.ConvertToIntNullable);
+            }
+            set
+            {
+                Setter("Height", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the description.
+        /// </summary>
+        /// <value>The description.</value>
+        public string Description
+        {
+            get
+            {
+                return Getter("Description");
+            }
+            set
+            {
+                Setter("Description", value);
+            }
+        }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// Its value is the name of the RSS channel that the item came from, derived from its title. It has one required attribute, url, which links to the XMLization of the source.
+    /// Taken verbatim from http://blogs.law.harvard.edu/tech/rss.
+    /// </summary>
+    public interface IRssSource
+    {
+        /// <summary>
+        /// Gets or sets the link.
+        /// </summary>
+        /// <value>The link.</value>
+        Uri Link
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the description.
+        /// </summary>
+        /// <value>The description.</value>
+        string Description
+        {
+            get;
+            set;
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class RssSource : CachedPropertiesProvider, Feeder.Rss.IRssSource
+    {
+        #region IRssSource Members
+
+        /// <summary>
+        /// Gets or sets the link.
+        /// </summary>
+        /// <value>The link.</value>
+        public Uri Link
+        {
+            get
+            {
+                return Getter<Uri>("Link", CachedPropertiesProvider.ConvertToUri);
+            }
+            set
+            {
+                Setter("Link", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the description.
+        /// </summary>
+        /// <value>The description.</value>
+        public string Description
+        {
+            get
+            {
+                return Getter("Description");
+            }
+            set
+            {
+                Setter("Description", value);
+            }
+        }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// The purpose of the textInput element is something of a mystery. You can use it to specify a search engine box. Or to allow a reader to provide feedback. Most aggregators ignore it.
+    /// Taken verbatim from http://blogs.law.harvard.edu/tech/rss.
+    /// </summary>
+    public interface IRssTextInput
+    {
+        /// <summary>
+        /// Gets or sets the title.
+        /// </summary>
+        /// <value>The title.</value>
+        string Title
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the description.
+        /// </summary>
+        /// <value>The description.</value>
+        string Description
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the name.
+        /// </summary>
+        /// <value>The name.</value>
+        string Name
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the link.
+        /// </summary>
+        /// <value>The link.</value>
+        Uri Link
+        {
+            get;
+            set;
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class RssTextInput : CachedPropertiesProvider, Feeder.Rss.IRssTextInput
+    {
+        #region IRssTextInput Members
+
+        /// <summary>
+        /// Gets or sets the title.
+        /// </summary>
+        /// <value>The title.</value>
+        public string Title
+        {
+            get
+            {
+                return Getter("Title");
+            }
+            set
+            {
+                Setter("Title", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the description.
+        /// </summary>
+        /// <value>The description.</value>
+        public string Description
+        {
+            get
+            {
+                return Getter("Description");
+            }
+            set
+            {
+                Setter("Description", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the name.
+        /// </summary>
+        /// <value>The name.</value>
+        public string Name
+        {
+            get
+            {
+                return Getter("Name");
+            }
+            set
+            {
+                Setter("Name", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the link.
+        /// </summary>
+        /// <value>The link.</value>
+        public Uri Link
+        {
+            get
+            {
+                return Getter<Uri>("Link", CachedPropertiesProvider.ConvertToUri);
+            }
+            set
+            {
+                Setter("Link", value);
+            }
+        }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class RssFeedParser : FeedParser
+    {
+        /// <summary>
+        /// Parses the specified reader.
+        /// </summary>
+        /// <param name="reader">The reader.</param>
+        /// <returns></returns>
+        public override T Parse<T>(System.Xml.XmlReader reader)
+        {
+            IRssFeed ret = (IRssFeed)new RssFeed();
+            reader.Read();
+
+            // RDF versions of RSS don't have version tags.
+            //double version = double.Parse(reader.GetAttribute("version"));
+
+            reader.ReadToDescendant("channel");
+
+            bool readContent = false;
+            while (readContent || reader.Read())
+            {
+                readContent = false;
+                if (reader.NodeType == XmlNodeType.Element)
+                {
+                    readContent = true;
+                    switch (reader.Name)
+                    {
+                        case "title":
+                            ret.Title = reader.ReadElementContentAsString();
+                            break;
+                        case "link":
+                            ret.FeedUri = CachedPropertiesProvider.ConvertToUri(reader.ReadElementContentAsString());
+                            break;
+                        case "description":
+                            ret.Description = reader.ReadElementContentAsString();
+                            break;
+                        case "language":
+                            ret.Culture = CachedPropertiesProvider.ConvertToCultureInfo(reader.ReadElementContentAsString());
+                            break;
+                        case "copyright":
+                            ret.Copyright = reader.ReadElementContentAsString();
+                            break;
+                        case "managingEditor":
+                            ret.ManagingEditor = reader.ReadElementContentAsString();
+                            break;
+                        case "webMaster":
+                            ret.WebMaster = reader.ReadElementContentAsString();
+                            break;
+                        case "pubDate":
+                            ret.PublicationDate = CachedPropertiesProvider.ConvertToTzDateTime(reader.ReadElementContentAsString());
+                            break;
+                        case "lastBuildDate":
+                            ret.LastChanged = CachedPropertiesProvider.ConvertToTzDateTime(reader.ReadElementContentAsString());
+                            break;
+                        case "category":
+                            using (XmlReader subReader = reader.ReadSubtree())
+                            {
+                                ret.Category = ConvertToIRssCategory(subReader);
+                            }
+                            if (reader.IsEmptyElement)
+                            {
+                                readContent = false;
+                            }
+                            break;
+                        case "generator":
+                            ret.Generator = reader.ReadElementContentAsString();
+                            break;
+                        case "docs":
+                            ret.Doc = CachedPropertiesProvider.ConvertToUri(reader.ReadElementContentAsString());
+                            break;
+                        case "cloud":
+                            using (XmlReader subReader = reader.ReadSubtree())
+                            {
+                                ret.Cloud = ConvertToIRssCloud(subReader);
+                            }
+                            if (reader.IsEmptyElement)
+                            {
+                                readContent = false;
+                            }
+                            break;
+                        case "ttl":
+                            ret.TimeToLive = CachedPropertiesProvider.ConvertToInt(reader.ReadElementContentAsString());
+                            break;
+                        case "image":
+                            using (XmlReader subReader = reader.ReadSubtree())
+                            {
+                                ret.Image = ConvertToIRssImage(subReader);
+                            }
+                            if (reader.IsEmptyElement)
+                            {
+                                readContent = false;
+                            }
+                            break;
+                        /*case "rating":
+                            break;*/
+                        case "textInput":
+                            using (XmlReader subReader = reader.ReadSubtree())
+                            {
+                                ret.TextInput = ConvertToIRssTextInput(subReader);
+                            }
+                            if (reader.IsEmptyElement)
+                            {
+                                readContent = false;
+                            }
+                            break;
+                        case "skipHours":
+                            using (XmlReader subReader = reader.ReadSubtree())
+                            {
+                                ret.SkipHours = ConvertToSkipHourList(subReader);
+                            }
+                            if (reader.IsEmptyElement)
+                            {
+                                readContent = false;
+                            }
+                            break;
+                        case "skipDays":
+                            using (XmlReader subReader = reader.ReadSubtree())
+                            {
+                                ret.SkipDays = ConvertToDayOfWeekList(subReader);
+                            }
+                            if (reader.IsEmptyElement)
+                            {
+                                readContent = false;
+                            }
+                            break;
+                        case "item":
+                            using (XmlReader itemReader = reader.ReadSubtree())
+                            {
+                                ret.Items.Add(ParseItem(itemReader));
+                            }
+                            if (reader.IsEmptyElement)
+                            {
+                                readContent = false;
+                            }
+                            break;
+                        default:
+                            UnhandledElement(ret, reader);
+                            break;
+                    }
+                }
+            }
+            reader.Close();
+            return (T)ret;
+        }
+
+        /// <summary>
+        /// Parses the item.
+        /// </summary>
+        /// <param name="reader">The reader.</param>
+        /// <returns></returns>
+        public IFeedItem ParseItem(XmlReader reader)
+        {
+            IRssFeedItem item = new RssFeedItem();
+            reader.ReadToDescendant("item");
+
+            bool readContent = false;
+            while (readContent || reader.Read())
+            {
+                readContent = false;
+                if (reader.NodeType == XmlNodeType.Element)
+                {
+                    readContent = true;
+                    switch (reader.Name)
+                    {
+                        case "author":
+                            item.Author = reader.ReadElementContentAsString();
+                            break;
+                        case "category":
+                            using (XmlReader subReader = reader.ReadSubtree())
+                            {
+                                item.Category = ConvertToIRssCategory(subReader);
+                            }
+                            if (reader.IsEmptyElement)
+                            {
+                                readContent = false;
+                            }
+                            break;
+                        case "comments":
+                            item.Comments = CachedPropertiesProvider.ConvertToUri(reader.ReadElementContentAsString());
+                            break;
+                        case "description":
+                            item.Description = reader.ReadElementContentAsString();
+                            break;
+                        case "enclosure":
+                            using (XmlReader subReader = reader.ReadSubtree())
+                            {
+                                item.Enclosure = ConvertToIRssEnclosure(subReader);
+                            }
+                            if (reader.IsEmptyElement)
+                            {
+                                readContent = false;
+                            }
+                            break;
+                        case "guid":
+                            using (XmlReader subReader = reader.ReadSubtree())
+                            {
+                                item.Guid = ConvertToIRssGuid(subReader);
+                            }
+                            if (reader.IsEmptyElement)
+                            {
+                                readContent = false;
+                            }
+                            break;
+                        case "link":
+                            item.Link = CachedPropertiesProvider.ConvertToUri(reader.ReadElementContentAsString());
+                            break;
+                        case "pubDate":
+                            item.PublicationDate = CachedPropertiesProvider.ConvertToTzDateTime(reader.ReadElementContentAsString());
+                            break;
+                        case "source":
+                            using (XmlReader subReader = reader.ReadSubtree())
+                            {
+                                item.Source = ConvertToIRssSource(subReader);
+                            }
+                            if (reader.IsEmptyElement)
+                            {
+                                readContent = false;
+                            }
+                            break;
+                        case "title":
+                            item.Title = reader.ReadElementContentAsString();
+                            break;
+                        default:
+                            UnhandledElement(item, reader);
+                            break;
+                    }
+                }
+            }
+            reader.Close();
+            return item;
+        }
+
+        /// <summary>
+        /// Converts to I RSS cloud.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <returns></returns>
+        public static IRssCloud ConvertToIRssCloud(XmlReader input)
+        {
+            RssCloud cloud = new RssCloud();
+            input.ReadToDescendant("cloud");
+            cloud.Domain = input.GetAttribute("domain");
+            cloud.Port = CachedPropertiesProvider.ConvertToInt(input.GetAttribute("port"));
+            cloud.Path = input.GetAttribute("path");
+            cloud.Protocol = ConvertToRssCloudProtocol(input.GetAttribute("protocol"));
+            cloud.RegisterProcedure = input.GetAttribute("registerProcedure");
+            input.Close();
+            return cloud;
+        }
+
+        /// <summary>
+        /// Converts to I RSS cloud.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <returns></returns>
+        public static IRssCloud ConvertToIRssCloud(string input)
+        {
+            return ConvertToIRssCloud(CreateXmlReaderFromString(input));
+        }
+
+        /// <summary>
+        /// Converts to I RSS category.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <returns></returns>
+        public static IRssCategory ConvertToIRssCategory(XmlReader input)
+        {
+            RssCategory cat = new RssCategory();
+            input.ReadToDescendant("category");
+            cat.Domain = input.GetAttribute("domain");
+            cat.CategoryName = input.ReadElementContentAsString();
+            input.Close();
+            return cat;
+        }
+
+        /// <summary>
+        /// Converts to I RSS category.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <returns></returns>
+        public static IRssCategory ConvertToIRssCategory(string input)
+        {
+            return ConvertToIRssCategory(CreateXmlReaderFromString(input));
+        }
+
+        /// <summary>
+        /// Converts to I RSS text input.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <returns></returns>
+        public static IRssTextInput ConvertToIRssTextInput(XmlReader input)
+        {
+            RssTextInput text = new RssTextInput();
+            input.ReadToDescendant("textInput");
+
+            bool readContent = false;
+            while (readContent || input.Read())
+            {
+                readContent = false;
+                if (input.NodeType == XmlNodeType.Element)
+                {
+                    readContent = true;
+                    switch (input.Name)
+                    {
+                        case "description":
+                            text.Description = input.ReadElementContentAsString();
+                            break;
+                        case "link":
+                            text.Link = CachedPropertiesProvider.ConvertToUri(input.ReadElementContentAsString());
+                            break;
+                        case "name":
+                            text.Name = input.ReadElementContentAsString();
+                            break;
+                        case "title":
+                            text.Title = input.ReadElementContentAsString();
+                            break;
+                        default:
+                            readContent = false;
+                            break;
+                    }
+                }
+            }
+            input.Close();
+            return text;
+        }
+
+        /// <summary>
+        /// Converts to I RSS text input.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <returns></returns>
+        public static IRssTextInput ConvertToIRssTextInput(string input)
+        {
+            return ConvertToIRssTextInput(CreateXmlReaderFromString(input));
+        }
+
+        /// <summary>
+        /// Converts to day of week list.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <returns></returns>
+        public static IList<DayOfWeek> ConvertToDayOfWeekList(XmlReader input)
+        {
+            IList<DayOfWeek> skipDays = new List<DayOfWeek>();
+            input.ReadToDescendant("skipDays");
+
+            bool readContent = false;
+            while (readContent || input.Read())
+            {
+                readContent = false;
+                if (input.NodeType == XmlNodeType.Element && input.Name == "day")
+                {
+                    skipDays.Add(ConvertToDayOfWeek(input.ReadElementContentAsString()));
+                    readContent = true;
+                }
+            }
+            input.Close();
+            return skipDays;
+        }
+
+        /// <summary>
+        /// Converts to day of week list.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <returns></returns>
+        public static IList<DayOfWeek> ConvertToDayOfWeekList(string input)
+        {
+            return ConvertToDayOfWeekList(CreateXmlReaderFromString(input));
+        }
+
+        /// <summary>
+        /// Converts to skip hour list.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <returns></returns>
+        public static IList<uint> ConvertToSkipHourList(XmlReader input)
+        {
+            IList<uint> skipHours = new List<uint>();
+            input.ReadToDescendant("skipHours");
+
+            bool readContent = false;
+            while (readContent || input.Read())
+            {
+                readContent = false;
+                if (input.NodeType == XmlNodeType.Element && input.Name == "hour")
+                {
+                    skipHours.Add(CachedPropertiesProvider.ConvertToUInt(input.ReadElementContentAsString()));
+                    readContent = true;
+                }
+            }
+            input.Close();
+            return skipHours;
+        }
+
+        /// <summary>
+        /// Converts to skip hour list.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <returns></returns>
+        public static IList<uint> ConvertToSkipHourList(string input)
+        {
+            return ConvertToSkipHourList(CreateXmlReaderFromString(input));
+        }
+
+        /// <summary>
+        /// Converts to I RSS image.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <returns></returns>
+        public static IRssImage ConvertToIRssImage(XmlReader input)
+        {
+            RssImage image = new RssImage();
+            input.ReadToDescendant("image");
+
+            bool readContent = false;
+            while (readContent || input.Read())
+            {
+                readContent = false;
+                if (input.NodeType == XmlNodeType.Element)
+                {
+                    readContent = true;
+                    switch (input.Name)
+                    {
+                        case "description":
+                            image.Description = input.ReadElementContentAsString();
+                            break;
+                        case "link":
+                            image.Link = CachedPropertiesProvider.ConvertToUri(input.ReadElementContentAsString());
+                            break;
+                        case "location":
+                            image.Location = CachedPropertiesProvider.ConvertToUri(input.ReadElementContentAsString());
+                            break;
+                        case "title":
+                            image.Title = input.ReadElementContentAsString();
+                            break;
+                        case "width":
+                            image.Width = CachedPropertiesProvider.ConvertToInt(input.ReadElementContentAsString());
+                            break;
+                        case "height":
+                            image.Height = CachedPropertiesProvider.ConvertToInt(input.ReadElementContentAsString());
+                            break;
+                        default:
+                            readContent = false;
+                            break;
+                    }
+                }
+            }
+            input.Close();
+            return image;
+        }
+
+        /// <summary>
+        /// Converts to I RSS image.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <returns></returns>
+        public static IRssImage ConvertToIRssImage(string input)
+        {
+            return ConvertToIRssImage(CreateXmlReaderFromString(input));
+        }
+
+        /// <summary>
+        /// Converts to I RSS enclosure.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <returns></returns>
+        public static IRssEnclosure ConvertToIRssEnclosure(XmlReader input)
+        {
+            RssEnclosure enc = new RssEnclosure();
+            input.ReadToDescendant("enclosure");
+            enc.Length = CachedPropertiesProvider.ConvertToInt(input.GetAttribute("length"));
+            enc.Link = CachedPropertiesProvider.ConvertToUri(input.GetAttribute("url"));
+            enc.Type = input.GetAttribute("type");
+            input.Close();
+            return enc;
+        }
+
+        /// <summary>
+        /// Converts to I RSS enclosure.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <returns></returns>
+        public static IRssEnclosure ConvertToIRssEnclosure(string input)
+        {
+            return ConvertToIRssEnclosure(CreateXmlReaderFromString(input));
+        }
+
+        /// <summary>
+        /// Converts to I RSS GUID.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <returns></returns>
+        public static IRssGuid ConvertToIRssGuid(XmlReader input)
+        {
+            RssGuid guid = new RssGuid();
+            input.ReadToDescendant("guid");
+            guid.IsPermaLink = CachedPropertiesProvider.ConvertToBoolNullable(input.GetAttribute("isPermaLink"));
+            guid.UniqueIdentifier = input.ReadElementContentAsString();
+            input.Close();
+            return guid;
+        }
+
+        /// <summary>
+        /// Converts to I RSS GUID.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <returns></returns>
+        public static IRssGuid ConvertToIRssGuid(string input)
+        {
+            return ConvertToIRssGuid(CreateXmlReaderFromString(input));
+        }
+
+        /// <summary>
+        /// Converts to I RSS source.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <returns></returns>
+        public static IRssSource ConvertToIRssSource(XmlReader input)
+        {
+            RssSource source = new RssSource();
+            input.ReadToDescendant("source");
+            source.Link = CachedPropertiesProvider.ConvertToUri(input.GetAttribute("url"));
+            source.Description = input.ReadElementContentAsString();
+            input.Close();
+            return source;
+        }
+
+        /// <summary>
+        /// Converts to I RSS source.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <returns></returns>
+        public static IRssSource ConvertToIRssSource(string input)
+        {
+            return ConvertToIRssSource(CreateXmlReaderFromString(input));
+        }
+
+        /// <summary>
+        /// Converts to RSS cloud protocol.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <returns></returns>
+        public static RssCloudProtocol ConvertToRssCloudProtocol(string input)
+        {
+            input = input.Trim().ToLower();
+            switch (input)
+            {
+                case "xml-rpc":
+                    return RssCloudProtocol.XmlRpc;
+                case "http-post":
+                    return RssCloudProtocol.HttpPost;
+                case "soap":
+                    return RssCloudProtocol.Soap;
+                default:
+                    return RssCloudProtocol.Unknown;
+            }
+        }
+
+        /// <summary>
+        /// Converts to day of week.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <returns></returns>
+        public static DayOfWeek ConvertToDayOfWeek(string input)
+        {
+            return (DayOfWeek)Enum.Parse(typeof(DayOfWeek), input);
+        }
+    }
+}
+#endif
+
+#if !(NOLOGGING)
+namespace PublicDomain.Logging
+{
+    /// <summary>
+    /// Severity of the log entry. The numeric value of the severity
+    /// is in the name itself for immediate feedback.
+    /// </summary>
+    public enum LoggerSeverity
+    {
+        /// <summary>
+        /// Detailed programmatic informational messages used
+        /// as an aid in troubleshooting problems by programmers.
+        /// </summary>
+        Debug10 = 10,
+
+        /// <summary>
+        /// Brief informative messages to use as an aid in
+        /// troubleshooting problems by production support and programmers.
+        /// </summary>
+        Info20 = 20,
+
+        /// <summary>
+        /// Messages intended to notify help desk, production support and programmers
+        /// of possible issues with respect to the running application.
+        /// </summary>
+        Warn30 = 30,
+
+        /// <summary>
+        /// Messages that detail a programmatic error, these are typically messages
+        /// intended for help desk, production support, programmers and occasionally users.
+        /// </summary>
+        Error40 = 40,
+
+        /// <summary>
+        /// Severe messages that are programmatic violations that will usually
+        /// result in application failure. These messages are intended for help
+        /// desk, production support, programmers and possibly users.
+        /// </summary>
+        Fatal50 = 50
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public interface ILogger
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        LoggerSeverity Threshold { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ILogFormatter Formatter { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        List<ILogFilter> Filters { get; }
+
+        /// <summary>
+        /// Gets the data.
+        /// </summary>
+        /// <value>The data.</value>
+        Dictionary<string, object> Data { get; }
+
+        /// <summary>
+        /// Gets or sets the category.
+        /// </summary>
+        /// <value>The category.</value>
+        string Category { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="severity"></param>
+        /// <param name="entry"></param>
+        /// <param name="formatParameters"></param>
+        void Log(LoggerSeverity severity, object entry, params object[] formatParameters);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="entry"></param>
+        /// <param name="formatParameters"></param>
+        void LogDebug10(object entry, params object[] formatParameters);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="entry"></param>
+        /// <param name="formatParameters"></param>
+        void LogInfo20(object entry, params object[] formatParameters);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="entry"></param>
+        /// <param name="formatParameters"></param>
+        void LogWarn30(object entry, params object[] formatParameters);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="entry"></param>
+        /// <param name="formatParameters"></param>
+        void LogError40(object entry, params object[] formatParameters);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="entry"></param>
+        /// <param name="formatParameters"></param>
+        void LogFatal50(object entry, params object[] formatParameters);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public interface ILogFormatter
+    {
+        /// <summary>
+        /// Formats the entry.
+        /// </summary>
+        /// <param name="severity">The severity.</param>
+        /// <param name="timestamp">The timestamp.</param>
+        /// <param name="entry">The entry.</param>
+        /// <param name="formatParameters">The format parameters.</param>
+        /// <param name="category">The category.</param>
+        /// <param name="data">The data.</param>
+        /// <returns></returns>
+        string FormatEntry(LoggerSeverity severity, TzDateTime timestamp, object entry, object[] formatParameters, string category, Dictionary<string, object> data);
+
+        /// <summary>
+        /// Gets or sets the format string.
+        /// </summary>
+        /// <value>The format string.</value>
+        string FormatString { get; set; }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public interface ILogFilter
+    {
+        /// <summary>
+        /// Determines whether the specified severity is loggable.
+        /// </summary>
+        /// <param name="threshold">The threshold.</param>
+        /// <param name="severity">The severity.</param>
+        /// <param name="timestamp">The timestamp.</param>
+        /// <param name="entry">The entry.</param>
+        /// <param name="formatParameters">The format parameters.</param>
+        /// <returns>
+        /// 	<c>true</c> if the specified severity is loggable; otherwise, <c>false</c>.
+        /// </returns>
+        bool IsLoggable(LoggerSeverity threshold, LoggerSeverity severity, TzDateTime timestamp, object entry, object[] formatParameters);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public abstract class Logger : ILogger
+    {
+        private LoggerSeverity m_threshold = LoggerSeverity.Debug10;
+
+        private List<ILogFilter> m_filters = new List<ILogFilter>();
+
+        private ILogFormatter m_formatter = new DefaultLogFormatter();
+
+        private string m_category;
+
+        private Dictionary<string, object> m_data = new Dictionary<string, object>();
+
+        private static Dictionary<int, int> m_stack = new Dictionary<int, int>();
+
+        internal static int LogStackCount
+        {
+            get
+            {
+                int threadId = Thread.CurrentThread.ManagedThreadId;
+                if (!m_stack.ContainsKey(threadId))
+                {
+                    m_stack[threadId] = 0;
+                }
+                return m_stack[threadId];
+            }
+            set
+            {
+                int threadId = Thread.CurrentThread.ManagedThreadId;
+                m_stack[threadId] = value;
+            }
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Logger"/> class.
+        /// </summary>
+        public Logger()
+            : this(new DefaultLogFilter())
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Logger"/> class.
+        /// </summary>
+        public Logger(ILogFilter logFilter)
+        {
+            if (logFilter != null)
+            {
+                AddLogFilter(logFilter);
+            }
+        }
+
+        /// <summary>
+        /// </summary>
+        /// <value></value>
+        public virtual LoggerSeverity Threshold
+        {
+            get
+            {
+                return m_threshold;
+            }
+            set
+            {
+                m_threshold = value;
+            }
+        }
+
+        /// <summary>
+        /// </summary>
+        /// <value></value>
+        public virtual ILogFormatter Formatter
+        {
+            get
+            {
+                return m_formatter;
+            }
+            set
+            {
+                m_formatter = value;
+            }
+        }
+
+        /// <summary>
+        /// </summary>
+        /// <value></value>
+        public virtual List<ILogFilter> Filters
+        {
+            get
+            {
+                return m_filters;
+            }
+        }
+
+        /// <summary>
+        /// Gets the data.
+        /// </summary>
+        /// <value>The data.</value>
+        public virtual Dictionary<string, object> Data
+        {
+            get
+            {
+                return m_data;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the category.
+        /// </summary>
+        /// <value>The category.</value>
+        public virtual string Category
+        {
+            get
+            {
+                return m_category;
+            }
+            set
+            {
+                m_category = value;
+            }
+        }
+
+        /// <summary>
+        /// Adds the log filter.
+        /// </summary>
+        /// <param name="filter">The filter.</param>
+        public virtual void AddLogFilter(ILogFilter filter)
+        {
+            Filters.Add(filter);
+        }
+
+        /// <summary>
+        /// Removes the log filter.
+        /// </summary>
+        /// <param name="filter">The filter.</param>
+        public virtual void RemoveLogFilter(ILogFilter filter)
+        {
+            Filters.Remove(filter);
+        }
+
+        /// <summary>
+        /// Clears the log filters.
+        /// </summary>
+        public virtual void ClearLogFilters()
+        {
+            Filters.Clear();
+        }
+
+        /// <summary>
+        /// </summary>
+        /// <param name="severity"></param>
+        /// <param name="entry"></param>
+        /// <param name="formatParameters"></param>
+        public virtual void Log(LoggerSeverity severity, object entry, params object[] formatParameters)
+        {
+            // Get the current timestamp
+            TzDateTime timestamp = TzDateTime.GetUtcNow(null);
+
+            // Check all the filters
+            if (Filters != null)
+            {
+                foreach (ILogFilter filter in Filters)
+                {
+                    if (!filter.IsLoggable(Threshold, severity, timestamp, entry, formatParameters))
+                    {
+                        return;
+                    }
+                }
+            }
+
+            string logLine = null;
+
+            if (Formatter == null)
+            {
+                if (entry != null)
+                {
+                    logLine = entry.ToString();
+                }
+            }
+            else
+            {
+                logLine = Formatter.FormatEntry(severity, timestamp, entry, formatParameters, Category, Data);
+            }
+
+            DoLog(severity, timestamp, entry, formatParameters, logLine);
+        }
+
+        /// <summary>
+        /// High level final log that is called with all of the detailed information
+        /// and the final log line as the last parameter.
+        /// </summary>
+        /// <param name="severity">The severity.</param>
+        /// <param name="timestamp">The timestamp.</param>
+        /// <param name="entry">The entry.</param>
+        /// <param name="formatParameters">The format parameters.</param>
+        /// <param name="logLine">The log line.</param>
+        protected virtual void DoLog(LoggerSeverity severity, TzDateTime timestamp, object entry, object[] formatParameters, string logLine)
+        {
+            DoLog(logLine);
+        }
+
+        /// <summary>
+        /// Called by the detailed version, forgetting about the details
+        /// and simply having the final log line.
+        /// </summary>
+        /// <param name="logLine">The log line.</param>
+        protected abstract void DoLog(string logLine);
+
+        /// <summary>
+        /// </summary>
+        /// <param name="entry"></param>
+        /// <param name="formatParameters"></param>
+        public virtual void LogDebug10(object entry, params object[] formatParameters)
+        {
+            Log(LoggerSeverity.Debug10, entry, formatParameters);
+        }
+
+        /// <summary>
+        /// </summary>
+        /// <param name="entry"></param>
+        /// <param name="formatParameters"></param>
+        public virtual void LogInfo20(object entry, params object[] formatParameters)
+        {
+            Log(LoggerSeverity.Info20, entry, formatParameters);
+        }
+
+        /// <summary>
+        /// </summary>
+        /// <param name="entry"></param>
+        /// <param name="formatParameters"></param>
+        public virtual void LogWarn30(object entry, params object[] formatParameters)
+        {
+            Log(LoggerSeverity.Warn30, entry, formatParameters);
+        }
+
+        /// <summary>
+        /// </summary>
+        /// <param name="entry"></param>
+        /// <param name="formatParameters"></param>
+        public virtual void LogError40(object entry, params object[] formatParameters)
+        {
+            Log(LoggerSeverity.Error40, entry, formatParameters);
+        }
+
+        /// <summary>
+        /// </summary>
+        /// <param name="entry"></param>
+        /// <param name="formatParameters"></param>
+        public virtual void LogFatal50(object entry, params object[] formatParameters)
+        {
+            Log(LoggerSeverity.Fatal50, entry, formatParameters);
+        }
+
+        /// <summary>
+        /// Logs the exception.
+        /// </summary>
+        /// <param name="ex">The ex.</param>
+        public virtual void LogException(Exception ex)
+        {
+            LogException(ex, LoggerSeverity.Error40);
+        }
+
+        /// <summary>
+        /// Logs the exception.
+        /// </summary>
+        /// <param name="ex">The ex.</param>
+        /// <param name="severity">The severity.</param>
+        public virtual void LogException(Exception ex, LoggerSeverity severity)
+        {
+            Log(severity, ex);
+        }
+
+        /// <summary>
+        /// Prints method information and the arguments passed.
+        /// This code is only compiled in with DEBUG set as
+        /// the configuration mode.
+        /// </summary>
+        /// <param name="args"></param>
+        [Conditional("DEBUG")]
+        public virtual void Start(params object[] args)
+        {
+            LogEntryExit(true, true, args);
+        }
+
+        /// <summary>
+        /// Prints method information and the arguments passed.
+        /// This code is only compiled in with DEBUG set as
+        /// the configuration mode.
+        /// </summary>
+        /// <param name="args"></param>
+        [Conditional("DEBUG")]
+        public virtual void End(params object[] args)
+        {
+            LogEntryExit(false, true, args);
+        }
+
+        /// <summary>
+        /// Prints method information and the arguments passed.
+        /// This code is only compiled in with DEBUG set as
+        /// the configuration mode.
+        /// </summary>
+        /// <param name="args"></param>
+        [Conditional("DEBUG")]
+        public virtual void WhereAmI(params object[] args)
+        {
+            LogEntryExit(false, false, args);
+        }
+
+        /// <summary>
+        /// Logs the entry exit.
+        /// </summary>
+        /// <param name="isEntry">if set to <c>true</c> [is entry].</param>
+        /// <param name="useMarker">if set to <c>true</c> [use marker].</param>
+        /// <param name="args">The args.</param>
+        protected virtual void LogEntryExit(bool isEntry, bool useMarker, object[] args)
+        {
+            StackTrace trace = new StackTrace(true);
+            StackFrame caller = trace.GetFrame(2);
+            MethodBase method = caller.GetMethod();
+            int cnt = LogStackCount;
+            if (useMarker)
+            {
+                cnt += (isEntry ? 1 : -1);
+                LogStackCount = cnt;
+            }
+            string message = (useMarker ? new string(' ', isEntry ? cnt - 1 : cnt) : new string(' ', cnt + 1)) + (useMarker ? (isEntry ? "> " : "< ") : "") + method.DeclaringType.ToString() + "." + method.Name + " [" + caller.GetFileLineNumber() + "]";
+            if (args != null)
+            {
+                message += " (";
+                for (int i = 0; i < args.Length; i++)
+                {
+                    if (i > 0)
+                    {
+                        message += ", ";
+                    }
+                    if (args[i] == null)
+                    {
+                        message += "[null]";
+                    }
+                    else
+                    {
+                        message += args[i];
+                    }
+                }
+                message += ")";
+            }
+            StackFrame caller2 = trace.GetFrame(3);
+            if (caller2 != null)
+            {
+                message += " {" + caller2.GetFileName() + ":" + caller2.GetFileLineNumber() + "}";
+            }
+            LogDebug10(message);
+        }
+
+        private string GetStackString()
+        {
+            return new string(' ', LogStackCount + 1);
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class FileLogger : Logger
+    {
+        private string m_fileName;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FileLogger"/> class.
+        /// </summary>
+        public FileLogger()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FileLogger"/> class.
+        /// </summary>
+        /// <param name="fileName">Name of the file.</param>
+        public FileLogger(string fileName)
+        {
+            FileName = fileName;
+        }
+
+        /// <summary>
+        /// Gets or sets the name of the file.
+        /// </summary>
+        /// <value>The name of the file.</value>
+        public virtual string FileName
+        {
+            get
+            {
+                return m_fileName;
+            }
+            set
+            {
+                m_fileName = value;
+            }
+        }
+
+        /// <summary>
+        /// High level final log that is called with all of the detailed information
+        /// and the final log line as the last parameter.
+        /// </summary>
+        /// <param name="severity">The severity.</param>
+        /// <param name="timestamp">The timestamp.</param>
+        /// <param name="entry">The entry.</param>
+        /// <param name="formatParameters">The format parameters.</param>
+        /// <param name="logLine">The log line.</param>
+        protected override void DoLog(LoggerSeverity severity, TzDateTime timestamp, object entry, object[] formatParameters, string logLine)
+        {
+            string fileName = GetFileName(severity, timestamp, entry, formatParameters, logLine);
+
+            if (!string.IsNullOrEmpty(fileName))
+            {
+                using (FileStream stream = File.Open(fileName, FileMode.Append, FileAccess.Write, FileShare.Write))
+                {
+                    using (StreamWriter writer = new StreamWriter(stream))
+                    {
+                        writer.WriteLine(logLine);
+                        writer.Flush();
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Called by the detailed version, forgetting about the details
+        /// and simply having the final log line.
+        /// </summary>
+        /// <param name="logLine">The log line.</param>
+        protected override void DoLog(string logLine)
+        {
+            // Should never get here
+        }
+
+        /// <summary>
+        /// Gets the name of the file.
+        /// </summary>
+        /// <returns></returns>
+        protected virtual string GetFileName(LoggerSeverity severity, TzDateTime timestamp, object entry, object[] formatParameters, string logLine)
+        {
+            return FileName;
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public interface IRollOverStrategy
+    {
+        /// <summary>
+        /// Gets the name of the file.
+        /// </summary>
+        /// <param name="fileName">Name of the file.</param>
+        /// <param name="severity">The severity.</param>
+        /// <param name="timestamp">The timestamp.</param>
+        /// <param name="entry">The entry.</param>
+        /// <param name="formatParameters">The format parameters.</param>
+        /// <param name="logLine">The log line.</param>
+        /// <returns></returns>
+        string GetFileName(string fileName, LoggerSeverity severity, TzDateTime timestamp, object entry, object[] formatParameters, string logLine);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class RollingFileLogger : FileLogger
+    {
+        private IRollOverStrategy m_strategy;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RollingFileLogger"/> class.
+        /// </summary>
+        /// <param name="fileNameFormatted">The file name formatted.</param>
+        public RollingFileLogger(string fileNameFormatted)
+            : this(fileNameFormatted, new FileSizeRollOverStrategy())
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RollingFileLogger"/> class.
+        /// </summary>
+        /// <param name="fileNameFormatted">The file name formatted.</param>
+        /// <param name="strategy">The strategy.</param>
+        public RollingFileLogger(string fileNameFormatted, IRollOverStrategy strategy)
+            : base(fileNameFormatted)
+        {
+            Strategy = strategy;
+        }
+
+        /// <summary>
+        /// Gets or sets the strategy.
+        /// </summary>
+        /// <value>The strategy.</value>
+        public IRollOverStrategy Strategy
+        {
+            get
+            {
+                return m_strategy;
+            }
+            set
+            {
+                m_strategy = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets the name of the file.
+        /// </summary>
+        /// <param name="severity"></param>
+        /// <param name="timestamp"></param>
+        /// <param name="entry"></param>
+        /// <param name="formatParameters"></param>
+        /// <param name="logLine"></param>
+        /// <returns></returns>
+        protected override string GetFileName(LoggerSeverity severity, TzDateTime timestamp, object entry, object[] formatParameters, string logLine)
+        {
+            string fileName = base.GetFileName(severity, timestamp, entry, formatParameters, logLine);
+
+            if (Strategy != null)
+            {
+                fileName = Strategy.GetFileName(fileName, severity, timestamp, entry, formatParameters, logLine);
+            }
+
+            return fileName;
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class FileSizeRollOverStrategy : IRollOverStrategy
+    {
+        /// <summary>
+        /// 10 megs
+        /// </summary>
+        public const int DefaultFileSizeStrategyBytes = GlobalConstants.BytesInAMegabyte * 10;
+
+        private long m_maxFileSize;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FileSizeRollOverStrategy"/> class.
+        /// </summary>
+        public FileSizeRollOverStrategy()
+            : this (DefaultFileSizeStrategyBytes)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FileSizeRollOverStrategy"/> class.
+        /// </summary>
+        /// <param name="fileSizeBytes">The file size bytes.</param>
+        public FileSizeRollOverStrategy(long fileSizeBytes)
+        {
+            m_maxFileSize = fileSizeBytes;
+        }
+
+        /// <summary>
+        /// Gets or sets the max size of the log file after which
+        /// a new log file is started.
+        /// </summary>
+        /// <value>The size of the max file.</value>
+        public long MaxFileSize
+        {
+            get
+            {
+                return m_maxFileSize;
+            }
+            set
+            {
+                m_maxFileSize = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets the name of the file.
+        /// </summary>
+        /// <param name="fileName">Name of the file.</param>
+        /// <param name="severity">The severity.</param>
+        /// <param name="timestamp">The timestamp.</param>
+        /// <param name="entry">The entry.</param>
+        /// <param name="formatParameters">The format parameters.</param>
+        /// <param name="logLine">The log line.</param>
+        /// <returns></returns>
+        public string GetFileName(string fileName, LoggerSeverity severity, TzDateTime timestamp, object entry, object[] formatParameters, string logLine)
+        {
+            // First, find the largest numbered file
+            string[] pieces = FileSystemUtilities.SplitFileIntoDirectoryAndName(fileName, true);
+            string search = pieces[1].Replace("{0}", "*");
+
+            string[] files = Directory.GetFiles(pieces[0], search);
+
+            int maxNumber = 0;
+
+            // Now, build the list of numbers from the file names
+            if (files != null)
+            {
+                foreach (string foundFile in files)
+                {
+                    int foundNumber = StringUtilities.ExtractFirstNumber(foundFile);
+                    if (foundNumber > maxNumber)
+                    {
+                        maxNumber = foundNumber;
+                    }
+                }
+            }
+
+            if (maxNumber == 0)
+            {
+                fileName = string.Format(fileName, maxNumber + 1);
+            }
+            else
+            {
+                string checkFileName = string.Format(fileName, maxNumber);
+
+                // Check if this file is too big or not
+                if (new FileInfo(checkFileName).Length >= MaxFileSize)
+                {
+                    // Increment the file number
+                    fileName = string.Format(fileName, maxNumber + 1);
+                }
+                else
+                {
+                    fileName = checkFileName;
+                }
+            }
+
+            return fileName;
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class TextWriterLogger : Logger
+    {
+        private TextWriter m_writer;
+
+        /// <summary>
+        /// Gets or sets the writer.
+        /// </summary>
+        /// <value>The writer.</value>
+        public virtual TextWriter Writer
+        {
+            get
+            {
+                return m_writer;
+            }
+            set
+            {
+                m_writer = value;
+            }
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TextWriterLogger"/> class.
+        /// </summary>
+        /// <param name="writer">The writer.</param>
+        public TextWriterLogger(TextWriter writer)
+        {
+            m_writer = writer;
+        }
+
+        /// <summary>
+        /// Does the log.
+        /// </summary>
+        /// <param name="logLine">The log line.</param>
+        protected override void DoLog(string logLine)
+        {
+            m_writer.WriteLine(logLine);
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class ConsoleLogger : TextWriterLogger
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ConsoleLogger"/> class.
+        /// </summary>
+        public ConsoleLogger()
+            : base(Console.Out)
+        {
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public abstract class LogFormatter : ILogFormatter
+    {
+        private string m_formatString;
+
+        /// <summary>
+        /// </summary>
+        /// <value></value>
+        public virtual string FormatString
+        {
+            get
+            {
+                return m_formatString;
+            }
+            set
+            {
+                m_formatString = value;
+            }
+        }
+
+        /// <summary>
+        /// </summary>
+        /// <param name="severity"></param>
+        /// <param name="timestamp"></param>
+        /// <param name="entry"></param>
+        /// <param name="formatParameters"></param>
+        /// <param name="category"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public string FormatEntry(LoggerSeverity severity, TzDateTime timestamp, object entry, object[] formatParameters, string category, Dictionary<string, object> data)
+        {
+            string logEntry = PrepareEntry(entry, formatParameters);
+
+            return DoFormatEntry(severity, timestamp, logEntry, category, data);
+        }
+
+        /// <summary>
+        /// Does the format entry.
+        /// </summary>
+        /// <param name="severity">The severity.</param>
+        /// <param name="timestamp">The timestamp.</param>
+        /// <param name="logEntry">The log entry.</param>
+        /// <param name="category">The category.</param>
+        /// <param name="data">The data.</param>
+        /// <returns></returns>
+        protected abstract string DoFormatEntry(LoggerSeverity severity, TzDateTime timestamp, string logEntry, string category, Dictionary<string, object> data);
+
+        /// <summary>
+        /// Prepares the entry.
+        /// </summary>
+        /// <param name="entry">The entry.</param>
+        /// <param name="formatParameters">The format parameters.</param>
+        /// <returns></returns>
+        protected virtual string PrepareEntry(object entry, object[] formatParameters)
+        {
+            if (entry == null) return null;
+
+            if (formatParameters != null && formatParameters.Length > 0)
+            {
+                entry = string.Format(entry.ToString(), formatParameters);
+            }
+
+            return entry.ToString();
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class DefaultLogFormatter : LogFormatter
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DefaultLogFormatter"/> class.
+        /// </summary>
+        public DefaultLogFormatter()
+        {
+            FormatString = "[{0} {1,-7}{3}] {2}";
+        }
+
+        /// <summary>
+        /// Does the format entry.
+        /// </summary>
+        /// <param name="severity">The severity.</param>
+        /// <param name="timestamp">The timestamp.</param>
+        /// <param name="logEntry">The log entry.</param>
+        /// <param name="category">The category.</param>
+        /// <param name="data">The data.</param>
+        /// <returns></returns>
+        protected override string DoFormatEntry(LoggerSeverity severity, TzDateTime timestamp, string logEntry, string category, Dictionary<string, object> data)
+        {
+            if (!string.IsNullOrEmpty(category))
+            {
+                category = " " + category;
+            }
+            return string.Format(FormatString, timestamp, severity, logEntry, category);
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class DefaultLogFilter : ILogFilter
+    {
+        /// <summary>
+        /// Determines whether the specified severity is loggable.
+        /// </summary>
+        /// <param name="threshold">The threshold.</param>
+        /// <param name="severity">The severity.</param>
+        /// <param name="timestamp">The timestamp.</param>
+        /// <param name="entry">The entry.</param>
+        /// <param name="formatParameters">The format parameters.</param>
+        /// <returns>
+        /// 	<c>true</c> if the specified severity is loggable; otherwise, <c>false</c>.
+        /// </returns>
+        public virtual bool IsLoggable(LoggerSeverity threshold, LoggerSeverity severity, TzDateTime timestamp, object entry, object[] formatParameters)
+        {
+            return (int)severity >= (int)threshold;
+        }
+    }
+
+    /// <summary>
+    /// Always logs severe events, otherwise defers to normal threshold
+    /// conditions.
+    /// </summary>
+    public class SevereLogFilter : DefaultLogFilter
+    {
+        /// <summary>
+        /// Determines whether the specified severity is loggable.
+        /// </summary>
+        /// <param name="threshold">The threshold.</param>
+        /// <param name="severity">The severity.</param>
+        /// <param name="timestamp">The timestamp.</param>
+        /// <param name="entry">The entry.</param>
+        /// <param name="formatParameters">The format parameters.</param>
+        /// <returns>
+        /// 	<c>true</c> if the specified severity is loggable; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool IsLoggable(LoggerSeverity threshold, LoggerSeverity severity, TzDateTime timestamp, object entry, object[] formatParameters)
+        {
+            return severity == LoggerSeverity.Fatal50 ? true : base.IsLoggable(threshold, severity, timestamp, entry, formatParameters);
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class CompositeLogger : Logger
+    {
+        private List<ILogger> m_loggers = new List<ILogger>();
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CompositeLogger"/> class.
+        /// </summary>
+        /// <param name="loggers">The loggers.</param>
+        public CompositeLogger(params ILogger[] loggers)
+        {
+            foreach (ILogger logger in loggers)
+            {
+                if (logger != null)
+                {
+                    Loggers.Add(logger);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the loggers.
+        /// </summary>
+        /// <value>The loggers.</value>
+        public virtual List<ILogger> Loggers
+        {
+            get
+            {
+                return m_loggers;
+            }
+        }
+
+        /// <summary>
+        /// </summary>
+        /// <param name="severity"></param>
+        /// <param name="entry"></param>
+        /// <param name="formatParameters"></param>
+        public override void Log(LoggerSeverity severity, object entry, params object[] formatParameters)
+        {
+            List<Exception> trappedExceptions = new List<Exception>();
+            foreach (ILogger logger in Loggers)
+            {
+                try
+                {
+                    logger.Log(severity, entry, formatParameters);
+                }
+                catch (Exception ex)
+                {
+                    trappedExceptions.Add(ex);
+                }
+            }
+
+            // Throw any trapped exceptions as a single exception
+            ExceptionUtilities.ThrowExceptionList(trappedExceptions);
+        }
+
+        /// <summary>
+        /// Does the log.
+        /// </summary>
+        /// <param name="logLine">The log line.</param>
+        protected override void DoLog(string logLine)
+        {
+            // This is not called
         }
     }
 }
