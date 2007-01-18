@@ -43,6 +43,10 @@
 //
 // Version History:
 // ======================================
+// V0.0.2.23
+//  [kevgrig@gmail.com]
+//   * TzDateTime modifications, adding a UtcOffset property, and local ToString methods.
+//   * Fixed WorkItem 7385 (http://www.codeplex.com/publicdomain/WorkItem/View.aspx?WorkItemId=7385)
 // V0.0.2.22
 //  [kevgrig@gmail.com]
 //   * Added Cryptography, Encoding, and Hashing utilities on strings
@@ -190,89 +194,159 @@ namespace PublicDomain
     public static class GlobalConstants
     {
         /// <summary>
-        /// 
+        /// Current version of this code, in string form. In a standalone build,
+        /// this is the assembly version and file version of the assembly.
         /// </summary>
-        public const string PublicDomainVersion = "0.0.2.22";
+        public const string PublicDomainVersion = "0.0.2.23";
 
         /// <summary>
-        /// Strong, public name of the PublicDomain assembly.
+        /// The name of the PublicDomain assembly, if this is a standalone build. If
+        /// this file is included in an existing project, this is purely a logical name.
         /// </summary>
-        public const string PublicDomainStrongName = "PublicDomain, Version=" + PublicDomainVersion + ", Culture=neutral, PublicKeyToken=FD3F43B5776A962B";
+        public const string PublicDomainName = "PublicDomain";
+
+        /// <summary>
+        /// Strong, public name of the PublicDomain assembly, if this is a standalone
+        /// build. If this file is included in an existing project, this is meaningless.
+        /// </summary>
+        public const string PublicDomainStrongName = PublicDomainName + ", Version=" + PublicDomainVersion + ", Culture=neutral, PublicKeyToken=FD3F43B5776A962B";
 
         /// <summary>
         /// The number of bits in a byte.
         /// </summary>
-        public const int BitsInAByte = 8;
+        public const int BitsInAByte = 2 ^ 3;
 
         /// <summary>
         /// The number of bytes in 1KB
         /// </summary>
-        public const int BytesInAKilobyte = BitsInAByte * 1000;
+        public const int BytesInAKilobyte = 2 ^ 10;
+
+        /// <summary>
+        /// The number of bits in 1KB
+        /// </summary>
+        public const int BitsInAKilobyte = BitsInAByte * BytesInAKilobyte;
 
         /// <summary>
         /// The number of bytes in 1MB
         /// </summary>
-        public const int BytesInAMegabyte = BytesInAKilobyte * 1000;
+        public const int BytesInAMegabyte = 2 ^ 20;
+
+        /// <summary>
+        /// The number of bits in 1MB
+        /// </summary>
+        public const int BitsInAMegabyte = BitsInAByte * BytesInAMegabyte;
 
         /// <summary>
         /// The number of bytes in 1GB
         /// </summary>
-        public const long BytesInAGigabyte = (long)BytesInAMegabyte * (long)1000;
+        public const long BytesInAGigabyte = 2 ^ 30;
+
+        /// <summary>
+        /// The number of bits in 1GB
+        /// </summary>
+        public const long BitsInAGigabyte = BitsInAByte * BytesInAGigabyte;
 
         /// <summary>
         /// The number of bytes in 1TB
         /// </summary>
-        public const long BytesInATerabyte = BytesInAGigabyte * 1000;
+        public const long BytesInATerabyte = 2 ^ 40;
+
+        /// <summary>
+        /// The number of bits in 1TB
+        /// </summary>
+        public const long BitsInATerabyte = BitsInAByte * BytesInATerabyte;
 
         /// <summary>
         /// The number of bytes in 1PB
         /// </summary>
-        public const long BytesInAPetabyte = BytesInATerabyte * 1000;
+        public const long BytesInAPetabyte = 2 ^ 50;
 
         /// <summary>
-        /// 
+        /// The number of bits in 1PB
+        /// </summary>
+        public const long BitsInAPetabyte = BitsInAByte * BytesInAPetabyte;
+
+        /// <summary>
+        /// A reasonable default block size for block reading/writing to and from
+        /// a Stream.
         /// </summary>
         public const int DefaultStreamBlockSize = 1024;
 
         /// <summary>
-        /// 
+        /// A reasonable default timeout value, in milliseconds, for a
+        /// small process to timeout.
         /// </summary>
-        public const int ExecuteSmallProcessTimeout = 60000;
+        public const int DefaultExecuteSmallProcessTimeout = 60000;
+
+        /// <summary>
+        /// http://scienceworld.wolfram.com/physics/Mile.html
+        /// </summary>
+        public const int FeetInAStatuteMile = 5280;
+
+        /// <summary>
+        /// http://scienceworld.wolfram.com/physics/Inch.html
+        /// </summary>
+        public const double InchesInACentimeter = 2.54;
+
+        /// <summary>
+        /// http://scienceworld.wolfram.com/physics/Inch.html
+        /// </summary>
+        public const int InchesInAFoot = 12;
+
+        /// <summary>
+        /// http://scienceworld.wolfram.com/physics/Yard.html
+        /// </summary>
+        public const int FeetInAYard = 3;
+
+        /// <summary>
+        /// http://scienceworld.wolfram.com/physics/Mile.html
+        /// </summary>
+        public const double KilometersInAStatuteMile = ((FeetInAStatuteMile) * (InchesInAFoot) * (InchesInACentimeter)) / (10 ^ 5);
+
+        /// <summary>
+        /// http://scienceworld.wolfram.com/astronomy/EarthRadius.html
+        /// </summary>
+        public const double EarthEquatorialRadiusInStatuteMiles = 3963.19;
 
         /// <summary>
         /// 
         /// </summary>
-        public const double EarthRadiusStatuteMiles = 3963.1D;
+        public const double EarthEquatorialRadiusInNauticalMiles = 3443.9;
+        
+        /// <summary>
+        /// http://scienceworld.wolfram.com/astronomy/EarthRadius.html
+        /// </summary>
+        public const double EarthEquatorialRadiusInKilometers = 6378.137;
+
+        /// <summary>
+        /// http://scienceworld.wolfram.com/astronomy/EarthRadius.html
+        /// </summary>
+        public const double EarthEquatorialCircumferenceInStatuteMiles = 24901.5;
+
+        /// <summary>
+        /// http://scienceworld.wolfram.com/astronomy/EarthRadius.html
+        /// </summary>
+        public const int EarthEquatorialCircumferenceInKilometers = 40075;
 
         /// <summary>
         /// 
         /// </summary>
-        public const double EarthRadiusNauticalMiles = 3443.9D;
+        public const double EarthEquatorialDiameterInStatuteMiles = EarthEquatorialRadiusInStatuteMiles * 2;
 
         /// <summary>
         /// 
         /// </summary>
-        public const double EarthRadiusKilometers = 6376D;
+        public const double EarthEquatorialDiameterInNauticalMiles = EarthEquatorialRadiusInNauticalMiles * 2;
 
         /// <summary>
         /// 
         /// </summary>
-        public const double EarthDiameterStatuteMiles = EarthRadiusStatuteMiles * 2;
+        public const double EarthEquatorialDiameterInKilometers = EarthEquatorialRadiusInKilometers * 2;
 
         /// <summary>
-        /// 
+        /// The default installation diretory of a standalone PublicDomain assembly.
         /// </summary>
-        public const double EarthDiameterNauticalMiles = EarthRadiusNauticalMiles * 2;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public const double EarthDiameterKilometers = EarthRadiusKilometers * 2;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public static char DirectorySeparator = '\\';
+        public const string PublicDomainDefaultInstallLocation = @"C:\Program Files\Public Domain\";
     }
 
     /// <summary>
@@ -393,7 +467,7 @@ namespace PublicDomain
         /// <returns></returns>
         public static byte[] ComputeSHA1Hash(string str)
         {
-            byte[] data = EncodingUtilities.GetBytesFromString(str);
+            byte[] data = StringUtilities.GetBytesFromString(str);
             return ComputeSHA1Hash(data);
         }
 
@@ -410,10 +484,20 @@ namespace PublicDomain
     }
 
     /// <summary>
-    /// 
+    /// String manipulation and generation methods, as well as string array manipulation.
     /// </summary>
-    public static class EncodingUtilities
+    public static class StringUtilities
     {
+        private static Random s_random;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        static StringUtilities()
+        {
+            s_random = new Random(unchecked((int)DateTime.UtcNow.Ticks));
+        }
+
         /// <summary>
         /// Gets the bytes from string.
         /// </summary>
@@ -434,13 +518,7 @@ namespace PublicDomain
         {
             return Encoding.Unicode.GetString(data);
         }
-    }
 
-    /// <summary>
-    /// String manipulation and generation methods, as well as string array manipulation.
-    /// </summary>
-    public static class StringUtilities
-    {
         /// <summary>
         /// Returns a string of length <paramref name="size"/> filled
         /// with random ASCII characters in the range A-Z, a-z. If <paramref name="lowerCase"/>
@@ -451,17 +529,22 @@ namespace PublicDomain
         /// <returns></returns>
         public static string RandomString(int size, bool lowerCase)
         {
-            StringBuilder builder = new StringBuilder();
-            Random random = new Random(unchecked((int)DateTime.UtcNow.Ticks));
-            char ch;
-            for (int i = 0; i < size; i++)
+            if (size < 0)
             {
-                ch = Convert.ToChar(Convert.ToInt32(Math.Floor(26 * random.NextDouble() + 65)));
-                builder.Append(ch);
+                throw new ArgumentOutOfRangeException("size", "Size must be positive");
             }
+            StringBuilder builder = new StringBuilder(size);
+            int low = 65; // 'A'
+            int high = 91; // 'Z' + 1
             if (lowerCase)
             {
-                return builder.ToString().ToLower();
+                low = 97; // 'a';
+                high = 123; // 'z' + 1
+            }
+            for (int i = 0; i < size; i++)
+            {
+                char ch = Convert.ToChar(s_random.Next(low, high));
+                builder.Append(ch);
             }
             return builder.ToString();
         }
@@ -491,6 +574,35 @@ namespace PublicDomain
             while (result.Length < length)
             {
                 result = pad + result;
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Returns a string of length <paramref name="length"/> with
+        /// 0's padded to the right, if necessary.
+        /// </summary>
+        /// <param name="val">The val.</param>
+        /// <param name="length">The length.</param>
+        /// <returns></returns>
+        public static string PadIntegerRight(int val, int length)
+        {
+            return PadIntegerRight(val, length, '0');
+        }
+
+        /// <summary>
+        /// Pads the integer right.
+        /// </summary>
+        /// <param name="val">The val.</param>
+        /// <param name="length">The length.</param>
+        /// <param name="pad">The pad.</param>
+        /// <returns></returns>
+        public static string PadIntegerRight(int val, int length, char pad)
+        {
+            string result = val.ToString();
+            while (result.Length < length)
+            {
+                result += pad;
             }
             return result;
         }
@@ -783,7 +895,7 @@ namespace PublicDomain
         public static string ComputeNonCollidingHash(string str)
         {
             byte[] data = CryptographyUtilities.ComputeSHA1Hash(str);
-            return EncodingUtilities.GetStringFromBytes(data);
+            return StringUtilities.GetStringFromBytes(data);
         }
 
 #if !(NONUNIT)
@@ -2465,7 +2577,7 @@ namespace PublicDomain
 
             if (ensureDirectoryElementEndingSlash)
             {
-                one = one + GlobalConstants.DirectorySeparator;
+                one = one + Path.DirectorySeparatorChar;
             }
 
             return new string[] { one, two };
@@ -4015,7 +4127,7 @@ namespace PublicDomain
         }
 
         /// <summary>
-        /// Starts with a timeout of <see cref="GlobalConstants.ExecuteSmallProcessTimeout"/>
+        /// Starts with a timeout of <see cref="GlobalConstants.DefaultExecuteSmallProcessTimeout"/>
         /// milliseconds and does not throw an exception when it sees an error, but returns
         /// the standard error and output.
         /// </summary>
@@ -4070,7 +4182,7 @@ namespace PublicDomain
         /// <returns>Return code of completed process</returns>
         public int StartAndWaitForExit(bool throwOnError)
         {
-            return StartAndWaitForExit(GlobalConstants.ExecuteSmallProcessTimeout, throwOnError);
+            return StartAndWaitForExit(GlobalConstants.DefaultExecuteSmallProcessTimeout, throwOnError);
         }
 
         /// <summary>
@@ -6537,6 +6649,25 @@ namespace PublicDomain
         /// 
         /// </summary>
         public static readonly Regex Email = new Regex(@"^[\w-\.]{1,}\@([\da-zA-Z-]{1,}\.){1,}[\da-zA-Z-]{2,3}$", RegexOptions.Compiled);
+
+        /// <summary>
+        /// Gets the capture. Group number 0 is the entire match. Group
+        /// number 1 is the first matched group from the left, and so on.
+        /// </summary>
+        /// <param name="match">The match.</param>
+        /// <param name="groupNumber">The group number.</param>
+        /// <returns></returns>
+        public static string GetCapture(Match match, int groupNumber)
+        {
+            if (match.Success && match.Groups.Count > groupNumber)
+            {
+                return match.Groups[groupNumber].ToString();
+            }
+            else
+            {
+                return null;
+            }
+        }
     }
 
     /// <summary>
@@ -6953,6 +7084,127 @@ namespace PublicDomain
     }
 
     /// <summary>
+    /// http://www.w3.org/TR/NOTE-datetime
+    /// </summary>
+    public class Iso8601
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        public const char UtcZuluIdentifier = 'Z';
+
+        private static Regex FormatYear, FormatYearAndMonth,
+            FormatComplete, FormatCompleteHM,
+            FormatCompleteHMS, FormatCompleteHMSF;
+
+        static Iso8601()
+        {
+            string format = @"^(\d\d\d\d)";
+            string tzd = @"(Z|(\+|-\d\d:\d\d))";
+
+            FormatYear = new Regex(format + "$");
+
+            format += @"-(\d\d)";
+            FormatYearAndMonth = new Regex(format + "$");
+
+            format += @"-(\d\d)";
+            FormatComplete = new Regex(format + "$");
+
+            format += @"T(\d\d):(\d\d)";
+            FormatCompleteHM = new Regex(format + tzd + "$");
+
+            format += @":(\d\d)";
+            FormatCompleteHMS = new Regex(format + tzd + "$");
+
+            format += @".(\d+)";
+            FormatCompleteHMSF = new Regex(format + tzd + "$");
+        }
+
+        /// <summary>
+        /// Tries the parse.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns></returns>
+        public static TzDateTime TryParse(string str)
+        {
+            TzDateTime result = null;
+            try
+            {
+                result = Parse(str);
+            }
+            catch (TzDatabase.TzException)
+            {
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Parses the specified STR.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns></returns>
+        public static TzDateTime Parse(string str)
+        {
+            int length = str.Length;
+            Match m;
+
+            switch (length)
+            {
+                case 4:
+                    m = FormatYear.Match(str);
+                    if (m.Success)
+                    {
+                        RegexUtilities.GetCapture(m, 1);
+                    }
+                    else
+                    {
+                    }
+                    break;
+                case 7:
+                    m = FormatYearAndMonth.Match(str);
+                    if (m.Success)
+                    {
+                    }
+                    else
+                    {
+                    }
+                    break;
+                case 10:
+                    m = FormatComplete.Match(str);
+                    if (m.Success)
+                    {
+                    }
+                    else
+                    {
+                    }
+                    break;
+            }
+
+            throw new TzDatabase.TzParseException(string.Format("Date/time does not conform to ISO 8601 format ({0}).", str));
+        }
+
+        /// <summary>
+        /// Gets the time zone data.
+        /// </summary>
+        /// <param name="timeSpan">The time span.</param>
+        /// <param name="useZuluModifier">if set to <c>true</c> [use zulu modifier].</param>
+        /// <returns></returns>
+        public static string GetTimeZoneData(TimeSpan timeSpan, bool useZuluModifier)
+        {
+            string result;
+            if (useZuluModifier && timeSpan.Hours == 0 && timeSpan.Minutes == 0 && timeSpan.Seconds == 0 && timeSpan.Milliseconds == 0)
+            {
+                result = UtcZuluIdentifier.ToString();
+            }
+            else
+            {
+                result = (timeSpan.Hours < 0 ? "-" : "+") + string.Format("{0:##}:{1:##}", timeSpan.Hours, timeSpan.Minutes);
+            }
+            return result;
+        }
+    }
+
+    /// <summary>
     /// Generic representation of a latitude and longitude point.
     /// </summary>
     [Serializable]
@@ -7219,7 +7471,7 @@ namespace PublicDomain
             double c = point2.Latitude / 57.29577951D;
             double d = point2.Longitude / 57.29577951D;
 
-            double earthRadius = (returnType == DistanceType.StatuteMiles ? GlobalConstants.EarthRadiusStatuteMiles : (returnType == DistanceType.NauticalMiles ? GlobalConstants.EarthRadiusNauticalMiles : GlobalConstants.EarthRadiusKilometers));
+            double earthRadius = (returnType == DistanceType.StatuteMiles ? GlobalConstants.EarthEquatorialRadiusInStatuteMiles : (returnType == DistanceType.NauticalMiles ? GlobalConstants.EarthEquatorialRadiusInNauticalMiles : GlobalConstants.EarthEquatorialRadiusInKilometers));
 
             double sina = Math.Sin(a);
             double sinc = Math.Sin(c);
@@ -8046,7 +8298,7 @@ namespace PublicDomain
                 return zone.UtcOffset;
             }
 
-            return new TimeSpan();
+            return TimeSpan.Zero;
         }
 
         /// <summary>
@@ -8163,7 +8415,7 @@ namespace PublicDomain
         /// </returns>
         public override string ToString()
         {
-            return base.ToString();
+            return ZoneName;
         }
 
         /// <summary>
@@ -12911,6 +13163,7 @@ namespace PublicDomain
     [Serializable]
     public class TzDateTime
     {
+        private const string UtcOffsetModifier = " +00:00";
         private DateTime m_dateTimeUtc;
         private TzTimeZone m_timeZone;
 
@@ -13104,6 +13357,19 @@ namespace PublicDomain
         }
 
         /// <summary>
+        /// Gets the utc offset.
+        /// </summary>
+        /// <value>The utc offset.</value>
+        public TimeSpan UtcOffset
+        {
+            get
+            {
+                ThrowIfNullTimeZone();
+                return TimeZone.GetUtcOffset(m_dateTimeUtc);
+            }
+        }
+
+        /// <summary>
         /// Parses the specified input. By default, this does
         /// not assume any time zone -- not even UTC. If the time
         /// zone cannot be parsed from the input, a null time zone
@@ -13204,7 +13470,80 @@ namespace PublicDomain
         /// </returns>
         public override string ToString()
         {
-            return DateTimeUtc.ToString();
+            return DateTimeUtc.ToString() + UtcOffsetModifier;
+        }
+
+        /// <summary>
+        /// Returns the UTC form of this date time. Returns a <see cref="T:System.String"></see> that represents the current <see cref="T:System.Object"></see>.
+        /// </summary>
+        /// <param name="provider">The provider.</param>
+        /// <returns></returns>
+        public string ToString(IFormatProvider provider)
+        {
+            return DateTimeUtc.ToString(provider) + UtcOffsetModifier;
+        }
+
+        /// <summary>
+        /// Returns the UTC form of this date time. Returns a <see cref="T:System.String"></see> that represents the current <see cref="T:System.Object"></see>.
+        /// </summary>
+        /// <param name="format">The format.</param>
+        /// <returns></returns>
+        public string ToString(string format)
+        {
+            return DateTimeUtc.ToString(format) + UtcOffsetModifier;
+        }
+
+        /// <summary>
+        /// Returns the UTC form of this date time. Returns a <see cref="T:System.String"></see> that represents the current <see cref="T:System.Object"></see>.
+        /// </summary>
+        /// <param name="format">The format.</param>
+        /// <param name="provider">The provider.</param>
+        /// <returns></returns>
+        public string ToString(string format, IFormatProvider provider)
+        {
+            return DateTimeUtc.ToString(format, provider) + UtcOffsetModifier;
+        }
+
+        /// <summary>
+        /// Returns the local form of this date time. Returns a <see cref="T:System.String"></see> that represents the current <see cref="T:System.Object"></see>.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="T:System.String"></see> that represents the current <see cref="T:System.Object"></see>.
+        /// </returns>
+        public string ToStringLocal()
+        {
+            return DateTimeLocal.ToString();
+        }
+
+        /// <summary>
+        /// Returns the local form of this date time. Returns a <see cref="T:System.String"></see> that represents the current <see cref="T:System.Object"></see>.
+        /// </summary>
+        /// <param name="provider">The provider.</param>
+        /// <returns></returns>
+        public string ToStringLocal(IFormatProvider provider)
+        {
+            return DateTimeLocal.ToString(provider);
+        }
+
+        /// <summary>
+        /// Returns the local form of this date time. Returns a <see cref="T:System.String"></see> that represents the current <see cref="T:System.Object"></see>.
+        /// </summary>
+        /// <param name="format">The format.</param>
+        /// <returns></returns>
+        public string ToStringLocal(string format)
+        {
+            return DateTimeLocal.ToString(format);
+        }
+
+        /// <summary>
+        /// Returns the local form of this date time. Returns a <see cref="T:System.String"></see> that represents the current <see cref="T:System.Object"></see>.
+        /// </summary>
+        /// <param name="format">The format.</param>
+        /// <param name="provider">The provider.</param>
+        /// <returns></returns>
+        public string ToStringLocal(string format, IFormatProvider provider)
+        {
+            return DateTimeLocal.ToString(format, provider);
         }
 
         /// <summary>
