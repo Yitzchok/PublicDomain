@@ -1,0 +1,72 @@
+PublicDomain
+============
+PublicDomain is placed in the Global Assembly Cache (GAC), so you can
+either reference it using its strong name, or add a reference to the PublicDomain.dll
+assembly from the installation directory (default is C:\Program Files\Public Domain\PublicDomain.dll).
+
+Contributing Authors
+====================
+William M. Leszczuk (billl@eden.rutgers.edu)
+
+Version History
+===============
+V0.0.2.32
+	[kevgrig@gmail.com]
+		* Added GlobalAssemblyCache class to wrap Fusion DLLs
+		* Added IInstallProgram interface and Win32.GetAddRemoveProgramList to
+		get the same data as the Add/Remove program list and manipulate it, including
+		running uninstallers
+		* Added ConsoleRerouter class
+		* Added Dynacode package
+		* Added Iso8601 class, and main time zone points for each zone, also TimeZoneLocal
+V0.0.2.23
+	[kevgrig@gmail.com]
+		* TzDateTime modifications, adding a UtcOffset property, and local ToString methods.
+		* Fixed WorkItem 7385 (http://www.codeplex.com/publicdomain/WorkItem/View.aspx?WorkItemId=7385)
+V0.0.2.22
+	[kevgrig@gmail.com]
+		* Added Cryptography, Encoding, and Hashing utilities on strings
+		* Fixed bugs in PublicDomain.Logging.FileSizeRolloverStrategy
+V0.0.2.5
+	[kevgrig@gmail.com]
+		* Added CompositeLogger
+V0.0.2.4
+	[kevgrig@gmail.com]
+		* Added my logging package, PublicDomain.Logging
+V0.0.2.3
+	[kevgrig@gmail.com]
+		* Added RSS, Atom, and OPML parsing and serialization support in the Feeder package
+V0.0.2.2
+	[kevgrig@gmail.com]
+		* TzDateTime creation methods
+V0.0.2.0
+	[kevgrig@gmail.com]
+		* TzTimeZone is very limited but functional. Get a time zone with TzTimeZone.GetTimeZone(string)
+V0.0.1.4
+	[kevgrig@gmail.com]
+		* Added ArrayUtilities.RemoveDuplicates<T>(IList<T>)
+		* Added libraries for counting code (ICountable, CountStream, etc.)
+V0.0.1.3
+	[kevgrig@gmail.com]
+		* Added ReadOnlyDictionary<K, V> and ReadOnlyICollection<T> classes
+		* Generation of TzZone data -- still nothing functional in time zones though
+V0.0.1.2
+	[kevgrig@gmail.com]
+		* Added pdsetup project
+V0.0.1.1
+	[kevgrig@gmail.com]
+		* Added bunch of methods to ConversionUtilities courtesy of
+		William M. Leszczuk (billl@eden.rutgers.edu)
+		* Parsing of tz files works
+V0.0.1.0
+	[kevgrig@gmail.com]
+		* Project creation in CodePlex (http://www.codeplex.com/PublicDomain)
+		* Added various code from my projects
+		* tz database code unfinished
+V0.0.0.1
+	[kevgrig@gmail.com]
+		* Added Win32 class and some ExitWindowsEx calls
+V0.0.0.0
+	[kevgrig@gmail.com]
+		* Wrapper around vjslib for zip file reading
+		* java.io.InputStream <-> System.IO.Stream wrappers

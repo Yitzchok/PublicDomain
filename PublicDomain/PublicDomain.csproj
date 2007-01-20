@@ -54,6 +54,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="pd.ico" />
+    <Content Include="README.txt" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />

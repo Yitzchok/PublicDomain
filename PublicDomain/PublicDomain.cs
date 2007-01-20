@@ -1,8 +1,7 @@
 // PublicDomain
 // ======================================
 //  Original Author: Kevin Grigorenko (kevgrig@gmail.com)
-//  Contributing Authors:
-//   * William M. Leszczuk (billl@eden.rutgers.edu)
+//      Download README.txt for a list of contributing authors
 // 
 //  - "Be free Jedi, be free!"
 // ======================================
@@ -41,59 +40,10 @@
 // is truly a proper place for the code, that external attribution is not necessary,
 // and finally make sure to internally attribute the code with a #region to the author(s).
 //
-// Version History:
-// ======================================
-// V0.0.2.23
-//  [kevgrig@gmail.com]
-//   * TzDateTime modifications, adding a UtcOffset property, and local ToString methods.
-//   * Fixed WorkItem 7385 (http://www.codeplex.com/publicdomain/WorkItem/View.aspx?WorkItemId=7385)
-// V0.0.2.22
-//  [kevgrig@gmail.com]
-//   * Added Cryptography, Encoding, and Hashing utilities on strings
-//   * Fixed bugs in PublicDomain.Logging.FileSizeRolloverStrategy
-// V0.0.2.5
-//  [kevgrig@gmail.com]
-//   * Added CompositeLogger
-// V0.0.2.4
-//  [kevgrig@gmail.com]
-//   * Added my logging package, PublicDomain.Logging
-// V0.0.2.3
-//  [kevgrig@gmail.com]
-//   * Added RSS, Atom, and OPML parsing and serialization support in the Feeder package
-// V0.0.2.2
-//  [kevgrig@gmail.com]
-//   * TzDateTime creation methods
-// V0.0.2.0
-//  [kevgrig@gmail.com]
-//   * TzTimeZone is very limited but functional. Get a time zone with TzTimeZone.GetTimeZone(string)
-// V0.0.1.4
-//  [kevgrig@gmail.com]
-//   * Added ArrayUtilities.RemoveDuplicates<T>(IList<T>)
-//   * Added libraries for counting code (ICountable, CountStream, etc.)
-// V0.0.1.3
-//  [kevgrig@gmail.com]
-//   * Added ReadOnlyDictionary<K, V> and ReadOnlyICollection<T> classes
-//   * Generation of TzZone data -- still nothing functional in time zones though
-// V0.0.1.2
-//  [kevgrig@gmail.com]
-//   * Added pdsetup project
-// V0.0.1.1
-//  [kevgrig@gmail.com]
-//   * Added bunch of methods to ConversionUtilities courtesy of
-//     William M. Leszczuk (billl@eden.rutgers.edu)
-//   * Parsing of tz files works
-// V0.0.1.0
-//  [kevgrig@gmail.com]
-//   * Project creation in CodePlex (http://www.codeplex.com/PublicDomain)
-//   * Added various code from my projects
-//   * tz database code unfinished
-// V0.0.0.1
-//  [kevgrig@gmail.com]
-//   * Added Win32 class and some ExitWindowsEx calls
-// V0.0.0.0
-//  [kevgrig@gmail.com]
-//   * Wrapper around vjslib for zip file reading
-//   * java.io.InputStream <-> System.IO.Stream wrappers
+// NOTE: Some code documentation may appear wrongly worded. This is due to auto-documentation
+// using GhostDoc (http://www.roland-weigelt.de/ghostdoc/).
+//
+// Version History: Download README.txt for the version history.
 //
 
 #region Directives
@@ -119,6 +69,7 @@
 //#define NOSTATES
 //#define NOCODECOUNT
 //#define NOLOGGING
+//#define NODYNACODE
 
 #endif
 
@@ -174,9 +125,12 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Xml;
+using PublicDomain;
 using PublicDomain.Feeder.Opml;
 using PublicDomain.Feeder.Rss;
 using PublicDomain.Feeder.Atom;
+using PublicDomain.Dynacode;
+using Microsoft.Win32;
 
 #if !(NOCLSCOMPLIANTWARNINGSOFF)
 #pragma warning disable 3001
@@ -197,7 +151,7 @@ namespace PublicDomain
         /// Current version of this code, in string form. In a standalone build,
         /// this is the assembly version and file version of the assembly.
         /// </summary>
-        public const string PublicDomainVersion = "0.0.2.23";
+        public const string PublicDomainVersion = "0.0.2.32";
 
         /// <summary>
         /// The name of the PublicDomain assembly, if this is a standalone build. If
@@ -659,6 +613,129 @@ namespace PublicDomain
         }
 
         /// <summary>
+        /// Splits <paramref name="str"/> based on finding the first location of <paramref name="ch"/>. The first element
+        /// is the left portion, and the second element
+        /// is the right portion. The character at index <paramref name="index"/>
+        /// is not included in either portion.
+        /// The return result is never null, and the elements
+        /// are never null, so one of the elements may be an empty string.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <param name="ch">The character to find.</param>
+        /// <returns></returns>
+        public static string[] SplitAroundIndexOf(string str, char ch)
+        {
+            if (str == null)
+            {
+                throw new ArgumentNullException("str");
+            }
+            return SplitAround(str, str.IndexOf(ch));
+        }
+
+        /// <summary>
+        /// Splits <paramref name="str"/> based on finding the first location of any of the characters from
+        /// <paramref name="anyOf"/>. The first element
+        /// is the left portion, and the second element
+        /// is the right portion. The character at index <paramref name="index"/>
+        /// is not included in either portion.
+        /// The return result is never null, and the elements
+        /// are never null, so one of the elements may be an empty string.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <param name="anyOf">Any of.</param>
+        /// <returns></returns>
+        public static string[] SplitAroundIndexOfAny(string str, params char[] anyOf)
+        {
+            if (str == null)
+            {
+                throw new ArgumentNullException("str");
+            }
+            return SplitAround(str, str.IndexOfAny(anyOf));
+        }
+
+        /// <summary>
+        /// Splits <paramref name="str"/> based on finding the last location of <paramref name="ch"/>. The first element
+        /// is the left portion, and the second element
+        /// is the right portion. The character at index <paramref name="index"/>
+        /// is not included in either portion.
+        /// The return result is never null, and the elements
+        /// are never null, so one of the elements may be an empty string.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <param name="ch">The character to find.</param>
+        /// <returns></returns>
+        public static string[] SplitAroundLastIndexOf(string str, char ch)
+        {
+            if (str == null)
+            {
+                throw new ArgumentNullException("str");
+            }
+            return SplitAround(str, str.LastIndexOf(ch));
+        }
+
+        /// <summary>
+        /// Splits <paramref name="str"/> based on finding the last location of any of the charactesr from
+        /// <paramref name="anyOf"/>. The first element
+        /// is the left portion, and the second element
+        /// is the right portion. The character at index <paramref name="index"/>
+        /// is not included in either portion.
+        /// The return result is never null, and the elements
+        /// are never null, so one of the elements may be an empty string.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <param name="anyOf">Any of.</param>
+        /// <returns></returns>
+        public static string[] SplitAroundLastIndexOfAny(string str, params char[] anyOf)
+        {
+            if (str == null)
+            {
+                throw new ArgumentNullException("str");
+            }
+            return SplitAround(str, str.LastIndexOfAny(anyOf));
+        }
+
+        /// <summary>
+        /// Splits <paramref name="str"/> based on the index. The first element
+        /// is the left portion, and the second element
+        /// is the right portion. The character at index <paramref name="index"/>
+        /// is not included in either portion.
+        /// The return result is never null, and the elements
+        /// are never null, so one of the elements may be an empty string.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <param name="index">The index.</param>
+        /// <returns></returns>
+        public static string[] SplitAround(string str, int index)
+        {
+            string one, two;
+            if (index == -1)
+            {
+                one = "";
+                two = str;
+            }
+            else
+            {
+                if (index == 0)
+                {
+                    one = "";
+                    two = str.Substring(1);
+                }
+                else if (index == str.Length - 1)
+                {
+                    one = str.Substring(0, str.Length - 1);
+                    two = "";
+                }
+                else
+                {
+                    one = str.Substring(0, index);
+                    two = str.Substring(index + 1);
+                }
+            }
+
+            return new string[] { one, two };
+        }
+
+        /// <summary>
         /// Splits the specified pieces.
         /// </summary>
         /// <param name="pieces">The pieces.</param>
@@ -896,6 +973,65 @@ namespace PublicDomain
         {
             byte[] data = CryptographyUtilities.ComputeSHA1Hash(str);
             return StringUtilities.GetStringFromBytes(data);
+        }
+
+        /// <summary>
+        /// Splits <paramref name="str"/> based on the index. The first element
+        /// is the left portion, and the second element
+        /// is the right portion. The character at index <paramref name="index"/>
+        /// is either included at the end of the left portion, or at the
+        /// beginning of the right portion, depending on <paramref name="isIndexInFirstPortion"/>
+        /// The return result is never null, and the elements
+        /// are never null, so one of the elements may be an empty string.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <param name="index">The index.</param>
+        /// <param name="isIndexInFirstPortion">if set to <c>true</c> [is index in first portion].</param>
+        /// <returns></returns>
+        public static string[] SplitOn(string str, int index, bool isIndexInFirstPortion)
+        {
+            string one, two;
+            if (index == -1)
+            {
+                one = str;
+                two = "";
+            }
+            else
+            {
+                if (index == 0)
+                {
+                    if (isIndexInFirstPortion)
+                    {
+                        one = str[0].ToString();
+                        two = str.Substring(1);
+                    }
+                    else
+                    {
+                        one = "";
+                        two = str;
+                    }
+                }
+                else if (index == str.Length - 1)
+                {
+                    if (isIndexInFirstPortion)
+                    {
+                        one = str;
+                        two = "";
+                    }
+                    else
+                    {
+                        one = str.Substring(0, str.Length - 1);
+                        two = str[str.Length - 1].ToString();
+                    }
+                }
+                else
+                {
+                    one = str.Substring(0, isIndexInFirstPortion ? index + 1 : index);
+                    two = str.Substring(isIndexInFirstPortion ? index + 1 : index);
+                }
+            }
+
+            return new string[] { one, two };
         }
 
 #if !(NONUNIT)
@@ -1192,7 +1328,7 @@ namespace PublicDomain
         public static bool IsStringATimeSpan(string str)
         {
             TimeSpan trash;
-            return TimeSpan.TryParse(str, out trash);
+            return DateTimeUtlities.TryParseTimeSpan(str, out trash);
         }
 
         /// <summary>
@@ -1338,6 +1474,66 @@ namespace PublicDomain
             char result;
             char.TryParse(str, out result);
             return result;
+        }
+
+        /// <summary>
+        /// Parses the URL.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns></returns>
+        public static Url ParseUrl(string str)
+        {
+            return new Url(str);
+        }
+
+        /// <summary>
+        /// Tries the parse URL.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <param name="url">The URL.</param>
+        /// <returns></returns>
+        public static bool TryParseUrl(string str, out Url url)
+        {
+            url = null;
+            try
+            {
+                url = ParseUrl(str);
+                return true;
+            }
+            catch (Exception)
+            {
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Parses the version.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns></returns>
+        public static Version ParseVersion(string str)
+        {
+            return new Version(str);
+        }
+
+        /// <summary>
+        /// Tries the parse version.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <param name="version">The version.</param>
+        /// <returns></returns>
+        public static bool TryParseVersion(string str, out Version version)
+        {
+            version = null;
+            try
+            {
+                version = ParseVersion(str);
+                return true;
+            }
+            catch (Exception)
+            {
+            }
+            return false;
         }
     }
 
@@ -1882,6 +2078,21 @@ namespace PublicDomain
     public static class ArrayUtilities
     {
         /// <summary>
+        /// Gets the list from enumerable.
+        /// </summary>
+        /// <param name="enumerable">The enumerable.</param>
+        /// <returns></returns>
+        public static List<T> GetListFromEnumerable<T>(IEnumerable<T> enumerable)
+        {
+            List<T> result = new List<T>();
+            foreach (T t in enumerable)
+            {
+                result.Add(t);
+            }
+            return result;
+        }
+
+        /// <summary>
         /// 
         /// </summary>
         /// <typeparam name="T"></typeparam>
@@ -2079,7 +2290,7 @@ namespace PublicDomain
         }
 
         /// <summary>
-        /// Throws the exception list.
+        /// Throws the exception list, if there are any.
         /// </summary>
         /// <param name="exceptions">The exceptions.</param>
         public static void ThrowExceptionList(ICollection<Exception> exceptions)
@@ -2549,38 +2760,14 @@ namespace PublicDomain
         /// <returns></returns>
         public static string[] SplitFileIntoDirectoryAndName(string path, bool ensureDirectoryElementEndingSlash)
         {
-            string one, two;
-            int lastIndex = path.LastIndexOfAny(trackbackChars);
-            if (lastIndex == -1)
-            {
-                one = "";
-                two = path;
-            }
-            else
-            {
-                if (lastIndex == 0)
-                {
-                    one = "";
-                    two = path.Substring(1);
-                }
-                else if (lastIndex == path.Length - 1)
-                {
-                    one = path.Substring(0, path.Length - 1);
-                    two = "";
-                }
-                else
-                {
-                    one = path.Substring(0, lastIndex);
-                    two = path.Substring(lastIndex + 1);
-                }
-            }
+            string[] result = StringUtilities.SplitAround(path, path.LastIndexOfAny(trackbackChars));
 
             if (ensureDirectoryElementEndingSlash)
             {
-                one = one + Path.DirectorySeparatorChar;
+                result[0] += Path.DirectorySeparatorChar;
             }
 
-            return new string[] { one, two };
+            return result;
         }
     }
 
@@ -2705,6 +2892,148 @@ namespace PublicDomain
         {
             Type type = FindTypeByInterface<T>(assembly);
             return assembly.CreateInstance(type.FullName) as T;
+        }
+
+        /// <summary>
+        /// Finds the method.
+        /// </summary>
+        /// <param name="assembly">The assembly.</param>
+        /// <param name="methodName">Fully qualified name of the method.</param>
+        /// <returns></returns>
+        public static MethodInfo FindMethod(Assembly assembly, string methodName)
+        {
+            string[] pieces = StringUtilities.SplitAround(methodName, methodName.LastIndexOf('.'));
+
+            Type type = assembly.GetType(pieces[0], false, true);
+
+            if (type != null)
+            {
+                return type.GetMethod(pieces[1]);
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Invokes the method.
+        /// </summary>
+        /// <param name="methodInfo">The method info.</param>
+        /// <param name="parameters">The parameters.</param>
+        /// <returns></returns>
+        public static object InvokeMethod(MethodInfo methodInfo, params object[] parameters)
+        {
+            if (methodInfo == null)
+            {
+                throw new ArgumentNullException("methodInfo");
+            }
+            if (methodInfo.IsStatic)
+            {
+                return methodInfo.Invoke(null, parameters);
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        /// <summary>
+        /// Invokes the method.
+        /// </summary>
+        /// <param name="assembly">The assembly.</param>
+        /// <param name="methodName">Name of the method.</param>
+        /// <param name="parameters">The parameters.</param>
+        /// <returns></returns>
+        public static object InvokeMethod(Assembly assembly, string methodName, params object[] parameters)
+        {
+            MethodInfo methodInfo = FindMethod(assembly, methodName);
+            if (methodInfo == null)
+            {
+                throw new ReflectionException(string.Format("Could not find method {0} in assembly {1}.", methodName, assembly));
+            }
+            return InvokeMethod(methodInfo, parameters);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        [Serializable]
+        public class ReflectionException : Exception
+        {
+            /// <summary>
+            /// Initializes a new instance of the <see cref="ReflectionException"/> class.
+            /// </summary>
+            public ReflectionException() { }
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="ReflectionException"/> class.
+            /// </summary>
+            /// <param name="message">The message.</param>
+            public ReflectionException(string message) : base(message) { }
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="ReflectionException"/> class.
+            /// </summary>
+            /// <param name="message">The message.</param>
+            /// <param name="inner">The inner.</param>
+            public ReflectionException(string message, Exception inner) : base(message, inner) { }
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="ReflectionException"/> class.
+            /// </summary>
+            /// <param name="info">The <see cref="T:System.Runtime.Serialization.SerializationInfo"></see> that holds the serialized object data about the exception being thrown.</param>
+            /// <param name="context">The <see cref="T:System.Runtime.Serialization.StreamingContext"></see> that contains contextual information about the source or destination.</param>
+            /// <exception cref="T:System.Runtime.Serialization.SerializationException">The class name is null or <see cref="P:System.Exception.HResult"></see> is zero (0). </exception>
+            /// <exception cref="T:System.ArgumentNullException">The info parameter is null. </exception>
+            protected ReflectionException(
+              SerializationInfo info,
+              StreamingContext context)
+                : base(info, context) { }
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static class RandomGenerationUtilities
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        public static Random RNG;
+
+        static RandomGenerationUtilities()
+        {
+            RNG = new Random(unchecked((int)DateTime.UtcNow.Ticks));
+        }
+
+        /// <summary>
+        /// Gets a random integer.
+        /// </summary>
+        /// <returns></returns>
+        public static int GetRandomInteger()
+        {
+            return RNG.Next();
+        }
+
+        /// <summary>
+        /// Gets a random integer.
+        /// </summary>
+        /// <param name="max">The max.</param>
+        /// <returns></returns>
+        public static int GetRandomInteger(int max)
+        {
+            return RNG.Next(max);
+        }
+
+        /// <summary>
+        /// Gets a random integer.
+        /// </summary>
+        /// <param name="min">The min.</param>
+        /// <param name="max">The max.</param>
+        /// <returns></returns>
+        public static int GetRandomInteger(int min, int max)
+        {
+            return RNG.Next(min, max);
         }
     }
 
@@ -3476,6 +3805,608 @@ namespace PublicDomain
     public static class Win32
     {
         /// <summary>
+        /// Wraps a COM interface pointer.
+        /// </summary>
+        /// <typeparam name="T">The COM interface</typeparam>
+        public interface IComWrapper<T>
+        {
+            /// <summary>
+            /// Gets the COM interface.
+            /// </summary>
+            /// <value>The COM interface.</value>
+            T ComInterface { get; }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public interface IInstalledProgram
+        {
+            /// <summary>
+            /// Gets the registry key.
+            /// </summary>
+            /// <value>The registry key.</value>
+            string RegistryKey { get; }
+
+            /// <summary>
+            /// Gets or sets the name of the display.
+            /// </summary>
+            /// <value>The name of the display.</value>
+            string DisplayName { get; set; }
+
+            /// <summary>
+            /// Gets or sets the display icon.
+            /// </summary>
+            /// <value>The display icon.</value>
+            string DisplayIcon { get; set; }
+
+            /// <summary>
+            /// Gets or sets the size of the estimated.
+            /// </summary>
+            /// <value>The size of the estimated.</value>
+            int? EstimatedSize { get; set; }
+
+            /// <summary>
+            /// Gets or sets the comments.
+            /// </summary>
+            /// <value>The comments.</value>
+            string Comments { get; set; }
+
+            /// <summary>
+            /// Gets or sets the contact.
+            /// </summary>
+            /// <value>The contact.</value>
+            string Contact { get; set; }
+
+            /// <summary>
+            /// Gets or sets the display version.
+            /// </summary>
+            /// <value>The display version.</value>
+            string DisplayVersion { get; set; }
+
+            /// <summary>
+            /// Gets or sets the help link.
+            /// </summary>
+            /// <value>The help link.</value>
+            string HelpLink { get; set; }
+
+            /// <summary>
+            /// Gets or sets the help telephone.
+            /// </summary>
+            /// <value>The help telephone.</value>
+            string HelpTelephone { get; set; }
+
+            /// <summary>
+            /// Gets or sets the install date.
+            /// </summary>
+            /// <value>The install date.</value>
+            TzDateTime InstallDate { get; set; }
+
+            /// <summary>
+            /// Gets or sets the publisher.
+            /// </summary>
+            /// <value>The publisher.</value>
+            string Publisher { get; set; }
+
+            /// <summary>
+            /// Gets the modify path.
+            /// </summary>
+            /// <value>The modify path.</value>
+            string ModifyPath { get; }
+
+            /// <summary>
+            /// Gets or sets the readme.
+            /// </summary>
+            /// <value>The readme.</value>
+            string Readme { get; set; }
+
+            /// <summary>
+            /// Gets or sets the size.
+            /// </summary>
+            /// <value>The size.</value>
+            string Size { get; set; }
+
+            /// <summary>
+            /// Gets the uninstall string.
+            /// </summary>
+            /// <value>The uninstall string.</value>
+            string UninstallString { get; }
+
+            /// <summary>
+            /// Gets or sets the URL info about.
+            /// </summary>
+            /// <value>The URL info about.</value>
+            Url UrlInfoAbout { get; set; }
+
+            /// <summary>
+            /// Gets or sets the URL update info.
+            /// </summary>
+            /// <value>The URL update info.</value>
+            Url UrlUpdateInfo { get; set; }
+
+            /// <summary>
+            /// Gets or sets the version.
+            /// </summary>
+            /// <value>The version.</value>
+            Version Version { get; set; }
+
+            /// <summary>
+            /// Uninstalls this instance.
+            /// </summary>
+            void Uninstall();
+
+            /// <summary>
+            /// Refreshes this instance.
+            /// </summary>
+            void Refresh();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public class InstalledProgram : IInstalledProgram
+        {
+            private string m_DisplayName;
+            private string m_DisplayIcon;
+            private int? m_EstimatedSize;
+            private string m_Comments;
+            private string m_Contact;
+            private string m_DisplayVersion;
+            private string m_HelpLink;
+            private string m_HelpTelephone;
+            private TzDateTime m_InstallDate;
+            private string m_Publisher;
+            private string m_ModifyPath;
+            private string m_Readme;
+            private string m_Size;
+            private string m_UninstallString;
+            private Url m_UrlInfoAbout;
+            private Url m_UrlUpdateInfo;
+            private Version m_Version;
+            private string m_keyName;
+            private bool m_hasData = false;
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="InstalledProgram"/> class.
+            /// </summary>
+            /// <param name="keyName">Name of the key.</param>
+            public InstalledProgram(string keyName)
+            {
+                m_keyName = keyName;
+            }
+
+            private void EnsureData()
+            {
+                if (!m_hasData)
+                {
+                    Refresh();
+                    m_hasData = true;
+                }
+            }
+
+            /// <summary>
+            /// Gets the registry key.
+            /// </summary>
+            /// <value>The registry key.</value>
+            public string RegistryKey
+            {
+                get
+                {
+                    return m_keyName;
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets the name of the display.
+            /// </summary>
+            /// <value>The name of the display.</value>
+            public string DisplayName
+            {
+                get
+                {
+                    EnsureData();
+                    return m_DisplayName;
+                }
+                set
+                {
+                    m_DisplayName = value;
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets the display icon.
+            /// </summary>
+            /// <value>The display icon.</value>
+            public string DisplayIcon
+            {
+                get
+                {
+                    EnsureData();
+                    return m_DisplayIcon;
+                }
+                set
+                {
+                    m_DisplayIcon = value;
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets the size of the estimated.
+            /// </summary>
+            /// <value>The size of the estimated.</value>
+            public int? EstimatedSize
+            {
+                get
+                {
+                    EnsureData();
+                    return m_EstimatedSize;
+                }
+                set
+                {
+                    m_EstimatedSize = value;
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets the comments.
+            /// </summary>
+            /// <value>The comments.</value>
+            public string Comments
+            {
+                get
+                {
+                    EnsureData();
+                    return m_Comments;
+                }
+                set
+                {
+                    m_Comments = value;
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets the contact.
+            /// </summary>
+            /// <value>The contact.</value>
+            public string Contact
+            {
+                get
+                {
+                    EnsureData();
+                    return m_Contact;
+                }
+                set
+                {
+                    m_Contact = value;
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets the display version.
+            /// </summary>
+            /// <value>The display version.</value>
+            public string DisplayVersion
+            {
+                get
+                {
+                    EnsureData();
+                    return m_DisplayVersion;
+                }
+                set
+                {
+                    m_DisplayVersion = value;
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets the help link.
+            /// </summary>
+            /// <value>The help link.</value>
+            public string HelpLink
+            {
+                get
+                {
+                    EnsureData();
+                    return m_HelpLink;
+                }
+                set
+                {
+                    m_HelpLink = value;
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets the help telephone.
+            /// </summary>
+            /// <value>The help telephone.</value>
+            public string HelpTelephone
+            {
+                get
+                {
+                    EnsureData();
+                    return m_HelpTelephone;
+                }
+                set
+                {
+                    m_HelpTelephone = value;
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets the install date.
+            /// </summary>
+            /// <value>The install date.</value>
+            public TzDateTime InstallDate
+            {
+                get
+                {
+                    EnsureData();
+                    return m_InstallDate;
+                }
+                set
+                {
+                    m_InstallDate = value;
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets the publisher.
+            /// </summary>
+            /// <value>The publisher.</value>
+            public string Publisher
+            {
+                get
+                {
+                    EnsureData();
+                    return m_Publisher;
+                }
+                set
+                {
+                    m_Publisher = value;
+                }
+            }
+
+            /// <summary>
+            /// Gets the modify path.
+            /// </summary>
+            /// <value>The modify path.</value>
+            public string ModifyPath
+            {
+                get
+                {
+                    EnsureData();
+                    return m_ModifyPath;
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets the readme.
+            /// </summary>
+            /// <value>The readme.</value>
+            public string Readme
+            {
+                get
+                {
+                    EnsureData();
+                    return m_Readme;
+                }
+                set
+                {
+                    m_Readme = value;
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets the size.
+            /// </summary>
+            /// <value>The size.</value>
+            public string Size
+            {
+                get
+                {
+                    EnsureData();
+                    return m_Size;
+                }
+                set
+                {
+                    m_Size = value;
+                }
+            }
+
+            /// <summary>
+            /// Gets the uninstall string.
+            /// </summary>
+            /// <value>The uninstall string.</value>
+            public string UninstallString
+            {
+                get
+                {
+                    EnsureData();
+                    return m_UninstallString;
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets the URL info about.
+            /// </summary>
+            /// <value>The URL info about.</value>
+            public Url UrlInfoAbout
+            {
+                get
+                {
+                    EnsureData();
+                    return m_UrlInfoAbout;
+                }
+                set
+                {
+                    m_UrlInfoAbout = value;
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets the URL update info.
+            /// </summary>
+            /// <value>The URL update info.</value>
+            public Url UrlUpdateInfo
+            {
+                get
+                {
+                    EnsureData();
+                    return m_UrlUpdateInfo;
+                }
+                set
+                {
+                    m_UrlUpdateInfo = value;
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets the version.
+            /// </summary>
+            /// <value>The version.</value>
+            public Version Version
+            {
+                get
+                {
+                    EnsureData();
+                    return m_Version;
+                }
+                set
+                {
+                    m_Version = value;
+                }
+            }
+
+            /// <summary>
+            /// Uninstalls this instance.
+            /// </summary>
+            public void Uninstall()
+            {
+                EnsureData();
+                if (string.IsNullOrEmpty(UninstallString))
+                {
+                    throw new ArgumentNullException("UninstallString");
+                }
+                ProcessHelper process = ProcessHelper.Parse(UninstallString);
+                if (process.FileName.IndexOf("msiexec.exe", StringComparison.CurrentCultureIgnoreCase) != -1)
+                {
+                    process.AddArguments("/quiet", "/qn");
+                    process.Arguments = process.Arguments.Replace("/I", "/x");
+                }
+                process.StartAndWaitForExit(true);
+            }
+
+            /// <summary>
+            /// Refreshes this instance.
+            /// </summary>
+            public void Refresh()
+            {
+                using (RegistryKey key = Registry.LocalMachine.OpenSubKey(m_keyName))
+                {
+                    m_Comments = key.GetValue("Comments") as string;
+                    m_Contact = key.GetValue("Contact") as string;
+                    m_DisplayIcon = key.GetValue("DisplayIcon") as string;
+                    m_DisplayName = key.GetValue("DisplayName") as string;
+                    m_DisplayVersion = key.GetValue("DisplayVersion") as string;
+                    object obj = key.GetValue("EstimatedSize");
+                    if (obj != null)
+                    {
+                        m_EstimatedSize = (int)obj;
+                    }
+                    m_HelpLink = key.GetValue("HelpLink") as string;
+                    m_HelpTelephone = key.GetValue("HelpTelephone") as string;
+                    string str = key.GetValue("InstallDate") as string;
+                    if (!string.IsNullOrEmpty(str))
+                    {
+                        TzDateTime dateTime;
+                        if (TzDateTime.TryParse(str, TzTimeZone.TimeZoneLocal, out dateTime))
+                        {
+                            m_InstallDate = dateTime;
+                        }
+                    }
+                    m_ModifyPath = key.GetValue("ModifyPath") as string;
+                    m_Publisher = key.GetValue("Publisher") as string;
+                    m_Readme = key.GetValue("Readme") as string;
+                    m_Size = key.GetValue("Size") as string;
+                    m_UninstallString = key.GetValue("UninstallString") as string;
+                    str = key.GetValue("URLInfoAbout") as string;
+                    if (!string.IsNullOrEmpty(str))
+                    {
+                        Url url;
+                        if (ConversionUtilities.TryParseUrl(str, out url))
+                        {
+                            m_UrlInfoAbout = url;
+                        }
+                    }
+                    str = key.GetValue("URLUpdateInfo") as string;
+                    if (!string.IsNullOrEmpty(str))
+                    {
+                        Url url;
+                        if (ConversionUtilities.TryParseUrl(str, out url))
+                        {
+                            m_UrlUpdateInfo = url;
+                        }
+                    }
+                    str = key.GetValue("Version") as string;
+                    if (!string.IsNullOrEmpty(str))
+                    {
+                        Version version;
+                        if (ConversionUtilities.TryParseVersion(str, out version))
+                        {
+                            m_Version = version;
+                        }
+                    }
+                }
+            }
+
+            /// <summary>
+            /// Returns a <see cref="T:System.String"></see> that represents the current <see cref="T:System.Object"></see>.
+            /// </summary>
+            /// <returns>
+            /// A <see cref="T:System.String"></see> that represents the current <see cref="T:System.Object"></see>.
+            /// </returns>
+            public override string ToString()
+            {
+                return DisplayName;
+            }
+        }
+
+        /// <summary>
+        /// Gets the add remove program list.
+        /// </summary>
+        /// <returns></returns>
+        public static List<IInstalledProgram> GetAddRemoveProgramList()
+        {
+            return GetAddRemoveProgramList(null);
+        }
+
+        /// <summary>
+        /// Gets the add remove program list.
+        /// </summary>
+        /// <returns></returns>
+        public static List<IInstalledProgram> GetAddRemoveProgramList(string filter)
+        {
+            string uninstallSubKey = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall";
+            List<IInstalledProgram> result = new List<IInstalledProgram>();
+            RegistryKey key = Registry.LocalMachine.OpenSubKey(uninstallSubKey);
+            if (key != null)
+            {
+                using (key)
+                {
+                    foreach (string name in key.GetSubKeyNames())
+                    {
+                        IInstalledProgram prog = new InstalledProgram(uninstallSubKey + @"\" + name);
+                        if (filter == null || (filter != null && prog.DisplayName != null && prog.DisplayName.IndexOf(filter, StringComparison.CurrentCultureIgnoreCase) != -1))
+                        {
+                            result.Add(prog);
+                        }
+                    }
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
         /// Logoffs the current user.
         /// </summary>
         public static void LogoffCurrentUser()
@@ -3594,10 +4525,667 @@ namespace PublicDomain
         }
 
         /// <summary>
+        /// Wrapper around <see cref="PublicDomain.Win32.Win32Interfaces.IAssemblyName"/>
+        /// </summary>
+        public class GacAssemblyName : IComWrapper<PublicDomain.Win32.Win32Interfaces.IAssemblyName>
+        {
+            private PublicDomain.Win32.Win32Interfaces.IAssemblyName m_assemblyName;
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="AssemblyName"/> class.
+            /// </summary>
+            /// <param name="assemblyName">Name of the assembly.</param>
+            public GacAssemblyName(PublicDomain.Win32.Win32Interfaces.IAssemblyName assemblyName)
+            {
+                m_assemblyName = assemblyName;
+            }
+
+            /// <summary>
+            /// Gets the COM interface.
+            /// </summary>
+            /// <value>The COM interface.</value>
+            public Win32Interfaces.IAssemblyName ComInterface
+            {
+                get
+                {
+                    return m_assemblyName;
+                }
+            }
+
+            /// <summary>
+            /// Gets the display name of the assembly. This
+            /// is the common format strong name, with the Name of the assembly,
+            /// followed by the version, followed by the Culture, and finally
+            /// followed by the PublicKeyToken. For example:
+            /// 
+            /// System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+            /// </summary>
+            public string DisplayName
+            {
+                get
+                {
+                    return GetDisplayName(
+                        Win32Enums.ASM_DISPLAY_FLAGS.ASM_DISPLAYF_PUBLIC_KEY_TOKEN |
+                        Win32Enums.ASM_DISPLAY_FLAGS.ASM_DISPLAYF_VERSION |
+                        Win32Enums.ASM_DISPLAY_FLAGS.ASM_DISPLAYF_CULTURE
+                    );
+                }
+            }
+
+            /// <summary>
+            /// Gets the name of the assembly.
+            /// </summary>
+            /// <value>The name of the assembly.</value>
+            public AssemblyName AssemblyName
+            {
+                get
+                {
+                    AssemblyName result = new AssemblyName();
+                    result.Name = Name;
+                    result.Version = Version;
+                    result.CultureInfo = Culture;
+                    result.SetPublicKeyToken(PublicKeyToken);
+                    return result;
+                }
+            }
+
+            /// <summary>
+            /// Gets the name of the display.
+            /// </summary>
+            /// <param name="flags">The flags.</param>
+            /// <returns></returns>
+            public string GetDisplayName(PublicDomain.Win32.Win32Enums.ASM_DISPLAY_FLAGS flags)
+            {
+                uint bufferSize = 255;
+                StringBuilder buffer = new StringBuilder((int)bufferSize);
+                m_assemblyName.GetDisplayName(buffer, ref bufferSize, flags);
+                string result = buffer.ToString();
+
+                // For some reason, sometimes the name comes back with \'s
+                result = result.Replace(@"\", "");
+
+                return result;
+            }
+
+            /// <summary>
+            /// Gets the simple display name.
+            /// </summary>
+            /// <value>The simple display name.</value>
+            public string Name
+            {
+                get
+                {
+                    uint bufferSize = 255;
+                    StringBuilder buffer = new StringBuilder((int)bufferSize);
+                    m_assemblyName.GetName(ref bufferSize, buffer);
+                    return buffer.ToString();
+                }
+            }
+
+            /// <summary>
+            /// Gets the version.
+            /// </summary>
+            /// <value>The version.</value>
+            public Version Version
+            {
+                get
+                {
+                    uint major;
+                    uint minor;
+                    m_assemblyName.GetVersion(out major, out minor);
+                    return new Version((int)(major >> 16), (int)(major & 0xFFFF), (int)(minor >> 16), (int)(minor & 0xFFFF));
+                }
+            }
+
+            /// <summary>
+            /// Gets the public key token.
+            /// </summary>
+            /// <value>The public key token.</value>
+            public byte[] PublicKeyToken
+            {
+                get
+                {
+                    byte[] result = new byte[8];
+                    uint bufferSize = 8;
+                    IntPtr buffer = Marshal.AllocHGlobal((int)bufferSize);
+                    m_assemblyName.GetProperty(PublicDomain.Win32.Win32Enums.ASM_NAME.ASM_NAME_PUBLIC_KEY_TOKEN, buffer, ref bufferSize);
+                    for (int i = 0; i < 8; i++)
+                    {
+                        result[i] = Marshal.ReadByte(buffer, i);
+                    }
+                    Marshal.FreeHGlobal(buffer);
+                    return result;
+                }
+            }
+
+            /// <summary>
+            /// Gets the public key.
+            /// </summary>
+            /// <value>The public key.</value>
+            public byte[] PublicKey
+            {
+                get
+                {
+                    uint bufferSize = 512;
+                    IntPtr buffer = Marshal.AllocHGlobal((int)bufferSize);
+                    m_assemblyName.GetProperty(PublicDomain.Win32.Win32Enums.ASM_NAME.ASM_NAME_PUBLIC_KEY, buffer, ref bufferSize);
+                    byte[] result = new byte[bufferSize];
+                    for (int i = 0; i < bufferSize; i++)
+                    {
+                        result[i] = Marshal.ReadByte(buffer, i);
+                    }
+                    Marshal.FreeHGlobal(buffer);
+                    return result;
+                }
+            }
+
+            /// <summary>
+            /// Gets the culture.
+            /// </summary>
+            /// <value>The culture.</value>
+            public CultureInfo Culture
+            {
+                get
+                {
+                    uint bufferSize = 255;
+                    IntPtr buffer = Marshal.AllocHGlobal((int)bufferSize);
+                    m_assemblyName.GetProperty(PublicDomain.Win32.Win32Enums.ASM_NAME.ASM_NAME_CULTURE, buffer, ref bufferSize);
+                    string result = Marshal.PtrToStringAuto(buffer);
+                    Marshal.FreeHGlobal(buffer);
+                    return new CultureInfo(result);
+                }
+            }
+
+            /// <summary>
+            /// Returns a <see cref="T:System.String"></see> that represents the current <see cref="T:System.Object"></see>.
+            /// </summary>
+            /// <returns>
+            /// A <see cref="T:System.String"></see> that represents the current <see cref="T:System.Object"></see>.
+            /// </returns>
+            public override string ToString()
+            {
+                return DisplayName;
+            }
+        }
+
+        /// <summary>
+        /// Wraps <see cref="PublicDomain.Win32.Win32Interfaces.IAssemblyEnum"/>
+        /// </summary>
+        public class GacAssemblyEnum : IComWrapper<Win32Interfaces.IAssemblyEnum>, IEnumerable<GacAssemblyName>
+        {
+            private PublicDomain.Win32.Win32Interfaces.IAssemblyEnum m_assemblyEnum;
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="GacAssemblyEnum"/> class.
+            /// </summary>
+            /// <param name="assemblyEnum">The assembly enum.</param>
+            public GacAssemblyEnum(PublicDomain.Win32.Win32Interfaces.IAssemblyEnum assemblyEnum)
+            {
+                m_assemblyEnum = assemblyEnum;
+            }
+
+            /// <summary>
+            /// Gets the COM interface.
+            /// </summary>
+            /// <value>The COM interface.</value>
+            public Win32Interfaces.IAssemblyEnum ComInterface
+            {
+                get
+                {
+                    return m_assemblyEnum;
+                }
+            }
+
+            /// <summary>
+            /// Returns an enumerator that iterates through the collection.
+            /// </summary>
+            /// <returns>
+            /// A <see cref="T:System.Collections.Generic.IEnumerator`1"></see> that can be used to iterate through the collection.
+            /// </returns>
+            public IEnumerator<GacAssemblyName> GetEnumerator()
+            {
+                return new AssemblyEnumerator(this);
+            }
+
+            /// <summary>
+            /// Returns an enumerator that iterates through a collection.
+            /// </summary>
+            /// <returns>
+            /// An <see cref="T:System.Collections.IEnumerator"></see> object that can be used to iterate through the collection.
+            /// </returns>
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return this.GetEnumerator();
+            }
+
+            /// <summary>
+            /// 
+            /// </summary>
+            private class AssemblyEnumerator : IEnumerator<GacAssemblyName>
+            {
+                private GacAssemblyEnum m_assemblyEnum;
+                private GacAssemblyName m_current;
+
+                /// <summary>
+                /// Initializes a new instance of the <see cref="AssemblyEnumerator"/> class.
+                /// </summary>
+                /// <param name="assemblyEnum">The assembly enum.</param>
+                public AssemblyEnumerator(GacAssemblyEnum assemblyEnum)
+                {
+                    m_assemblyEnum = assemblyEnum;
+                }
+
+                /// <summary>
+                /// Gets the element in the collection at the current position of the enumerator.
+                /// </summary>
+                /// <value></value>
+                /// <returns>The element in the collection at the current position of the enumerator.</returns>
+                public GacAssemblyName Current
+                {
+                    get
+                    {
+                        return m_current;
+                    }
+                }
+
+                /// <summary>
+                /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+                /// </summary>
+                public void Dispose()
+                {
+                }
+
+                /// <summary>
+                /// Gets the element in the collection at the current position of the enumerator.
+                /// </summary>
+                /// <value></value>
+                /// <returns>The element in the collection at the current position of the enumerator.</returns>
+                object IEnumerator.Current
+                {
+                    get
+                    {
+                        return Current;
+                    }
+                }
+
+                /// <summary>
+                /// Advances the enumerator to the next element of the collection.
+                /// </summary>
+                /// <returns>
+                /// true if the enumerator was successfully advanced to the next element; false if the enumerator has passed the end of the collection.
+                /// </returns>
+                /// <exception cref="T:System.InvalidOperationException">The collection was modified after the enumerator was created. </exception>
+                public bool MoveNext()
+                {
+                    PublicDomain.Win32.Win32Interfaces.IAssemblyName next;
+                    int result = m_assemblyEnum.ComInterface.GetNextAssembly((IntPtr)0, out next, 0);
+                    bool advanced = result == Win32Constants.S_OK ? true : false;
+                    if (advanced)
+                    {
+                        m_current = new GacAssemblyName(next);
+                    }
+                    return advanced;
+                }
+
+                /// <summary>
+                /// Sets the enumerator to its initial position, which is before the first element in the collection.
+                /// </summary>
+                /// <exception cref="T:System.InvalidOperationException">The collection was modified after the enumerator was created. </exception>
+                public void Reset()
+                {
+                    m_assemblyEnum.ComInterface.Reset();
+                }
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public class GlobalAssemblyCache
+        {
+            private static string s_path;
+            private static object s_lock = new object();
+
+            /// <summary>
+            /// Gets the path of the GAC.
+            /// </summary>
+            /// <value>The path of the GAC.</value>
+            public static string Path
+            {
+                get
+                {
+                    if (s_path == null)
+                    {
+                        lock (s_lock)
+                        {
+                            s_path = Win32GetCachePath(Win32Enums.ASM_CACHE_FLAGS.ASM_CACHE_GAC);
+                        }
+                    }
+                    return s_path;
+                }
+            }
+
+            /// <summary>
+            /// Gets the zap path.
+            /// </summary>
+            /// <value>The zap path.</value>
+            public static string ZapPath
+            {
+                get
+                {
+                    return Win32GetCachePath(Win32Enums.ASM_CACHE_FLAGS.ASM_CACHE_ZAP);
+                }
+            }
+
+            /// <summary>
+            /// Gets the download path.
+            /// </summary>
+            /// <value>The download path.</value>
+            public static string DownloadPath
+            {
+                get
+                {
+                    return Win32GetCachePath(Win32Enums.ASM_CACHE_FLAGS.ASM_CACHE_DOWNLOAD);
+                }
+            }
+
+            /// <summary>
+            /// The assembly is referenced by an application that has been
+            /// installed by using Windows Installer. The szIdentifier field
+            /// is set to MSI, and szNonCannonicalData is set to Windows Installer.
+            /// This scheme must only be used by Windows Installer itself.
+            /// </summary>
+            public static Guid FUSION_REFCOUNT_MSI_GUID = new Guid("25DF0FC1-7F97-4070-ADD7-4B13BBFD7CB8");
+
+            /// <summary>
+            /// The assembly is referenced by an application that appears
+            /// in Add/Remove Programs. The szIdentifier field is the token
+            /// that is used to register the application with Add/Remove programs.
+            /// </summary>
+            public static Guid FUSION_REFCOUNT_UNINSTALL_SUBKEY_GUID = new Guid("8CEDC215-AC4b-488B-93C0-A50A49CB2FB8");
+
+            /// <summary>
+            /// The assembly is referenced by an application that is represented
+            /// by a file in the file system. The szIdentifier field is the path
+            /// to this file.
+            /// </summary>
+            public static Guid FUSION_REFCOUNT_FILEPATH_GUID = new Guid("B02F9D65-FB77-4F7A-AFA5-B391309F11C9");
+
+            /// <summary>
+            /// The assembly is referenced by an application that is only
+            /// represented by an opaque string. The szIdentifier is this
+            /// opaque string. The GAC does not perform existence checking
+            /// for opaque references when you remove this.
+            /// </summary>
+            public static Guid FUSION_REFCOUNT_OPAQUE_STRING_GUID = new Guid("2EC93463-B0C3-45E1-8364-327E96AEA856");
+
+            /// <summary>
+            /// Wrapper around <see cref="PublicDomain.Win32.ExternalMethods.CreateAssemblyCache"/>
+            /// </summary>
+            /// <returns></returns>
+            public static PublicDomain.Win32.Win32Interfaces.IAssemblyCache Win32CreateAssemblyCache()
+            {
+                PublicDomain.Win32.Win32Interfaces.IAssemblyCache result;
+                ExternalMethods.CreateAssemblyCache(out result, 0);
+                return result;
+            }
+
+            /// <summary>
+            /// Wrapper around <see cref="PublicDomain.Win32.ExternalMethods.CreateAssemblyNameObject"/>.
+            /// Certain properties, such as processor architecture, are set to their default values.
+            /// </summary>
+            /// <param name="name">A string representation of the assembly name or of a full assembly reference that is determined by dwFlags. The string representation can be null.</param>
+            /// <returns></returns>
+            public static PublicDomain.Win32.Win32Interfaces.IAssemblyName Win32CreateAssemblyName(string name)
+            {
+                return Win32CreateAssemblyName(name, Win32Enums.CREATE_ASM_NAME_OBJ_FLAGS.CANOF_SET_DEFAULT_VALUES);
+            }
+
+            /// <summary>
+            /// Wrapper around <see cref="PublicDomain.Win32.ExternalMethods.CreateAssemblyNameObject"/>
+            /// </summary>
+            /// <param name="name">A string representation of the assembly name or of a full assembly reference that is determined by dwFlags. The string representation can be null.</param>
+            /// <param name="flags">Zero or more of the bits that are defined in the CREATE_ASM_NAME_OBJ_FLAGS enumeration.</param>
+            /// <returns></returns>
+            public static PublicDomain.Win32.Win32Interfaces.IAssemblyName Win32CreateAssemblyName(string name, PublicDomain.Win32.Win32Enums.CREATE_ASM_NAME_OBJ_FLAGS flags)
+            {
+                PublicDomain.Win32.Win32Interfaces.IAssemblyName result;
+                ExternalMethods.CreateAssemblyNameObject(out result, name, flags, (IntPtr)0);
+                return result;
+            }
+
+            /// <summary>
+            /// Wrapper around <see cref="PublicDomain.Win32.ExternalMethods.CreateAssemblyEnum"/>.
+            /// Enumerates only the GAC with no filter.
+            /// </summary>
+            /// <returns></returns>
+            public static PublicDomain.Win32.Win32Interfaces.IAssemblyEnum Win32CreateAssemblyEnum()
+            {
+                return Win32CreateAssemblyEnum(null);
+            }
+
+            /// <summary>
+            /// Wrapper around <see cref="PublicDomain.Win32.ExternalMethods.CreateAssemblyEnum"/>.
+            /// Enumerates only the GAC.
+            /// </summary>
+            /// <param name="filterName">An assembly name that is used to filter the enumeration. Can be null to enumerate all assemblies in the GAC.</param>
+            /// <returns></returns>
+            public static PublicDomain.Win32.Win32Interfaces.IAssemblyEnum Win32CreateAssemblyEnum(PublicDomain.Win32.Win32Interfaces.IAssemblyName filterName)
+            {
+                return Win32CreateAssemblyEnum(filterName, Win32Enums.ASM_CACHE_FLAGS.ASM_CACHE_GAC);
+            }
+
+            /// <summary>
+            /// Wrapper around <see cref="PublicDomain.Win32.ExternalMethods.CreateAssemblyEnum"/>
+            /// </summary>
+            /// <param name="filterName">An assembly name that is used to filter the enumeration. Can be null to enumerate all assemblies in the GAC.</param>
+            /// <param name="flags">Exactly one bit from the ASM_CACHE_FLAGS enumeration.</param>
+            /// <returns></returns>
+            public static PublicDomain.Win32.Win32Interfaces.IAssemblyEnum Win32CreateAssemblyEnum(PublicDomain.Win32.Win32Interfaces.IAssemblyName filterName, PublicDomain.Win32.Win32Enums.ASM_CACHE_FLAGS flags)
+            {
+                PublicDomain.Win32.Win32Interfaces.IAssemblyEnum result;
+                ExternalMethods.CreateAssemblyEnum(out result, (IntPtr)0, filterName, flags, (IntPtr)0);
+                return result;
+            }
+
+            /// <summary>
+            /// Wrapper around <see cref="PublicDomain.Win32.ExternalMethods.CreateInstallReferenceEnum"/>
+            /// </summary>
+            /// <param name="name">The assembly name for which the references are enumerated.</param>
+            /// <returns></returns>
+            public static PublicDomain.Win32.Win32Interfaces.IInstallReferenceEnum Win32CreateInstallReferenceEnum(PublicDomain.Win32.Win32Interfaces.IAssemblyName name)
+            {
+                PublicDomain.Win32.Win32Interfaces.IInstallReferenceEnum result;
+                ExternalMethods.CreateInstallReferenceEnum(out result, name, 0, (IntPtr)0);
+                return result;
+            }
+
+            /// <summary>
+            /// Wrapper around <see cref="PublicDomain.Win32.ExternalMethods.GetCachePath"/>
+            /// </summary>
+            /// <param name="flags">The flags.</param>
+            /// <returns></returns>
+            public static string Win32GetCachePath(PublicDomain.Win32.Win32Enums.ASM_CACHE_FLAGS flags)
+            {
+                uint bufferSize = 255;
+                StringBuilder buffer = new StringBuilder((int)bufferSize);
+                ExternalMethods.GetCachePath(flags, buffer, ref bufferSize);
+                return buffer.ToString();
+            }
+
+            /// <summary>
+            /// Gets all the assemblies in the GAC.
+            /// </summary>
+            /// <returns></returns>
+            public static GacAssemblyEnum GetAllAssemblies()
+            {
+                return new GacAssemblyEnum(Win32CreateAssemblyEnum());
+            }
+
+            /// <summary>
+            /// Finds all the assemblies in the GAC, matching the <paramref name="filterName"/> filter
+            /// and <paramref name="flags"/>.
+            /// </summary>
+            /// <param name="filterName">An assembly name that is used to filter the enumeration. Can be null to enumerate all assemblies in the GAC.</param>
+            /// <returns></returns>
+            public static GacAssemblyEnum FindAssemblies(GacAssemblyName filterName)
+            {
+                return new GacAssemblyEnum(Win32CreateAssemblyEnum(filterName == null ? null : filterName.ComInterface));
+            }
+
+            /// <summary>
+            /// Finds the assemblies.
+            /// </summary>
+            /// <param name="filterName">Name of the filter.</param>
+            /// <returns></returns>
+            public static GacAssemblyEnum FindAssemblies(string filterName)
+            {
+                return FindAssemblies(CreateAssemblyName(filterName));
+            }
+
+            /// <summary>
+            /// Finds all the assemblies in the GAC, matching the <paramref name="filterName"/> filter
+            /// and <paramref name="flags"/>.
+            /// </summary>
+            /// <param name="filterName">An assembly name that is used to filter the enumeration. Can be null to enumerate all assemblies in the GAC.</param>
+            /// <param name="flags">Exactly one bit from the ASM_CACHE_FLAGS enumeration.</param>
+            /// <returns></returns>
+            public static GacAssemblyEnum FindAssemblies(GacAssemblyName filterName, PublicDomain.Win32.Win32Enums.ASM_CACHE_FLAGS flags)
+            {
+                return new GacAssemblyEnum(Win32CreateAssemblyEnum(filterName == null ? null : filterName.ComInterface, flags));
+            }
+
+            /// <summary>
+            /// Creates the name of the assembly.
+            /// </summary>
+            /// <param name="name">The name.</param>
+            /// <returns></returns>
+            public static GacAssemblyName CreateAssemblyName(string name)
+            {
+                return new GacAssemblyName(Win32CreateAssemblyName(name));
+            }
+
+            /// <summary>
+            /// Finds the assembly with the largest version.
+            /// </summary>
+            /// <param name="filterName">Name of the filter.</param>
+            /// <returns></returns>
+            public static GacAssemblyName FindAssemblyWithLargestVersion(string filterName)
+            {
+                List<GacAssemblyName> assemblies = ArrayUtilities.GetListFromEnumerable<GacAssemblyName>(FindAssemblies(filterName));
+                if (assemblies.Count > 0)
+                {
+                    assemblies.Sort(delegate(GacAssemblyName x, GacAssemblyName y)
+                    {
+                        return x.Version.CompareTo(y.Version);
+                    });
+                    return assemblies[assemblies.Count - 1];
+                }
+                return null;
+            }
+
+            /// <summary>
+            /// Installs the assembly.
+            /// </summary>
+            /// <param name="dll">The DLL.</param>
+            /// <param name="references">The references.</param>
+            public static void InstallAssembly(string dll, params PublicDomain.Win32.Win32Structures.FUSION_INSTALL_REFERENCE[] references)
+            {
+                InstallAssembly(dll, Win32Enums.IASSEMBLYCACHE_INSTALL_FLAG.IASSEMBLYCACHE_INSTALL_FLAG_REFRESH, references);
+            }
+
+            /// <summary>
+            /// Installs the assembly.
+            /// </summary>
+            /// <param name="dll">The DLL.</param>
+            /// <param name="flag">The flag.</param>
+            /// <param name="references">The references.</param>
+            public static void InstallAssembly(string dll, Win32Enums.IASSEMBLYCACHE_INSTALL_FLAG flag, params PublicDomain.Win32.Win32Structures.FUSION_INSTALL_REFERENCE[] references)
+            {
+                if (references.Length == 0)
+                {
+                    references = null;
+                }
+                PublicDomain.Win32.Win32Interfaces.IAssemblyCache cache = Win32CreateAssemblyCache();
+                cache.InstallAssembly(flag, dll, references);
+            }
+
+            /// <summary>
+            /// Installs the assembly.
+            /// </summary>
+            /// <param name="dll">Full path to the dll.</param>
+            /// <param name="referenceType">Type of the reference.</param>
+            /// <param name="referenceDetails">The reference details.</param>
+            /// <param name="nonCanonicalData">The non canonical data.</param>
+            public static void InstallAssembly(string dll, Win32Enums.INSTALL_GAC_REFERENCE referenceType, string referenceDetails, string nonCanonicalData)
+            {
+                Win32Structures.FUSION_INSTALL_REFERENCE reference = BuildInstallReference(referenceType, referenceDetails, nonCanonicalData);
+                InstallAssembly(dll, reference);
+            }
+
+            private static Win32Structures.FUSION_INSTALL_REFERENCE BuildInstallReference(Win32Enums.INSTALL_GAC_REFERENCE referenceType, string referenceDetails, string nonCanonicalData)
+            {
+                Win32Structures.FUSION_INSTALL_REFERENCE reference = new Win32Structures.FUSION_INSTALL_REFERENCE();
+                reference.cbSize = (uint)Marshal.SizeOf(reference);
+                reference.dwFlags = 0;
+                reference.szNonCannonicalData = nonCanonicalData;
+                switch (referenceType)
+                {
+                    case Win32Enums.INSTALL_GAC_REFERENCE.ApplicationInFilesystem:
+                        reference.guidScheme = FUSION_REFCOUNT_FILEPATH_GUID;
+                        reference.szIdentifier = referenceDetails;
+                        break;
+                    case Win32Enums.INSTALL_GAC_REFERENCE.OpaqueProgram:
+                        reference.guidScheme = FUSION_REFCOUNT_OPAQUE_STRING_GUID;
+                        reference.szIdentifier = referenceDetails;
+                        break;
+                    case Win32Enums.INSTALL_GAC_REFERENCE.ProgramInAddRemoveProgramsList:
+                        reference.guidScheme = FUSION_REFCOUNT_UNINSTALL_SUBKEY_GUID;
+                        reference.szIdentifier = referenceDetails;
+                        break;
+                    case Win32Enums.INSTALL_GAC_REFERENCE.MSI:
+                        reference.guidScheme = FUSION_REFCOUNT_MSI_GUID;
+                        reference.szIdentifier = "MSI";
+                        reference.szNonCannonicalData = "Windows Installer";
+                        break;
+                    default:
+                        throw new NotImplementedException();
+                }
+                return reference;
+            }
+
+            /// <summary>
+            /// Uninstalls the assembly from the GAC.
+            /// </summary>
+            /// <param name="assemblyStrongName">Name of the assembly strong.</param>
+            public static Win32Enums.AssemblyCacheUninstallDisposition UninstallAssembly(string assemblyStrongName)
+            {
+                PublicDomain.Win32.Win32Interfaces.IAssemblyCache cache = Win32CreateAssemblyCache();
+                Win32Enums.AssemblyCacheUninstallDisposition result = Win32Enums.AssemblyCacheUninstallDisposition.Uninstalled;
+                uint disposition;
+                if (cache.UninstallAssembly(0, assemblyStrongName, null, out disposition) == Win32Constants.S_FALSE)
+                {
+                    result = (Win32Enums.AssemblyCacheUninstallDisposition)disposition;
+                }
+                return result;
+            }
+        }
+
+        /// <summary>
         /// Win32 constants
         /// </summary>
         public static class Win32Constants
         {
+            /// <summary>
+            /// Success
+            /// </summary>
+            public const int S_OK = 0x00000000;
+
+            /// <summary>
+            /// 
+            /// </summary>
+            public const int S_FALSE = 0x00000001;
+
             /// <summary>
             /// Shuts down all processes running in the logon session of the process that called the ExitWindowsEx function. Then it logs the user off.
             /// This flag can be used only by processes running in an interactive user's logon session.
@@ -3838,6 +5426,74 @@ namespace PublicDomain
             /// If the function fails, the return value is zero. To get extended error information, call GetLastError.</returns>
             [DllImport("user32.dll", SetLastError = true)]
             public static extern bool ExitWindowsEx(uint uFlags, uint dwReason);
+
+            /// <summary>
+            /// To obtain an instance of the CreateAssemblyCache API
+            /// </summary>
+            /// <param name="ppAsmCache">Pointer to return IAssemblyCache</param>
+            /// <param name="dwReserved">Reserved, must be zero.</param>
+            [DllImport("fusion.dll", SetLastError = true, PreserveSig = false)]
+            public static extern void CreateAssemblyCache(out PublicDomain.Win32.Win32Interfaces.IAssemblyCache ppAsmCache, uint dwReserved);
+
+            /// <summary>
+            /// An instance of IAssemblyName is obtained by calling the CreateAssemblyNameObject API
+            /// </summary>
+            /// <param name="ppAssemblyNameObj">Pointer to a memory location that receives the IAssemblyName pointer that is created.</param>
+            /// <param name="szAssemblyName">A string representation of the assembly name or of a full assembly reference that is determined by dwFlags. The string representation can be null.</param>
+            /// <param name="dwFlags">Zero or more of the bits that are defined in the CREATE_ASM_NAME_OBJ_FLAGS enumeration.</param>
+            /// <param name="pvReserved">Must be null.</param>
+            [DllImport("fusion.dll", SetLastError = true, CharSet = CharSet.Unicode, PreserveSig = false)]
+            public static extern void CreateAssemblyNameObject(
+                out PublicDomain.Win32.Win32Interfaces.IAssemblyName ppAssemblyNameObj,
+                string szAssemblyName,
+                PublicDomain.Win32.Win32Enums.CREATE_ASM_NAME_OBJ_FLAGS dwFlags,
+                IntPtr pvReserved
+            );
+
+            /// <summary>
+            /// To obtain an instance of the CreateAssemblyEnum API, call the CreateAssemblyNameObject API
+            /// </summary>
+            /// <param name="pEnum">Pointer to a memory location that contains the IAssemblyEnum pointer.</param>
+            /// <param name="pUnkReserved">Must be null.</param>
+            /// <param name="pName">An assembly name that is used to filter the enumeration. Can be null to enumerate all assemblies in the GAC.</param>
+            /// <param name="dwFlags">Exactly one bit from the ASM_CACHE_FLAGS enumeration.</param>
+            /// <param name="pvReserved">Must be NULL.</param>
+            [DllImport("fusion.dll", SetLastError = true, PreserveSig = false)]
+            public static extern void CreateAssemblyEnum(
+                out PublicDomain.Win32.Win32Interfaces.IAssemblyEnum pEnum,
+                IntPtr pUnkReserved,
+                PublicDomain.Win32.Win32Interfaces.IAssemblyName pName,
+                PublicDomain.Win32.Win32Enums.ASM_CACHE_FLAGS dwFlags,
+                IntPtr pvReserved
+            );
+
+            /// <summary>
+            /// To obtain an instance of the CreateInstallReferenceEnum API, call the CreateInstallReferenceEnum API
+            /// </summary>
+            /// <param name="ppRefEnum">A pointer to a memory location that receives the IInstallReferenceEnum pointer.</param>
+            /// <param name="pName">The assembly name for which the references are enumerated.</param>
+            /// <param name="dwFlags">Must be zero.</param>
+            /// <param name="pvReserved">Must be null.</param>
+            [DllImport("fusion.dll", SetLastError = true, PreserveSig = false)]
+            public static extern void CreateInstallReferenceEnum(
+                out PublicDomain.Win32.Win32Interfaces.IInstallReferenceEnum ppRefEnum,
+                PublicDomain.Win32.Win32Interfaces.IAssemblyName pName,
+                uint dwFlags,
+                IntPtr pvReserved
+            );
+
+            /// <summary>
+            /// The GetCachePath API returns the storage location of the GAC.
+            /// </summary>
+            /// <param name="dwCacheFlags">Exactly one of the bits defined in the ASM_CACHE_FLAGS enumeration.</param>
+            /// <param name="pwzCachePath">Pointer to a buffer that is to receive the path of the GAC as a Unicode string.</param>
+            /// <param name="pcchPath">Length of the pwszCachePath buffer, in Unicode characters.</param>
+            [DllImport("fusion.dll", SetLastError = true, CharSet = CharSet.Unicode, PreserveSig = false)]
+            public static extern void GetCachePath(
+                PublicDomain.Win32.Win32Enums.ASM_CACHE_FLAGS dwCacheFlags,
+                [MarshalAs(UnmanagedType.LPWStr)] StringBuilder pwzCachePath,
+                ref uint pcchPath
+            );
         }
 
         /// <summary>
@@ -3871,10 +5527,783 @@ namespace PublicDomain
             RestartApps = Win32Constants.EWX_RESTARTAPPS,
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        public static class Win32Enums
+        {
+            /// <summary>
+            /// 
+            /// </summary>
+            public enum INSTALL_GAC_REFERENCE
+            {
+                /// <summary>
+                /// The assembly is referenced by an application that is represented
+                /// by a file in the file system.
+                /// </summary>
+                ApplicationInFilesystem,
+
+                /// <summary>
+                /// The assembly is referenced by an application that appears
+                /// in Add/Remove Programs.
+                /// </summary>
+                ProgramInAddRemoveProgramsList,
+
+                /// <summary>
+                /// The assembly is referenced by an application that is only
+                /// represented by an opaque string. The GAC does not perform existence checking
+                /// for opaque references when you remove this.
+                /// </summary>
+                OpaqueProgram,
+
+                /// <summary>
+                /// 
+                /// </summary>
+                MSI
+            }
+
+            /// <summary>
+            /// 
+            /// </summary>
+            public enum AssemblyCacheUninstallDisposition
+            {
+                /// <summary>
+                /// The assembly files have been removed from the GAC.
+                /// </summary>
+                Uninstalled = 1,
+
+                /// <summary>
+                /// An application is using the assembly. This value is returned on Microsoft Windows 95 and Microsoft Windows 98.
+                /// </summary>
+                StillInUs = 2,
+
+                /// <summary>
+                /// The assembly does not exist in the GAC.
+                /// </summary>
+                AlreadyUninstalled = 3,
+
+                /// <summary>
+                /// Not used.
+                /// </summary>
+                DeletePending = 4,
+
+                /// <summary>
+                /// The assembly has not been removed from the GAC because another application reference exists.
+                /// </summary>
+                HasInstallReferences = 5,
+
+                /// <summary>
+                /// The reference that is specified in pRefData is not found in the GAC.
+                /// </summary>
+                ReferenceNotFound = 6
+            }
+
+            /// <summary>
+            /// 
+            /// </summary>
+            [Flags]
+            public enum CREATE_ASM_NAME_OBJ_FLAGS
+            {
+                /// <summary>
+                /// If this flag is specified, the szAssemblyName parameter is a full assembly name and is parsed to the individual properties. If the flag is not specified, szAssemblyName is the "Name" portion of the assembly name.
+                /// </summary>
+                CANOF_PARSE_DISPLAY_NAME = 0x1,
+
+                /// <summary>
+                /// If this flag is specified, certain properties, such as processor architecture, are set to their default values.
+                /// </summary>
+                CANOF_SET_DEFAULT_VALUES = 0x2
+            }
+
+            /// <summary>
+            /// The ASM_NAME enumeration property ID describes the valid names of the name-value pairs in an assembly name.
+            /// </summary>
+            public enum ASM_NAME
+            {
+                /// <summary>
+                /// Property ID for the assembly's public key. The value is a byte array.
+                /// </summary>
+                ASM_NAME_PUBLIC_KEY = 0,
+
+                /// <summary>
+                /// Property ID for the assembly's public key token. The value is a byte array.
+                /// </summary>
+                ASM_NAME_PUBLIC_KEY_TOKEN,
+
+                /// <summary>
+                /// Property ID for a reserved name-value pair. The value is a byte array.
+                /// </summary>
+                ASM_NAME_HASH_VALUE,
+
+                /// <summary>
+                /// Property ID for the assembly's simple name. The value is a string value.
+                /// </summary>
+                ASM_NAME_NAME,
+
+                /// <summary>
+                /// Property ID for the assembly's major version. The value is a WORD value.
+                /// </summary>
+                ASM_NAME_MAJOR_VERSION,
+
+                /// <summary>
+                /// Property ID for the assembly's minor version. The value is a WORD value.
+                /// </summary>
+                ASM_NAME_MINOR_VERSION,
+
+                /// <summary>
+                /// Property ID for the assembly's build version. The value is a WORD value.
+                /// </summary>
+                ASM_NAME_BUILD_NUMBER,
+
+                /// <summary>
+                /// Property ID for the assembly's revision version. The value is a WORD value.
+                /// </summary>
+                ASM_NAME_REVISION_NUMBER,
+
+                /// <summary>
+                /// Property ID for the assembly's culture. The value is a string value.
+                /// </summary>
+                ASM_NAME_CULTURE,
+
+                /// <summary>
+                /// Property ID for a reserved name-value pair.
+                /// </summary>
+                ASM_NAME_PROCESSOR_ID_ARRAY,
+
+                /// <summary>
+                /// Property ID for a reserved name-value pair.
+                /// </summary>
+                ASM_NAME_OSINFO_ARRAY,
+
+                /// <summary>
+                /// Property ID for a reserved name-value pair. The value is a DWORD value.
+                /// </summary>
+                ASM_NAME_HASH_ALGID,
+
+                /// <summary>
+                /// Property ID for a reserved name-value pair.
+                /// </summary>
+                ASM_NAME_ALIAS,
+
+                /// <summary>
+                /// Property ID for a reserved name-value pair.
+                /// </summary>
+                ASM_NAME_CODEBASE_URL,
+
+                /// <summary>
+                /// Property ID for a reserved name-value pair. The value is a FILETIME structure.
+                /// </summary>
+                ASM_NAME_CODEBASE_LASTMOD,
+
+                /// <summary>
+                /// Property ID for the assembly as a simply named assembly that does not have a public key.
+                /// </summary>
+                ASM_NAME_NULL_PUBLIC_KEY,
+
+                /// <summary>
+                /// Property ID for the assembly as a simply named assembly that does not have a public key token.
+                /// </summary>
+                ASM_NAME_NULL_PUBLIC_KEY_TOKEN,
+
+                /// <summary>
+                /// Property ID for a reserved name-value pair. The value is a string value.
+                /// </summary>
+                ASM_NAME_CUSTOM,
+
+                /// <summary>
+                /// Property ID for a reserved name-value pair.
+                /// </summary>
+                ASM_NAME_NULL_CUSTOM,
+
+                /// <summary>
+                /// Property ID for a reserved name-value pair.
+                /// </summary>
+                ASM_NAME_MVID,
+
+                /// <summary>
+                /// Reserved.
+                /// </summary>
+                ASM_NAME_MAX_PARAMS
+            }
+
+            /// <summary>
+            /// 
+            /// </summary>
+            [Flags]
+            public enum ASM_DISPLAY_FLAGS
+            {
+                /// <summary>
+                /// Includes the version number as part of the display name.
+                /// </summary>
+                ASM_DISPLAYF_VERSION = 0x1,
+
+                /// <summary>
+                /// Includes the culture.
+                /// </summary>
+                ASM_DISPLAYF_CULTURE = 0x2,
+
+                /// <summary>
+                /// Includes the public key token.
+                /// </summary>
+                ASM_DISPLAYF_PUBLIC_KEY_TOKEN = 0x4,
+
+                /// <summary>
+                /// Includes the public key.
+                /// </summary>
+                ASM_DISPLAYF_PUBLIC_KEY = 0x8,
+
+                /// <summary>
+                /// Includes the custom part of the assembly name.
+                /// </summary>
+                ASM_DISPLAYF_CUSTOM = 0x10,
+
+                /// <summary>
+                /// Includes the processor architecture.
+                /// </summary>
+                ASM_DISPLAYF_PROCESSORARCHITECTURE = 0x20,
+
+                /// <summary>
+                /// Includes the language ID.
+                /// </summary>
+                ASM_DISPLAYF_LANGUAGEID = 0x40
+            }
+
+            /// <summary>
+            /// 
+            /// </summary>
+            [Flags]
+            public enum ASM_CMP_FLAGS
+            {
+                /// <summary>
+                /// Compare the name portion of the assembly names.
+                /// </summary>
+                ASM_CMPF_NAME = 0x1,
+
+                /// <summary>
+                /// Compare the major version portion of the assembly names.
+                /// </summary>
+                ASM_CMPF_MAJOR_VERSION = 0x2,
+
+                /// <summary>
+                /// Compare the minor version portion of the assembly names.
+                /// </summary>
+                ASM_CMPF_MINOR_VERSION = 0x4,
+
+                /// <summary>
+                /// Compare the build version portion of the assembly names.
+                /// </summary>
+                ASM_CMPF_BUILD_NUMBER = 0x8,
+
+                /// <summary>
+                /// Compare the revision version portion of the assembly names.
+                /// </summary>
+                ASM_CMPF_REVISION_NUMBER = 0x10,
+
+                /// <summary>
+                /// Compare the public key token portion of the assembly names.
+                /// </summary>
+                ASM_CMPF_PUBLIC_KEY_TOKEN = 0x20,
+
+                /// <summary>
+                /// Compare the culture portion of the assembly names.
+                /// </summary>
+                ASM_CMPF_CULTURE = 0x40,
+
+                /// <summary>
+                /// Compare the custom portion of the assembly names.
+                /// </summary>
+                ASM_CMPF_CUSTOM = 0x80,
+
+                /// <summary>
+                /// Compare all portions of the assembly names.
+                /// </summary>
+                ASM_CMPF_ALL = ASM_CMPF_NAME | ASM_CMPF_MAJOR_VERSION | ASM_CMPF_MINOR_VERSION |
+                               ASM_CMPF_REVISION_NUMBER | ASM_CMPF_BUILD_NUMBER |
+                               ASM_CMPF_PUBLIC_KEY_TOKEN | ASM_CMPF_CULTURE | ASM_CMPF_CUSTOM,
+
+                /// <summary>
+                /// Ignore the version number to compare assemblies with simple names.
+                /// 
+                /// For strongly named assemblies, ASM_CMPF_DEFAULT==ASM_CMPF_ALL.
+                /// For simply named assemblies, this is also true. However, when
+                /// performing IAssemblyName::IsEqual, the build number/revision 
+                /// number will be removed from the comparison.
+                /// </summary>
+                ASM_CMPF_DEFAULT = 0x100
+            }
+
+            /// <summary>
+            /// 
+            /// </summary>
+            [Flags]
+            public enum ASM_CACHE_FLAGS
+            {
+                /// <summary>
+                /// Enumerates the cache of precompiled assemblies by using Ngen.exe.
+                /// </summary>
+                ASM_CACHE_ZAP = 0x1,
+
+                /// <summary>
+                /// Enumerates the GAC.
+                /// </summary>
+                ASM_CACHE_GAC = 0x2,
+
+                /// <summary>
+                /// Enumerates the assemblies that have been downloaded on-demand or that have been shadow-copied.
+                /// </summary>
+                ASM_CACHE_DOWNLOAD = 0x4
+            }
+
+            /// <summary>
+            /// 
+            /// </summary>
+            public enum IASSEMBLYCACHE_INSTALL_FLAG
+            {
+                /// <summary>
+                /// If the assembly is already installed in the GAC and the file version numbers of the assembly being installed are the same or later, the files are replaced.
+                /// </summary>
+                IASSEMBLYCACHE_INSTALL_FLAG_REFRESH = 1,
+
+                /// <summary>
+                /// The files of an existing assembly are overwritten regardless of their version number.
+                /// </summary>
+                IASSEMBLYCACHE_INSTALL_FLAG_FORCE_REFRESH = 2
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public static class Win32Structures
+        {
+            /// <summary>
+            /// The FUSION_INSTALL_REFERENCE structure represents a reference
+            /// that is made when an application has installed an assembly in the GAC.
+            /// </summary>
+            [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+            public struct FUSION_INSTALL_REFERENCE
+            {
+                /// <summary>
+                /// The size of the structure in bytes.
+                /// </summary>
+                public uint cbSize;
+
+                /// <summary>
+                /// Reserved, must be zero.
+                /// </summary>
+                public uint dwFlags;
+
+                /// <summary>
+                /// The entity that adds the reference.
+                /// 
+                /// Possible values for the guidScheme field can be one of the following:
+                /// FUSION_REFCOUNT_MSI_GUID - The assembly is referenced by an application that has been installed by using Windows Installer. The szIdentifier field is set to MSI, and szNonCannonicalData is set to Windows Installer. This scheme must only be used by Windows Installer itself.
+                /// FUSION_REFCOUNT_UNINSTALL_SUBKEY_GUID - The assembly is referenced by an application that appears in Add/Remove Programs. The szIdentifier field is the token that is used to register the application with Add/Remove programs.
+                /// FUSION_REFCOUNT_FILEPATH_GUID - The assembly is referenced by an application that is represented by a file in the file system. The szIdentifier field is the path to this file.
+                /// FUSION_REFCOUNT_OPAQUE_STRING_GUID - The assembly is referenced by an application that is only represented by an opaque string. The szIdentifier is this opaque string. The GAC does not perform existence checking for opaque references when you remove this.
+                /// </summary>
+                public Guid guidScheme;
+
+                /// <summary>
+                /// A unique string that identifies the application that installed the assembly.
+                /// </summary>
+                public string szIdentifier;
+
+                /// <summary>
+                /// A string that is only understood by the entity that adds the reference. The GAC only stores this string.
+                /// </summary>
+                public string szNonCannonicalData;
+            }
+
+            /// <summary>
+            /// The ASSEMBLY_INFO structure represents information about an
+            /// assembly in the assembly cache.
+            /// </summary>
+            [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+            public struct ASSEMBLY_INFO
+            {
+                /// <summary>
+                /// Size of the structure in bytes. Permits additions
+                /// to the structure in future version of the .NET Framework.
+                /// </summary>
+                public uint cbAssemblyInfo;
+
+                /// <summary>
+                /// Indicates one or more of the ASSEMBLYINFO_FLAG_* bits.
+                /// 
+                /// dwAssemblyFlags can have one of the following values:
+                /// ASSEMBLYINFO_FLAG__INSTALLED - Indicates that the assembly is actually installed. Always set in current version of the .NET Framework.
+                /// ASSEMBLYINFO_FLAG__PAYLOADRESIDENT - Never set in the current version of the .NET Framework.
+                /// </summary>
+                public uint dwAssemblyFlags;
+
+                /// <summary>
+                /// The size of the files that make up the assembly in kilobytes (KB).
+                /// </summary>
+                public ulong uliAssemblySizeInKB;
+
+                /// <summary>
+                /// A pointer to a string buffer that holds the current path of the directory that contains the files that make up the assembly. The path must end with a zero.
+                /// </summary>
+                public string pszCurrentAssemblyPathBuf;
+
+                /// <summary>
+                /// Size of the buffer that the pszCurrentAssemblyPathBug field points to.
+                /// </summary>
+                public uint cchBuf;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public static class Win32Interfaces
+        {
+            /// <summary>
+            /// 
+            /// </summary>
+            [ComImport, Guid("E707DCDE-D1CD-11D2-BAB9-00C04F8ECEAE"),
+                InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+            public interface IAssemblyCache
+            {
+                /// <summary>
+                /// The IAssemblyCache::UninstallAssembly method removes a reference to an assembly from the GAC. If other applications hold no other references to the assembly, the files that make up the assembly are removed from the GAC.
+                /// </summary>
+                /// <param name="dwFlags">No flags defined. Must be zero.</param>
+                /// <param name="pszAssemblyName">The name of the assembly. A zero-ended Unicode string.</param>
+                /// <param name="pRefData">A pointer to a FUSION_INSTALL_REFERENCE structure. Although this is not recommended, this parameter can be null. The assembly is installed without an application reference, or all existing application references are gone.</param>
+                /// <param name="pulDisposition">Pointer to an integer that indicates the action that is performed by the function.
+                /// 
+                /// If pulDisposition is not null, pulDisposition contains one of the following values:
+                /// IASSEMBLYCACHE_UNINSTALL_DISPOSITION_UNINSTALLED - The assembly files have been removed from the GAC.
+                /// IASSEMBLYCACHE_UNINSTALL_DISPOSITION_STILL_IN_USE - An application is using the assembly. This value is returned on Microsoft Windows 95 and Microsoft Windows 98.
+                /// IASSEMBLYCACHE_UNINSTALL_DISPOSITION_ALREADY_UNINSTALLED - The assembly does not exist in the GAC.
+                /// IASSEMBLYCACHE_UNINSTALL_DISPOSITION_DELETE_PENDING - Not used.
+                /// IASSEMBLYCACHE_UNINSTALL_DISPOSITION_HAS_INSTALL_REFERENCES - The assembly has not been removed from the GAC because another application reference exists.
+                /// IASSEMBLYCACHE_UNINSTALL_DISPOSITION_REFERENCE_NOT_FOUND - The reference that is specified in pRefData is not found in the GAC.
+                /// </param>
+                /// <returns>S_OK - The assembly has been uninstalled.
+                /// S_FALSE - The operation succeeded, but the assembly was not removed from the GAC. The reason is described in pulDisposition.</returns>
+                [PreserveSig]
+                int UninstallAssembly(
+                    int dwFlags,
+                    [MarshalAs(UnmanagedType.LPWStr)] string pszAssemblyName,
+                    [MarshalAs(UnmanagedType.LPArray)] PublicDomain.Win32.Win32Structures.FUSION_INSTALL_REFERENCE[] pRefData,
+                    out uint pulDisposition
+                );
+
+                /// <summary>
+                /// The IAssemblyCache::QueryAssemblyInfo method retrieves information about an assembly from the GAC.
+                /// </summary>
+                /// <param name="dwFlags">One of QUERYASMINFO_FLAG_VALIDATE or QUERYASMINFO_FLAG_GETSIZE:
+                /// *_VALIDATE - Performs validation of the files in the GAC against the assembly manifest, including hash verification and strong name signature verification.
+                /// *_GETSIZE - Returns the size of all files in the assembly (disk footprint). If this is not specified, the ASSEMBLY_INFO::uliAssemblySizeInKB field is not modified.</param>
+                /// <param name="pszAssemblyName">Name of the assembly that is queried.</param>
+                /// <param name="pAsmInfo">Pointer to the returned ASSEMBLY_INFO structure.</param>
+                /// <returns></returns>
+                [PreserveSig]
+                void QueryAssemblyInfo(
+                    uint dwFlags,
+                    [MarshalAs(UnmanagedType.LPWStr)] string pszAssemblyName,
+                    ref PublicDomain.Win32.Win32Structures.ASSEMBLY_INFO pAsmInfo
+                );
+
+                /// <summary>
+                /// The IAssemblyCache::InstallAssembly method adds a new assembly to the GAC. The assembly must be persisted in the file system and is copied to the GAC.
+                /// </summary>
+                /// <param name="dwFlags">At most, one of the bits of the IASSEMBLYCACHE_INSTALL_FLAG_* values can be specified:
+                /// *_REFRESH - If the assembly is already installed in the GAC and the file version numbers of the assembly being installed are the same or later, the files are replaced.
+                /// *_FORCE_REFRESH - The files of an existing assembly are overwritten regardless of their version number.</param>
+                /// <param name="pszManifestFilePath">A string pointing to the dynamic-linked library (DLL) that contains the assembly manifest. Other assembly files must reside in the same directory as the DLL that contains the assembly manifest.</param>
+                /// <param name="pRefData">A pointer to a FUSION_INSTALL_REFERENCE that indicates the application on whose behalf the assembly is being installed. Although this is not recommended, this parameter can be null, but this leaves the assembly without any application reference.</param>
+                /// <returns></returns>
+                [PreserveSig]
+                void InstallAssembly(
+                    PublicDomain.Win32.Win32Enums.IASSEMBLYCACHE_INSTALL_FLAG dwFlags,
+                    [MarshalAs(UnmanagedType.LPWStr)] string pszManifestFilePath,
+                    [MarshalAs(UnmanagedType.LPArray)] PublicDomain.Win32.Win32Structures.FUSION_INSTALL_REFERENCE[] pRefData
+                );
+            }
+
+            /// <summary>
+            /// The IAssemblyName interface represents an assembly name. An assembly name includes a predetermined set of name-value pairs. The assembly name is described in detail in the .NET Framework SDK.
+            /// </summary>
+            [ComImport, Guid("CD193BC0-B4BC-11D2-9833-00C04FC31D2E"),
+                InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+            public interface IAssemblyName
+            {
+                /// <summary>
+                /// The IAssemblyName::SetProperty method adds a name-value pair to the assembly name, or, if a name-value pair with the same name already exists, modifies or deletes the value of a name-value pair.
+                /// </summary>
+                /// <param name="PropertyId">The ID that represents the name part of the name-value pair that is to be added or to be modified. Valid property IDs are defined in the ASM_NAME enumeration.</param>
+                /// <param name="pvProperty">A pointer to a buffer that contains the value of the property.</param>
+                /// <param name="cbProperty">The length of the pvProperty buffer in bytes. If cbProperty is zero, the name-value pair is removed from the assembly name.</param>
+                /// <returns></returns>
+                [PreserveSig]
+                int SetProperty(PublicDomain.Win32.Win32Enums.ASM_NAME PropertyId, IntPtr pvProperty, uint cbProperty);
+
+                /// <summary>
+                /// The IAssemblyName::GetProperty method retrieves the value of a name-value pair in the assembly name that specifies the name.
+                /// </summary>
+                /// <param name="PropertyId">The ID that represents the name of the name-value pair whose value is to be retrieved. Specified property IDs are defined in the ASM_NAME enumeration.</param>
+                /// <param name="pvProperty">A pointer to a buffer that is to contain the value of the property.</param>
+                /// <param name="pcbProperty">The length of the pvProperty buffer, in bytes.</param>
+                /// <returns></returns>
+                [PreserveSig]
+                int GetProperty(PublicDomain.Win32.Win32Enums.ASM_NAME PropertyId, IntPtr pvProperty, ref uint pcbProperty);
+
+                /// <summary>
+                /// The IAssemblyName::Finalize method freezes an assembly name. Additional calls to IAssemblyName::SetProperty are unsuccessful after this method has been called.
+                /// </summary>
+                /// <returns></returns>
+                [PreserveSig]
+                int Finalize();
+
+                /// <summary>
+                /// The IAssemblyName::GetDisplayName method returns a string representation of the assembly name.
+                /// </summary>
+                /// <param name="szDisplayName">A pointer to a buffer that is to contain the display name. The display name is returned in Unicode.</param>
+                /// <param name="pccDisplayName">The size of the buffer in characters (on input). The length of the returned display name (on return).</param>
+                /// <param name="dwDisplayFlags">One or more of the bits defined in the ASM_DISPLAY_FLAGS enumeration</param>
+                /// <returns></returns>
+                [PreserveSig]
+                int GetDisplayName(
+                    [Out, MarshalAs(UnmanagedType.LPWStr)] StringBuilder szDisplayName,
+                    ref uint pccDisplayName,
+                    PublicDomain.Win32.Win32Enums.ASM_DISPLAY_FLAGS dwDisplayFlags
+                );
+
+                /// <summary>
+                /// The IAssemblyName::GetName method returns the name part of the assembly name.
+                /// </summary>
+                /// <param name="lpcwBuffer">Size of the pwszName buffer (on input). Length of the name (on return).</param>
+                /// <param name="pwszName">Pointer to the buffer that is to contain the name part of the assembly name.</param>
+                /// <returns></returns>
+                [PreserveSig]
+                int GetName(
+                    ref uint lpcwBuffer,
+                    [Out, MarshalAs(UnmanagedType.LPWStr)] StringBuilder pwszName
+                );
+
+                /// <summary>
+                /// The IAssemblyName::GetVersion method returns the version part of the assembly name.
+                /// </summary>
+                /// <param name="pdwVersionHi">Pointer to a DWORD that contains the upper 32 bits of the version number.</param>
+                /// <param name="pdwVersionLow">Pointer to a DWORD that contain the lower 32 bits of the version number.</param>
+                /// <returns></returns>
+                [PreserveSig]
+                int GetVersion(out uint pdwVersionHi, out uint pdwVersionLow);
+
+                /// <summary>
+                /// The IAssemblyName::IsEqual method compares the assembly name to another assembly names.
+                /// </summary>
+                /// <param name="pName">The assembly name to compare to.</param>
+                /// <param name="dwCmpFlags">Indicates which part of the assembly name to use in the comparison.</param>
+                /// <returns>S_OK: - The names match according to the comparison criteria.
+                /// S_FALSE: - The names do not match.</returns>
+                [PreserveSig]
+                int IsEqual(IAssemblyName pName, PublicDomain.Win32.Win32Enums.ASM_CMP_FLAGS dwCmpFlags);
+
+                /// <summary>
+                /// The IAssemblyName::Clone method creates a copy of an assembly name.
+                /// </summary>
+                /// <param name="pName">New instance</param>
+                /// <returns></returns>
+                [PreserveSig]
+                int Clone(out IAssemblyName pName);
+            }
+
+            /// <summary>
+            /// The IAssemblyEnum interface enumerates the assemblies in the GAC.
+            /// </summary>
+            [ComImport, Guid("21B8916C-F28E-11D2-A473-00C04F8EF448"),
+                InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+            public interface IAssemblyEnum
+            {
+                /// <summary>
+                /// The IAssemblyEnum::GetNextAssembly method enumerates the assemblies in the GAC.
+                /// </summary>
+                /// <param name="pvReserved">Must be null.</param>
+                /// <param name="ppName">Pointer to a memory location that is to receive the interface pointer to the assembly name of the next assembly that is enumerated.</param>
+                /// <param name="dwFlags">Must be zero.</param>
+                /// <returns></returns>
+                [PreserveSig]
+                int GetNextAssembly(IntPtr pvReserved, out IAssemblyName ppName, uint dwFlags);
+
+                /// <summary>
+                /// Resets this instance.
+                /// </summary>
+                /// <returns></returns>
+                [PreserveSig]
+                int Reset();
+            }
+
+            /// <summary>
+            /// The IInstallReferenceItem interface represents a reference that has been set on an assembly in the GAC. Instances of IInstallReferenceIteam are returned by the IInstallReferenceEnum interface.
+            /// </summary>
+            [ComImport, Guid("582DAC66-E678-449F-ABA6-6FAAEC8A9394"),
+                InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+            public interface IInstallReferenceItem
+            {
+                /// <summary>
+                /// The IInstallReferenceItem::GetReference method returns a FUSION_INSTALL_REFERENCE structure.
+                /// </summary>
+                /// <param name="ppRefData">A pointer to a FUSION_INSTALL_REFERENCE structure. The memory is allocated by the GetReference method and is freed when IInstallReferenceItem is released. Callers must not hold a reference to this buffer after the IInstallReferenceItem object is released.</param>
+                /// <param name="dwFlags">Must be zero.</param>
+                /// <param name="pvReserved">Must be null.</param>
+                /// <returns></returns>
+                [PreserveSig]
+                int GetReference(
+                    [MarshalAs(UnmanagedType.LPArray)] out PublicDomain.Win32.Win32Structures.FUSION_INSTALL_REFERENCE[] ppRefData,
+                    uint dwFlags,
+                    IntPtr pvReserved
+                );
+            }
+
+            /// <summary>
+            /// The IInstallReferenceEnum interface enumerates all references that are set on an assembly in the GAC.
+            /// NOTE: References that belong to the assembly are locked for changes while those references are being enumerated.
+            /// </summary>
+            [ComImport, Guid("56B1A988-7C0C-4AA2-8639-C3EB5A90226F"),
+                InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+            public interface IInstallReferenceEnum
+            {
+                /// <summary>
+                /// IInstallReferenceEnum::GetNextInstallReferenceItem returns the next reference information for an assembly.
+                /// </summary>
+                /// <param name="ppRefItem">Pointer to a memory location that receives the IInstallReferenceItem pointer.</param>
+                /// <param name="dwFlags">Must be zero.</param>
+                /// <param name="pvReserved">Must be null.</param>
+                /// <returns>S_OK: - The next item is returned successfully.
+                /// S_FALSE: - No more items.</returns>
+                [PreserveSig()]
+                int GetNextInstallReferenceItem(
+                    out IInstallReferenceItem ppRefItem,
+                    uint dwFlags,
+                    IntPtr pvReserved
+                );
+            }
+        }
+
         private static void GetLastErrorThrow()
         {
             throw new Win32Exception(Marshal.GetLastWin32Error());
         }
+
+#if !(NONUNIT)
+        /// <summary>
+        /// 
+        /// </summary>
+        [TestFixture]
+        public class Win32Tests
+        {
+            /// <summary>
+            /// Tests the GAC.
+            /// </summary>
+            [Test]
+            public void TestGAC()
+            {
+                Console.WriteLine(GlobalAssemblyCache.Path);
+                Console.WriteLine(GlobalAssemblyCache.ZapPath);
+                Console.WriteLine(GlobalAssemblyCache.DownloadPath);
+            }
+
+            /// <summary>
+            /// Gets the assembly.
+            /// </summary>
+            [Test]
+            public void GetAssembly()
+            {
+                foreach (GacAssemblyName it in GlobalAssemblyCache.FindAssemblies("System"))
+                {
+                    Console.WriteLine(it);
+                }
+            }
+
+            /// <summary>
+            /// Finds the largest assembly.
+            /// </summary>
+            [Test]
+            public void FindLargestAssembly()
+            {
+                Console.WriteLine(GlobalAssemblyCache.FindAssemblyWithLargestVersion("System"));
+            }
+
+            /// <summary>
+            /// Enumerates the GAC.
+            /// </summary>
+            [Test]
+            public void EnumerateGAC()
+            {
+                foreach (GacAssemblyName name in GlobalAssemblyCache.GetAllAssemblies())
+                {
+                    Console.WriteLine(name.AssemblyName);
+                }
+            }
+
+            /// <summary>
+            /// Test1s this instance.
+            /// </summary>
+            [Test]
+            public void Test1()
+            {
+                foreach (GacAssemblyName assembly in GlobalAssemblyCache.FindAssemblies("PublicDomain"))
+                {
+                    Console.WriteLine(assembly);
+                }
+            }
+
+            /// <summary>
+            /// Test2s this instance.
+            /// </summary>
+            [Test]
+            public void Test2()
+            {
+                List<GacAssemblyName> pds = ArrayUtilities.GetListFromEnumerable<GacAssemblyName>(GlobalAssemblyCache.FindAssemblies("PublicDomain"));
+                foreach (GacAssemblyName pd in pds)
+                {
+                    PublicDomain.Win32.Win32Enums.AssemblyCacheUninstallDisposition result = 
+                        GlobalAssemblyCache.UninstallAssembly(pd.DisplayName);
+                    Console.WriteLine(result);
+                }
+            }
+
+            /// <summary>
+            /// Test3s this instance.
+            /// </summary>
+            [Test]
+            public void Test3()
+            {
+            }
+
+            /// <summary>
+            /// Tests the add remove list.
+            /// </summary>
+            [Test]
+            public void TestAddRemoveList()
+            {
+                List<IInstalledProgram> programs = GetAddRemoveProgramList();
+                foreach (IInstalledProgram program in programs)
+                {
+                    Console.WriteLine(program.DisplayName);
+                }
+            }
+
+            /// <summary>
+            /// Tests the add remove list.
+            /// </summary>
+            [Test]
+            public void TestUninstall()
+            {
+                List<IInstalledProgram> programs = GetAddRemoveProgramList("Public Domain");
+                foreach (IInstalledProgram program in programs)
+                {
+                    Console.WriteLine("Uninstalling " + program.DisplayName);
+                    program.Uninstall();
+                }
+            }
+        }
+#endif
     }
 #endif
 
@@ -3921,6 +6350,40 @@ namespace PublicDomain
                 Out = new System.IO.StringWriter(m_outBuilder);
                 Error = new System.IO.StringWriter(m_errorBuilder);
             }
+        }
+
+        /// <summary>
+        /// Parses the specified STR.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns></returns>
+        public static ProcessHelper Parse(string str)
+        {
+            // Assumes there is an .exe somwhere
+            int exeIndex = str.IndexOf(".exe", StringComparison.CurrentCultureIgnoreCase);
+            if (exeIndex != -1)
+            {
+                if (str.Length > exeIndex + 4 && str[exeIndex + 4] == '\"')
+                {
+                    exeIndex++;
+                }
+                string[] pieces = StringUtilities.SplitOn(str, exeIndex + 3, true);
+                pieces[0] = pieces[0].Trim();
+                pieces[1] = pieces[1].Trim();
+                if (pieces[0].Length > 0 && pieces[0][0] == '\"')
+                {
+                    pieces[0] = pieces[0].Substring(1);
+                }
+                if (pieces[0].Length > 0 && pieces[0][pieces[0].Length - 1] == '\"')
+                {
+                    pieces[0] = pieces[0].Substring(0, pieces[0].Length - 1);
+                }
+                ProcessHelper result = new ProcessHelper();
+                result.FileName = pieces[0];
+                result.Arguments = pieces[1];
+                return result;
+            }
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -6668,246 +9131,65 @@ namespace PublicDomain
                 return null;
             }
         }
-    }
 
-    /// <summary>
-    /// Methods for working with code and languages.
-    /// </summary>
-    public static class CodeUtilities
-    {
         /// <summary>
-        /// 
+        /// Gets the last capture.
         /// </summary>
-        /// <param name="lang"></param>
-        /// <param name="str"></param>
+        /// <param name="match">The match.</param>
         /// <returns></returns>
-        public static string StripNonIdentifierCharacters(Language lang, string str)
+        public static string GetLastCapture(Match match)
         {
-            switch (lang)
-            {
-                case Language.CSharp:
-                    // http://www.ecma-international.org/publications/standards/Ecma-334.htm
-                    // Page 70, Printed Page 92
-                    // The following is not complete
-                    str = StringUtilities.RemoveCharactersInverse(str, '_', 'a', '-', 'z', 'A', '-',  'Z', '0', '-', '9');
-                    break;
-                default:
-                    throw new NotImplementedException();
-            }
-            return str;
+            return GetLastCapture(match, 0);
         }
 
         /// <summary>
-        /// 
+        /// Gets the last Nth capture, specified by <paramref name="offset"/>.
+        /// If <paramref name="offset"/> is 0, then this will return the last
+        /// capture. If it is 1, then this will return the second-to-last
+        /// capture and so on.
         /// </summary>
-        /// <param name="language"></param>
-        /// <param name="code"></param>
+        /// <param name="match">The match.</param>
+        /// <param name="offset">The Nth last capture. If 0, then this will return the last
+        /// capture. If it is 1, then this will return the second-to-last
+        /// capture and so on.</param>
         /// <returns></returns>
-        /// <exception cref="PublicDomain.CodeUtilities.CompileException"/>
-        /// <exception cref="PublicDomain.CodeUtilities.NativeCompileException"/>
-        public static string Eval(Language language, string code)
+        public static string GetLastCapture(Match match, int offset)
         {
-            using (CodeDomProvider domProvider = CodeDomProvider.CreateProvider(language.ToString()))
-            {
-                CompilerInfo compilerInfo = CodeDomProvider.GetCompilerInfo(language.ToString());
-                CompilerParameters compilerParameters = compilerInfo.CreateDefaultCompilerParameters();
-                CompilerResults results = domProvider.CompileAssemblyFromSource(compilerParameters, code);
-                CheckCompilerResultsThrow(results);
-                throw new NotImplementedException();
-            }
+            return GetCapture(match, match.Groups.Count - 1 - offset);
         }
 
         /// <summary>
-        /// This method throws an Exception if it finds an error in the
-        /// <c>results</c>, otherwise it returns without side effect.
+        /// Matches any.
         /// </summary>
-        /// <param name="results"></param>
-        /// <exception cref="PublicDomain.CodeUtilities.CompileException"/>
-        /// <exception cref="PublicDomain.CodeUtilities.NativeCompileException"/>
-        public static void CheckCompilerResultsThrow(CompilerResults results)
+        /// <param name="input">The input.</param>
+        /// <param name="regexs">The regexs.</param>
+        /// <returns></returns>
+        public static int MatchAny(string input, params Regex[] regexs)
         {
-            if (results.Errors.HasErrors)
+            Match trash;
+            return MatchAny(input, out trash, regexs);
+        }
+
+        /// <summary>
+        /// Matches any.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <param name="successfulMatch">The successful match.</param>
+        /// <param name="regexs">The regexs.</param>
+        /// <returns></returns>
+        public static int MatchAny(string input, out Match successfulMatch, params Regex[] regexs)
+        {
+            successfulMatch = null;
+            for (int i = 0; i < regexs.Length; i++)
             {
-                string msg = GetCompilerErrorsAsString(results.Errors);
-                if (results.NativeCompilerReturnValue != 0)
+                Match m = regexs[i].Match(input);
+                if (m.Success)
                 {
-                    msg += Environment.NewLine + GetNativeCompilerErrorMessage(results);
+                    successfulMatch = m;
+                    return i;
                 }
-                throw new CompileException(msg);
             }
-            else if (results.NativeCompilerReturnValue != 0)
-            {
-                throw new NativeCompileException(GetNativeCompilerErrorMessage(results));
-            }
-        }
-
-        private static string GetNativeCompilerErrorMessage(CompilerResults results)
-        {
-            return "Compiler returned exit code " + results.NativeCompilerReturnValue;
-        }
-
-        /// <summary>
-        /// Gets the compiler errors as string.
-        /// </summary>
-        /// <param name="errors">The errors.</param>
-        /// <returns></returns>
-        public static string GetCompilerErrorsAsString(CompilerErrorCollection errors)
-        {
-            StringBuilder sb = new StringBuilder(errors.Count * 10);
-            CompilerError error;
-            for (int i = 0; i < errors.Count; i++)
-            {
-                error = errors[i];
-                if (i > 0)
-                {
-                    sb.Append(Environment.NewLine);
-                }
-                sb.Append(error.ToString());
-            }
-            return sb.ToString();
-        }
-
-        /// <summary>
-        /// Gets the display name of the language.
-        /// </summary>
-        /// <param name="lang">The language.</param>
-        /// <returns></returns>
-        public static string GetLanguageDisplayName(Language lang)
-        {
-            switch (lang)
-            {
-                case Language.CPlusPlus:
-                    return "C++";
-                case Language.CSharp:
-                    return "C#";
-                case Language.Java:
-                    return "Java";
-                case Language.JScript:
-                    return "JScript";
-                case Language.JSharp:
-                    return "J#";
-                case Language.PHP:
-                    return "PHP";
-                case Language.Ruby:
-                    return "Ruby";
-                case Language.VisualBasic:
-                    return "Visual Basic";
-                default:
-                    throw new NotImplementedException();
-            }
-        }
-
-        /// <summary>
-        /// Gets a <seealso cref="PublicDomain.Language"/> given a string name.
-        /// </summary>
-        /// <param name="name">The name.</param>
-        /// <returns></returns>
-        public static Language GetLanguageByName(string name)
-        {
-            name = name.ToLower().Trim();
-            switch (name)
-            {
-                case "cplusplus":
-                case "c++":
-                    return Language.CPlusPlus;
-                case "c#":
-                case "csharp":
-                    return Language.CSharp;
-                case "java":
-                    return Language.Java;
-                case "js":
-                case "jscript":
-                    return Language.JScript;
-                case "vj#":
-                case "j#":
-                case "jsharp":
-                    return Language.JSharp;
-                case "php":
-                    return Language.PHP;
-                case "vb":
-                case "visual basic":
-                case "visualbasic":
-                    return Language.VisualBasic;
-                case "ruby":
-                    return Language.Ruby;
-                default:
-                    throw new ArgumentException("Could not find language by name " + name);
-            }
-        }
-
-        /// <summary>
-        /// Thrown when an error is encountered compiling.
-        /// </summary>
-        [Serializable]
-        public class CompileException : Exception
-        {
-            /// <summary>
-            /// Initializes a new instance of the <see cref="CompileException"/> class.
-            /// </summary>
-            public CompileException() { }
-
-            /// <summary>
-            /// Initializes a new instance of the <see cref="CompileException"/> class.
-            /// </summary>
-            /// <param name="message">The message.</param>
-
-            public CompileException(string message) : base(message) { }
-            /// <summary>
-            /// Initializes a new instance of the <see cref="CompileException"/> class.
-            /// </summary>
-            /// <param name="message">The message.</param>
-            /// <param name="inner">The inner.</param>
-
-            public CompileException(string message, Exception inner) : base(message, inner) { }
-            /// <summary>
-            /// Initializes a new instance of the <see cref="CompileException"/> class.
-            /// </summary>
-            /// <param name="info">The <see cref="T:System.Runtime.Serialization.SerializationInfo"></see> that holds the serialized object data about the exception being thrown.</param>
-            /// <param name="context">The <see cref="T:System.Runtime.Serialization.StreamingContext"></see> that contains contextual information about the source or destination.</param>
-            /// <exception cref="T:System.Runtime.Serialization.SerializationException">The class name is null or <see cref="P:System.Exception.HResult"></see> is zero (0). </exception>
-            /// <exception cref="T:System.ArgumentNullException">The info parameter is null. </exception>
-
-            protected CompileException(
-              System.Runtime.Serialization.SerializationInfo info,
-              System.Runtime.Serialization.StreamingContext context)
-                : base(info, context) { }
-        }
-
-        /// <summary>
-        /// Thrown when the compiler returns an unexpected value.
-        /// </summary>
-        [Serializable]
-        public class NativeCompileException : CompileException
-        {
-            /// <summary>
-            /// Initializes a new instance of the <see cref="NativeCompileException"/> class.
-            /// </summary>
-            public NativeCompileException() { }
-
-            /// <summary>
-            /// Initializes a new instance of the <see cref="NativeCompileException"/> class.
-            /// </summary>
-            /// <param name="message">The message.</param>
-            public NativeCompileException(string message) : base(message) { }
-
-            /// <summary>
-            /// Initializes a new instance of the <see cref="NativeCompileException"/> class.
-            /// </summary>
-            /// <param name="message">The message.</param>
-            /// <param name="inner">The inner.</param>
-            public NativeCompileException(string message, Exception inner) : base(message, inner) { }
-
-            /// <summary>
-            /// Initializes a new instance of the <see cref="NativeCompileException"/> class.
-            /// </summary>
-            /// <param name="info">The <see cref="T:System.Runtime.Serialization.SerializationInfo"></see> that holds the serialized object data about the exception being thrown.</param>
-            /// <param name="context">The <see cref="T:System.Runtime.Serialization.StreamingContext"></see> that contains contextual information about the source or destination.</param>
-            /// <exception cref="T:System.Runtime.Serialization.SerializationException">The class name is null or <see cref="P:System.Exception.HResult"></see> is zero (0). </exception>
-            /// <exception cref="T:System.ArgumentNullException">The info parameter is null. </exception>
-            protected NativeCompileException(
-              System.Runtime.Serialization.SerializationInfo info,
-              System.Runtime.Serialization.StreamingContext context)
-                : base(info, context) { }
+            return -1;
         }
     }
 
@@ -7085,6 +9367,7 @@ namespace PublicDomain
 
     /// <summary>
     /// http://www.w3.org/TR/NOTE-datetime
+    /// http://www.cl.cam.ac.uk/~mgk25/iso-time.html
     /// </summary>
     public class Iso8601
     {
@@ -7100,14 +9383,14 @@ namespace PublicDomain
         static Iso8601()
         {
             string format = @"^(\d\d\d\d)";
-            string tzd = @"(Z|(\+|-\d\d:\d\d))";
+            string tzd = @"(Z|((\+|-)\d\d:\d\d))";
 
             FormatYear = new Regex(format + "$");
 
-            format += @"-(\d\d)";
+            format += @"-?(\d\d)";
             FormatYearAndMonth = new Regex(format + "$");
 
-            format += @"-(\d\d)";
+            format += @"-?(\d\d)";
             FormatComplete = new Regex(format + "$");
 
             format += @"T(\d\d):(\d\d)";
@@ -7124,18 +9407,23 @@ namespace PublicDomain
         /// Tries the parse.
         /// </summary>
         /// <param name="str">The STR.</param>
+        /// <param name="dateTime">The date time.</param>
         /// <returns></returns>
-        public static TzDateTime TryParse(string str)
+        public static bool TryParse(string str, out TzDateTime dateTime)
         {
-            TzDateTime result = null;
-            try
-            {
-                result = Parse(str);
-            }
-            catch (TzDatabase.TzException)
-            {
-            }
-            return result;
+            return TryParse(str, null, out dateTime);
+        }
+
+        /// <summary>
+        /// Tries the parse.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <param name="localTimeZone">The local time zone.</param>
+        /// <param name="dateTime">The date time.</param>
+        /// <returns></returns>
+        public static bool TryParse(string str, TzTimeZone localTimeZone, out TzDateTime dateTime)
+        {
+            return DoParse(str, localTimeZone, out dateTime);
         }
 
         /// <summary>
@@ -7145,41 +9433,93 @@ namespace PublicDomain
         /// <returns></returns>
         public static TzDateTime Parse(string str)
         {
-            int length = str.Length;
-            Match m;
+            return Parse(str, null);
+        }
 
-            switch (length)
+        /// <summary>
+        /// Parses the specified STR.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <param name="localTimeZone">The local time zone.</param>
+        /// <returns></returns>
+        public static TzDateTime Parse(string str, TzTimeZone localTimeZone)
+        {
+            TzDateTime result;
+            if (!DoParse(str, localTimeZone, out result))
             {
-                case 4:
-                    m = FormatYear.Match(str);
-                    if (m.Success)
-                    {
-                        RegexUtilities.GetCapture(m, 1);
-                    }
-                    else
-                    {
-                    }
-                    break;
-                case 7:
-                    m = FormatYearAndMonth.Match(str);
-                    if (m.Success)
-                    {
-                    }
-                    else
-                    {
-                    }
-                    break;
-                case 10:
-                    m = FormatComplete.Match(str);
-                    if (m.Success)
-                    {
-                    }
-                    else
-                    {
-                    }
-                    break;
+                ThrowInvalidFormatException(str);
+            }
+            return result;
+        }
+
+        private static bool DoParse(string str, TzTimeZone localTimeZone, out TzDateTime result)
+        {
+            result = null;
+
+            if (string.IsNullOrEmpty(str))
+            {
+                throw new ArgumentNullException("str");
             }
 
+            Match m;
+            int matchIndex = RegexUtilities.MatchAny(str, out m,
+                FormatYear,
+                FormatYearAndMonth,
+                FormatComplete,
+                FormatCompleteHM,
+                FormatCompleteHMS,
+                FormatCompleteHMSF);
+            int year = 0, month = 1, day = 1, hours = 0, minutes = 0, seconds = 0, millisecond = 0;
+            DateTimeKind kind = DateTimeKind.Local;
+            TzTimeZone timezone = localTimeZone;
+
+            if (matchIndex != -1)
+            {
+                if (matchIndex >= 0)
+                {
+                    year = int.Parse(RegexUtilities.GetCapture(m, 1));
+                }
+                if (matchIndex >= 1)
+                {
+                    month = int.Parse(RegexUtilities.GetCapture(m, 2));
+                }
+                if (matchIndex >= 2)
+                {
+                    day = int.Parse(RegexUtilities.GetCapture(m, 3));
+                }
+                if (matchIndex >= 3)
+                {
+                    hours = int.Parse(RegexUtilities.GetCapture(m, 4));
+                    minutes = int.Parse(RegexUtilities.GetCapture(m, 5));
+
+                    // At this level, we also expect a time zone designator
+                    kind = DateTimeKind.Utc;
+                    string tzd = RegexUtilities.GetLastCapture(m, 2);
+                    if (tzd == UtcZuluIdentifier.ToString())
+                    {
+                        timezone = TzTimeZone.TimeZoneUtc;
+                    }
+                    else
+                    {
+                        timezone = TzTimeZone.GetTimeZoneByOffset(RegexUtilities.GetLastCapture(m, 1));
+                    }
+                }
+                if (matchIndex >= 4)
+                {
+                    seconds = int.Parse(RegexUtilities.GetCapture(m, 6));
+                }
+                if (matchIndex >= 5)
+                {
+                    millisecond = int.Parse(RegexUtilities.GetCapture(m, 7));
+                }
+                result = new TzDateTime(year, month, day, hours, minutes, seconds, millisecond, kind, timezone);
+                return true;
+            }
+            return false;
+        }
+
+        private static void ThrowInvalidFormatException(string str)
+        {
             throw new TzDatabase.TzParseException(string.Format("Date/time does not conform to ISO 8601 format ({0}).", str));
         }
 
@@ -7198,10 +9538,40 @@ namespace PublicDomain
             }
             else
             {
-                result = (timeSpan.Hours < 0 ? "-" : "+") + string.Format("{0:##}:{1:##}", timeSpan.Hours, timeSpan.Minutes);
+                result = (DateTimeUtlities.IsTimeSpanNegative(timeSpan) ? "-" : "+") + string.Format("{0:##}:{1:##}", timeSpan.Hours, timeSpan.Minutes);
             }
             return result;
         }
+
+#if !(NONUNIT)
+        /// <summary>
+        /// 
+        /// </summary>
+        [TestFixture]
+        public class Iso8601Tests
+        {
+            /// <summary>
+            /// Test1s this instance.
+            /// </summary>
+            [Test]
+            public void Test1()
+            {
+                foreach (string test in new string[] {
+                    "2007", "2007-02", "2007-02-15",
+                    "2007-02-15T14:57Z",
+                    "2007-02-15T14:57-05:00",
+                    "2007-02-15T14:57+03:00",
+                    "2007-02-15T14:57:30Z",
+                    "2007-02-15T14:57:30-08:00",
+                    "2007-02-15T14:57:30.983Z",
+                })
+                {
+                    TzDateTime dt = Iso8601.Parse(test, TzTimeZone.TimeZoneAmericaEastern);
+                    Console.WriteLine(dt + "," + dt.ToStringLocal());
+                }
+            }
+        }
+#endif
     }
 
     /// <summary>
@@ -7647,9 +10017,78 @@ namespace PublicDomain
                 }
             }
         }
+
+        /// <summary>
+        /// Determines whether [is time span negative] [the specified time span].
+        /// </summary>
+        /// <param name="timeSpan">The time span.</param>
+        /// <returns>
+        /// 	<c>true</c> if [is time span negative] [the specified time span]; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool IsTimeSpanNegative(TimeSpan timeSpan)
+        {
+            return timeSpan.ToString().IndexOf('-') != -1;
+        }
+
+        /// <summary>
+        /// Converts the time span to double.
+        /// </summary>
+        /// <param name="timeSpan">The time span.</param>
+        /// <returns></returns>
+        public static double ConvertTimeSpanToDouble(string timeSpan)
+        {
+            return ConvertTimeSpanToDouble(DateTimeUtlities.ParseTimeSpan(timeSpan));
+        }
+
+        /// <summary>
+        /// Converts the time span to integer.
+        /// </summary>
+        /// <param name="timeSpan">The time span.</param>
+        /// <returns></returns>
+        public static double ConvertTimeSpanToDouble(TimeSpan timeSpan)
+        {
+            return timeSpan.TotalMilliseconds;
+        }
+
+        /// <summary>
+        /// Parses the time span. TimeSpan.Parse does not accept
+        /// a plus (+) designator, only minus (-). This parse method
+        /// accepts both. Does not throw any exceptions, but returns
+        /// false on failure. Return true on success.
+        /// </summary>
+        /// <param name="timeSpan">The time span.</param>
+        /// <param name="result">The result.</param>
+        /// <returns></returns>
+        public static bool TryParseTimeSpan(string timeSpan, out TimeSpan result)
+        {
+            result = TimeSpan.Zero;
+            try
+            {
+                result = ParseTimeSpan(timeSpan);
+                return true;
+            }
+            catch (Exception)
+            {
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Parses the time span. TimeSpan.Parse does not accept
+        /// a plus (+) designator, only minus (-). This parse method
+        /// accepts both.
+        /// </summary>
+        /// <param name="timeSpan">The time span.</param>
+        /// <returns></returns>
+        public static TimeSpan ParseTimeSpan(string timeSpan)
+        {
+            if (timeSpan != null && timeSpan[0] == '+')
+            {
+                timeSpan = timeSpan.Substring(1);
+            }
+            return TimeSpan.Parse(timeSpan);
+        }
     }
-
-
 
     /// <summary>
     /// Methods and date related to the United States, such as a list
@@ -8042,6 +10481,66 @@ namespace PublicDomain
         /// </summary>
         public static bool TreatUnspecifiedKindAsLocal = true;
 
+        private static Dictionary<double, string> s_mainTimeZones = new Dictionary<double,string>();
+
+        static TzTimeZone()
+        {
+            s_mainTimeZones[DateTimeUtlities.ConvertTimeSpanToDouble("-11:00")] = TzConstants.TimezonePacificMidway;
+            s_mainTimeZones[DateTimeUtlities.ConvertTimeSpanToDouble("-10:00")] = TzConstants.TimezonePacificHonolulu;
+            s_mainTimeZones[DateTimeUtlities.ConvertTimeSpanToDouble("-9:30")] = TzConstants.TimezonePacificMarquesas;
+            s_mainTimeZones[DateTimeUtlities.ConvertTimeSpanToDouble("-9:00")] = TzConstants.TimezoneAmericaAnchorage;
+            s_mainTimeZones[DateTimeUtlities.ConvertTimeSpanToDouble("-8:00")] = TzConstants.TimezoneAmericaLosAngeles;
+            s_mainTimeZones[DateTimeUtlities.ConvertTimeSpanToDouble("-7:00")] = TzConstants.TimezoneAmericaDenver;
+            s_mainTimeZones[DateTimeUtlities.ConvertTimeSpanToDouble("-6:00")] = TzConstants.TiemzoneAmericaChicago;
+            s_mainTimeZones[DateTimeUtlities.ConvertTimeSpanToDouble("-5:00")] = TzConstants.TimezoneAmericaNewYork;
+            s_mainTimeZones[DateTimeUtlities.ConvertTimeSpanToDouble("-4:00")] = TzConstants.TimezoneAmericaLaPaz;
+            s_mainTimeZones[DateTimeUtlities.ConvertTimeSpanToDouble("-3:30")] = TzConstants.TimezoneAmericaStJohns;
+            s_mainTimeZones[DateTimeUtlities.ConvertTimeSpanToDouble("-3:00")] = TzConstants.TimezoneAmericaArgentinaBuenosAires;
+            s_mainTimeZones[DateTimeUtlities.ConvertTimeSpanToDouble("-2:00")] = TzConstants.TimezoneAmericaNoronha;
+            s_mainTimeZones[DateTimeUtlities.ConvertTimeSpanToDouble("-1:00")] = TzConstants.TimezoneAtlanticAzores;
+            s_mainTimeZones[DateTimeUtlities.ConvertTimeSpanToDouble("0:00")] = TzConstants.TimezoneUtc;
+            s_mainTimeZones[DateTimeUtlities.ConvertTimeSpanToDouble("1:00")] = TzConstants.TimezoneEuropeParis;
+            s_mainTimeZones[DateTimeUtlities.ConvertTimeSpanToDouble("2:00")] = TzConstants.TimezoneEuropeAthens;
+            s_mainTimeZones[DateTimeUtlities.ConvertTimeSpanToDouble("3:00")] = TzConstants.TimezoneEuropeMoscow;
+            s_mainTimeZones[DateTimeUtlities.ConvertTimeSpanToDouble("3:30")] = TzConstants.TimezoneAsiaTehran;
+            s_mainTimeZones[DateTimeUtlities.ConvertTimeSpanToDouble("4:00")] = TzConstants.TimezoneAsiaDubai;
+            s_mainTimeZones[DateTimeUtlities.ConvertTimeSpanToDouble("4:30")] = TzConstants.TimezoneAsiaKabul;
+            s_mainTimeZones[DateTimeUtlities.ConvertTimeSpanToDouble("5:00")] = TzConstants.TimezoneAsiaKarachi;
+            s_mainTimeZones[DateTimeUtlities.ConvertTimeSpanToDouble("5:30")] = TzConstants.TimezoneAsiaCalcutta;
+            s_mainTimeZones[DateTimeUtlities.ConvertTimeSpanToDouble("6:00")] = TzConstants.TimezoneAsiaOmsk;
+            s_mainTimeZones[DateTimeUtlities.ConvertTimeSpanToDouble("6:30")] = TzConstants.TimezoneIndianCocos;
+            s_mainTimeZones[DateTimeUtlities.ConvertTimeSpanToDouble("7:00")] = TzConstants.TimezoneAsiaJakarta;
+            s_mainTimeZones[DateTimeUtlities.ConvertTimeSpanToDouble("8:00")] = TzConstants.TimezoneAsiaShanghai;
+            s_mainTimeZones[DateTimeUtlities.ConvertTimeSpanToDouble("9:00")] = TzConstants.TimezoneAsiaTokyo;
+            s_mainTimeZones[DateTimeUtlities.ConvertTimeSpanToDouble("9:30")] = TzConstants.TimezoneAustraliaDarwin;
+            s_mainTimeZones[DateTimeUtlities.ConvertTimeSpanToDouble("10:00")] = TzConstants.TimezonePacificGuam;
+            s_mainTimeZones[DateTimeUtlities.ConvertTimeSpanToDouble("10:30")] = TzConstants.TimezoneAustraliaLordHowe;
+            s_mainTimeZones[DateTimeUtlities.ConvertTimeSpanToDouble("11:00")] = TzConstants.TimezonePacificGuadalcanal;
+            s_mainTimeZones[DateTimeUtlities.ConvertTimeSpanToDouble("11:30")] = TzConstants.TimezonePacificNorfolk;
+            s_mainTimeZones[DateTimeUtlities.ConvertTimeSpanToDouble("12:00")] = TzConstants.TimezonePacificFiji;
+            s_mainTimeZones[DateTimeUtlities.ConvertTimeSpanToDouble("13:00")] = TzConstants.TimezonePacificEnderbury;
+            s_mainTimeZones[DateTimeUtlities.ConvertTimeSpanToDouble("14:00")] = TzConstants.TimezonePacificKiritimati;
+            s_localTimeZone = TzTimeZone.GetTimeZoneByOffset(TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now));
+        }
+
+        private static TzTimeZone s_localTimeZone;
+
+        /// <summary>
+        /// Gets or sets the local time zone.
+        /// </summary>
+        /// <value>The local time zone.</value>
+        public static TzTimeZone TimeZoneLocal
+        {
+            get
+            {
+                return s_localTimeZone;
+            }
+            set
+            {
+                s_localTimeZone = value;
+            }
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -8091,6 +10590,55 @@ namespace PublicDomain
         }
 
         /// <summary>
+        /// UTC-5, main point New York
+        /// </summary>
+        /// <value>The time zone america eastern.</value>
+        public static TzTimeZone TimeZoneAmericaEastern
+        {
+            get
+            {
+                return m_americaEasternTimeZone;
+            }
+        }
+
+        /// <summary>
+        /// UTC-6, main point Chicago
+        /// </summary>
+        /// <value>The time zone america central.</value>
+        public static TzTimeZone TimeZoneAmericaCentral
+        {
+            get
+            {
+                return m_americaCentralTimeZone;
+            }
+        }
+
+        /// <summary>
+        /// UTC-7, main point Denver
+        /// </summary>
+        /// <value>The time zone america mountain.</value>
+        public static TzTimeZone TimeZoneAmericaMountain
+        {
+            get
+            {
+                return m_americaMountainTimeZone;
+            }
+        }
+
+        /// <summary>
+        /// UTC-8, main point Los Angeles
+        /// </summary>
+        /// <value>The time zone america pacific.</value>
+        public static TzTimeZone TimeZoneAmericaPacific
+        {
+            get
+            {
+                return m_americaPacificTimeZone;
+            }
+        }
+
+
+        /// <summary>
         /// Gets all zone names.
         /// </summary>
         /// <value>All zone names.</value>
@@ -8118,6 +10666,10 @@ namespace PublicDomain
         private static object m_loadLock = new object();
 
         private static TzTimeZone m_utcTimeZone = TzTimeZone.GetTimeZone(TzConstants.TimezoneUtc);
+        private static TzTimeZone m_americaEasternTimeZone = TzTimeZone.GetTimeZone(TzConstants.TimezoneUsEastern);
+        private static TzTimeZone m_americaCentralTimeZone = TzTimeZone.GetTimeZone(TzConstants.TimezoneUsCentral);
+        private static TzTimeZone m_americaMountainTimeZone = TzTimeZone.GetTimeZone(TzConstants.TimezoneUsMountain);
+        private static TzTimeZone m_americaPacificTimeZone = TzTimeZone.GetTimeZone(TzConstants.TimezoneUsPacific);
 
         private static string[] m_allZoneNames;
 
@@ -8278,8 +10830,9 @@ namespace PublicDomain
         /// </returns>
         public override TimeSpan GetUtcOffset(DateTime time)
         {
-            // Ensure that it is a local time
-            switch (time.Kind)
+            // This method is regardless of the type of the time,
+            // whether it is local, UTC, specified, or other.
+            /*switch (time.Kind)
             {
                 case DateTimeKind.Utc:
                     return TimeSpan.Zero;
@@ -8289,7 +10842,7 @@ namespace PublicDomain
                         throw new ArgumentException("unspecified type");
                     }
                     break;
-            }
+            }*/
 
             // Figure out the offset for the local time
             TzDatabase.TzZone zone = GetZone(ref time);
@@ -8432,6 +10985,43 @@ namespace PublicDomain
                 result = new TzTimeZone(zoneInfo);
             }
             return result;
+        }
+
+        /// <summary>
+        /// Gets the time zone by offset.
+        /// </summary>
+        /// <param name="utcOffsetTime">The utc offset time.</param>
+        /// <returns></returns>
+        public static TzTimeZone GetTimeZoneByOffset(string utcOffsetTime)
+        {
+            return GetTimeZoneByOffset(DateTimeUtlities.ParseTimeSpan(utcOffsetTime));
+        }
+
+        /// <summary>
+        /// Gets the time zone by offset.
+        /// </summary>
+        /// <param name="utcOffsetTime">The utc offset time.</param>
+        /// <returns></returns>
+        public static TzTimeZone GetTimeZoneByOffset(TimeSpan utcOffsetTime)
+        {
+            if (utcOffsetTime.Equals(TimeSpan.Zero))
+            {
+                return TimeZoneUtc;
+            }
+            else
+            {
+                // We pick the most "well-known" time zone in the set for each offset
+                string zoneName;
+                if (s_mainTimeZones.TryGetValue(DateTimeUtlities.ConvertTimeSpanToDouble(utcOffsetTime), out zoneName))
+                {
+                    return GetTimeZone(zoneName);
+                }
+                else
+                {
+                    // TODO do a manual search
+                }
+            }
+            throw new TzDatabase.TzException(string.Format("Cannot find time zone with UTC offset {0}.", utcOffsetTime));
         }
 
         #region Generated Time Zones
@@ -13045,34 +15635,204 @@ namespace PublicDomain
         }
 
         /// <summary>
-        /// 
+        /// http://wwp.greenwichmeantime.com/info/timezone.htm
         /// </summary>
         public static class TzConstants
         {
             /// <summary>
-            /// 
+            /// UTC-5
             /// </summary>
             public const string TimezoneUsEastern = "US/Eastern";
 
             /// <summary>
-            /// 
+            /// UTC-6
             /// </summary>
             public const string TimezoneUsCentral = "US/Central";
 
             /// <summary>
-            /// 
+            /// UTC-7
             /// </summary>
             public const string TimezoneUsMountain = "US/Mountain";
 
             /// <summary>
-            /// 
+            /// UTC-8
             /// </summary>
             public const string TimezoneUsPacific = "US/Pacific";
 
             /// <summary>
-            /// 
+            /// UTC-11
+            /// </summary>
+            public const string TimezonePacificMidway = "Pacific/Midway";
+
+            /// <summary>
+            /// UTC-10
+            /// </summary>
+            public const string TimezonePacificHonolulu = "Pacific/Honolulu";
+
+            /// <summary>
+            /// UTC-9:30
+            /// </summary>
+            public const string TimezonePacificMarquesas = "Pacific/Marquesas";
+
+            /// <summary>
+            /// UTC-9
+            /// </summary>
+            public const string TimezoneAmericaAnchorage = "America/Anchorage";
+
+            /// <summary>
+            /// UTC-8
+            /// </summary>
+            public const string TimezoneAmericaLosAngeles = "America/Los_Angeles";
+
+            /// <summary>
+            /// UTC-7
+            /// </summary>
+            public const string TimezoneAmericaDenver = "America/Denver";
+
+            /// <summary>
+            /// UTC-6
+            /// </summary>
+            public const string TiemzoneAmericaChicago = "America/Chicago";
+
+            /// <summary>
+            /// UTC-5
+            /// </summary>
+            public const string TimezoneAmericaNewYork = "America/New_York";
+
+            /// <summary>
+            /// UTC-4
+            /// </summary>
+            public const string TimezoneAmericaLaPaz = "America/La_Paz";
+
+            /// <summary>
+            /// UTC-3:30
+            /// </summary>
+            public const string TimezoneAmericaStJohns = "America/St_Johns";
+
+            /// <summary>
+            /// UTC-3
+            /// </summary>
+            public const string TimezoneAmericaArgentinaBuenosAires = "America/Argentina/Buenos_Aires";
+
+            /// <summary>
+            /// UTC-2
+            /// </summary>
+            public const string TimezoneAmericaNoronha = "America/Noronha";
+
+            /// <summary>
+            /// UTC-1
+            /// </summary>
+            public const string TimezoneAtlanticAzores = "Atlantic/Azores";
+
+            /// <summary>
+            /// UTC+0
             /// </summary>
             public const string TimezoneUtc = "UTC";
+
+            /// <summary>
+            /// UTC+1
+            /// </summary>
+            public const string TimezoneEuropeParis = "Europe/Paris";
+
+            /// <summary>
+            /// UTC+2
+            /// </summary>
+            public const string TimezoneEuropeAthens = "Europe/Athens";
+
+            /// <summary>
+            /// UTC+3
+            /// </summary>
+            public const string TimezoneEuropeMoscow = "Europe/Moscow";
+
+            /// <summary>
+            /// UTC+3:30
+            /// </summary>
+            public const string TimezoneAsiaTehran = "Asia/Tehran";
+
+            /// <summary>
+            /// UTC+4
+            /// </summary>
+            public const string TimezoneAsiaDubai = "Asia/Dubai";
+
+            /// <summary>
+            /// UTC+4:30
+            /// </summary>
+            public const string TimezoneAsiaKabul = "Asia/Kabul";
+
+            /// <summary>
+            /// UTC+5
+            /// </summary>
+            public const string TimezoneAsiaKarachi = "Asia/Karachi";
+
+            /// <summary>
+            /// UTC+5:30
+            /// </summary>
+            public const string TimezoneAsiaCalcutta = "Asia/Calcutta";
+
+            /// <summary>
+            /// UTC+6
+            /// </summary>
+            public const string TimezoneAsiaOmsk = "Asia/Omsk";
+
+            /// <summary>
+            /// UTC+6:30
+            /// </summary>
+            public const string TimezoneIndianCocos = "Indian/Cocos";
+
+            /// <summary>
+            /// UTC+7
+            /// </summary>
+            public const string TimezoneAsiaJakarta = "Asia/Jakarta";
+
+            /// <summary>
+            /// UTC+8
+            /// </summary>
+            public const string TimezoneAsiaShanghai = "Asia/Shanghai";
+
+            /// <summary>
+            /// UTC+9
+            /// </summary>
+            public const string TimezoneAsiaTokyo = "Asia/Tokyo";
+
+            /// <summary>
+            /// UTC+9:30
+            /// </summary>
+            public const string TimezoneAustraliaDarwin = "Australia/Darwin";
+
+            /// <summary>
+            /// UTC+10
+            /// </summary>
+            public const string TimezonePacificGuam = "Pacific/Guam";
+
+            /// <summary>
+            /// UTC+10:30
+            /// </summary>
+            public const string TimezoneAustraliaLordHowe = "Australia/Lord_Howe";
+
+            /// <summary>
+            /// UTC+11
+            /// </summary>
+            public const string TimezonePacificGuadalcanal = "Pacific/Guadalcanal";
+
+            /// <summary>
+            /// UTC+11:30
+            /// </summary>
+            public const string TimezonePacificNorfolk = "Pacific/Norfolk";
+
+            /// <summary>
+            /// UTC+12
+            /// </summary>
+            public const string TimezonePacificFiji = "Pacific/Fiji";
+
+            /// <summary>
+            /// UTC+13
+            /// </summary>
+            public const string TimezonePacificEnderbury = "Pacific/Enderbury";
+
+            /// <summary>
+            /// UTC+14
+            /// </summary>
+            public const string TimezonePacificKiritimati = "Pacific/Kiritimati";
         }
 
 #if !(NONUNIT)
@@ -13082,6 +15842,18 @@ namespace PublicDomain
         [TestFixture]
         public class TzTimeZoneTests
         {
+            /// <summary>
+            /// Prints the time zones.
+            /// </summary>
+            [Test]
+            public void PrintTimeZones()
+            {
+                foreach (string timeZone in TzTimeZone.Zones.Keys)
+                {
+                    Console.WriteLine(timeZone);
+                }
+            }
+
             /// <summary>
             /// 
             /// </summary>
@@ -13163,7 +15935,7 @@ namespace PublicDomain
     [Serializable]
     public class TzDateTime
     {
-        private const string UtcOffsetModifier = " +00:00";
+        private const string UtcOffsetModifier = "+00:00";
         private DateTime m_dateTimeUtc;
         private TzTimeZone m_timeZone;
 
@@ -13212,7 +15984,32 @@ namespace PublicDomain
         /// <param name="day">The day.</param>
         /// <param name="timeZone">The time zone.</param>
         public TzDateTime(int year, int month, int day, TzTimeZone timeZone)
-            : this(year, month, day, 0, 0, 0, timeZone)
+            : this(year, month, day, 0, 0, 0, 0, timeZone)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TzDateTime"/> class.
+        /// </summary>
+        /// <param name="year">The year.</param>
+        /// <param name="month">The month.</param>
+        /// <param name="day">The day.</param>
+        /// <param name="kind">The kind.</param>
+        /// <param name="timeZone">The time zone.</param>
+        public TzDateTime(int year, int month, int day, DateTimeKind kind, TzTimeZone timeZone)
+            : this(year, month, day, 0, 0, 0, 0, kind, timeZone)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TzDateTime"/> class.
+        /// </summary>
+        /// <param name="year">The year.</param>
+        /// <param name="month">The month.</param>
+        /// <param name="day">The day.</param>
+        /// <param name="kind">The kind.</param>
+        public TzDateTime(int year, int month, int day, DateTimeKind kind)
+            : this(year, month, day, 0, 0, 0, 0, kind, null)
         {
         }
 
@@ -13226,7 +16023,22 @@ namespace PublicDomain
         /// <param name="minutes">The minutes.</param>
         /// <param name="seconds">The seconds.</param>
         public TzDateTime(int year, int month, int day, int hour, int minutes, int seconds)
-            : this(year, month, day, hour, minutes, seconds, null)
+            : this(year, month, day, hour, minutes, seconds, 0, null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TzDateTime"/> class.
+        /// </summary>
+        /// <param name="year">The year.</param>
+        /// <param name="month">The month.</param>
+        /// <param name="day">The day.</param>
+        /// <param name="hour">The hour.</param>
+        /// <param name="minutes">The minutes.</param>
+        /// <param name="seconds">The seconds.</param>
+        /// <param name="kind">The kind.</param>
+        public TzDateTime(int year, int month, int day, int hour, int minutes, int seconds, DateTimeKind kind)
+            : this(year, month, day, hour, minutes, seconds, 0, kind, null)
         {
         }
 
@@ -13241,7 +16053,7 @@ namespace PublicDomain
         /// <param name="seconds">The seconds.</param>
         /// <param name="timeZone">The time zone.</param>
         public TzDateTime(int year, int month, int day, int hour, int minutes, int seconds, TzTimeZone timeZone)
-            : this(year, month, day, hour, minutes, seconds, DateTimeKind.Local, timeZone)
+            : this(year, month, day, hour, minutes, seconds, 0, DateTimeKind.Local, timeZone)
         {
         }
 
@@ -13257,7 +16069,56 @@ namespace PublicDomain
         /// <param name="kind">The kind.</param>
         /// <param name="timeZone">The time zone.</param>
         public TzDateTime(int year, int month, int day, int hour, int minutes, int seconds, DateTimeKind kind, TzTimeZone timeZone)
-            : this(new DateTime(year, month, day, hour, minutes, seconds, kind), timeZone)
+            : this(year, month, day, hour, minutes, seconds, 0, kind, timeZone)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TzDateTime"/> class.
+        /// </summary>
+        /// <param name="year">The year.</param>
+        /// <param name="month">The month.</param>
+        /// <param name="day">The day.</param>
+        /// <param name="hour">The hour.</param>
+        /// <param name="minutes">The minutes.</param>
+        /// <param name="seconds">The seconds.</param>
+        /// <param name="millisecond">The millisecond.</param>
+        /// <param name="kind">The kind.</param>
+        public TzDateTime(int year, int month, int day, int hour, int minutes, int seconds, int millisecond, DateTimeKind kind)
+            : this(year, month, day, hour, minutes, seconds, millisecond, kind, null)
+        {
+        }
+
+        /// <summary>
+        /// Assumes a local date/time. Initializes a new instance of the <see cref="TzDateTime"/> class.
+        /// </summary>
+        /// <param name="year">The year.</param>
+        /// <param name="month">The month.</param>
+        /// <param name="day">The day.</param>
+        /// <param name="hour">The hour.</param>
+        /// <param name="minutes">The minutes.</param>
+        /// <param name="seconds">The seconds.</param>
+        /// <param name="millisecond">The millisecond.</param>
+        /// <param name="timeZone">The time zone.</param>
+        public TzDateTime(int year, int month, int day, int hour, int minutes, int seconds, int millisecond, TzTimeZone timeZone)
+            : this(year, month, day, hour, minutes, seconds, millisecond, DateTimeKind.Local, timeZone)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TzDateTime"/> class.
+        /// </summary>
+        /// <param name="year">The year.</param>
+        /// <param name="month">The month.</param>
+        /// <param name="day">The day.</param>
+        /// <param name="hour">The hour.</param>
+        /// <param name="minutes">The minutes.</param>
+        /// <param name="seconds">The seconds.</param>
+        /// <param name="millisecond">The millisecond.</param>
+        /// <param name="kind">The kind.</param>
+        /// <param name="timeZone">The time zone.</param>
+        public TzDateTime(int year, int month, int day, int hour, int minutes, int seconds, int millisecond, DateTimeKind kind, TzTimeZone timeZone)
+            : this(new DateTime(year, month, day, hour, minutes, seconds, millisecond, kind), timeZone)
         {
         }
 
@@ -13268,6 +16129,10 @@ namespace PublicDomain
         /// <param name="timeZone">The time zone.</param>
         public TzDateTime(DateTime time, TzTimeZone timeZone)
         {
+            if (timeZone == null && (time.Kind == DateTimeKind.Local || TzTimeZone.TreatUnspecifiedKindAsLocal && time.Kind == DateTimeKind.Unspecified))
+            {
+                throw new ArgumentException("A date/time with DateTimeKind Local or Unspecified must be initialized with a time zone. Otherwise, the date/time is ambiguous. You must explicitly provide a time zone for predictable results, for example, you may provide the local time zone of the computer running this program.", "timeZone");
+            }
             m_timeZone = timeZone;
             SetDateTime(time);
         }
@@ -13413,7 +16278,37 @@ namespace PublicDomain
         /// <returns></returns>
         public static TzDateTime Parse(string input, TzTimeZone timeZone, DateTimeStyles styles)
         {
-            return new TzDateTime(DateTime.Parse(input), timeZone);
+            if (input == null)
+            {
+                throw new ArgumentNullException("input");
+            }
+
+            input = input.Trim();
+
+            // First, see if this is an ISO 8601 date
+            TzDateTime result;
+            if (!Iso8601.TryParse(input, timeZone, out result))
+            {
+                // If it's not ISO 8601, we use the normal DateTime.Parse
+                // method; however, we also check if there is a time zone
+                // designator on the end
+                if (input.Length >= UtcOffsetModifier.Length)
+                {
+                    // There may be a time zone designator
+                    if (input[input.Length - UtcOffsetModifier.Length] == '+' ||
+                        input[input.Length - UtcOffsetModifier.Length] == '-')
+                    {
+                        // Looks like there is a time zone designator
+                        char modifier = input[input.Length - UtcOffsetModifier.Length];
+                        string[] pieces = StringUtilities.SplitAroundLastIndexOfAny(input, '+', '-');
+                        input = pieces[0];
+                        timeZone = TzTimeZone.GetTimeZoneByOffset(modifier + pieces[1]);
+                    }
+                }
+
+                result = new TzDateTime(DateTime.Parse(input), timeZone);
+            }
+            return result;
         }
 
         /// <summary>
@@ -13750,6 +16645,31 @@ namespace PublicDomain
         {
             return x.DateTimeUtc <= y.DateTimeUtc;
         }
+
+#if !(NONUNIT)
+        /// <summary>
+        /// 
+        /// </summary>
+        [TestFixture]
+        public class TzDateTimeTests
+        {
+            /// <summary>
+            /// Test1s this instance.
+            /// </summary>
+            [Test]
+            public void Test1()
+            {
+                foreach (string test in new string[] {
+                    "06/20/1984 3:00:00 PM-05:00",
+                    "1/1/2007+00:00",
+                })
+                {
+                    TzDateTime dt = Parse(test);
+                    Console.WriteLine(dt + "," + dt.ToStringLocal());
+                }
+            }
+        }
+#endif
     }
 
     /// <summary>
@@ -13861,7 +16781,7 @@ namespace PublicDomain
                         }
                         else if (ConversionUtilities.IsStringATimeSpan(dataZone.RuleName))
                         {
-                            TimeSpan timedRule = TimeSpan.Parse(dataZone.RuleName);
+                            TimeSpan timedRule = DateTimeUtlities.ParseTimeSpan(dataZone.RuleName);
                             dataRules.Add(new TzRule(dataZone.RuleName, int.MinValue, int.MaxValue, Month.January,
                                 1, null, new TimeSpan(), null, timedRule, null, null));
                         }
@@ -14616,7 +17536,7 @@ namespace PublicDomain
             public bool HasRules()
             {
                 TimeSpan trash;
-                return !string.IsNullOrEmpty(RuleName) && !RuleName.Trim().Equals(NotApplicableValue) && !TimeSpan.TryParse(RuleName, out trash);
+                return !string.IsNullOrEmpty(RuleName) && !RuleName.Trim().Equals(NotApplicableValue) && !DateTimeUtlities.TryParseTimeSpan(RuleName, out trash);
             }
 
             /// <summary>
@@ -14767,7 +17687,7 @@ namespace PublicDomain
                 timeModifier = saveTime[saveTime.Length - 1].ToString();
                 saveTime = saveTime.Substring(0, saveTime.Length - 1);
             }
-            return TimeSpan.Parse(saveTime);
+            return DateTimeUtlities.ParseTimeSpan(saveTime);
         }
 
         /// <summary>
@@ -14821,7 +17741,7 @@ namespace PublicDomain
             TzDatabase.GetTzDataDay(pieces[6], out t.StartDay, out t.StartDay_DayOfWeek);
 
             t.StartTime = TzDatabase.GetTzDataTime(pieces[7], out t.StartTimeModifier);
-            t.SaveTime = TimeSpan.Parse(pieces[8]);
+            t.SaveTime = DateTimeUtlities.ParseTimeSpan(pieces[8]);
             t.Modifier = pieces[9];
             if (t.Modifier != null && t.Modifier.IndexOf('#') != 1)
             {
@@ -14860,7 +17780,7 @@ namespace PublicDomain
 
             if (z.ZoneName != FactoryZoneName)
             {
-                z.UtcOffset = TimeSpan.Parse(pieces[2]);
+                z.UtcOffset = DateTimeUtlities.ParseTimeSpan(pieces[2]);
                 z.RuleName = pieces[3];
                 z.Format = pieces[4];
 
@@ -15282,6 +18202,179 @@ namespace PublicDomain
                 }
             }
             return null;
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class ConsoleRerouter : IDisposable
+    {
+        private TextWriter m_oldOut, m_oldError;
+        private TextReader m_oldIn;
+        private StringWriter m_stringWriter;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ConsoleRerouter"/> class.
+        /// </summary>
+        /// <param name="sb">The sb.</param>
+        public ConsoleRerouter(StringBuilder sb)
+        {
+            if (sb != null)
+            {
+                m_stringWriter = new StringWriter(sb);
+                SetStreams(m_stringWriter, m_stringWriter, null);
+            }
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ConsoleRerouter"/> class.
+        /// </summary>
+        /// <param name="consoleOut">The console out.</param>
+        public ConsoleRerouter(TextWriter consoleOut)
+            : this(consoleOut, true)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ConsoleRerouter"/> class.
+        /// </summary>
+        /// <param name="consoleOut">The console out.</param>
+        /// <param name="useOutForError">if set to <c>true</c> [use out for error].</param>
+        public ConsoleRerouter(TextWriter consoleOut, bool useOutForError)
+            : this(consoleOut, useOutForError ? consoleOut : null, null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ConsoleRerouter"/> class.
+        /// </summary>
+        /// <param name="consoleOut">The console out.</param>
+        /// <param name="consoleError">The console error.</param>
+        /// <param name="consoleIn">The console in.</param>
+        public ConsoleRerouter(TextWriter consoleOut, TextWriter consoleError, TextReader consoleIn)
+        {
+            SetStreams(consoleOut, consoleError, consoleIn);
+        }
+
+        private void SetStreams(TextWriter consoleOut, TextWriter consoleError, TextReader consoleIn)
+        {
+            if (consoleOut != null)
+            {
+                m_oldOut = Console.Out;
+                Console.SetOut(consoleOut);
+            }
+
+            if (consoleError != null)
+            {
+                m_oldError = Console.Error;
+                Console.SetError(consoleError);
+            }
+
+            if (consoleIn != null)
+            {
+                m_oldIn = Console.In;
+                Console.SetIn(consoleIn);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the out.
+        /// </summary>
+        /// <value>The out.</value>
+        public TextWriter Out
+        {
+            get
+            {
+                return Console.Out;
+            }
+            set
+            {
+                Console.SetOut(value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the error.
+        /// </summary>
+        /// <value>The error.</value>
+        public TextWriter Error
+        {
+            get
+            {
+                return Console.Error;
+            }
+            set
+            {
+                Console.SetError(value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the in.
+        /// </summary>
+        /// <value>The in.</value>
+        public TextReader In
+        {
+            get
+            {
+                return Console.In;
+            }
+            set
+            {
+                Console.SetIn(value);
+            }
+        }
+
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
+        public void Dispose()
+        {
+            List<Exception> exceptions = new List<Exception>();
+
+            if (m_oldError != null)
+            {
+                try
+                {
+                    Console.SetError(m_oldError);
+                }
+                catch (Exception ex)
+                {
+                    exceptions.Add(ex);
+                }
+            }
+
+            if (m_oldOut != null)
+            {
+                try
+                {
+                    Console.SetOut(m_oldOut);
+                }
+                catch (Exception ex)
+                {
+                    exceptions.Add(ex);
+                }
+            }
+
+            if (m_oldIn != null)
+            {
+                try
+                {
+                    Console.SetIn(m_oldIn);
+                }
+                catch (Exception ex)
+                {
+                    exceptions.Add(ex);
+                }
+            }
+
+            if (m_stringWriter != null)
+            {
+                m_stringWriter.Dispose();
+            }
+
+            ExceptionUtilities.ThrowExceptionList(exceptions);
         }
     }
 }
@@ -23485,6 +26578,592 @@ namespace PublicDomain.Logging
         {
             // This is not called
         }
+    }
+}
+#endif
+
+#if !(NODYNACODE)
+namespace PublicDomain.Dynacode
+{
+    /// <summary>
+    /// 
+    /// </summary>
+    public interface ICodeRunner
+    {
+        /// <summary>
+        /// Runs the specified arguments.
+        /// </summary>
+        /// <param name="compilerResults">The compiler results.</param>
+        /// <param name="execMethod">The exec method.</param>
+        /// <param name="output">The output.</param>
+        /// <param name="arguments">The arguments.</param>
+        /// <returns></returns>
+        object Run(CompilerResults compilerResults, string execMethod, StringBuilder output, params string[] arguments);
+
+        /// <summary>
+        /// Runs to string.
+        /// </summary>
+        /// <param name="compilerResults">The compiler results.</param>
+        /// <param name="execMethod">The exec method.</param>
+        /// <param name="arguments">The arguments.</param>
+        /// <returns></returns>
+        string RunToString(CompilerResults compilerResults, string execMethod, params string[] arguments);
+
+        /// <summary>
+        /// Gets the language.
+        /// </summary>
+        /// <value>The language.</value>
+        Language Language { get; }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class DotNetCodeRunner : ICodeRunner
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        protected Language m_language;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DotNetCodeRunner"/> class.
+        /// </summary>
+        /// <param name="language">The language.</param>
+        public DotNetCodeRunner(Language language)
+        {
+            m_language = language;
+        }
+
+        /// <summary>
+        /// Runs the specified arguments.
+        /// </summary>
+        /// <param name="compilerResults">The compiler results.</param>
+        /// <param name="execMethod">The exec method.</param>
+        /// <param name="output">The output.</param>
+        /// <param name="arguments">The arguments.</param>
+        /// <returns></returns>
+        public virtual object Run(CompilerResults compilerResults, string execMethod, StringBuilder output, params string[] arguments)
+        {
+            // Find the method in the assembly
+            using (new ConsoleRerouter(output))
+            {
+                return ReflectionUtilities.InvokeMethod(compilerResults.CompiledAssembly, execMethod, new object[] { arguments });
+            }
+        }
+
+        /// <summary>
+        /// Runs to string.
+        /// </summary>
+        /// <param name="compilerResults">The compiler results.</param>
+        /// <param name="execMethod">The exec method.</param>
+        /// <param name="arguments">The arguments.</param>
+        /// <returns></returns>
+        public virtual string RunToString(CompilerResults compilerResults, string execMethod, params string[] arguments)
+        {
+            StringBuilder sb = new StringBuilder();
+            Run(compilerResults, execMethod, sb, arguments);
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// Gets the language.
+        /// </summary>
+        /// <value>The language.</value>
+        public virtual Language Language
+        {
+            get
+            {
+                return m_language;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Methods for working with code and languages.
+    /// </summary>
+    public static class CodeUtilities
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        public const string DefaultNamespace = "DefaultNamespace";
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public const string DefaultClassName = "DefaultClassName";
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="lang"></param>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static string StripNonIdentifierCharacters(Language lang, string str)
+        {
+            switch (lang)
+            {
+                case Language.CSharp:
+                case Language.JSharp:
+                    // http://www.ecma-international.org/publications/standards/Ecma-334.htm
+                    // Page 70, Printed Page 92
+
+                    // TODO The following is not complete
+                    // TODO JSharp should its own version of this -- it is different
+
+                    str = StringUtilities.RemoveCharactersInverse(str, '_', 'a', '-', 'z', 'A', '-', 'Z', '0', '-', '9');
+                    break;
+                case Language.VisualBasic:
+                    // http://msdn.microsoft.com/library/default.asp?url=/library/en-us/vbls7/html/vblrfVBSpec2_2.asp
+
+                    str = StringUtilities.RemoveCharactersInverse(str, '_', 'a', '-', 'z', 'A', '-', 'Z', '0', '-', '9', '\\', '[', '\\', ']');
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
+            return str;
+        }
+
+        /// <summary>
+        /// Evals the snippet.
+        /// </summary>
+        /// <param name="language">The language.</param>
+        /// <param name="simpleCode">The simple code.</param>
+        /// <returns></returns>
+        public static string EvalSnippet(Language language, string simpleCode)
+        {
+            return Eval(language, GetSnippetCode(language, simpleCode));
+        }
+
+        /// <summary>
+        /// Runs a snippet of code.
+        /// </summary>
+        /// <param name="language">The language.</param>
+        /// <param name="code">The code.</param>
+        /// <param name="arguments">The arguments.</param>
+        /// <returns></returns>
+        public static string Eval(Language language, string code, params string[] arguments)
+        {
+            return Eval(language, code, true, arguments);
+        }
+
+        /// <summary>
+        /// Evals the specified language.
+        /// </summary>
+        /// <param name="language">The language.</param>
+        /// <param name="code">The code.</param>
+        /// <param name="isSnippet">if set to <c>true</c> [is snippet].</param>
+        /// <param name="arguments">The arguments.</param>
+        /// <returns></returns>
+        public static string Eval(Language language, string code, bool isSnippet, params string[] arguments)
+        {
+            CompilerResults compilerResults = Compile(language, code, isSnippet, true);
+
+            // Now, run the code
+            ICodeRunner codeRunner = GetCodeRunner(language);
+            return codeRunner.RunToString(compilerResults, string.Format("{0}.{1}.{2}", DefaultNamespace, DefaultClassName, GetDefaultMainMethodName(language)), arguments);
+        }
+
+        /// <summary>
+        /// Compiles the specified language.
+        /// </summary>
+        /// <param name="language">The language.</param>
+        /// <param name="code">The code.</param>
+        /// <returns></returns>
+        public static CompilerResults Compile(Language language, string code)
+        {
+            return Compile(language, code, true, true);
+        }
+
+        /// <summary>
+        /// Compiles the specified language.
+        /// </summary>
+        /// <param name="language">The language.</param>
+        /// <param name="code">The code.</param>
+        /// <param name="isSnippet">if set to <c>true</c> then <paramref name="code"/> will be placed into
+        /// templated "application code", such as a static void main.</param>
+        /// <param name="throwExceptionOnCompileError">if set to <c>true</c> [throw exception on compile error].</param>
+        /// <returns></returns>
+        /// <exception cref="PublicDomain.Dynacode.CodeUtilities.CompileException"/>
+        /// <exception cref="PublicDomain.Dynacode.CodeUtilities.NativeCompileException"/>
+        public static CompilerResults Compile(Language language, string code, bool isSnippet, bool throwExceptionOnCompileError)
+        {
+            using (CodeDomProvider domProvider = CodeDomProvider.CreateProvider(language.ToString()))
+            {
+                CompilerInfo compilerInfo = CodeDomProvider.GetCompilerInfo(language.ToString());
+                CompilerParameters compilerParameters = compilerInfo.CreateDefaultCompilerParameters();
+                PrepareCompilerParameters(language, compilerParameters);
+                if (isSnippet)
+                {
+                    code = GetApplicationCode(language, code, DefaultClassName, DefaultNamespace);
+                }
+                CompilerResults results = domProvider.CompileAssemblyFromSource(compilerParameters, code);
+                if (throwExceptionOnCompileError)
+                {
+                    CheckCompilerResultsThrow(results);
+                }
+                return results;
+            }
+        }
+
+        /// <summary>
+        /// Prepares the compiler parameters.
+        /// </summary>
+        /// <param name="language">The language.</param>
+        /// <param name="compilerParameters">The compiler parameters.</param>
+        public static void PrepareCompilerParameters(Language language, CompilerParameters compilerParameters)
+        {
+            switch (language)
+            {
+                case Language.CSharp:
+                    break;
+                case Language.VisualBasic:
+                    compilerParameters.ReferencedAssemblies.Add(@"c:\windows\Microsoft.NET\Framework\v2.0.50727\System.dll");
+                    compilerParameters.ReferencedAssemblies.Add(@"c:\windows\Microsoft.NET\Framework\v2.0.50727\System.Xml.dll");
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        /// <summary>
+        /// Gets the code runner.
+        /// </summary>
+        /// <param name="language">The language.</param>
+        /// <returns></returns>
+        public static ICodeRunner GetCodeRunner(Language language)
+        {
+            switch (language)
+            {
+                case Language.CSharp:
+                case Language.VisualBasic:
+                case Language.JSharp:
+                    return new DotNetCodeRunner(language);
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        /// <summary>
+        /// Gets the name of the default main method.
+        /// </summary>
+        /// <param name="lang">The lang.</param>
+        /// <returns></returns>
+        public static string GetDefaultMainMethodName(Language lang)
+        {
+            switch (lang)
+            {
+                case Language.CSharp:
+                case Language.VisualBasic:
+                    return "Main";
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        /// <summary>
+        /// Gets the application template code.
+        /// Parameters:
+        /// 0: Code
+        /// 1: Class Name
+        /// 2: Namespace
+        /// </summary>
+        /// <param name="lang">The lang.</param>
+        /// <returns></returns>
+        public static string GetApplicationTemplateCode(Language lang)
+        {
+            switch (lang)
+            {
+                case Language.CSharp:
+                    return @"using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace {2}
+{{
+    public class {1}
+    {{
+        public static void Main(string[] args)
+        {{
+            {0}
+        }}
+    }}
+}}
+";
+                case Language.VisualBasic:
+                    return @"Imports System
+Imports System.Collections.Generic
+Imports System.Text
+
+Namespace {2}
+    Module {1}
+        Sub Main(ByVal Args() as String)
+            {0}
+        End Sub
+    End Module
+End Namespace
+";
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        /// <summary>
+        /// Gets the snippet code.
+        /// </summary>
+        /// <param name="lang">The lang.</param>
+        /// <param name="code">The code.</param>
+        /// <returns></returns>
+        public static string GetSnippetCode(Language lang, string code)
+        {
+            return string.Format(GetSnippetTemplateCode(lang), code);
+        }
+
+        /// <summary>
+        /// Gets the snippet template code.
+        /// </summary>
+        /// <param name="lang">The lang.</param>
+        /// <returns></returns>
+        public static string GetSnippetTemplateCode(Language lang)
+        {
+            switch (lang)
+            {
+                case Language.CSharp:
+                    return @"Console.Write({0});";
+                case Language.VisualBasic:
+                    return @"Console.Write({0})";
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        /// <summary>
+        /// Gets the application code.
+        /// Parameters:
+        /// 0: Code
+        /// 1: Class Name
+        /// 2: Namespace
+        /// </summary>
+        /// <param name="lang">The lang.</param>
+        /// <param name="args">The args.</param>
+        /// <returns></returns>
+        public static string GetApplicationCode(Language lang, params string[] args)
+        {
+            return string.Format(GetApplicationTemplateCode(lang), args);
+        }
+
+        /// <summary>
+        /// This method throws an Exception if it finds an error in the
+        /// <c>results</c>, otherwise it returns without side effect.
+        /// </summary>
+        /// <param name="results"></param>
+        /// <exception cref="PublicDomain.Dynacode.CodeUtilities.CompileException"/>
+        /// <exception cref="PublicDomain.Dynacode.CodeUtilities.NativeCompileException"/>
+        public static void CheckCompilerResultsThrow(CompilerResults results)
+        {
+            if (results.Errors.HasErrors)
+            {
+                string msg = GetCompilerErrorsAsString(results.Errors);
+                if (results.NativeCompilerReturnValue != 0)
+                {
+                    msg += Environment.NewLine + GetNativeCompilerErrorMessage(results);
+                }
+                throw new CompileException(msg);
+            }
+            else if (results.NativeCompilerReturnValue != 0)
+            {
+                throw new NativeCompileException(GetNativeCompilerErrorMessage(results));
+            }
+        }
+
+        private static string GetNativeCompilerErrorMessage(CompilerResults results)
+        {
+            return "Compiler returned exit code " + results.NativeCompilerReturnValue;
+        }
+
+        /// <summary>
+        /// Gets the compiler errors as string.
+        /// </summary>
+        /// <param name="errors">The errors.</param>
+        /// <returns></returns>
+        public static string GetCompilerErrorsAsString(CompilerErrorCollection errors)
+        {
+            StringBuilder sb = new StringBuilder(errors.Count * 10);
+            CompilerError error;
+            for (int i = 0; i < errors.Count; i++)
+            {
+                error = errors[i];
+                if (i > 0)
+                {
+                    sb.Append(Environment.NewLine);
+                }
+                sb.Append(error.ToString());
+            }
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// Gets the display name of the language.
+        /// </summary>
+        /// <param name="lang">The language.</param>
+        /// <returns></returns>
+        public static string GetLanguageDisplayName(Language lang)
+        {
+            switch (lang)
+            {
+                case Language.CPlusPlus:
+                    return "C++";
+                case Language.CSharp:
+                    return "C#";
+                case Language.Java:
+                    return "Java";
+                case Language.JScript:
+                    return "JScript";
+                case Language.JSharp:
+                    return "J#";
+                case Language.PHP:
+                    return "PHP";
+                case Language.Ruby:
+                    return "Ruby";
+                case Language.VisualBasic:
+                    return "Visual Basic";
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        /// <summary>
+        /// Gets a <seealso cref="PublicDomain.Language"/> given a string name.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <returns></returns>
+        public static Language GetLanguageByName(string name)
+        {
+            name = name.ToLower().Trim();
+            switch (name)
+            {
+                case "cplusplus":
+                case "c++":
+                    return Language.CPlusPlus;
+                case "c#":
+                case "csharp":
+                    return Language.CSharp;
+                case "java":
+                    return Language.Java;
+                case "js":
+                case "jscript":
+                    return Language.JScript;
+                case "vj#":
+                case "j#":
+                case "jsharp":
+                    return Language.JSharp;
+                case "php":
+                    return Language.PHP;
+                case "vb":
+                case "visual basic":
+                case "visualbasic":
+                    return Language.VisualBasic;
+                case "ruby":
+                    return Language.Ruby;
+                default:
+                    throw new ArgumentException("Could not find language by name " + name);
+            }
+        }
+
+        /// <summary>
+        /// Thrown when an error is encountered compiling.
+        /// </summary>
+        [Serializable]
+        public class CompileException : Exception
+        {
+            /// <summary>
+            /// Initializes a new instance of the <see cref="CompileException"/> class.
+            /// </summary>
+            public CompileException() { }
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="CompileException"/> class.
+            /// </summary>
+            /// <param name="message">The message.</param>
+
+            public CompileException(string message) : base(message) { }
+            /// <summary>
+            /// Initializes a new instance of the <see cref="CompileException"/> class.
+            /// </summary>
+            /// <param name="message">The message.</param>
+            /// <param name="inner">The inner.</param>
+
+            public CompileException(string message, Exception inner) : base(message, inner) { }
+            /// <summary>
+            /// Initializes a new instance of the <see cref="CompileException"/> class.
+            /// </summary>
+            /// <param name="info">The <see cref="T:System.Runtime.Serialization.SerializationInfo"></see> that holds the serialized object data about the exception being thrown.</param>
+            /// <param name="context">The <see cref="T:System.Runtime.Serialization.StreamingContext"></see> that contains contextual information about the source or destination.</param>
+            /// <exception cref="T:System.Runtime.Serialization.SerializationException">The class name is null or <see cref="P:System.Exception.HResult"></see> is zero (0). </exception>
+            /// <exception cref="T:System.ArgumentNullException">The info parameter is null. </exception>
+
+            protected CompileException(
+              System.Runtime.Serialization.SerializationInfo info,
+              System.Runtime.Serialization.StreamingContext context)
+                : base(info, context) { }
+        }
+
+        /// <summary>
+        /// Thrown when the compiler returns an unexpected value.
+        /// </summary>
+        [Serializable]
+        public class NativeCompileException : CompileException
+        {
+            /// <summary>
+            /// Initializes a new instance of the <see cref="NativeCompileException"/> class.
+            /// </summary>
+            public NativeCompileException() { }
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="NativeCompileException"/> class.
+            /// </summary>
+            /// <param name="message">The message.</param>
+            public NativeCompileException(string message) : base(message) { }
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="NativeCompileException"/> class.
+            /// </summary>
+            /// <param name="message">The message.</param>
+            /// <param name="inner">The inner.</param>
+            public NativeCompileException(string message, Exception inner) : base(message, inner) { }
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="NativeCompileException"/> class.
+            /// </summary>
+            /// <param name="info">The <see cref="T:System.Runtime.Serialization.SerializationInfo"></see> that holds the serialized object data about the exception being thrown.</param>
+            /// <param name="context">The <see cref="T:System.Runtime.Serialization.StreamingContext"></see> that contains contextual information about the source or destination.</param>
+            /// <exception cref="T:System.Runtime.Serialization.SerializationException">The class name is null or <see cref="P:System.Exception.HResult"></see> is zero (0). </exception>
+            /// <exception cref="T:System.ArgumentNullException">The info parameter is null. </exception>
+            protected NativeCompileException(
+              System.Runtime.Serialization.SerializationInfo info,
+              System.Runtime.Serialization.StreamingContext context)
+                : base(info, context) { }
+        }
+
+#if !(NONUNIT)
+        /// <summary>
+        /// 
+        /// </summary>
+        [TestFixture]
+        public class CodeUtilityTests
+        {
+            /// <summary>
+            /// Test1s this instance.
+            /// </summary>
+            [Test]
+            public void Test1()
+            {
+                Console.WriteLine(EvalSnippet(Language.CSharp, "TimeSpan.Parse(\"-05:00\").Hours"));
+                Console.WriteLine(EvalSnippet(Language.VisualBasic, "TimeSpan.Parse(\"-05:00\").Hours"));
+            }
+        }
+#endif
     }
 }
 #endif
