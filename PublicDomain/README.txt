@@ -10,6 +10,10 @@ William M. Leszczuk (billl@eden.rutgers.edu)
 
 Version History
 ===============
+V0.1.17.0
+	[kevgrig@gmail.com]
+		* Added ApplicationLogger class
+		* Versions better coincide with setup versions
 V0.0.2.32
 	[kevgrig@gmail.com]
 		* Added GlobalAssemblyCache class to wrap Fusion DLLs

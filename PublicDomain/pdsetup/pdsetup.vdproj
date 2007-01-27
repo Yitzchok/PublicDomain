@@ -45,13 +45,13 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_E50F6BBDC1F041F384A2C19862B20D17"
+        "MsmKey" = "8:_BFF796853FCF41C2B644EB195AE655B3"
         "OwnerKey" = "8:_232751C70EAD4554B7412280C921C0AC"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_E50F6BBDC1F041F384A2C19862B20D17"
+        "MsmKey" = "8:_BFF796853FCF41C2B644EB195AE655B3"
         "OwnerKey" = "8:_4DA056F41EEF41BAB6C1A1B2A7C8B906"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -76,7 +76,7 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_E50F6BBDC1F041F384A2C19862B20D17"
+        "OwnerKey" = "8:_BFF796853FCF41C2B644EB195AE655B3"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -273,14 +273,14 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Public Domain"
-        "ProductCode" = "8:{FB205EF3-AEA4-47CD-9194-8C3004515F52}"
-        "PackageCode" = "8:{C7018494-C383-469B-AE88-7403B8EA048E}"
+        "ProductCode" = "8:{D853444C-8E41-49A7-A841-AE05DD4DBE6E}"
+        "PackageCode" = "8:{D6272B84-D1D4-448E-8134-D4749F9A50EC}"
         "UpgradeCode" = "8:{1DFA6A0E-52E0-4DDC-8B97-584FBFB16243}"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:TRUE"
-        "ProductVersion" = "8:0.0.2320"
+        "ProductVersion" = "8:0.1.17"
         "Manufacturer" = "8:Public Domain"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:http://www.codeplex.com/publicdomain"
@@ -460,7 +460,7 @@
                             "ContextData" = "8:1;True=1;False=0"
                             "Attributes" = "3:0"
                             "Setting" = "3:0"
-                            "Value" = "3:1"
+                            "Value" = "3:0"
                             "DefaultValue" = "3:1"
                             "UsePlugInResources" = "11:TRUE"
                             }
@@ -503,8 +503,8 @@
                             "Type" = "3:15"
                             "ContextData" = "8:"
                             "Attributes" = "3:0"
-                            "Setting" = "3:1"
-                            "Value" = "8:#1258"
+                            "Setting" = "3:2"
+                            "Value" = "8:Enjoy PublicDomain! Documentation and assemblies are in [TARGETDIR]"
                             "DefaultValue" = "8:#1258"
                             "UsePlugInResources" = "11:TRUE"
                             }
@@ -741,7 +741,7 @@
         }
         "MergeModule"
         {
-            "{CEE29DC0-9FBA-4B99-8D47-5BC643D9B626}:_E50F6BBDC1F041F384A2C19862B20D17"
+            "{CEE29DC0-9FBA-4B99-8D47-5BC643D9B626}:_BFF796853FCF41C2B644EB195AE655B3"
             {
             "UseDynamicProperties" = "11:TRUE"
             "IsDependency" = "11:TRUE"

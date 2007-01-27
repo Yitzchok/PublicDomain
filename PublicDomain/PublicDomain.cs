@@ -148,10 +148,28 @@ namespace PublicDomain
     public static class GlobalConstants
     {
         /// <summary>
+        /// Static Initializer
+        /// </summary>
+        static GlobalConstants()
+        {
+            BitsInAByte = (int)Math.Pow(2, 3);
+            BytesInAKilobyte = (int)Math.Pow(2, 10);
+            BitsInAKilobyte = BitsInAByte * BytesInAKilobyte;
+            BytesInAMegabyte = (int)Math.Pow(2, 20);
+            BitsInAMegabyte = BitsInAByte * BytesInAMegabyte;
+            BytesInAGigabyte = (long)Math.Pow(2, 30);
+            BitsInAGigabyte = BitsInAByte * BytesInAGigabyte;
+            BytesInATerabyte = (long)Math.Pow(2, 40);
+            BitsInATerabyte = BitsInAByte * BytesInATerabyte;
+            BytesInAPetabyte = (long)Math.Pow(2, 50);
+            BitsInAPetabyte = BitsInAByte * BytesInAPetabyte;
+        }
+
+        /// <summary>
         /// Current version of this code, in string form. In a standalone build,
         /// this is the assembly version and file version of the assembly.
         /// </summary>
-        public const string PublicDomainVersion = "0.0.2.32";
+        public const string PublicDomainVersion = "0.1.17.0";
 
         /// <summary>
         /// The name of the PublicDomain assembly, if this is a standalone build. If
@@ -166,59 +184,59 @@ namespace PublicDomain
         public const string PublicDomainStrongName = PublicDomainName + ", Version=" + PublicDomainVersion + ", Culture=neutral, PublicKeyToken=FD3F43B5776A962B";
 
         /// <summary>
-        /// The number of bits in a byte.
+        /// The number of bits in 1 Byte (8)
         /// </summary>
-        public const int BitsInAByte = 2 ^ 3;
+        public static readonly int BitsInAByte;
 
         /// <summary>
-        /// The number of bytes in 1KB
+        /// The number of bytes in 1KB (1024).
         /// </summary>
-        public const int BytesInAKilobyte = 2 ^ 10;
+        public static readonly int BytesInAKilobyte;
 
         /// <summary>
-        /// The number of bits in 1KB
+        /// The number of bits in 1KB (8192).
         /// </summary>
-        public const int BitsInAKilobyte = BitsInAByte * BytesInAKilobyte;
+        public static readonly int BitsInAKilobyte;
 
         /// <summary>
-        /// The number of bytes in 1MB
+        /// The number of bytes in 1MB (1048576).
         /// </summary>
-        public const int BytesInAMegabyte = 2 ^ 20;
+        public static readonly int BytesInAMegabyte;
 
         /// <summary>
-        /// The number of bits in 1MB
+        /// The number of bits in 1MB (8388608).
         /// </summary>
-        public const int BitsInAMegabyte = BitsInAByte * BytesInAMegabyte;
+        public static readonly int BitsInAMegabyte;
 
         /// <summary>
-        /// The number of bytes in 1GB
+        /// The number of bytes in 1GB (1073741824).
         /// </summary>
-        public const long BytesInAGigabyte = 2 ^ 30;
+        public static readonly long BytesInAGigabyte;
 
         /// <summary>
-        /// The number of bits in 1GB
+        /// The number of bits in 1GB (8589934592).
         /// </summary>
-        public const long BitsInAGigabyte = BitsInAByte * BytesInAGigabyte;
+        public static readonly long BitsInAGigabyte;
 
         /// <summary>
-        /// The number of bytes in 1TB
+        /// The number of bytes in 1TB (1099511627776).
         /// </summary>
-        public const long BytesInATerabyte = 2 ^ 40;
+        public static readonly long BytesInATerabyte;
 
         /// <summary>
-        /// The number of bits in 1TB
+        /// The number of bits in 1TB (8796093022208).
         /// </summary>
-        public const long BitsInATerabyte = BitsInAByte * BytesInATerabyte;
+        public static readonly long BitsInATerabyte;
 
         /// <summary>
-        /// The number of bytes in 1PB
+        /// The number of bytes in 1PB (1125899906842624).
         /// </summary>
-        public const long BytesInAPetabyte = 2 ^ 50;
+        public static readonly long BytesInAPetabyte;
 
         /// <summary>
-        /// The number of bits in 1PB
+        /// The number of bits in 1PB (9007199254740992).
         /// </summary>
-        public const long BitsInAPetabyte = BitsInAByte * BytesInAPetabyte;
+        public static readonly long BitsInAPetabyte;
 
         /// <summary>
         /// A reasonable default block size for block reading/writing to and from
@@ -4630,10 +4648,8 @@ namespace PublicDomain
             {
                 get
                 {
-                    uint major;
-                    uint minor;
-                    m_assemblyName.GetVersion(out major, out minor);
-                    return new Version((int)(major >> 16), (int)(major & 0xFFFF), (int)(minor >> 16), (int)(minor & 0xFFFF));
+                    string sn = DisplayName;
+                    return new Version(RegexUtilities.Extract(sn, @"Version=(\d+\.\d+\.\d+\.\d+)", 1));
                 }
             }
 
@@ -9191,6 +9207,116 @@ namespace PublicDomain
             }
             return -1;
         }
+
+        /// <summary>
+        /// Capture index number 0 is the entire match. Capture
+        /// index 1 is the first matched group from the left, and so on.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <param name="regularExpression">The regular expression.</param>
+        /// <param name="captureIndex">Capture index number 0 is the entire match. Capture
+        /// index 1 is the first matched group from the left, and so on.</param>
+        /// <returns></returns>
+        public static string Extract(string input, string regularExpression, int captureIndex)
+        {
+            Match m = Regex.Match(input, regularExpression);
+            if (m.Success)
+            {
+                return GetCapture(m, captureIndex);
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Capture index number 0 is the entire match. Capture
+        /// index 1 is the first matched group from the left, and so on.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <param name="regularExpression">The regular expression.</param>
+        /// <param name="captureIndex">Capture index number 0 is the entire match. Capture
+        /// index 1 is the first matched group from the left, and so on.
+        /// </param>
+        /// <param name="replacement">The replacement.</param>
+        /// <returns></returns>
+        public static string Replace(string input, string regularExpression, int captureIndex, string replacement)
+        {
+            return Replace(input, regularExpression, captureIndex, new StaticStringReplacer(replacement).Replace);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="capturedIndex"></param>
+        /// <param name="capturedValue"></param>
+        /// <returns></returns>
+        public delegate string CallbackRegexReplacement(int capturedIndex, string capturedValue);
+
+        private class StaticStringReplacer
+        {
+            private string m_replacement;
+
+            public StaticStringReplacer(string replacement)
+            {
+                m_replacement = replacement;
+            }
+
+            public string Replace(int capturedIndex, string capturedValue)
+            {
+                return m_replacement;
+            }
+        }
+
+        /// <summary>
+        /// Replaces the specified input.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <param name="regularExpression">The regular expression.</param>
+        /// <param name="captureIndex">Index of the capture.</param>
+        /// <param name="replacement">The replacement.</param>
+        /// <returns></returns>
+        public static string Replace(string input, string regularExpression, int captureIndex, CallbackRegexReplacement replacement)
+        {
+            Match m = Regex.Match(input, regularExpression);
+            StringBuilder result = new StringBuilder(input.Length);
+            while (m.Success)
+            {
+                Group g = m.Groups[captureIndex];
+                string[] pieces = StringUtilities.SplitOn(input, g.Index, false);
+                result.Append(pieces[0]);
+                result.Append(replacement(captureIndex, g.ToString()));
+                input = pieces[1].Substring(g.Length);
+
+                // Get the next match
+                m = Regex.Match(input, regularExpression);
+            }
+            result.Append(input);
+            return result.ToString();
+        }
+
+#if !(NONUNIT)
+        /// <summary>
+        /// 
+        /// </summary>
+        [TestFixture]
+        public class RegexTests
+        {
+            /// <summary>
+            /// Simples this instance.
+            /// </summary>
+            [Test]
+            public void Simple()
+            {
+                Assert.AreEqual(Replace("abcdabcd", @"(bc)", 1, delegate(int captureIndex, string captureValue)
+                {
+                    return captureValue + " ";
+                }), "abc dabc d");
+                Assert.AreEqual(Replace("abcdabcd", @"(bc)", 1, delegate(int captureIndex, string captureValue)
+                {
+                    return captureValue;
+                }), "abcdabcd");
+            }
+        }
+#endif
     }
 
     /// <summary>
@@ -10678,6 +10804,13 @@ namespace PublicDomain
         /// <summary>
         /// Initializes a new instance of the <see cref="TzTimeZone"/> class.
         /// </summary>
+        public TzTimeZone()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TzTimeZone"/> class.
+        /// </summary>
         /// <param name="info">The info.</param>
         public TzTimeZone(TzZoneInfo info)
         {
@@ -10942,7 +11075,8 @@ namespace PublicDomain
         }
 
         /// <summary>
-        /// Gets the name of the zone.
+        /// Gets the name of the zone. Setting the zone is
+        /// the same as finding a new zone.
         /// </summary>
         /// <value>The name of the zone.</value>
         public string ZoneName
@@ -10950,6 +11084,22 @@ namespace PublicDomain
             get
             {
                 return this.m_info.ZoneName;
+            }
+            set
+            {
+                if (string.IsNullOrEmpty(value))
+                {
+                    throw new ArgumentNullException("ZoneName");
+                }
+                TzZoneInfo zoneInfo;
+                if (Zones.TryGetValue(value, out zoneInfo))
+                {
+                    m_info = zoneInfo;
+                }
+                else
+                {
+                    throw new TzDatabase.TzException("Invalid time zone " + value);
+                }
             }
         }
 
@@ -18377,6 +18527,159 @@ namespace PublicDomain
             ExceptionUtilities.ThrowExceptionList(exceptions);
         }
     }
+
+#if !(NONUNIT)
+    /// <summary>
+    /// 
+    /// </summary>
+    [TestFixture]
+    public class GeneralTests
+    {
+        /// <summary>
+        /// Plays this instance.
+        /// </summary>
+        [Test]
+        public void play()
+        {
+            Console.WriteLine("{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10}",
+                GlobalConstants.BitsInAByte,
+                GlobalConstants.BitsInAGigabyte,
+                GlobalConstants.BitsInAKilobyte,
+                GlobalConstants.BitsInAMegabyte,
+                GlobalConstants.BitsInAPetabyte,
+                GlobalConstants.BitsInATerabyte,
+                GlobalConstants.BytesInAGigabyte,
+                GlobalConstants.BytesInAKilobyte,
+                GlobalConstants.BytesInAMegabyte,
+                GlobalConstants.BytesInAPetabyte,
+                GlobalConstants.BytesInATerabyte);
+        }
+
+        /// <summary>
+        /// Adds the revision.
+        /// </summary>
+        [Test]
+        public void AddRevision()
+        {
+            string csFile = FileSystemUtilities.PathCombine(Environment.CurrentDirectory, @"..\..\PublicDomain.cs");
+            string text = File.ReadAllText(csFile);
+            Version newVersion = null;
+            string newText = RegexUtilities.Replace(text, @"public const string PublicDomainVersion = ""(\d+\.\d+\.\d+\.\d+)"";", 1, delegate(int captureIndex, string captureValue)
+            {
+                newVersion = VersionUtilities.AddBuild(new Version(captureValue), 1);
+                return newVersion.ToString();
+            });
+
+            if (text != newText)
+            {
+                File.WriteAllText(csFile, newText);
+                Console.WriteLine("PublicDomain version updated");
+                UpdateProductVersion(newVersion);
+            }
+            else
+            {
+                Console.WriteLine("PublicDomain version NOT updated");
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        [Test]
+        public void UpdateProductVersion()
+        {
+            Version currentVersion = new Version(GlobalConstants.PublicDomainVersion);
+            UpdateProductVersion(currentVersion);
+        }
+
+        private static void UpdateProductVersion(Version currentVersion)
+        {
+            string newProductVersion = currentVersion.ToString(3);
+
+            string projFile = FileSystemUtilities.CombineTrackbacksInPath(FileSystemUtilities.PathCombine(Environment.CurrentDirectory, @"..\..\pdsetup\pdsetup.vdproj"));
+            string text = File.ReadAllText(projFile);
+            string newText = RegexUtilities.Replace(text, @"""ProductVersion"" = ""\d+:(\d+\.\d+\.\d+)""", 1, delegate(int captureIndex, string captureValue)
+            {
+                return newProductVersion;
+            });
+
+            if (text != newText)
+            {
+                // We also need a new ProductCode and PackageCode
+                newText = RegexUtilities.Replace(newText, @"""ProductCode"" = ""8:{(....................................)}""", 1, delegate(int captureIndex, string captureValue)
+                {
+                    return Guid.NewGuid().ToString().ToUpper();
+                });
+
+                newText = RegexUtilities.Replace(newText, @"""PackageCode"" = ""8:{(....................................)}""", 1, delegate(int captureIndex, string captureValue)
+                {
+                    return Guid.NewGuid().ToString().ToUpper();
+                });
+
+                File.WriteAllText(projFile, newText);
+                Console.WriteLine("Version updated");
+            }
+            else
+            {
+                Console.WriteLine("Version NOT updated");
+            }
+        }
+    }
+#endif
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static class VersionUtilities
+    {
+        /// <summary>
+        /// Adds the major.
+        /// </summary>
+        /// <param name="version">The version.</param>
+        /// <param name="majorAmount">The major amount.</param>
+        /// <returns></returns>
+        public static Version AddMajor(Version version, int majorAmount)
+        {
+            return new Version(version.Major + majorAmount, version.Minor, version.Build, version.Revision);
+        }
+
+        /// <summary>
+        /// Adds the minor.
+        /// </summary>
+        /// <param name="version">The version.</param>
+        /// <param name="minorAmount">The minor amount.</param>
+        /// <returns></returns>
+        public static Version AddMinor(Version version, int minorAmount)
+        {
+            return new Version(version.Major, version.Minor + minorAmount, version.Build, version.Revision);
+        }
+
+        /// <summary>
+        /// Creates a new instance of <see cref="System.Version"/>, adding
+        /// <paramref name="buildAmount"/> to the <see cref="System.Version.Build"/>
+        /// portion of the version, the third portion.
+        /// </summary>
+        /// <param name="version">The version.</param>
+        /// <param name="buildAmount">The build amount.</param>
+        /// <returns></returns>
+        public static Version AddBuild(Version version, int buildAmount)
+        {
+            return new Version(version.Major, version.Minor, version.Build + buildAmount, version.Revision);
+        }
+
+        /// <summary>
+        /// Creates a new instance of <see cref="System.Version"/>, adding
+        /// <paramref name="revisionAmount"/> to the <see cref="System.Version.Revision"/>
+        /// portion of the version, the fourth portion.
+        /// </summary>
+        /// <param name="version">The version.</param>
+        /// <param name="revisionAmount">The revision amount.</param>
+        /// <returns></returns>
+        public static Version AddRevision(Version version, int revisionAmount)
+        {
+            return new Version(version.Major, version.Minor, version.Build, version.Revision + revisionAmount);
+        }
+    }
 }
 
 #if !(NOCODECOUNT)
@@ -25566,7 +25869,11 @@ namespace PublicDomain.Logging
     public interface ILogger
     {
         /// <summary>
-        /// 
+        /// The severity threshold at which point a log message
+        /// is logged. For example, if the threshold is Debug,
+        /// all messages with severity greater than or equal to Debug
+        /// will be logged. All other messages will be discarded.
+        /// The default threshold is Warn.
         /// </summary>
         LoggerSeverity Threshold { get; set; }
 
@@ -25684,7 +25991,7 @@ namespace PublicDomain.Logging
     /// </summary>
     public abstract class Logger : ILogger
     {
-        private LoggerSeverity m_threshold = LoggerSeverity.Debug10;
+        private LoggerSeverity m_threshold = LoggerSeverity.Warn30;
 
         private List<ILogFilter> m_filters = new List<ILogFilter>();
 
@@ -26126,6 +26433,39 @@ namespace PublicDomain.Logging
     }
 
     /// <summary>
+    /// Provides a common application logger, which writes to a rolling
+    /// log file in the application's working directory. The logger
+    /// always logs severe log events using the <see cref="PublicDomain.Logging.SevereLogFilter"/>,
+    /// and by default, uses the default Logger <see cref="PublicDomain.Logging.ILogger.Threshold"/> value.
+    /// </summary>
+    public class ApplicationLogger : CompositeLogger
+    {
+        /// <summary>
+        /// Static logger provides a common application logger, which writes to a rolling
+        /// log file in the application's working directory. The logger
+        /// always logs severe log events using the <see cref="PublicDomain.Logging.SevereLogFilter"/>,
+        /// and by default, uses the default Logger <see cref="PublicDomain.Logging.Logger.Threshold"/> value.
+        /// </summary>
+        public static ILogger Current = new ApplicationLogger();
+
+        /// <summary>
+        /// Provides a common application logger, which writes to a rolling
+        /// log file in the application's working directory. The logger
+        /// always logs severe log events using the <see cref="PublicDomain.Logging.SevereLogFilter"/>,
+        /// and by default, uses the default Logger <see cref="PublicDomain.Logging.Logger.Threshold"/> value.
+        /// Initializes a new instance of the <see cref="ApplicationLogger"/> class.
+        /// </summary>
+        public ApplicationLogger()
+        {
+            // Figure out where we'll be logging the files
+            string fileNameFormatted = FileSystemUtilities.PathCombine(Environment.CurrentDirectory, @"\app{0}.log");
+            Console.WriteLine("Application logging to {0}", fileNameFormatted);
+            Loggers.Add(new RollingFileLogger(fileNameFormatted));
+            AddLogFilter(new SevereLogFilter());
+        }
+    }
+
+    /// <summary>
     /// 
     /// </summary>
     public interface IRollOverStrategy
@@ -26144,13 +26484,16 @@ namespace PublicDomain.Logging
     }
 
     /// <summary>
-    /// 
+    /// Writes to a file, rolling over to a new version of a file
+    /// when the previous file has filled to capacity.
     /// </summary>
     public class RollingFileLogger : FileLogger
     {
         private IRollOverStrategy m_strategy;
 
         /// <summary>
+        /// Writes to a file, rolling over to a new version of a file
+        /// when the previous file has filled to capacity.
         /// Initializes a new instance of the <see cref="RollingFileLogger"/> class.
         /// </summary>
         /// <param name="fileNameFormatted">The file name formatted.</param>
@@ -26160,6 +26503,8 @@ namespace PublicDomain.Logging
         }
 
         /// <summary>
+        /// Writes to a file, rolling over to a new version of a file
+        /// when the previous file has filled to capacity.
         /// Initializes a new instance of the <see cref="RollingFileLogger"/> class.
         /// </summary>
         /// <param name="fileNameFormatted">The file name formatted.</param>
@@ -26214,9 +26559,17 @@ namespace PublicDomain.Logging
     public class FileSizeRollOverStrategy : IRollOverStrategy
     {
         /// <summary>
+        /// 
+        /// </summary>
+        static FileSizeRollOverStrategy()
+        {
+            DefaultFileSizeStrategyBytes = GlobalConstants.BytesInAMegabyte * 10;
+        }
+
+        /// <summary>
         /// 10 megs
         /// </summary>
-        public const int DefaultFileSizeStrategyBytes = GlobalConstants.BytesInAMegabyte * 10;
+        public static readonly int DefaultFileSizeStrategyBytes;
 
         private long m_maxFileSize;
 
@@ -26496,6 +26849,15 @@ namespace PublicDomain.Logging
     public class SevereLogFilter : DefaultLogFilter
     {
         /// <summary>
+        /// Always logs severe events, otherwise defers to normal threshold
+        /// conditions. Initializes a new instance of the <see cref="SevereLogFilter"/> class.
+        /// </summary>
+        public SevereLogFilter()
+            : base()
+        {
+        }
+
+        /// <summary>
         /// Determines whether the specified severity is loggable.
         /// </summary>
         /// <param name="threshold">The threshold.</param>
@@ -26694,6 +27056,16 @@ namespace PublicDomain.Dynacode
         /// </summary>
         public const string DefaultClassName = "DefaultClassName";
 
+        private static Language[] s_supportedLanguages;
+
+        static CodeUtilities()
+        {
+            List<Language> supportedLanguages = new List<Language>();
+            supportedLanguages.Add(Language.CSharp);
+            supportedLanguages.Add(Language.VisualBasic);
+            s_supportedLanguages = supportedLanguages.ToArray();
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -26730,6 +27102,8 @@ namespace PublicDomain.Dynacode
         /// </summary>
         /// <param name="language">The language.</param>
         /// <param name="simpleCode">The simple code.</param>
+        /// <exception cref="PublicDomain.Dynacode.CodeUtilities.CompileException" />
+        /// <exception cref="PublicDomain.Dynacode.CodeUtilities.NativeCompileException" />
         /// <returns></returns>
         public static string EvalSnippet(Language language, string simpleCode)
         {
@@ -26742,6 +27116,8 @@ namespace PublicDomain.Dynacode
         /// <param name="language">The language.</param>
         /// <param name="code">The code.</param>
         /// <param name="arguments">The arguments.</param>
+        /// <exception cref="PublicDomain.Dynacode.CodeUtilities.CompileException" />
+        /// <exception cref="PublicDomain.Dynacode.CodeUtilities.NativeCompileException" />
         /// <returns></returns>
         public static string Eval(Language language, string code, params string[] arguments)
         {
@@ -26755,6 +27131,8 @@ namespace PublicDomain.Dynacode
         /// <param name="code">The code.</param>
         /// <param name="isSnippet">if set to <c>true</c> [is snippet].</param>
         /// <param name="arguments">The arguments.</param>
+        /// <exception cref="PublicDomain.Dynacode.CodeUtilities.CompileException" />
+        /// <exception cref="PublicDomain.Dynacode.CodeUtilities.NativeCompileException" />
         /// <returns></returns>
         public static string Eval(Language language, string code, bool isSnippet, params string[] arguments)
         {
@@ -26770,6 +27148,8 @@ namespace PublicDomain.Dynacode
         /// </summary>
         /// <param name="language">The language.</param>
         /// <param name="code">The code.</param>
+        /// <exception cref="PublicDomain.Dynacode.CodeUtilities.CompileException" />
+        /// <exception cref="PublicDomain.Dynacode.CodeUtilities.NativeCompileException" />
         /// <returns></returns>
         public static CompilerResults Compile(Language language, string code)
         {
@@ -26784,9 +27164,9 @@ namespace PublicDomain.Dynacode
         /// <param name="isSnippet">if set to <c>true</c> then <paramref name="code"/> will be placed into
         /// templated "application code", such as a static void main.</param>
         /// <param name="throwExceptionOnCompileError">if set to <c>true</c> [throw exception on compile error].</param>
+        /// <exception cref="PublicDomain.Dynacode.CodeUtilities.CompileException" />
+        /// <exception cref="PublicDomain.Dynacode.CodeUtilities.NativeCompileException" />
         /// <returns></returns>
-        /// <exception cref="PublicDomain.Dynacode.CodeUtilities.CompileException"/>
-        /// <exception cref="PublicDomain.Dynacode.CodeUtilities.NativeCompileException"/>
         public static CompilerResults Compile(Language language, string code, bool isSnippet, bool throwExceptionOnCompileError)
         {
             using (CodeDomProvider domProvider = CodeDomProvider.CreateProvider(language.ToString()))
@@ -26825,6 +27205,15 @@ namespace PublicDomain.Dynacode
                 default:
                     throw new NotImplementedException();
             }
+        }
+
+        /// <summary>
+        /// Gets the supported languages.
+        /// </summary>
+        /// <returns></returns>
+        public static Language[] GetSupportedLanguages()
+        {
+            return s_supportedLanguages;
         }
 
         /// <summary>
