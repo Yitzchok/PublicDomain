@@ -169,7 +169,7 @@ namespace PublicDomain
         /// Current version of this code, in string form. In a standalone build,
         /// this is the assembly version and file version of the assembly.
         /// </summary>
-        public const string PublicDomainVersion = "0.1.18.0";
+        public const string PublicDomainVersion = "0.1.19.0";
 
         /// <summary>
         /// The name of the PublicDomain assembly, if this is a standalone build. If
@@ -18709,7 +18709,7 @@ namespace PublicDomain
     public static class VersionUtilities
     {
         /// <summary>
-        /// 
+        /// There cannot be a min version.
         /// </summary>
         public static readonly Version MaxVersion;
 
@@ -18718,14 +18718,8 @@ namespace PublicDomain
         /// </summary>
         public static readonly Version ZeroVersion;
 
-        /// <summary>
-        /// 
-        /// </summary>
-        public static readonly Version MinVersion;
-
         static VersionUtilities()
         {
-            MinVersion = new Version(int.MinValue, int.MinValue, int.MinValue, int.MinValue);
             MaxVersion = new Version(int.MaxValue, int.MaxValue, int.MaxValue, int.MaxValue);
             ZeroVersion = new Version(0, 0, 0, 0);
         }
@@ -18788,6 +18782,57 @@ namespace PublicDomain
         public static bool IsNonZero(Version version)
         {
             return version.Major > 0 || version.Minor > 0 || version.Revision > 0 || version.Build > 0;
+        }
+
+        /// <summary>
+        /// Tries to extract a version from the beginning of <paramref name="str"/>.
+        /// Discards anything that follows. Returns null if <paramref name="str"/>
+        /// does not begin with an integer.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns></returns>
+        public static Version ParseFirstVersion(string str)
+        {
+            bool found = false;
+            int major = 0, minor = 0, build = 0, revision = 0, step = 0;
+
+            if (!string.IsNullOrEmpty(str) && char.IsDigit(str[0]))
+            {
+                found = true;
+                foreach (char c in str)
+                {
+                    if (char.IsDigit(c))
+                    {
+                        switch (step)
+                        {
+                            case 0:
+                                major = (major * 10) + int.Parse(c.ToString());
+                                break;
+                            case 1:
+                                minor = (minor * 10) + int.Parse(c.ToString());
+                                break;
+                            case 2:
+                                build = (build * 10) + int.Parse(c.ToString());
+                                break;
+                            case 3:
+                                revision = (revision * 10) + int.Parse(c.ToString());
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                    else if (c == '.')
+                    {
+                        step++;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+            }
+
+            return found ? new Version(major, minor, build, revision) : null;
         }
     }
 
