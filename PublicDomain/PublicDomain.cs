@@ -169,7 +169,7 @@ namespace PublicDomain
         /// Current version of this code, in string form. In a standalone build,
         /// this is the assembly version and file version of the assembly.
         /// </summary>
-        public const string PublicDomainVersion = "0.1.17.0";
+        public const string PublicDomainVersion = "0.1.18.0";
 
         /// <summary>
         /// The name of the PublicDomain assembly, if this is a standalone build. If
@@ -317,6 +317,7 @@ namespace PublicDomain
 
         /// <summary>
         /// The default installation diretory of a standalone PublicDomain assembly.
+        /// Always ends in a trailing slash.
         /// </summary>
         public const string PublicDomainDefaultInstallLocation = @"C:\Program Files\Public Domain\";
     }
@@ -1050,6 +1051,62 @@ namespace PublicDomain
             }
 
             return new string[] { one, two };
+        }
+
+        /// <summary>
+        /// Formats the precision.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="precision">The precision.</param>
+        /// <returns></returns>
+        public static string FormatPrecision(decimal value, int precision)
+        {
+            return FormatPrecision(value, precision, false);
+        }
+
+        /// <summary>
+        /// Formats the precision.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="precision">The precision.</param>
+        /// <param name="chopOffZeros">if set to <c>true</c> [chop off zeros].</param>
+        /// <returns></returns>
+        public static string FormatPrecision(decimal value, int precision, bool chopOffZeros)
+        {
+            string result = value.ToString();
+            int periodIndex = result.LastIndexOf('.');
+            if (periodIndex != -1)
+            {
+                string decimalPortion = CutRight(result.Substring(periodIndex + 1), precision);
+
+                if (chopOffZeros && ConversionUtilities.ParseLong(decimalPortion) == 0)
+                {
+                    decimalPortion = null;
+                }
+
+                result = result.Substring(0, periodIndex);
+
+                if (decimalPortion != null)
+                {
+                    result += "." + decimalPortion;
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Cuts the right.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <param name="resultingLength">Length of the resulting.</param>
+        /// <returns></returns>
+        public static string CutRight(string str, int resultingLength)
+        {
+            if (str != null && str.Length > resultingLength)
+            {
+                str = str.Substring(0, resultingLength);
+            }
+            return str;
         }
 
 #if !(NONUNIT)
@@ -2787,6 +2844,23 @@ namespace PublicDomain
 
             return result;
         }
+
+        /// <summary>
+        /// Ensures the directory in <paramref name="path"/>.
+        /// </summary>
+        /// <param name="path">The path.</param>
+        /// <returns>The full directory path that was extracted
+        /// from <paramref name="path"/> which is ensured to be
+        /// created if it did not already exist.</returns>
+        public static string EnsureDirectoriesInPath(string path)
+        {
+            string[] pieces = SplitFileIntoDirectoryAndName(path, true);
+            if (!Directory.Exists(pieces[0]))
+            {
+                Directory.CreateDirectory(pieces[0]);
+            }
+            return pieces[0];
+        }
     }
 
     /// <summary>
@@ -3954,6 +4028,12 @@ namespace PublicDomain
             void Uninstall();
 
             /// <summary>
+            /// Uninstalls this instance.
+            /// </summary>
+            /// <param name="quiet">if set to <c>true</c> [quiet].</param>
+            void Uninstall(bool quiet);
+
+            /// <summary>
             /// Refreshes this instance.
             /// </summary>
             void Refresh();
@@ -4300,13 +4380,21 @@ namespace PublicDomain
             /// </summary>
             public void Uninstall()
             {
+                Uninstall(true);
+            }
+
+            /// <summary>
+            /// Uninstalls this instance.
+            /// </summary>
+            public void Uninstall(bool quiet)
+            {
                 EnsureData();
                 if (string.IsNullOrEmpty(UninstallString))
                 {
                     throw new ArgumentNullException("UninstallString");
                 }
                 ProcessHelper process = ProcessHelper.Parse(UninstallString);
-                if (process.FileName.IndexOf("msiexec.exe", StringComparison.CurrentCultureIgnoreCase) != -1)
+                if (quiet && process.FileName.IndexOf("msiexec.exe", StringComparison.CurrentCultureIgnoreCase) != -1)
                 {
                     process.AddArguments("/quiet", "/qn");
                     process.Arguments = process.Arguments.Replace("/I", "/x");
@@ -18541,18 +18629,6 @@ namespace PublicDomain
         [Test]
         public void play()
         {
-            Console.WriteLine("{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10}",
-                GlobalConstants.BitsInAByte,
-                GlobalConstants.BitsInAGigabyte,
-                GlobalConstants.BitsInAKilobyte,
-                GlobalConstants.BitsInAMegabyte,
-                GlobalConstants.BitsInAPetabyte,
-                GlobalConstants.BitsInATerabyte,
-                GlobalConstants.BytesInAGigabyte,
-                GlobalConstants.BytesInAKilobyte,
-                GlobalConstants.BytesInAMegabyte,
-                GlobalConstants.BytesInAPetabyte,
-                GlobalConstants.BytesInATerabyte);
         }
 
         /// <summary>
@@ -18633,6 +18709,28 @@ namespace PublicDomain
     public static class VersionUtilities
     {
         /// <summary>
+        /// 
+        /// </summary>
+        public static readonly Version MaxVersion;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public static readonly Version ZeroVersion;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public static readonly Version MinVersion;
+
+        static VersionUtilities()
+        {
+            MinVersion = new Version(int.MinValue, int.MinValue, int.MinValue, int.MinValue);
+            MaxVersion = new Version(int.MaxValue, int.MaxValue, int.MaxValue, int.MaxValue);
+            ZeroVersion = new Version(0, 0, 0, 0);
+        }
+
+        /// <summary>
         /// Adds the major.
         /// </summary>
         /// <param name="version">The version.</param>
@@ -18679,6 +18777,26 @@ namespace PublicDomain
         {
             return new Version(version.Major, version.Minor, version.Build, version.Revision + revisionAmount);
         }
+
+        /// <summary>
+        /// Determines whether [is non zero] [the specified version].
+        /// </summary>
+        /// <param name="version">The version.</param>
+        /// <returns>
+        /// 	<c>true</c> if [is non zero] [the specified version]; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool IsNonZero(Version version)
+        {
+            return version.Major > 0 || version.Minor > 0 || version.Revision > 0 || version.Build > 0;
+        }
+    }
+
+    /// <summary>
+    /// Code marked with this attribute should be moved to the PublicDomain package.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.All)]
+    public class PendingPublicDomainAttribute : Attribute
+    {
     }
 }
 
@@ -25958,7 +26076,7 @@ namespace PublicDomain.Logging
         /// <param name="category">The category.</param>
         /// <param name="data">The data.</param>
         /// <returns></returns>
-        string FormatEntry(LoggerSeverity severity, TzDateTime timestamp, object entry, object[] formatParameters, string category, Dictionary<string, object> data);
+        string FormatEntry(LoggerSeverity severity, DateTime timestamp, object entry, object[] formatParameters, string category, Dictionary<string, object> data);
 
         /// <summary>
         /// Gets or sets the format string.
@@ -25983,7 +26101,7 @@ namespace PublicDomain.Logging
         /// <returns>
         /// 	<c>true</c> if the specified severity is loggable; otherwise, <c>false</c>.
         /// </returns>
-        bool IsLoggable(LoggerSeverity threshold, LoggerSeverity severity, TzDateTime timestamp, object entry, object[] formatParameters);
+        bool IsLoggable(LoggerSeverity threshold, LoggerSeverity severity, DateTime timestamp, object entry, object[] formatParameters);
     }
 
     /// <summary>
@@ -26041,6 +26159,11 @@ namespace PublicDomain.Logging
         }
 
         /// <summary>
+        /// The severity threshold at which point a log message
+        /// is logged. For example, if the threshold is Debug,
+        /// all messages with severity greater than or equal to Debug
+        /// will be logged. All other messages will be discarded.
+        /// The default threshold is Warn.
         /// </summary>
         /// <value></value>
         public virtual LoggerSeverity Threshold
@@ -26143,7 +26266,7 @@ namespace PublicDomain.Logging
         public virtual void Log(LoggerSeverity severity, object entry, params object[] formatParameters)
         {
             // Get the current timestamp
-            TzDateTime timestamp = TzDateTime.GetUtcNow(null);
+            DateTime timestamp = DateTime.UtcNow;
 
             // Check all the filters
             if (Filters != null)
@@ -26183,7 +26306,7 @@ namespace PublicDomain.Logging
         /// <param name="entry">The entry.</param>
         /// <param name="formatParameters">The format parameters.</param>
         /// <param name="logLine">The log line.</param>
-        protected virtual void DoLog(LoggerSeverity severity, TzDateTime timestamp, object entry, object[] formatParameters, string logLine)
+        protected virtual void DoLog(LoggerSeverity severity, DateTime timestamp, object entry, object[] formatParameters, string logLine)
         {
             DoLog(logLine);
         }
@@ -26383,6 +26506,10 @@ namespace PublicDomain.Logging
             set
             {
                 m_fileName = value;
+                if (!string.IsNullOrEmpty(m_fileName))
+                {
+                    FileSystemUtilities.EnsureDirectoriesInPath(m_fileName);
+                }
             }
         }
 
@@ -26395,7 +26522,7 @@ namespace PublicDomain.Logging
         /// <param name="entry">The entry.</param>
         /// <param name="formatParameters">The format parameters.</param>
         /// <param name="logLine">The log line.</param>
-        protected override void DoLog(LoggerSeverity severity, TzDateTime timestamp, object entry, object[] formatParameters, string logLine)
+        protected override void DoLog(LoggerSeverity severity, DateTime timestamp, object entry, object[] formatParameters, string logLine)
         {
             string fileName = GetFileName(severity, timestamp, entry, formatParameters, logLine);
 
@@ -26426,7 +26553,7 @@ namespace PublicDomain.Logging
         /// Gets the name of the file.
         /// </summary>
         /// <returns></returns>
-        protected virtual string GetFileName(LoggerSeverity severity, TzDateTime timestamp, object entry, object[] formatParameters, string logLine)
+        protected virtual string GetFileName(LoggerSeverity severity, DateTime timestamp, object entry, object[] formatParameters, string logLine)
         {
             return FileName;
         }
@@ -26436,7 +26563,7 @@ namespace PublicDomain.Logging
     /// Provides a common application logger, which writes to a rolling
     /// log file in the application's working directory. The logger
     /// always logs severe log events using the <see cref="PublicDomain.Logging.SevereLogFilter"/>,
-    /// and by default, uses the default Logger <see cref="PublicDomain.Logging.ILogger.Threshold"/> value.
+    /// and by default, uses the default Logger <see cref="PublicDomain.Logging.ILogger.Threshold"/> value of Warn.
     /// </summary>
     public class ApplicationLogger : CompositeLogger
     {
@@ -26444,9 +26571,9 @@ namespace PublicDomain.Logging
         /// Static logger provides a common application logger, which writes to a rolling
         /// log file in the application's working directory. The logger
         /// always logs severe log events using the <see cref="PublicDomain.Logging.SevereLogFilter"/>,
-        /// and by default, uses the default Logger <see cref="PublicDomain.Logging.Logger.Threshold"/> value.
+        /// and by default, uses the default Logger <see cref="PublicDomain.Logging.Logger.Threshold"/> value of Warn.
         /// </summary>
-        public static ILogger Current = new ApplicationLogger();
+        public static ApplicationLogger Current = new ApplicationLogger();
 
         /// <summary>
         /// Provides a common application logger, which writes to a rolling
@@ -26459,9 +26586,21 @@ namespace PublicDomain.Logging
         {
             // Figure out where we'll be logging the files
             string fileNameFormatted = FileSystemUtilities.PathCombine(Environment.CurrentDirectory, @"\app{0}.log");
-            Console.WriteLine("Application logging to {0}", fileNameFormatted);
             Loggers.Add(new RollingFileLogger(fileNameFormatted));
             AddLogFilter(new SevereLogFilter());
+
+            // So that we know where the log is going
+            string msg = string.Format("Application logging to {0}", fileNameFormatted);
+            Console.WriteLine(msg);
+
+#if DEBUG
+            // Sometimes the Console does not go anywhere logical (or nowhere at all),
+            // so it becomes difficult to know where the current directory is. Therefore,
+            // we write the same message to a global file
+            ILogger loggers = new FileLogger(GlobalConstants.PublicDomainDefaultInstallLocation + @"loggers.log");
+            loggers.Threshold = LoggerSeverity.Info20;
+            loggers.LogInfo20(msg);
+#endif
         }
     }
 
@@ -26480,7 +26619,7 @@ namespace PublicDomain.Logging
         /// <param name="formatParameters">The format parameters.</param>
         /// <param name="logLine">The log line.</param>
         /// <returns></returns>
-        string GetFileName(string fileName, LoggerSeverity severity, TzDateTime timestamp, object entry, object[] formatParameters, string logLine);
+        string GetFileName(string fileName, LoggerSeverity severity, DateTime timestamp, object entry, object[] formatParameters, string logLine);
     }
 
     /// <summary>
@@ -26540,7 +26679,7 @@ namespace PublicDomain.Logging
         /// <param name="formatParameters"></param>
         /// <param name="logLine"></param>
         /// <returns></returns>
-        protected override string GetFileName(LoggerSeverity severity, TzDateTime timestamp, object entry, object[] formatParameters, string logLine)
+        protected override string GetFileName(LoggerSeverity severity, DateTime timestamp, object entry, object[] formatParameters, string logLine)
         {
             string fileName = base.GetFileName(severity, timestamp, entry, formatParameters, logLine);
 
@@ -26617,7 +26756,7 @@ namespace PublicDomain.Logging
         /// <param name="formatParameters">The format parameters.</param>
         /// <param name="logLine">The log line.</param>
         /// <returns></returns>
-        public string GetFileName(string fileName, LoggerSeverity severity, TzDateTime timestamp, object entry, object[] formatParameters, string logLine)
+        public string GetFileName(string fileName, LoggerSeverity severity, DateTime timestamp, object entry, object[] formatParameters, string logLine)
         {
             // First, find the largest numbered file
             string[] pieces = FileSystemUtilities.SplitFileIntoDirectoryAndName(fileName, true);
@@ -26751,7 +26890,7 @@ namespace PublicDomain.Logging
         /// <param name="category"></param>
         /// <param name="data"></param>
         /// <returns></returns>
-        public string FormatEntry(LoggerSeverity severity, TzDateTime timestamp, object entry, object[] formatParameters, string category, Dictionary<string, object> data)
+        public string FormatEntry(LoggerSeverity severity, DateTime timestamp, object entry, object[] formatParameters, string category, Dictionary<string, object> data)
         {
             string logEntry = PrepareEntry(entry, formatParameters);
 
@@ -26767,7 +26906,7 @@ namespace PublicDomain.Logging
         /// <param name="category">The category.</param>
         /// <param name="data">The data.</param>
         /// <returns></returns>
-        protected abstract string DoFormatEntry(LoggerSeverity severity, TzDateTime timestamp, string logEntry, string category, Dictionary<string, object> data);
+        protected abstract string DoFormatEntry(LoggerSeverity severity, DateTime timestamp, string logEntry, string category, Dictionary<string, object> data);
 
         /// <summary>
         /// Prepares the entry.
@@ -26810,7 +26949,7 @@ namespace PublicDomain.Logging
         /// <param name="category">The category.</param>
         /// <param name="data">The data.</param>
         /// <returns></returns>
-        protected override string DoFormatEntry(LoggerSeverity severity, TzDateTime timestamp, string logEntry, string category, Dictionary<string, object> data)
+        protected override string DoFormatEntry(LoggerSeverity severity, DateTime timestamp, string logEntry, string category, Dictionary<string, object> data)
         {
             if (!string.IsNullOrEmpty(category))
             {
@@ -26836,7 +26975,7 @@ namespace PublicDomain.Logging
         /// <returns>
         /// 	<c>true</c> if the specified severity is loggable; otherwise, <c>false</c>.
         /// </returns>
-        public virtual bool IsLoggable(LoggerSeverity threshold, LoggerSeverity severity, TzDateTime timestamp, object entry, object[] formatParameters)
+        public virtual bool IsLoggable(LoggerSeverity threshold, LoggerSeverity severity, DateTime timestamp, object entry, object[] formatParameters)
         {
             return (int)severity >= (int)threshold;
         }
@@ -26868,7 +27007,7 @@ namespace PublicDomain.Logging
         /// <returns>
         /// 	<c>true</c> if the specified severity is loggable; otherwise, <c>false</c>.
         /// </returns>
-        public override bool IsLoggable(LoggerSeverity threshold, LoggerSeverity severity, TzDateTime timestamp, object entry, object[] formatParameters)
+        public override bool IsLoggable(LoggerSeverity threshold, LoggerSeverity severity, DateTime timestamp, object entry, object[] formatParameters)
         {
             return severity == LoggerSeverity.Fatal50 ? true : base.IsLoggable(threshold, severity, timestamp, entry, formatParameters);
         }
@@ -26915,21 +27054,10 @@ namespace PublicDomain.Logging
         /// <param name="formatParameters"></param>
         public override void Log(LoggerSeverity severity, object entry, params object[] formatParameters)
         {
-            List<Exception> trappedExceptions = new List<Exception>();
             foreach (ILogger logger in Loggers)
             {
-                try
-                {
-                    logger.Log(severity, entry, formatParameters);
-                }
-                catch (Exception ex)
-                {
-                    trappedExceptions.Add(ex);
-                }
+                logger.Log(severity, entry, formatParameters);
             }
-
-            // Throw any trapped exceptions as a single exception
-            ExceptionUtilities.ThrowExceptionList(trappedExceptions);
         }
 
         /// <summary>
