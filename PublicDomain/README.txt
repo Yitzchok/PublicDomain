@@ -7,9 +7,13 @@ assembly from the installation directory (default is C:\Program Files\Public Dom
 Contributing Authors
 ====================
 William M. Leszczuk (billl@eden.rutgers.edu)
+Pierre Vachon (pierrevachon@gmail.com)
 
 Version History
 ===============
+V0.1.23.0
+	[pierrevachon@gmail.com]
+		* Bug fix in the semantics of GlobalConstants
 V0.1.22.0
 	[kevgrig@gmail.com]
 		* Added ASpell SpellChecker class

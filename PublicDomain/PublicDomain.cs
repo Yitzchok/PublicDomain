@@ -168,13 +168,14 @@ namespace PublicDomain
             BitsInATerabyte = BitsInAByte * BytesInATerabyte;
             BytesInAPetabyte = (long)Math.Pow(2, 50);
             BitsInAPetabyte = BitsInAByte * BytesInAPetabyte;
+            KilometersInAStatuteMile = ((FeetInAStatuteMile) * (InchesInAFoot) * (CentimetersInAnInch)) / (Math.Pow(10, 5));
         }
 
         /// <summary>
         /// Current version of this code, in string form. In a standalone build,
         /// this is the assembly version and file version of the assembly.
         /// </summary>
-        public const string PublicDomainVersion = "0.1.22.0";
+        public const string PublicDomainVersion = "0.1.23.0";
 
         /// <summary>
         /// The name of the PublicDomain assembly, if this is a standalone build. If
@@ -256,21 +257,31 @@ namespace PublicDomain
         public const int DefaultExecuteSmallProcessTimeout = 60000;
 
         /// <summary>
+        /// 5280
         /// http://scienceworld.wolfram.com/physics/Mile.html
         /// </summary>
         public const int FeetInAStatuteMile = 5280;
 
         /// <summary>
+        /// 0.3937007874015748031496062992126
         /// http://scienceworld.wolfram.com/physics/Inch.html
         /// </summary>
-        public const double InchesInACentimeter = 2.54;
+        public const double InchesInACentimeter = 0.3937007874015748031496062992126;
 
         /// <summary>
+        /// 2.54
+        /// http://scienceworld.wolfram.com/physics/Inch.html
+        /// </summary>
+        public const double CentimetersInAnInch = 2.54;
+
+        /// <summary>
+        /// 12
         /// http://scienceworld.wolfram.com/physics/Inch.html
         /// </summary>
         public const int InchesInAFoot = 12;
 
         /// <summary>
+        /// 3
         /// http://scienceworld.wolfram.com/physics/Yard.html
         /// </summary>
         public const int FeetInAYard = 3;
@@ -278,29 +289,33 @@ namespace PublicDomain
         /// <summary>
         /// http://scienceworld.wolfram.com/physics/Mile.html
         /// </summary>
-        public const double KilometersInAStatuteMile = ((FeetInAStatuteMile) * (InchesInAFoot) * (InchesInACentimeter)) / (10 ^ 5);
+        public static readonly double KilometersInAStatuteMile;
 
         /// <summary>
+        /// 3963.19
         /// http://scienceworld.wolfram.com/astronomy/EarthRadius.html
         /// </summary>
         public const double EarthEquatorialRadiusInStatuteMiles = 3963.19;
 
         /// <summary>
-        /// 
+        /// 3443.9
         /// </summary>
         public const double EarthEquatorialRadiusInNauticalMiles = 3443.9;
         
         /// <summary>
+        /// 6378.137
         /// http://scienceworld.wolfram.com/astronomy/EarthRadius.html
         /// </summary>
         public const double EarthEquatorialRadiusInKilometers = 6378.137;
 
         /// <summary>
+        /// 24901.5
         /// http://scienceworld.wolfram.com/astronomy/EarthRadius.html
         /// </summary>
         public const double EarthEquatorialCircumferenceInStatuteMiles = 24901.5;
 
         /// <summary>
+        /// 40075
         /// http://scienceworld.wolfram.com/astronomy/EarthRadius.html
         /// </summary>
         public const int EarthEquatorialCircumferenceInKilometers = 40075;
