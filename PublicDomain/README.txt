@@ -10,6 +10,9 @@ William M. Leszczuk (billl@eden.rutgers.edu)
 
 Version History
 ===============
+V0.1.22.0
+	[kevgrig@gmail.com]
+		* Added ASpell SpellChecker class
 V0.1.18.0
 	[kevgrig@gmail.com]
 		* Changed PublicDomain.ILogger to use DateTime instead of TzDateTime for better initial performance

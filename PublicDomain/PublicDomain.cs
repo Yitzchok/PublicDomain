@@ -60,6 +60,7 @@
 #define NOVJSLIB
 #define NOSYSTEMWEB
 #define NONUNIT
+#define NOASPELL
 
 // Other switches:
 //#define NOSCREENSCRAPER
@@ -71,6 +72,10 @@
 //#define NOLOGGING
 //#define NODYNACODE
 
+#endif
+
+#if !(TEST)
+#define NONUNIT
 #endif
 
 // !!!EDIT DIRECTIVES END!!!!!
@@ -103,7 +108,7 @@ using System.Web;
 using NUnit.Framework;
 #endif
 
-// Core includes (at the bottom for Visual Studio's sake [place optional includes above])
+// Core includes
 using System;
 using System.CodeDom.Compiler;
 using System.Collections;
@@ -169,7 +174,7 @@ namespace PublicDomain
         /// Current version of this code, in string form. In a standalone build,
         /// this is the assembly version and file version of the assembly.
         /// </summary>
-        public const string PublicDomainVersion = "0.1.19.0";
+        public const string PublicDomainVersion = "0.1.22.0";
 
         /// <summary>
         /// The name of the PublicDomain assembly, if this is a standalone build. If
@@ -18834,6 +18839,20 @@ namespace PublicDomain
 
             return found ? new Version(major, minor, build, revision) : null;
         }
+
+        /// <summary>
+        /// Ares the equal.
+        /// </summary>
+        /// <param name="v1">The v1.</param>
+        /// <param name="v2">The v2.</param>
+        /// <returns></returns>
+        public static bool AreEqual(Version v1, Version v2)
+        {
+            return (v1.Major == v2.Major || (v1.Major == -1 && v2.Major == 0) || (v2.Major == -1 && v1.Major == 0)) &&
+                (v1.Minor == v2.Minor || (v1.Minor == -1 && v2.Minor == 0) || (v2.Minor == -1 && v1.Minor == 0)) &&
+            (v1.Build == v2.Build || (v1.Build == -1 && v2.Build == 0) || (v2.Build == -1 && v1.Build == 0)) &&
+            (v1.Revision == v2.Revision || (v1.Revision == -1 && v2.Revision == 0) || (v2.Revision == -1 && v1.Revision == 0));
+        }
     }
 
     /// <summary>
@@ -18843,6 +18862,302 @@ namespace PublicDomain
     public class PendingPublicDomainAttribute : Attribute
     {
     }
+
+#if !(NOASPELL)
+    /// <summary>
+    /// 
+    /// </summary>
+    [Serializable]
+    public class SpellCheckerException : Exception
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SpellCheckerException"/> class.
+        /// </summary>
+        public SpellCheckerException() { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SpellCheckerException"/> class.
+        /// </summary>
+        /// <param name="message">The message.</param>
+        public SpellCheckerException(string message) : base(message) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SpellCheckerException"/> class.
+        /// </summary>
+        /// <param name="message">The message.</param>
+        /// <param name="inner">The inner.</param>
+        public SpellCheckerException(string message, Exception inner) : base(message, inner) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SpellCheckerException"/> class.
+        /// </summary>
+        /// <param name="info">The <see cref="T:System.Runtime.Serialization.SerializationInfo"></see> that holds the serialized object data about the exception being thrown.</param>
+        /// <param name="context">The <see cref="T:System.Runtime.Serialization.StreamingContext"></see> that contains contextual information about the source or destination.</param>
+        /// <exception cref="T:System.Runtime.Serialization.SerializationException">The class name is null or <see cref="P:System.Exception.HResult"></see> is zero (0). </exception>
+        /// <exception cref="T:System.ArgumentNullException">The info parameter is null. </exception>
+        protected SpellCheckerException(
+          SerializationInfo info,
+          StreamingContext context)
+            : base(info, context) { }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class SpellChecker
+    {
+        /// <summary>
+        /// Always ends in a trailing slash.
+        /// </summary>
+        public const string AspellDirectory = @"c:\aspell\";
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public const string AspellDllLocation = AspellDirectory + @"aspelldll.dll";
+
+        /// <summary>
+        /// Always ends in a trailing slash.
+        /// </summary>
+        public const string DefaultDataDirectory = AspellDirectory + @"data\";
+
+        /// <summary>
+        /// Always ends in a trailing slash.
+        /// </summary>
+        public const string DefaultDictionaryDirectory = AspellDirectory + @"dict\";
+
+        private const int CheckBufferSize = 512;
+        private const int SuggestBufferSize = 1024;
+
+        /// <summary>
+        /// Checks the specified datadir.
+        /// </summary>
+        /// <param name="datadir">The datadir.</param>
+        /// <param name="dictdir">The dictdir.</param>
+        /// <param name="language">The language.</param>
+        /// <param name="word">The word.</param>
+        /// <param name="retval">The retval.</param>
+        /// <param name="errorMsg">The error MSG.</param>
+        /// <returns>0 if successful</returns>
+        [DllImport(AspellDllLocation)]
+        public static extern int check(string datadir, string dictdir, string language, string word, out int retval, ref WordStruct errorMsg);
+
+        /// <summary>
+        /// Suggests the specified datadir.
+        /// </summary>
+        /// <param name="datadir">The datadir.</param>
+        /// <param name="dictdir">The dictdir.</param>
+        /// <param name="language">The language.</param>
+        /// <param name="word">The word.</param>
+        /// <param name="errorMsg">The error MSG.</param>
+        /// <param name="suggest">The suggest.</param>
+        /// <returns>0 if successful</returns>
+        [DllImport(AspellDllLocation)]
+        public static extern int suggest(string datadir, string dictdir, string language, string word, ref WordStruct errorMsg, ref WordStruct suggest);
+
+        private static string s_dataDirectory = DefaultDataDirectory;
+
+        /// <summary>
+        /// Gets or sets the data directory.
+        /// </summary>
+        /// <value>The data directory.</value>
+        public static string DataDirectory
+        {
+            get
+            {
+                return s_dataDirectory;
+            }
+            set
+            {
+                s_dataDirectory = value;
+            }
+        }
+
+        private static string s_dictionaryDirectory = DefaultDictionaryDirectory;
+
+        /// <summary>
+        /// Gets or sets the dictionary directory.
+        /// </summary>
+        /// <value>The dictionary directory.</value>
+        public static string DictionaryDirectory
+        {
+            get
+            {
+                return s_dictionaryDirectory;
+            }
+            set
+            {
+                s_dictionaryDirectory = value;
+            }
+        }
+
+        /// <summary>
+        /// Checks the word.
+        /// </summary>
+        /// <param name="word">The word.</param>
+        /// <returns></returns>
+        public static bool IsWordSpelledCorrectly(string word)
+        {
+            string language = GetLanguage();
+
+            // initialize buffer and append something to the end so whole
+            // buffer is passed to unmanaged side
+            StringBuilder buffer = new StringBuilder(CheckBufferSize);
+            buffer.Append((char)0);
+            buffer.Append('*', buffer.Capacity - 8);
+
+            WordStruct buf;
+            buf.Buffer = buffer.ToString();
+            buf.Size = buf.Buffer.Length;
+
+            int retval;
+            if (check(DataDirectory, DictionaryDirectory, language, word, out retval, ref buf) != 0)
+            {
+                throw new SpellCheckerException(buf.Buffer);
+            }
+            return retval == 1 ? true : false;
+        }
+
+        private static string GetLanguage()
+        {
+            return "en_US";
+        }
+
+        /// <summary>
+        /// Suggests the specified word.
+        /// </summary>
+        /// <param name="word">The word.</param>
+        /// <returns></returns>
+        public static List<string> SuggestWords(string word)
+        {
+            string language = GetLanguage();
+            List<string> ret = new List<string>();
+
+            StringBuilder buffer = new StringBuilder(SuggestBufferSize);
+            buffer.Append((char)0);
+            buffer.Append('*', buffer.Capacity - 8);
+
+            WordStruct buf;
+            buf.Buffer = buffer.ToString();
+            buf.Size = buf.Buffer.Length;
+
+            WordStruct suggestStruct;
+            suggestStruct.Buffer = buffer.ToString();
+            suggestStruct.Size = suggestStruct.Buffer.Length;
+
+            if (!IsWordSpelledCorrectly(word))
+            {
+                if (suggest(DataDirectory, DictionaryDirectory, language, word, ref buf, ref suggestStruct) != 0)
+                {
+                    throw new SpellCheckerException(buf.Buffer);
+                }
+
+                string[] suggestions = suggestStruct.Buffer.ToString().Split(',');
+                foreach (string str in suggestions)
+                {
+                    if (!string.IsNullOrEmpty(str))
+                    {
+                        ret.Add(str);
+                    }
+                }
+            }
+
+            return ret;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
+        public struct WordStruct
+        {
+            /// <summary>
+            /// 
+            /// </summary>
+            public string Buffer;
+
+            /// <summary>
+            /// 
+            /// </summary>
+            public int Size;
+        }
+
+#if !(NONUNIT)
+        /// <summary>
+        /// 
+        /// </summary>
+        [TestFixture]
+        public class SpellCheckerTests
+        {
+            /// <summary>
+            /// Tests the valid check.
+            /// </summary>
+            [Test]
+            public void TestValidCheck()
+            {
+                SetupValidDirectories();
+
+                Assert.IsFalse(SpellChecker.IsWordSpelledCorrectly("perfuntory"));
+                Assert.IsTrue(SpellChecker.IsWordSpelledCorrectly("perfunctory"));
+            }
+
+            /// <summary>
+            /// Tests the valid suggest.
+            /// </summary>
+            [Test]
+            public void TestValidSuggest()
+            {
+                SetupValidDirectories();
+
+                List<string> suggestions = SpellChecker.SuggestWords("perfuntory");
+
+                Assert.AreNotSame(suggestions.IndexOf("perfunctory"), -1);
+
+                foreach (string suggestion in suggestions)
+                {
+                    Console.WriteLine(suggestion);
+                }
+            }
+
+            /// <summary>
+            /// Tests the invalid check.
+            /// </summary>
+            [Test]
+            [ExpectedException(typeof(SpellCheckerException))]
+            public void TestInvalidCheck()
+            {
+                SetupInvalidDirectories();
+
+                SpellChecker.IsWordSpelledCorrectly("test");
+            }
+
+            /// <summary>
+            /// Tests the invalid suggest.
+            /// </summary>
+            [Test]
+            [ExpectedException(typeof(SpellCheckerException))]
+            public void TestInvalidSuggest()
+            {
+                SetupInvalidDirectories();
+
+                SpellChecker.SuggestWords("test");
+            }
+
+            private static void SetupInvalidDirectories()
+            {
+                SpellChecker.DataDirectory = Path.GetTempPath();
+                SpellChecker.DictionaryDirectory = Path.GetTempPath();
+            }
+
+            private static void SetupValidDirectories()
+            {
+                SpellChecker.DataDirectory = SpellChecker.DefaultDataDirectory;
+                SpellChecker.DictionaryDirectory = SpellChecker.DefaultDictionaryDirectory;
+            }
+        }
+#endif
+    }
+#endif
 }
 
 #if !(NOCODECOUNT)
