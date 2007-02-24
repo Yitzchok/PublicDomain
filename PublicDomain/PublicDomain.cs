@@ -71,6 +71,7 @@
 //#define NOCODECOUNT
 //#define NOLOGGING
 //#define NODYNACODE
+//#define NOASPNETRUNTIMEHOST
 
 #endif
 
@@ -116,11 +117,13 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Configuration;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Reflection;
+using System.Runtime.Remoting.Lifetime;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Cryptography;
@@ -129,6 +132,7 @@ using System.Security.Policy;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Web.Hosting;
 using System.Xml;
 using PublicDomain;
 using PublicDomain.Feeder.Opml;
@@ -175,7 +179,7 @@ namespace PublicDomain
         /// Current version of this code, in string form. In a standalone build,
         /// this is the assembly version and file version of the assembly.
         /// </summary>
-        public const string PublicDomainVersion = "0.1.23.0";
+        public const string PublicDomainVersion = "0.1.26.0";
 
         /// <summary>
         /// The name of the PublicDomain assembly, if this is a standalone build. If
@@ -3917,6 +3921,72 @@ namespace PublicDomain
     public static class Win32
     {
         /// <summary>
+        /// Gets the free disk space of the main system volume.
+        /// </summary>
+        /// <returns></returns>
+        public static long GetFreeDiskSpaceOfMainSystemVolume()
+        {
+            return GetFreeDiskSpace(Environment.SystemDirectory);
+        }
+
+        /// <summary>
+        /// Gets the free disk space.
+        /// </summary>
+        /// <param name="path">The path.</param>
+        /// <returns></returns>
+        public static long GetFreeDiskSpace(string path)
+        {
+            long result = -1;
+            long available, total, free;
+            if (ExternalMethods.GetDiskFreeSpaceEx(path, out available, out total, out free))
+            {
+                result = free;
+            }
+            else
+            {
+                int error = GetLastError();
+                if (error != 0)
+                {
+                    result = error;
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Gets the total disk space of main system volume.
+        /// </summary>
+        /// <returns></returns>
+        public static long GetTotalDiskSpaceOfMainSystemVolume()
+        {
+            return GetTotalDiskSpace(Environment.SystemDirectory);
+        }
+
+        /// <summary>
+        /// Gets the total disk space.
+        /// </summary>
+        /// <param name="path">The path.</param>
+        /// <returns></returns>
+        public static long GetTotalDiskSpace(string path)
+        {
+            long result = -1;
+            long available, total, free;
+            if (ExternalMethods.GetDiskFreeSpaceEx(path, out available, out total, out free))
+            {
+                result = total;
+            }
+            else
+            {
+                int error = GetLastError();
+                if (error != 0)
+                {
+                    result = error;
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
         /// Wraps a COM interface pointer.
         /// </summary>
         /// <typeparam name="T">The COM interface</typeparam>
@@ -5566,7 +5636,7 @@ namespace PublicDomain
             /// <param name="szAssemblyName">A string representation of the assembly name or of a full assembly reference that is determined by dwFlags. The string representation can be null.</param>
             /// <param name="dwFlags">Zero or more of the bits that are defined in the CREATE_ASM_NAME_OBJ_FLAGS enumeration.</param>
             /// <param name="pvReserved">Must be null.</param>
-            [DllImport("fusion.dll", SetLastError = true, CharSet = CharSet.Unicode, PreserveSig = false)]
+            [DllImport("fusion.dll", SetLastError = true, CharSet = CharSet.Auto, PreserveSig = false)]
             public static extern void CreateAssemblyNameObject(
                 out PublicDomain.Win32.Win32Interfaces.IAssemblyName ppAssemblyNameObj,
                 string szAssemblyName,
@@ -5612,12 +5682,314 @@ namespace PublicDomain
             /// <param name="dwCacheFlags">Exactly one of the bits defined in the ASM_CACHE_FLAGS enumeration.</param>
             /// <param name="pwzCachePath">Pointer to a buffer that is to receive the path of the GAC as a Unicode string.</param>
             /// <param name="pcchPath">Length of the pwszCachePath buffer, in Unicode characters.</param>
-            [DllImport("fusion.dll", SetLastError = true, CharSet = CharSet.Unicode, PreserveSig = false)]
+            [DllImport("fusion.dll", SetLastError = true, CharSet = CharSet.Auto, PreserveSig = false)]
             public static extern void GetCachePath(
                 PublicDomain.Win32.Win32Enums.ASM_CACHE_FLAGS dwCacheFlags,
                 [MarshalAs(UnmanagedType.LPWStr)] StringBuilder pwzCachePath,
                 ref uint pcchPath
             );
+
+            /// <summary>
+            /// The GetDiskFreeSpaceEx function retrieves information about the amount of space that is available on a disk volume, which is the total amount of space, the total amount of free space, and the total amount of free space available to the user that is associated with the calling thread.
+            /// </summary>
+            /// <param name="lpDirectoryName">A pointer to a null-terminated string that specifies a directory on a disk.
+            /// If this parameter is NULL, the function uses the root of the current disk.
+            /// If this parameter is a UNC name, it must include a trailing backslash, for example, \\MyServer\MyShare\.
+            /// This parameter does not have to specify the root directory on a disk. The function accepts any directory on a disk.
+            /// The calling application must have FILE_LIST_DIRECTORY access rights for this directory.</param>
+            /// <param name="lpFreeBytesAvailableToCaller">A pointer to a variable that receives the total number of free bytes on a disk that are available to the user who is associated with the calling thread.
+            /// This parameter can be NULL.
+            /// Windows Me/98/95:  This parameter cannot be NULL.
+            /// If per-user quotas are being used, this value may be less than the total number of free bytes on a disk.</param>
+            /// <param name="lpTotalNumberOfBytes">A pointer to a variable that receives the total number of bytes on a disk that are available to the user who is associated with the calling thread.
+            /// This parameter can be NULL.
+            /// Windows Me/98/95 and Windows NT 4.0:  This parameter cannot be NULL.
+            /// If per-user quotas are being used, this value may be less than the total number of bytes on a disk.
+            /// To determine the total number of bytes on a disk or volume, use IOCTL_DISK_GET_LENGTH_INFO.</param>
+            /// <param name="lpTotalNumberOfFreeBytes">A pointer to a variable that receives the total number of free bytes on a disk.
+            /// This parameter can be NULL.</param>
+            /// <returns>If the function succeeds, the return value is nonzero.
+            /// If the function fails, the return value is 0 (zero). To get extended error information, call GetLastError.</returns>
+            [DllImport("kernel32.dll", SetLastError = true, CharSet=CharSet.Auto)]
+            public static extern bool GetDiskFreeSpaceEx(
+                string lpDirectoryName,
+                out long lpFreeBytesAvailableToCaller,
+                out long lpTotalNumberOfBytes,
+                out long lpTotalNumberOfFreeBytes
+            );
+
+            /// <summary>
+            /// Creates or opens a job object.
+            /// </summary>
+            /// <param name="lpJobAttributes">A pointer to a SECURITY_ATTRIBUTES structure that specifies the security descriptor for the job object and determines whether child processes can inherit the returned handle. If lpJobAttributes is NULL, the job object gets a default security descriptor and the handle cannot be inherited. The ACLs in the default security descriptor for a job object come from the primary or impersonation token of the creator.</param>
+            /// <param name="lpName">The name of the job. The name is limited to MAX_PATH characters. Name comparison is case-sensitive.
+            /// If lpName is NULL, the job is created without a name.
+            /// If lpName matches the name of an existing event, semaphore, mutex, waitable timer, or file-mapping object, the function fails and the GetLastError function returns ERROR_INVALID_HANDLE. This occurs because these objects share the same name space.
+            /// The object can be created in a private namespace. For more information, see Object Namespaces.
+            /// Terminal Services:  The name can have a "Global\" or "Local\" prefix to explicitly create the object in the global or session name space. The remainder of the name can contain any character except the backslash character (\). For more information, see Kernel Object Namespaces.
+            /// Windows 2000:  If Terminal Services is not running, the "Global\" and "Local\" prefixes are ignored. The remainder of the name can contain any character except the backslash character.</param>
+            /// <returns>If the function succeeds, the return value is a handle to the job object. The handle has the JOB_OBJECT_ALL_ACCESS access right. If the object existed before the function call, the function returns a handle to the existing job object and GetLastError returns ERROR_ALREADY_EXISTS.
+            /// If the function fails, the return value is NULL. To get extended error information, call GetLastError.</returns>
+            [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+            public static extern IntPtr CreateJobObject(
+                [In] ref PublicDomain.Win32.Win32Structures.SECURITY_ATTRIBUTES lpJobAttributes,
+                string lpName
+            );
+
+            /// <summary>
+            /// Closes an open object handle.
+            /// </summary>
+            /// <param name="hObject">A valid handle to an open object.</param>
+            /// <returns>If the function succeeds, the return value is nonzero.
+            /// If the function fails, the return value is zero. To get extended error information, call GetLastError.
+            /// If the application is running under a debugger, the function will throw an exception if it receives either a handle value that is not valid or a pseudo-handle value. This can happen if you close a handle twice, or if you call CloseHandle on a handle returned by the FindFirstFile function.</returns>
+            [DllImport("kernel32.dll", SetLastError = true)]
+            public static extern bool CloseHandle(IntPtr hObject);
+
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="hJob"></param>
+            /// <param name="JobObjectInfoClass"></param>
+            /// <param name="lpJobObjectInfo"></param>
+            /// <param name="cbJobObjectInfoLength"></param>
+            /// <returns></returns>
+            [DllImport("kernel32.dll", SetLastError = true, EntryPoint = "SetInformationJobObject")]
+            internal static extern bool SetInformationJobObjectLimit(
+                IntPtr hJob,
+                PublicDomain.Win32.Win32Enums.JobObjectInfoClass JobObjectInfoClass,
+                ref Win32Structures.JOBOBJECT_BASIC_LIMIT_INFORMATION lpJobObjectInfo,
+                int cbJobObjectInfoLength
+            );
+
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="hJob"></param>
+            /// <param name="JobObjectInfoClass"></param>
+            /// <param name="lpJobObjectInfo"></param>
+            /// <param name="cbJobObjectInfoLength"></param>
+            /// <param name="lpReturnLength"></param>
+            /// <returns></returns>
+            [DllImport("kernel32.dll", SetLastError = true, EntryPoint = "QueryInformationJobObject")]
+            internal static extern bool QueryInformationJobObjectLimit(
+                IntPtr hJob,
+                PublicDomain.Win32.Win32Enums.JobObjectInfoClass JobObjectInfoClass,
+                out Win32Structures.JOBOBJECT_BASIC_LIMIT_INFORMATION lpJobObjectInfo,
+                int cbJobObjectInfoLength,
+                out int lpReturnLength
+            );
+
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="hJob"></param>
+            /// <param name="hProcess"></param>
+            /// <returns></returns>
+            [DllImport("kernel32.dll", SetLastError = true)]
+            public static extern bool AssignProcessToJobObject(
+                IntPtr hJob,
+                IntPtr hProcess
+            );
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public class Job : IDisposable
+        {
+            private string m_name;
+            private IntPtr? m_handle;
+            private bool m_inheritSecurityHandle;
+            private IntPtr m_securityDescriptor;
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="Job"/> class.
+            /// </summary>
+            /// <param name="name">The name.</param>
+            public Job(string name)
+                : this(name, true, (IntPtr)null)
+            {
+            }
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="Job"/> class.
+            /// </summary>
+            /// <param name="name">The name.</param>
+            /// <param name="inheritSecurityHandle">if set to <c>true</c> [inherit security handle].</param>
+            /// <param name="securityDescriptor">The security descriptor.</param>
+            public Job(string name, bool inheritSecurityHandle, IntPtr securityDescriptor)
+            {
+                m_name = name;
+                m_inheritSecurityHandle = inheritSecurityHandle;
+                m_securityDescriptor = securityDescriptor;
+                Create();
+            }
+
+            /// <summary>
+            /// Creates the job with memory limits.
+            /// </summary>
+            /// <param name="minWorkingSetSize">Size of the min working set.</param>
+            /// <param name="maxWorkingSetSize">Size of the max working set.</param>
+            /// <param name="processesToLimit">The processes to limit.</param>
+            /// <returns></returns>
+            public static Job CreateJobWithMemoryLimits(uint minWorkingSetSize, uint maxWorkingSetSize, params Process[] processesToLimit)
+            {
+                Job job = new Job(StringUtilities.RandomString(10, true));
+                job.SetLimitWorkingSetSize(minWorkingSetSize, maxWorkingSetSize);
+                foreach (Process p in processesToLimit)
+                {
+                    job.AssignProcess(p);
+                }
+                return job;
+            }
+
+            /// <summary>
+            /// Gets the name.
+            /// </summary>
+            /// <value>The name.</value>
+            public string Name
+            {
+                get
+                {
+                    return m_name;
+                }
+            }
+
+            /// <summary>
+            /// Gets a value indicating whether [inherit security handle].
+            /// </summary>
+            /// <value>
+            /// 	<c>true</c> if [inherit security handle]; otherwise, <c>false</c>.
+            /// </value>
+            public bool InheritSecurityHandle
+            {
+                get
+                {
+                    return m_inheritSecurityHandle;
+                }
+            }
+
+            /// <summary>
+            /// Gets the security descriptor.
+            /// </summary>
+            /// <value>The security descriptor.</value>
+            public IntPtr SecurityDescriptor
+            {
+                get
+                {
+                    return m_securityDescriptor;
+                }
+            }
+
+            /// <summary>
+            /// Releases unmanaged resources and performs other cleanup operations before the
+            /// <see cref="Job"/> is reclaimed by garbage collection.
+            /// </summary>
+            ~Job()
+            {
+                Dispose();
+            }
+
+            /// <summary>
+            /// Creates this instance.
+            /// </summary>
+            public void Create()
+            {
+                if (m_handle != null && m_handle.Value != null)
+                {
+                    throw new Exception("Previous handle exists");
+                }
+
+                PublicDomain.Win32.Win32Structures.SECURITY_ATTRIBUTES securityAttributes = new Win32Structures.SECURITY_ATTRIBUTES();
+                
+                securityAttributes.bInheritHandle = InheritSecurityHandle ? 1 : 0;
+                securityAttributes.lpSecurityDescriptor = SecurityDescriptor;
+                securityAttributes.nLength = Marshal.SizeOf(securityAttributes);
+
+                m_handle = ExternalMethods.CreateJobObject(ref securityAttributes, Name);
+                if (m_handle == null || m_handle.Value == null)
+                {
+                    GetLastErrorThrow();
+                }
+            }
+
+            /// <summary>
+            /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+            /// </summary>
+            public void Dispose()
+            {
+                if (m_handle != null && m_handle.Value != null)
+                {
+                    bool result = ExternalMethods.CloseHandle(m_handle.Value);
+
+                    m_handle = null;
+                    
+                    if (!result)
+                    {
+                        Win32.GetLastErrorThrow();
+                    }
+                }
+            }
+
+            /// <summary>
+            /// Sets the size of the limit maximum working set.
+            /// </summary>
+            /// <param name="minWorkingSetSize">Size of the min working set.</param>
+            /// <param name="maxWorkingSetSize">Size of the max working set.</param>
+            public void SetLimitWorkingSetSize(uint minWorkingSetSize, uint maxWorkingSetSize)
+            {
+                Win32Structures.JOBOBJECT_BASIC_LIMIT_INFORMATION limitInfo = new Win32Structures.JOBOBJECT_BASIC_LIMIT_INFORMATION();
+
+                limitInfo.LimitFlags = Win32Enums.LimitFlags.JOB_OBJECT_LIMIT_WORKINGSET;
+                limitInfo.MinimumWorkingSetSize = minWorkingSetSize;
+                limitInfo.MaximumWorkingSetSize = maxWorkingSetSize;
+
+                int size = Marshal.SizeOf(limitInfo);
+                if (!ExternalMethods.SetInformationJobObjectLimit(
+                    m_handle.Value,
+                    Win32Enums.JobObjectInfoClass.JobObjectBasicLimitInformation,
+                    ref limitInfo,
+                    size
+                ))
+                {
+                    GetLastErrorThrow();
+                }
+            }
+
+            /// <summary>
+            /// Queries the information job object limit.
+            /// </summary>
+            public Win32Structures.JOBOBJECT_BASIC_LIMIT_INFORMATION QueryInformationJobObjectLimit()
+            {
+                Win32Structures.JOBOBJECT_BASIC_LIMIT_INFORMATION limitInfo = new Win32Structures.JOBOBJECT_BASIC_LIMIT_INFORMATION();
+
+                int size;
+                if (!ExternalMethods.QueryInformationJobObjectLimit(
+                    m_handle.Value,
+                    Win32Enums.JobObjectInfoClass.JobObjectBasicLimitInformation,
+                    out limitInfo,
+                    Marshal.SizeOf(limitInfo),
+                    out size
+                ))
+                {
+                    GetLastErrorThrow();
+                }
+
+                return limitInfo;
+            }
+
+            /// <summary>
+            /// Assigns the process.
+            /// </summary>
+            /// <param name="process">The process.</param>
+            public void AssignProcess(Process process)
+            {
+                if (!ExternalMethods.AssignProcessToJobObject(m_handle.Value, process.Handle))
+                {
+                    GetLastErrorThrow();
+                }
+            }
         }
 
         /// <summary>
@@ -5993,6 +6365,134 @@ namespace PublicDomain
                 /// </summary>
                 IASSEMBLYCACHE_INSTALL_FLAG_FORCE_REFRESH = 2
             }
+
+            /// <summary>
+            /// 
+            /// </summary>
+            public enum JobObjectInfoClass
+            {
+                /// <summary>
+                /// 
+                /// </summary>
+                JobObjectBasicAccountingInformation = 1,
+
+                /// <summary>
+                /// 
+                /// </summary>
+                JobObjectBasicLimitInformation = 2,
+
+                /// <summary>
+                /// 
+                /// </summary>
+                JobObjectBasicProcessIdList = 3,
+
+                /// <summary>
+                /// 
+                /// </summary>
+                JobObjectBasicUIRestrictions = 4,
+
+                /// <summary>
+                /// 
+                /// </summary>
+                JobObjectSecurityLimitInformation = 5,
+
+                /// <summary>
+                /// 
+                /// </summary>
+                JobObjectEndOfJobTimeInformation = 6,
+
+                /// <summary>
+                /// 
+                /// </summary>
+                JobObjectAssociateCompletionPortInformation = 7,
+
+                /// <summary>
+                /// 
+                /// </summary>
+                JobObjectBasicAndIoAccountingInformation = 8,
+
+                /// <summary>
+                /// 
+                /// </summary>
+                JobObjectExtendedLimitInformation = 9
+            }
+
+            /// <summary>
+            /// 
+            /// </summary>
+            [Flags]
+            public enum LimitFlags
+            {
+                /// <summary>
+                /// 
+                /// </summary>
+                JOB_OBJECT_LIMIT_ACTIVE_PROCESS = 0x00000008,
+
+                /// <summary>
+                /// 
+                /// </summary>
+                JOB_OBJECT_LIMIT_AFFINITY = 0x00000010,
+
+                /// <summary>
+                /// 
+                /// </summary>
+                JOB_OBJECT_LIMIT_BREAKAWAY_OK = 0x00000800,
+
+                /// <summary>
+                /// 
+                /// </summary>
+                JOB_OBJECT_LIMIT_DIE_ON_UNHANDLED_EXCEPTION = 0x00000400,
+
+                /// <summary>
+                /// 
+                /// </summary>
+                JOB_OBJECT_LIMIT_JOB_MEMORY = 0x00000200,
+
+                /// <summary>
+                /// 
+                /// </summary>
+                JOB_OBJECT_LIMIT_JOB_TIME = 0x00000004,
+
+                /// <summary>
+                /// 
+                /// </summary>
+                JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE = 0x00002000,
+
+                /// <summary>
+                /// 
+                /// </summary>
+                JOB_OBJECT_LIMIT_PRESERVE_JOB_TIME = 0x00000040,
+
+                /// <summary>
+                /// 
+                /// </summary>
+                JOB_OBJECT_LIMIT_PRIORITY_CLASS = 0x00000020,
+
+                /// <summary>
+                /// 
+                /// </summary>
+                JOB_OBJECT_LIMIT_PROCESS_MEMORY = 0x00000100,
+
+                /// <summary>
+                /// 
+                /// </summary>
+                JOB_OBJECT_LIMIT_PROCESS_TIME = 0x00000002,
+
+                /// <summary>
+                /// 
+                /// </summary>
+                JOB_OBJECT_LIMIT_SCHEDULING_CLASS = 0x00000080,
+
+                /// <summary>
+                /// 
+                /// </summary>
+                JOB_OBJECT_LIMIT_SILENT_BREAKAWAY_OK = 0x00001000,
+
+                /// <summary>
+                /// 
+                /// </summary>
+                JOB_OBJECT_LIMIT_WORKINGSET = 0x00000001
+            }
         }
 
         /// <summary>
@@ -6004,7 +6504,7 @@ namespace PublicDomain
             /// The FUSION_INSTALL_REFERENCE structure represents a reference
             /// that is made when an application has installed an assembly in the GAC.
             /// </summary>
-            [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+            [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
             public struct FUSION_INSTALL_REFERENCE
             {
                 /// <summary>
@@ -6043,7 +6543,7 @@ namespace PublicDomain
             /// The ASSEMBLY_INFO structure represents information about an
             /// assembly in the assembly cache.
             /// </summary>
-            [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+            [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
             public struct ASSEMBLY_INFO
             {
                 /// <summary>
@@ -6075,6 +6575,80 @@ namespace PublicDomain
                 /// Size of the buffer that the pszCurrentAssemblyPathBug field points to.
                 /// </summary>
                 public uint cchBuf;
+            }
+
+            /// <summary>
+            /// The SECURITY_ATTRIBUTES structure contains the security descriptor for an object and specifies whether the handle retrieved by specifying this structure is inheritable. This structure provides security settings for objects created by various functions, such as CreateFile, CreatePipe, CreateProcess, RegCreateKeyEx, or RegSaveKeyEx.
+            /// </summary>
+            [StructLayout(LayoutKind.Sequential)]
+            public struct SECURITY_ATTRIBUTES
+            {
+                /// <summary>
+                /// The size, in bytes, of this structure. Set this value to the size of the SECURITY_ATTRIBUTES structure.
+                /// </summary>
+                public int nLength;
+
+                /// <summary>
+                /// A pointer to a security descriptor for the object that controls the sharing of it. If NULL is specified for this member, the object is assigned the default security descriptor of the calling process. This is not the same as granting access to everyone by assigning a NULL discretionary access control list (DACL). The default security descriptor is based on the default DACL of the access token belonging to the calling process. By default, the default DACL in the access token of a process allows access only to the user represented by the access token. If other users must access the object, you can either create a security descriptor with the appropriate access, or add ACEs to the DACL that grants access to a group of users.
+                /// </summary>
+                public IntPtr lpSecurityDescriptor;
+
+                /// <summary>
+                /// A Boolean value that specifies whether the returned handle is inherited when a new process is created. If this member is TRUE, the new process inherits the handle.
+                /// </summary>
+                public int bInheritHandle;
+            }
+
+            /// <summary>
+            /// 
+            /// </summary>
+            [StructLayout(LayoutKind.Sequential)]
+            public struct JOBOBJECT_BASIC_LIMIT_INFORMATION
+            {
+                /// <summary>
+                /// 
+                /// </summary>
+                public long PerProcessUserTimeLimit;
+
+                /// <summary>
+                /// 
+                /// </summary>
+                public long PerJobUserTimeLimit;
+
+                /// <summary>
+                /// 
+                /// </summary>
+                public PublicDomain.Win32.Win32Enums.LimitFlags LimitFlags;
+
+                /// <summary>
+                /// 
+                /// </summary>
+                public uint MinimumWorkingSetSize;
+
+                /// <summary>
+                /// 
+                /// </summary>
+                public uint MaximumWorkingSetSize;
+
+                /// <summary>
+                /// 
+                /// </summary>
+                public int ActiveProcessLimit;
+
+                /// <summary>
+                /// 
+                /// </summary>
+                public IntPtr Affinity;
+
+                /// <summary>
+                /// 
+                /// </summary>
+                public int PriorityClass;
+
+                /// <summary>
+                /// 
+                /// </summary>
+                public int SchedulingClass;
             }
         }
 
@@ -6309,9 +6883,21 @@ namespace PublicDomain
             }
         }
 
-        private static void GetLastErrorThrow()
+        /// <summary>
+        /// Gets the last error.
+        /// </summary>
+        /// <returns></returns>
+        public static int GetLastError()
         {
-            throw new Win32Exception(Marshal.GetLastWin32Error());
+            return Marshal.GetLastWin32Error();
+        }
+
+        /// <summary>
+        /// Gets the last error throw.
+        /// </summary>
+        public static void GetLastErrorThrow()
+        {
+            throw new Win32Exception(GetLastError());
         }
 
 #if !(NONUNIT)
@@ -18649,6 +19235,20 @@ namespace PublicDomain
         [Test]
         public void play()
         {
+            using (PublicDomain.Win32.Job job = new PublicDomain.Win32.Job("dorp"))
+            {
+                job.SetLimitWorkingSetSize((uint)GlobalConstants.BytesInAMegabyte, (uint)GlobalConstants.BytesInAMegabyte * 10);
+
+                PublicDomain.Win32.Win32Structures.JOBOBJECT_BASIC_LIMIT_INFORMATION limitInfo = job.QueryInformationJobObjectLimit();
+
+                Console.WriteLine(limitInfo.MaximumWorkingSetSize);
+
+                Process p = new Process();
+                p.StartInfo = new ProcessStartInfo(@"c:\windows\system32\cmd.exe");
+                p.Start();
+
+                job.AssignProcess(p);
+            }
         }
 
         /// <summary>
@@ -19083,7 +19683,7 @@ namespace PublicDomain
         /// <summary>
         /// 
         /// </summary>
-        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
         public struct WordStruct
         {
             /// <summary>
@@ -26325,6 +26925,11 @@ namespace PublicDomain.Logging
     public enum LoggerSeverity
     {
         /// <summary>
+        /// Lowest severity.
+        /// </summary>
+        None0 = 0,
+
+        /// <summary>
         /// Detailed programmatic informational messages used
         /// as an aid in troubleshooting problems by programmers.
         /// </summary>
@@ -26353,87 +26958,12 @@ namespace PublicDomain.Logging
         /// result in application failure. These messages are intended for help
         /// desk, production support, programmers and possibly users.
         /// </summary>
-        Fatal50 = 50
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public interface ILogger
-    {
-        /// <summary>
-        /// The severity threshold at which point a log message
-        /// is logged. For example, if the threshold is Debug,
-        /// all messages with severity greater than or equal to Debug
-        /// will be logged. All other messages will be discarded.
-        /// The default threshold is Warn.
-        /// </summary>
-        LoggerSeverity Threshold { get; set; }
+        Fatal50 = 50,
 
         /// <summary>
         /// 
         /// </summary>
-        ILogFormatter Formatter { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        List<ILogFilter> Filters { get; }
-
-        /// <summary>
-        /// Gets the data.
-        /// </summary>
-        /// <value>The data.</value>
-        Dictionary<string, object> Data { get; }
-
-        /// <summary>
-        /// Gets or sets the category.
-        /// </summary>
-        /// <value>The category.</value>
-        string Category { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="severity"></param>
-        /// <param name="entry"></param>
-        /// <param name="formatParameters"></param>
-        void Log(LoggerSeverity severity, object entry, params object[] formatParameters);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="entry"></param>
-        /// <param name="formatParameters"></param>
-        void LogDebug10(object entry, params object[] formatParameters);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="entry"></param>
-        /// <param name="formatParameters"></param>
-        void LogInfo20(object entry, params object[] formatParameters);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="entry"></param>
-        /// <param name="formatParameters"></param>
-        void LogWarn30(object entry, params object[] formatParameters);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="entry"></param>
-        /// <param name="formatParameters"></param>
-        void LogError40(object entry, params object[] formatParameters);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="entry"></param>
-        /// <param name="formatParameters"></param>
-        void LogFatal50(object entry, params object[] formatParameters);
+        Infinity = int.MaxValue
     }
 
     /// <summary>
@@ -26480,9 +27010,10 @@ namespace PublicDomain.Logging
     }
 
     /// <summary>
-    /// 
+    /// There is no interface for this class to allow for certain methods
+    /// to be overriden and removed in debug builds.
     /// </summary>
-    public abstract class Logger : ILogger
+    public abstract class Logger
     {
         private LoggerSeverity m_threshold = LoggerSeverity.Warn30;
 
@@ -26938,7 +27469,7 @@ namespace PublicDomain.Logging
     /// Provides a common application logger, which writes to a rolling
     /// log file in the application's working directory. The logger
     /// always logs severe log events using the <see cref="PublicDomain.Logging.SevereLogFilter"/>,
-    /// and by default, uses the default Logger <see cref="PublicDomain.Logging.ILogger.Threshold"/> value of Warn.
+    /// and by default, uses the default Logger <see cref="PublicDomain.Logging.Logger.Threshold"/> value of Warn.
     /// </summary>
     public class ApplicationLogger : CompositeLogger
     {
@@ -26972,10 +27503,421 @@ namespace PublicDomain.Logging
             // Sometimes the Console does not go anywhere logical (or nowhere at all),
             // so it becomes difficult to know where the current directory is. Therefore,
             // we write the same message to a global file
-            ILogger loggers = new FileLogger(GlobalConstants.PublicDomainDefaultInstallLocation + @"loggers.log");
+            Logger loggers = new FileLogger(GlobalConstants.PublicDomainDefaultInstallLocation + @"loggers.log");
             loggers.Threshold = LoggerSeverity.Info20;
             loggers.LogInfo20(msg);
 #endif
+        }
+    }
+
+    /// <summary>
+    /// Can be used for logging based on a class name, which is used
+    /// as the category. Also, delineates a new static run on the first log, in debug mode.
+    /// </summary>
+    public class SimpleCompositeLogger : CompositeLogger
+    {
+		private string m_className;
+        private string m_prefix;
+        private const string InitialLine = "NEW RUN";
+        internal static readonly int CATEGORY_LENGTH = 10;
+
+#if DEBUG
+        private static int logcount = 1;
+        private static object logcountlock = new object();
+#endif
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SimpleCompositeLogger"/> class.
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <param name="className">Name of the class.</param>
+        public SimpleCompositeLogger(Logger log, string className)
+            : base(log)
+		{
+            ClearLogFilters();
+            AddLogFilter(new SevereLogFilter());
+
+            m_className = className;
+            if (!string.IsNullOrEmpty(className))
+            {
+                // First, we create a friendly name for the logger which we
+                // will use as the "category"
+                int lastPeriod = m_className.LastIndexOf('.');
+                if (lastPeriod != -1)
+                {
+                    m_prefix = m_className.Substring(lastPeriod + 1);
+                }
+                else
+                {
+                    m_prefix = m_className;
+                }
+
+                // Pad the prefix to ten characters
+                if (m_prefix.Length > CATEGORY_LENGTH)
+                {
+                    m_prefix = m_prefix.Substring(0, CATEGORY_LENGTH);
+                }
+                else if (m_prefix.Length < CATEGORY_LENGTH)
+                {
+                    m_prefix = string.Format("{0,-" + CATEGORY_LENGTH + "}", m_prefix);
+                }
+            }
+		}
+
+        /// <summary>
+        /// High level final log that is called with all of the detailed information
+        /// and the final log line as the last parameter.
+        /// </summary>
+        /// <param name="severity">The severity.</param>
+        /// <param name="timestamp">The timestamp.</param>
+        /// <param name="entry">The entry.</param>
+        /// <param name="formatParameters">The format parameters.</param>
+        /// <param name="logLine">The log line.</param>
+        protected override void DoLog(LoggerSeverity severity, DateTime timestamp, object entry, object[] formatParameters, string logLine)
+        {
+#if DEBUG
+            lock (logcountlock)
+            {
+                if (logcount == 1)
+                {
+                    base.DoLog(LoggerSeverity.Info20, timestamp, InitialLine, new object[] { }, InitialLine);
+                }
+                logcount++;
+            }
+#endif
+            Category = m_prefix;
+            if (severity == LoggerSeverity.Fatal50)
+            {
+                // TODO call a notification interface, which could do something like
+                // send an email
+            }
+            base.DoLog(severity, timestamp, entry, formatParameters, logLine);
+		}
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class SimpleLogFormatter : DefaultLogFormatter
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SimpleLogFormatter"/> class.
+        /// </summary>
+        public SimpleLogFormatter()
+        {
+            FormatString = "[{0} {3,5} {1,-7}{4}] {2}";
+        }
+
+        /// <summary>
+        /// Does the format entry.
+        /// </summary>
+        /// <param name="severity">The severity.</param>
+        /// <param name="timestamp">The timestamp.</param>
+        /// <param name="logEntry">The log entry.</param>
+        /// <param name="category">The category.</param>
+        /// <param name="data">The data.</param>
+        /// <returns></returns>
+        protected override string DoFormatEntry(LoggerSeverity severity, DateTime timestamp, string logEntry, string category, Dictionary<string, object> data)
+        {
+            if (!string.IsNullOrEmpty(category))
+            {
+                category = " " + category;
+            }
+            return string.Format(FormatString, timestamp.ToString("s"), severity, logEntry, Thread.CurrentThread.ManagedThreadId, category);
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class NullLogger : SimpleCompositeLogger
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        public static readonly NullLogger Current = new NullLogger();
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="NullLogger"/> class.
+        /// </summary>
+        public NullLogger()
+			: base(null, null)
+		{
+		}
+
+        /// <summary>
+        /// </summary>
+        /// <param name="severity"></param>
+        /// <param name="entry"></param>
+        /// <param name="formatParameters"></param>
+        [Conditional("DEBUG")]
+        public new void Log(LoggerSeverity severity, object entry, params object[] formatParameters)
+        {
+        }
+
+        /// <summary>
+        /// </summary>
+        /// <param name="entry"></param>
+        /// <param name="formatParameters"></param>
+        [Conditional("DEBUG")]
+        public new void LogDebug10(object entry, params object[] formatParameters)
+        {
+        }
+
+        /// <summary>
+        /// </summary>
+        /// <param name="entry"></param>
+        /// <param name="formatParameters"></param>
+        [Conditional("DEBUG")]
+        public new void LogError40(object entry, params object[] formatParameters)
+        {
+        }
+
+        /// <summary>
+        /// </summary>
+        /// <param name="entry"></param>
+        /// <param name="formatParameters"></param>
+        [Conditional("DEBUG")]
+        public new void LogFatal50(object entry, params object[] formatParameters)
+        {
+        }
+
+        /// <summary>
+        /// </summary>
+        /// <param name="entry"></param>
+        /// <param name="formatParameters"></param>
+        [Conditional("DEBUG")]
+        public new void LogInfo20(object entry, params object[] formatParameters)
+        {
+        }
+
+        /// <summary>
+        /// </summary>
+        /// <param name="entry"></param>
+        /// <param name="formatParameters"></param>
+        [Conditional("DEBUG")]
+        public new void LogWarn30(object entry, params object[] formatParameters)
+        {
+        }
+
+        /// <summary>
+        /// Prints method information and the arguments passed.
+        /// This code is only compiled in with DEBUG set as
+        /// the configuration mode.
+        /// </summary>
+        /// <param name="args"></param>
+        [Conditional("DEBUG")]
+        public new void Start(params object[] args)
+        {
+        }
+
+        /// <summary>
+        /// Prints method information and the arguments passed.
+        /// This code is only compiled in with DEBUG set as
+        /// the configuration mode.
+        /// </summary>
+        /// <param name="args"></param>
+        [Conditional("DEBUG")]
+        public new void End(params object[] args)
+        {
+        }
+
+        /// <summary>
+        /// Logs the entry exit.
+        /// </summary>
+        /// <param name="isEntry">if set to <c>true</c> [is entry].</param>
+        /// <param name="useMarker">if set to <c>true</c> [use marker].</param>
+        /// <param name="args">The args.</param>
+        [Conditional("DEBUG")]
+        protected new void LogEntryExit(bool isEntry, bool useMarker, object[] args)
+        {
+        }
+
+        /// <summary>
+        /// Logs the exception.
+        /// </summary>
+        /// <param name="ex">The ex.</param>
+        [Conditional("DEBUG")]
+        public new void LogException(Exception ex)
+        {
+        }
+
+        /// <summary>
+        /// Logs the exception.
+        /// </summary>
+        /// <param name="ex">The ex.</param>
+        /// <param name="severity">The severity.</param>
+        [Conditional("DEBUG")]
+        public new void LogException(Exception ex, LoggerSeverity severity)
+        {
+        }
+
+        /// <summary>
+        /// Prints method information and the arguments passed.
+        /// This code is only compiled in with DEBUG set as
+        /// the configuration mode.
+        /// </summary>
+        /// <param name="args"></param>
+        [Conditional("DEBUG")]
+        public new void WhereAmI(params object[] args)
+        {
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class LoggingConfig
+    {
+        private Dictionary<string, Logger> m_loggers = new Dictionary<string, Logger>();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="className"></param>
+        /// <param name="threshold"></param>
+        /// <returns></returns>
+        public delegate Logger CallbackCreateLogger(string className, LoggerSeverity threshold);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public const string AllLoggersDesignator = "all";
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LoggingConfig"/> class.
+        /// </summary>
+        public LoggingConfig()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LoggingConfig"/> class.
+        /// </summary>
+        /// <param name="configString">The config string.</param>
+        /// <param name="createLogger">The create logger.</param>
+        public LoggingConfig(string configString, CallbackCreateLogger createLogger)
+        {
+            Load(configString, createLogger);
+        }
+
+        /// <summary>
+        /// Loads the specified config string.
+        /// </summary>
+        /// <param name="configString">The config string.</param>
+        /// <param name="createLogger">The create logger.</param>
+        public void Load(string configString, CallbackCreateLogger createLogger)
+        {
+            if (configString != null)
+            {
+                string[] pieces = configString.Trim().Split(';');
+                foreach (string piece in pieces)
+                {
+                    string[] parts = piece.Trim().Split('=');
+                    if (parts != null && parts.Length > 0 && parts.Length <= 2 && parts[0].Trim().Length > 0)
+                    {
+                        string key = parts[0].ToLower().Trim();
+
+                        if (key == "*")
+                        {
+                            key = AllLoggersDesignator;
+                        }
+
+                        string val = parts.Length == 1 ? "*" : parts[1];
+                        LoggerSeverity threshold = GetLogValue(val);
+                        if (threshold == LoggerSeverity.Infinity)
+                        {
+                            m_loggers[key] = NullLogger.Current;
+                        }
+                        else
+                        {
+                            m_loggers[key] = createLogger(parts[0].Trim(), threshold);
+                        }
+                    }
+                    else
+                    {
+                        throw new ArgumentException(string.Format("Check format of log string ({0}).", piece));
+                    }
+                }
+            }
+        }
+
+        private static LoggerSeverity GetDefaultLogThreshold()
+        {
+            return LoggerSeverity.None0;
+        }
+
+        /// <summary>
+        /// Gets the log value.
+        /// </summary>
+        /// <param name="logValue">The log value.</param>
+        /// <returns></returns>
+        private LoggerSeverity GetLogValue(string logValue)
+        {
+            if (logValue == null)
+            {
+                throw new ArgumentNullException("logValue");
+            }
+            string val = logValue.ToLower().Trim();
+
+            if (val == "" || val == "*" || val == "on" || val == "1" || val == AllLoggersDesignator)
+            {
+                return GetDefaultLogThreshold();
+            }
+            else if (val != "off" && val != "0")
+            {
+                return GetOffValue();
+            }
+            string[] names = Enum.GetNames(typeof(LoggerSeverity));
+            foreach (string name in names)
+            {
+                if (name.ToLower().StartsWith(val))
+                {
+                    return (LoggerSeverity)Enum.Parse(typeof(LoggerSeverity), name);
+                }
+            }
+
+            // If we can't figure out the value, throw an exception
+            throw new ArgumentException(string.Format("Unknown logging value {0}", logValue));
+        }
+
+        private LoggerSeverity GetOffValue()
+        {
+            return LoggerSeverity.Infinity;
+        }
+
+        /// <summary>
+        /// Gets the <see cref="PublicDomain.Logging.Logger"/> with the specified log class.
+        /// </summary>
+        /// <value></value>
+        public Logger CreateLogger(string logClass)
+        {
+            if (logClass == null)
+            {
+                throw new ArgumentNullException("logClass");
+            }
+            string logClassLower = logClass.ToLower().Trim();
+
+            Logger result;
+            if (!m_loggers.TryGetValue(logClassLower, out result))
+            {
+                if (!m_loggers.TryGetValue(AllLoggersDesignator, out result))
+                {
+                    result = NullLogger.Current;
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Creates the logger.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <returns></returns>
+        public Logger CreateLogger(Type type)
+        {
+            return CreateLogger(type.ToString());
         }
     }
 
@@ -27389,19 +28331,19 @@ namespace PublicDomain.Logging
     }
 
     /// <summary>
-    /// 
+    /// By default does not have any filters, and supposes that the composed logs will filter.
     /// </summary>
     public class CompositeLogger : Logger
     {
-        private List<ILogger> m_loggers = new List<ILogger>();
+        private List<Logger> m_loggers = new List<Logger>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CompositeLogger"/> class.
         /// </summary>
         /// <param name="loggers">The loggers.</param>
-        public CompositeLogger(params ILogger[] loggers)
+        public CompositeLogger(params Logger[] loggers)
         {
-            foreach (ILogger logger in loggers)
+            foreach (Logger logger in loggers)
             {
                 if (logger != null)
                 {
@@ -27414,7 +28356,7 @@ namespace PublicDomain.Logging
         /// Gets the loggers.
         /// </summary>
         /// <value>The loggers.</value>
-        public virtual List<ILogger> Loggers
+        public virtual List<Logger> Loggers
         {
             get
             {
@@ -27429,7 +28371,7 @@ namespace PublicDomain.Logging
         /// <param name="formatParameters"></param>
         public override void Log(LoggerSeverity severity, object entry, params object[] formatParameters)
         {
-            foreach (ILogger logger in Loggers)
+            foreach (Logger logger in Loggers)
             {
                 logger.Log(severity, entry, formatParameters);
             }
@@ -27446,6 +28388,301 @@ namespace PublicDomain.Logging
     }
 }
 #endif
+
+namespace PublicDomain.Config
+{
+    /// <summary>
+    /// 
+    /// </summary>
+    public class ConfigurationValues
+    {
+        private Dictionary<string, string> m_values = new Dictionary<string, string>();
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ConfigurationValues"/> class.
+        /// </summary>
+        public ConfigurationValues()
+        {
+        }
+
+        /// <summary>
+        /// Reads the parameters from assembly.
+        /// </summary>
+        /// <param name="assemblyStreamName">Name of the assembly stream.</param>
+        /// <param name="intersectAlternateConfig">if set to <c>true</c> [intersect alternate config].</param>
+        /// <returns></returns>
+        public ConfigurationValues(string assemblyStreamName, bool intersectAlternateConfig)
+            : this(assemblyStreamName, Assembly.GetExecutingAssembly(), intersectAlternateConfig)
+        {
+        }
+
+        /// <summary>
+        /// Reads the parameters from assembly.
+        /// </summary>
+        /// <param name="assemblyStreamName">Name of the assembly stream.</param>
+        /// <param name="assembly">The assembly.</param>
+        /// <param name="intersectAlternateConfig">if set to <c>true</c> [intersect alternate config].</param>
+        /// <returns></returns>
+        public ConfigurationValues(string assemblyStreamName, Assembly assembly, bool intersectAlternateConfig)
+        {
+            if (assembly == null)
+            {
+                throw new ArgumentNullException("assembly");
+            }
+
+            Stream stream = assembly.GetManifestResourceStream(assemblyStreamName);
+            if (stream == null)
+            {
+                throw new ArgumentNullException(string.Format("Could not find embedded resource named {0} in assembly {1}.", assemblyStreamName, assembly));
+            }
+            ReadParametersFromStream(stream, intersectAlternateConfig);
+        }
+
+        /// <summary>
+        /// Reads the parameters from file.
+        /// </summary>
+        /// <param name="fileName">Name of the file.</param>
+        /// <param name="intersectAlternateConfig">if set to <c>true</c> [intersect alternate config].</param>
+        /// <returns></returns>
+        public void ReadParametersFromStream(string fileName, bool intersectAlternateConfig)
+        {
+            using (TextReader textReader = new StreamReader(fileName))
+            {
+                ReadParametersFromTextReader(textReader, intersectAlternateConfig);
+            }
+        }
+
+        /// <summary>
+        /// Reads the parameters from stream.
+        /// </summary>
+        /// <param name="stream">The stream.</param>
+        /// <param name="intersectAlternateConfig">if set to <c>true</c> [intersect alternate config].</param>
+        /// <returns></returns>
+        public void ReadParametersFromStream(Stream stream, bool intersectAlternateConfig)
+        {
+            if (stream == null)
+            {
+                throw new ArgumentNullException("stream");
+            }
+            using (XmlReader reader = XmlReader.Create(stream))
+            {
+                ReadParameters(reader, intersectAlternateConfig);
+            }
+        }
+
+        /// <summary>
+        /// Reads the parameters from text reader.
+        /// </summary>
+        /// <param name="reader">The reader.</param>
+        /// <param name="intersectAlternateConfig">if set to <c>true</c> [intersect alternate config].</param>
+        /// <returns></returns>
+        public void ReadParametersFromTextReader(TextReader reader, bool intersectAlternateConfig)
+        {
+            if (reader == null)
+            {
+                throw new ArgumentNullException("reader");
+            }
+            using (XmlReader xmlReader = XmlReader.Create(reader))
+            {
+                ReadParameters(xmlReader, intersectAlternateConfig);
+            }
+        }
+
+        private void ReadParameters(XmlReader reader, bool intersectAlternateConfig)
+        {
+            ReadParamsReader(reader);
+
+            if (intersectAlternateConfig)
+            {
+                string alternateConfigFile;
+                if (TryGetString("externalconfig", out alternateConfigFile))
+                {
+                    if (File.Exists(alternateConfigFile))
+                    {
+                        ConfigurationValues fileValues = new ConfigurationValues();
+                        fileValues.ReadParametersFromStream(alternateConfigFile, false);
+                        IntersectValues(fileValues);
+                    }
+                }
+            }
+        }
+
+        private void ReadParamsReader(XmlReader reader)
+        {
+            while (reader.Read())
+            {
+                if (reader.NodeType == XmlNodeType.Element && reader.LocalName.ToLower() == "param")
+                {
+                    string name = reader.GetAttribute("name");
+                    string val = reader.GetAttribute("value");
+                    if (!string.IsNullOrEmpty(name))
+                    {
+                        m_values[name.ToLower()] = val;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the value with the specified key.
+        /// </summary>
+        /// <value></value>
+        public string this[string key]
+        {
+            get
+            {
+                string result;
+                if (!m_values.TryGetValue(key.ToLower(), out result))
+                {
+                    // Next, go to the machine config
+                    Configuration machineConfig = ConfigurationManager.OpenMachineConfiguration();
+                    if (machineConfig.AppSettings != null)
+                    {
+                        KeyValueConfigurationElement k = machineConfig.AppSettings.Settings[key];
+                        if (k != null)
+                        {
+                            result = k.Value;
+                            this[key] = result;
+                        }
+                    }
+                }
+                return result;
+            }
+            set
+            {
+                m_values[key.ToLower()] = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets the keys.
+        /// </summary>
+        /// <value>The keys.</value>
+        public ICollection<string> Keys
+        {
+            get
+            {
+                return m_values.Keys;
+            }
+        }
+
+        /// <summary>
+        /// Gets the string.
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <returns></returns>
+        public string GetString(string key)
+        {
+            return GetString(key, null);
+        }
+
+        /// <summary>
+        /// Gets the string.
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <param name="defaultValue">The default value.</param>
+        /// <returns></returns>
+        public string GetString(string key, string defaultValue)
+        {
+            string val = this[key];
+            return val == null ? defaultValue : val;
+        }
+
+        /// <summary>
+        /// Gets the long.
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <returns></returns>
+        public long GetLong(string key)
+        {
+            return GetLong(key, 0);
+        }
+
+        /// <summary>
+        /// Gets the long.
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <param name="defaultValue">The default value.</param>
+        /// <returns></returns>
+        public long GetLong(string key, long defaultValue)
+        {
+            string val = this[key];
+            return val == null ? defaultValue : long.Parse(val);
+        }
+
+        /// <summary>
+        /// Gets the int.
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <returns></returns>
+        public int GetInt(string key)
+        {
+            return GetInt(key, 0);
+        }
+
+        /// <summary>
+        /// Gets the int.
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <param name="defaultValue">The default value.</param>
+        /// <returns></returns>
+        public int GetInt(string key, int defaultValue)
+        {
+            string val = this[key];
+            return val == null ? defaultValue : int.Parse(val);
+        }
+
+        /// <summary>
+        /// Tries the get string.
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <param name="val">The val.</param>
+        /// <returns></returns>
+        public bool TryGetString(string key, out string val)
+        {
+            val = null;
+            string config = this[key];
+            if (config != null)
+            {
+                val = config;
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Intersects the values.
+        /// </summary>
+        /// <param name="intersectValues">The intersect values.</param>
+        public void IntersectValues(ConfigurationValues intersectValues)
+        {
+            foreach (string key in intersectValues.Keys)
+            {
+                this[key] = intersectValues[key];
+            }
+        }
+
+        private bool m_wasExternalConfigRead;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether [was external config read].
+        /// </summary>
+        /// <value>
+        /// 	<c>true</c> if [was external config read]; otherwise, <c>false</c>.
+        /// </value>
+        public bool WasExternalConfigRead
+        {
+            get
+            {
+                return m_wasExternalConfigRead;
+            }
+            set
+            {
+                m_wasExternalConfigRead = value;
+            }
+        }
+    }
+}
 
 #if !(NODYNACODE)
 namespace PublicDomain.Dynacode
@@ -28056,6 +29293,1257 @@ End Namespace
             }
         }
 #endif
+    }
+}
+#endif
+
+#if !(NOASPNETRUNTIMEHOST)
+
+// This entire namespace is courtesy of Rick Strahl (http://www.west-wind.com/), who
+// has marked it as Public Domain (http://www.west-wind.com/wwThreads/default.asp?msgid=20D16295H). Thank's Rick!
+namespace PublicDomain.AspRuntimeHost
+{
+    /// <summary>
+    /// 
+    /// </summary>
+    public class wwAspRuntimeHost : IDisposable
+    {
+        /// <summary>
+        /// Location for the generated HTML output.
+        /// </summary>
+        public string OutputFile = "d:\\temp\\__preview.htm";
+
+        /// <summary>
+        /// Hashtable of parameters that can be added to the Host object
+        /// </summary>
+        public Hashtable Context = new Hashtable();
+
+        /// <summary>
+        /// An optional PostBuffer in binary format.
+        /// </summary>
+        protected byte[] PostData = null;
+
+        /// <summary>
+        /// An optional POST buffer Content Type
+        /// </summary>
+        protected string PostContentType = "application/x-www-form-urlencoded";
+
+        /// <summary>
+        /// Name of the directory that AspRunTimeHost class's parent assembly is located in. This is so the DLL/EXE
+        /// can be found. Default is blank which uses the current application directory. 
+        /// </summary>
+        public string ApplicationBase = "";
+
+        /// <summary>
+        /// Location of the web.Config file. Defaults to the Application Base path.
+        /// </summary>
+        public string ConfigFile = "web.config";
+
+        /// <summary>
+        /// Name of the Physical Directory assigned with Start(). Required!
+        /// </summary>
+        public string PhysicalDirectory = "";
+
+        /// <summary>
+        /// Name of the virtual directory assigned to the application with Start.Not used internally, only exposed for
+        /// external apps to retrieve. 
+        /// </summary>
+        public string VirtualPath = "/";
+
+        /// <summary>
+        /// A hashtable that contains all the HTPP Headers the server sent in header / value pair
+        /// </summary>
+        public Hashtable ResponseHeaders = null;
+
+        /// <summary>
+        /// Send any Request headers - optional. You can pick up response headers and post them right back.
+        /// </summary>
+        public Hashtable RequestHeaders = null;
+
+        /// <summary>
+        /// the Response status code the server sent. 200 on success, 500 on error, 404 for redirect etc.
+        /// </summary>
+        public int ResponseStatusCode = 200;
+
+        /// <summary>
+        /// A comma delimited list of assemblies that should be automatically
+        /// copied to the Web applications' BIN directory to avoid having
+        /// to manually copy them there.
+        /// 
+        /// Assign any assemblies that contain types you might be using 
+        /// in your parent application and passing to the ASP.NET application
+        /// </summary>
+        public string ShadowCopyAssemblies = "";
+
+        /// <summary>
+        /// Collection of cookies set by the request.
+        /// </summary>
+        public Hashtable Cookies = new Hashtable();
+
+        // <summary>
+        // The code to be used when writing the Response output
+        // </summary>
+        //public Encoding ResponseEncoding = Encoding.UTF8;
+
+        /// <summary>
+        /// An error message if bError is set. Only works for the ProcessRequest method
+        /// </summary>
+        public string ErrorMessage = "";
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public bool Error = false;
+
+
+        /// <summary>
+        /// Instance of the Proxy object. Exposed to allow access to the ResponseData object.
+        /// </summary>
+        public wwAspRuntimeProxy Proxy = null;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="wwAspRuntimeHost"/> class.
+        /// </summary>
+        public wwAspRuntimeHost()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="wwAspRuntimeHost"/> class.
+        /// </summary>
+        /// <param name="physicalDirectory">The physical directory.</param>
+        /// <param name="virtualPath">The virtual path.</param>
+        public wwAspRuntimeHost(string physicalDirectory, string virtualPath)
+        {
+            PhysicalDirectory = physicalDirectory;
+            VirtualPath = virtualPath;
+
+            Start();
+        }
+
+        /// <summary>
+        /// Processes a page request against the ASP.Net runtime. 
+        /// </summary>
+        /// <param name="Page">A page filename relative to the Virtual directory. Use subdir\sub2\test.aspx style syntax for subdirs. (note forward slash!)</param>
+        /// <param name="QueryString">Optional - query string in key value pair format. Pass null for non.</param>
+        /// <returns>true or false. False returns only if a real failure occurs - most page errors will result in an HTTP error page.</returns>
+        public virtual bool ProcessRequest(string Page, string QueryString)
+        {
+            if (!this.PreProcessing())
+                return false;
+
+            bool Result = false;
+            try
+            {
+                Result = this.Proxy.ProcessRequest(Page, QueryString);
+            }
+            catch (Exception ex)
+            {
+                this.ResponseStatusCode = 500;
+                this.ErrorMessage = ex.Message;
+                this.Error = true;
+                this.ClearRequestData();
+                return false;
+            }
+
+            this.PostProcessing();
+
+            return Result;
+        }
+
+
+        /// <summary>
+        /// Processes a page request against the ASP.Net runtime and runs the result to a string
+        /// </summary>
+        /// <param name="Page">A page filename relative to the Virtual directory. Use subdir\sub2\test.aspx style syntax for subdirs. (note forward slash!)</param>
+        /// <param name="queryStringKeysAndValues">The query string keys and values.</param>
+        /// <returns>
+        /// true or false. False returns only if a real failure occurs - most page errors will result in an HTTP error page.
+        /// </returns>
+        public virtual string ProcessRequestToString(string Page, params string[] queryStringKeysAndValues)
+        {
+            string queryString = "";
+
+            if (queryStringKeysAndValues != null)
+            {
+                for (int i = 0; i < queryStringKeysAndValues.Length; i += 2)
+                {
+                    if (queryString.Length > 0)
+                    {
+                        queryString += "&";
+                    }
+                    if (queryStringKeysAndValues[i + 1] != null)
+                    {
+                        queryString += string.Format("{0}={1}", queryStringKeysAndValues[i], HttpUtility.UrlEncode(queryStringKeysAndValues[i + 1]));
+                    }
+                    else
+                    {
+                        queryString += string.Format("{0}", queryStringKeysAndValues[i]);
+                    }
+                }
+            }
+
+            if (!this.PreProcessing())
+                return "";
+
+            string Result = "";
+            try
+            {
+                Result = this.Proxy.ProcessRequestToString(Page, queryString);
+            }
+            catch (Exception ex)
+            {
+                this.ClearRequestData();
+                this.ResponseStatusCode = 500;
+                this.ErrorMessage = ex.Message;
+                this.Error = true;
+                return "";
+            }
+
+            //this.PostProcessing();
+
+            return Result;
+        }
+
+        /// <summary>
+        /// Pre-Processing routine common to the Processing methods
+        /// </summary>
+        /// <returns></returns>
+        private bool PreProcessing()
+        {
+            this.ErrorMessage = "";
+            this.Error = false;
+
+            // Use this to check if host has unloaded from proxy
+            try
+            {
+                string Path = this.Proxy.OutputFile;
+            }
+            catch (Exception)
+            {
+                // *** Most likely the runtime unloaded on us
+                if (!this.Start())
+                    return false;
+            }
+
+            try
+            {
+                // *** Pass Parameter info
+                this.Proxy.Context = this.Context;
+
+                if (this.Cookies != null)
+                    this.AddCookiesToRequest();
+
+                this.Proxy.OutputFile = this.OutputFile;
+                this.Proxy.PostData = this.PostData;
+                this.Proxy.PostContentType = this.PostContentType;
+                this.Proxy.RequestHeaders = this.RequestHeaders;
+            }
+            catch (Exception ex)
+            {
+                this.ClearRequestData();
+                this.ResponseStatusCode = 500;
+                this.ErrorMessage = ex.Message;
+                this.Error = true;
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Post-Processing code common to both of the processing routines
+        /// </summary>
+        private void PostProcessing()
+        {
+            this.ResponseHeaders = this.Proxy.ResponseHeaders;
+            this.ResponseStatusCode = this.Proxy.ResponseStatusCode;
+
+            // *** Pick up the server's Cookies and add to internal Cookie Collection
+            if (this.Proxy.Cookies != null)
+            {
+                foreach (string Key in this.Proxy.Cookies.Keys)
+                {
+                    if (this.Cookies.ContainsKey(Key))
+                        this.Cookies[Key] = this.Proxy.Cookies[Key];
+                    else
+                        this.Cookies.Add(Key, this.Proxy.Cookies[Key]);
+                }
+            }
+
+            // Copy the Context
+            this.Context = this.Proxy.Context;
+
+            this.ClearRequestData();
+
+        }
+
+
+        /// <summary>
+        /// Resets the host so on the next request we start with a clean slate
+        /// </summary>
+        private void ClearRequestData()
+        {
+            this.PostData = null;
+            this.PostContentType = "application/x-www-form-urlencoded";
+            this.RequestHeaders = null;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="Header"></param>
+        /// <param name="value"></param>
+        public void AddRequestHeader(string Header, string value)
+        {
+            if (this.RequestHeaders == null)
+                this.RequestHeaders = new Hashtable();
+
+            if (!this.RequestHeaders.Contains(Header))
+                this.RequestHeaders.Add(Header, value);
+        }
+
+
+        /// <summary>
+        /// Adds all the cookies in the Cookie Collection
+        /// </summary>
+        protected void AddCookiesToRequest()
+        {
+            // *** Forward any cookies we've picked up previously
+            if (this.Cookies != null)
+            {
+                string TCookies = "";
+                foreach (DictionaryEntry Cookie in Cookies)
+                    TCookies += (string)Cookie.Value + "; ";
+
+                if (TCookies != "")
+                    this.AddRequestHeader("cookie", TCookies);
+            }
+        }
+
+
+
+        /// <summary>
+        /// Starts the ASP.Net runtime hosting by creating a new appdomain and loading the runtime into it.
+        /// </summary>
+        /// <returns>true or false</returns>
+        public bool Start()
+        {
+            if (this.Proxy == null)
+            {
+                // *** Make sure ASP.Net registry keys exist 
+                // *** if IIS was never registered, required aspnet_isapi.dll 
+                // *** cannot be found otherwise
+                this.GetInstallPathAndConfigureAspNetIfNeeded();
+
+                if (this.VirtualPath.Length == 0 || this.PhysicalDirectory.Length == 0)
+                {
+                    this.ErrorMessage = "Virtual or Physical Path not set.";
+                    this.Error = true;
+                    return false;
+                }
+
+                // *** Force any assemblies assemblies to be copied
+                this.MakeShadowCopies(this.ShadowCopyAssemblies);
+
+                try
+                {
+                    this.Proxy = wwAspRuntimeProxy.Start(this.PhysicalDirectory, this.VirtualPath,
+                        this.ApplicationBase, this.ConfigFile);
+
+                    this.Proxy.PhysicalDirectory = this.PhysicalDirectory;
+                    this.Proxy.VirtualPath = this.VirtualPath;
+
+                }
+                catch (Exception ex)
+                {
+                    this.ErrorMessage = ex.Message;
+                    this.Error = true;
+                    this.Proxy = null;
+                    return false;
+                }
+                this.Cookies.Clear();
+            }
+
+
+            return true;
+        }
+
+        /// <summary>
+        /// Stops the ASP.Net runtime unloading the AppDomain
+        /// </summary>
+        /// <returns></returns>
+        public bool Stop()
+        {
+            if (this.Proxy != null)
+            {
+                try
+                {
+                    wwAspRuntimeProxy.Stop(this.Proxy);
+                    this.Proxy = null;
+                }
+                catch (Exception ex)
+                {
+                    this.ErrorMessage = ex.Message;
+                    this.Error = true;
+                    return false;
+                }
+                return true;
+            }
+            return false;
+        }
+
+
+
+        /// <summary>
+        /// Adds a complete POST buffer to the current request.
+        /// </summary>
+        /// <param name="PostBuffer">raw POST buffer as byte[]</param>
+        /// <param name="ContentType">the content type of the buffer.</param>
+        public void AddPostBuffer(byte[] PostBuffer, string ContentType)
+        {
+            if (ContentType != null)
+                this.PostContentType = ContentType;
+
+            this.PostData = PostBuffer;
+            return;
+        }
+
+        /// <summary>
+        /// Adds a complete POST buffer to the current request.
+        /// </summary>
+        /// <param name="PostBuffer">raw POST buffer as a string</param>
+        /// <param name="ContentType">the content type of the buffer.</param>
+        public void AddPostBuffer(string PostBuffer, string ContentType)
+        {
+            this.AddPostBuffer(Encoding.GetEncoding(1252).GetBytes(PostBuffer), ContentType);
+        }
+
+        /// <summary>
+        /// Adds a complete POST buffer to the current request.
+        /// </summary>
+        /// <param name="PostBuffer">raw POST buffer as byte[]</param>
+        public void AddPostBuffer(string PostBuffer)
+        {
+            this.AddPostBuffer(PostBuffer, "application/x-www-form-urlencoded");
+        }
+
+
+        /// <summary>
+        /// Copies any assemblies marked for ShadowCopying into the BIN directory
+        /// of the Web physical director. Copies only 
+        /// if the assemblies in the source dir is newer
+        /// </summary>
+        private void MakeShadowCopies(string ShadowCopyAssemblies)
+        {
+            if (ShadowCopyAssemblies == null ||
+                ShadowCopyAssemblies == string.Empty)
+                return;
+
+            string[] Assemblies = ShadowCopyAssemblies.Split(';', ',');
+            foreach (string Assembly in Assemblies)
+            {
+                try
+                {
+                    string TargetFile = PhysicalDirectory + "bin\\" + Path.GetFileName(Assembly);
+
+                    if (File.Exists(TargetFile))
+                    {
+                        // *** Compare Timestamps
+                        DateTime SourceTime = File.GetLastWriteTime(Assembly);
+                        DateTime TargetTime = File.GetLastWriteTime(TargetFile);
+                        if (SourceTime == TargetTime)
+                            continue;
+                    }
+
+                    File.Copy(Assembly, TargetFile, true);
+                }
+                catch { ;  } // nothing we can do on failure 
+            }
+        }
+
+
+        /// <summary>
+        /// The ASP.NET Runtime requires certain keys configured in the registry.
+        /// This code checks for those keys on startup and if not found sets them up
+        /// even if ASP.NET is not installed.
+        /// 
+        /// Taken from the Cassini Source
+        /// </summary>
+        /// <returns></returns>
+        private string GetInstallPathAndConfigureAspNetIfNeeded()
+        {
+            // If ASP.NET was never registered on this machine, the registry 
+            // needs to be patched up for System.Web.dll to find aspnet_isapi.dll
+            //
+            // If HKLM\Microsoft\ASP.NET key is missing, this will be added
+            //      (adjusted for the correct directory and version number
+            // [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\ASP.NET]
+            //      "RootVer"="1.0.3514.0"
+            // [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\ASP.NET\1.0.3514.0]
+            //      "Path"="E:\WINDOWS\Microsoft.NET\Framework\v1.0.3514"
+            //      "DllFullPath"="E:\WINDOWS\Microsoft.NET\Framework\v1.0.3514\aspnet_isapi.dll"
+
+            const String aspNetKeyName = @"Software\Microsoft\ASP.NET";
+
+            RegistryKey aspNetKey = null;
+            RegistryKey aspNetVersionKey = null;
+            RegistryKey frameworkKey = null;
+
+            String installPath = null;
+
+            try
+            {
+                // get the version corresponding to System.Web.Dll currently loaded
+                String aspNetVersion = FileVersionInfo.GetVersionInfo(typeof(HttpRuntime).Module.FullyQualifiedName).FileVersion;
+                String aspNetVersionKeyName = aspNetKeyName + "\\" + aspNetVersion;
+
+                // non 1.0 names should have 0 QFE in the registry
+                if (!aspNetVersion.StartsWith("1.0."))
+                    aspNetVersionKeyName = aspNetVersionKeyName.Substring(0, aspNetVersionKeyName.LastIndexOf('.') + 1) + "0";
+
+                // check if the subkey with version number already exists
+                aspNetVersionKey = Registry.LocalMachine.OpenSubKey(aspNetVersionKeyName);
+
+                if (aspNetVersionKey != null)
+                {
+                    // already created -- just get the path
+                    installPath = (String)aspNetVersionKey.GetValue("Path");
+                }
+                else
+                {
+                    // open/create the ASP.NET key
+                    aspNetKey = Registry.LocalMachine.OpenSubKey(aspNetKeyName);
+                    if (aspNetKey == null)
+                    {
+                        aspNetKey = Registry.LocalMachine.CreateSubKey(aspNetKeyName);
+                        // add RootVer if creating
+                        aspNetKey.SetValue("RootVer", aspNetVersion);
+                    }
+
+                    // version dir name is almost version: "1.0.3514.0" -> "v1.0.3514"
+                    String versionDirName = "v" + aspNetVersion.Substring(0, aspNetVersion.LastIndexOf('.'));
+
+                    // install directory from "InstallRoot" under ".NETFramework" key
+                    frameworkKey = Registry.LocalMachine.OpenSubKey(@"Software\Microsoft\.NETFramework");
+                    String rootDir = (String)frameworkKey.GetValue("InstallRoot");
+                    if (rootDir.EndsWith("\\"))
+                        rootDir = rootDir.Substring(0, rootDir.Length - 1);
+
+                    // create the version subkey
+                    aspNetVersionKey = Registry.LocalMachine.CreateSubKey(aspNetVersionKeyName);
+
+                    // install path
+                    installPath = rootDir + "\\" + versionDirName;
+
+                    // set path and dllfullpath
+                    aspNetVersionKey.SetValue("Path", installPath);
+                    aspNetVersionKey.SetValue("DllFullPath", installPath + "\\aspnet_isapi.dll");
+                }
+            }
+            catch
+            {
+            }
+            finally
+            {
+                if (aspNetVersionKey != null)
+                    aspNetVersionKey.Close();
+                if (aspNetKey != null)
+                    aspNetKey.Close();
+                if (frameworkKey != null)
+                    frameworkKey.Close();
+            }
+
+            return installPath;
+        }
+
+
+        #region IDisposable Members
+
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
+        public void Dispose()
+        {
+            Stop();
+        }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class wwAspRuntimeProxy : MarshalByRefObject
+    {
+        /// <summary>
+        /// Location for the generated HTML output.
+        /// </summary>
+        public string OutputFile = "d:\\temp\\__preview.htm";
+
+        /// <summary>
+        /// Context parameters that can be read back in the page from the Context object.
+        /// </summary>
+        public Hashtable Context = new Hashtable();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public byte[] PostData = null;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public string PostContentType = "application/x-www-form-urlencoded";
+
+        /// <summary>
+        /// Reference to the AppDomain to allow unloading the hosted application.
+        /// </summary>
+        public AppDomain AppDomain = null;
+
+        /// <summary>
+        /// Name of the Physical Directory assigned with Start(). Not used internally, only exposed for
+        /// external apps to retrieve.
+        /// </summary>
+        public string PhysicalDirectory = "";
+
+        /// <summary>
+        /// Name of the virtual directory assigned to the application with Start.Not used internally, only exposed for
+        /// external apps to retrieve.
+        /// </summary>
+        public string VirtualPath = "";
+
+        /// <summary>
+        /// An error message if bError is set. Only works for the ProcessRequest method
+        /// </summary>
+        public string ErrorMessage = "";
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public bool Error = false;
+
+        /// <summary>
+        /// The timeout for the ASP.Net runtime after which it is automatically unloaded when idle
+        /// to release resources. Note this can't be externally set because the lease is set 
+        /// during object construction. All you can do is change this property value here statically
+        /// </summary>
+        public static int IdleTimeoutMinutes = 15;
+
+        /// <summary>
+        /// A hashtable that contains all the HTPP Headers the server sent in header / value pair
+        /// </summary>
+        public Hashtable ResponseHeaders = null;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public Hashtable RequestHeaders = null;
+
+        /// <summary>
+        /// the Response status code the server sent. 200 on success, 500 on error, 404 for redirect etc.
+        /// </summary>
+        public int ResponseStatusCode = 200;
+
+        /// <summary>
+        /// Collection of cookies set by the request.
+        /// </summary>
+        public Hashtable Cookies = null;
+
+        /// <summary>
+        /// Processes script execution on the specified page.
+        /// </summary>
+        /// <param name="Page">A page filename relative to the Virtual directory. Use subdir\sub2\test.aspx style syntax for subdirs. (note forward slash!)</param>
+        /// <param name="QueryString">Optional - query string in key value pair format. Pass null for non.</param>
+        /// <returns>true or false. False returns only if a real failure occurs - most page errors will result in an HTTP error page.</returns>
+        public virtual bool ProcessRequest(string Page, string QueryString)
+        {
+            TextWriter Output;
+
+            try
+            {
+                // *** Note you have to write the right 'codepage'. If you use the default UTF-8
+                // *** everything will be double encoded.
+                Output = new StreamWriter(this.OutputFile, false, Encoding.GetEncoding(1252));
+
+                // *** Write the UTF-8 prefix
+                Output.Write("﻿");
+            }
+            catch (Exception ex)
+            {
+                this.Error = true;
+                this.ErrorMessage = ex.Message;
+                return false;
+            }
+
+            // *** Reset the Response settings
+            this.ResponseHeaders = null;
+            this.Cookies = null;
+            this.ResponseStatusCode = 200;
+
+            wwWorkerRequest Request = new wwWorkerRequest(Page, QueryString, Output);
+            if (this.Context != null)
+                Request.Context = this.Context;
+
+            Request.PostData = this.PostData;
+            Request.PostContentType = this.PostContentType;
+            Request.RequestHeaders = this.RequestHeaders;
+            Request.PhysicalPath = this.PhysicalDirectory;
+
+            try
+            {
+                HttpRuntime.ProcessRequest(Request);
+            }
+            catch (Exception ex)
+            {
+                Output.Close();
+                this.ResponseStatusCode = 500;
+                this.ErrorMessage = ex.Message;
+                this.Error = true;
+                return false;
+            }
+
+            Output.Close();
+
+            this.ResponseHeaders = Request.ResponseHeaders;
+            this.ResponseStatusCode = Request.ResponseStatusCode;
+
+
+            // *** Capture the Cookies that were set by the server
+            this.Cookies = Request.Cookies;
+
+            if (Request.Context != null)
+                this.Context = Request.Context;
+
+            return true;
+        }
+
+        /// <summary>
+        /// Processes a script and returns the result as a string.
+        /// </summary>
+        /// <param name="Page">Name of the page to return</param>
+        /// <param name="QueryString">Optional query string</param>
+        /// <returns>script result or null on failure. Script errors are returned as errors in the script result string.</returns>
+        public virtual string ProcessRequestToString(string Page, string QueryString)
+        {
+            StringWriter sw = new StringWriter();
+            TextWriter Writer = new System.Web.UI.HtmlTextWriter(sw);
+
+            // *** Reset the Response settings
+            this.ResponseHeaders = null;
+            this.Cookies = null;
+            this.ResponseStatusCode = 200;
+
+            wwWorkerRequest Request = new wwWorkerRequest(Page, QueryString, Writer);
+            if (this.Context != null)
+                Request.Context = this.Context;
+
+            Request.PostData = this.PostData;
+            Request.PostContentType = this.PostContentType;
+            Request.RequestHeaders = this.RequestHeaders;
+            Request.PhysicalPath = this.PhysicalDirectory;
+
+            try
+            {
+                HttpRuntime.ProcessRequest(Request);
+            }
+            catch (Exception ex)
+            {
+                this.ResponseStatusCode = Request.ResponseStatusCode;
+                this.ErrorMessage = ex.Message;
+                this.Error = true;
+                return null;
+            }
+
+            string Result = sw.ToString();
+            Writer.Close();
+
+            this.ResponseHeaders = Request.ResponseHeaders;
+            this.ResponseStatusCode = Request.ResponseStatusCode;
+
+            this.Cookies = Request.Cookies;
+            this.Context = Request.Context;
+
+            return Result;
+        }
+
+        /// <summary>
+        /// Creates an instance of this class in the ASP.NET AppDomain
+        /// </summary>
+        /// <param name="hostType">Type of the application to be hosted. Essentially this class.</param>
+        /// <param name="virtualDir">Name of the Virtual Directory that hosts this application. Not really used, other than on error messages and ASP Server Variable return values.</param>
+        /// <param name="physicalDir">The physical location of the Virtual Directory for the application</param>
+        /// <param name="PrivateBinPath">The private bin path.</param>
+        /// <param name="ConfigurationFile">Location of the configuration file. Default to web.config in the bin directory.</param>
+        /// <returns>
+        /// object instance to the wwAspRuntimeProxy class you can call ProcessRequest on. Note this instance returned
+        /// is a remoting proxy
+        /// </returns>
+        public static wwAspRuntimeProxy CreateApplicationHost(Type hostType, string virtualDir, string physicalDir,
+                                                               string PrivateBinPath, string ConfigurationFile)
+        {
+            if (!(physicalDir.EndsWith("\\")))
+                physicalDir = physicalDir + "\\";
+
+            // *** Copy this hosting DLL into the /bin directory of the application
+            string FileName = Assembly.GetExecutingAssembly().Location;
+            try
+            {
+                if (!Directory.Exists(physicalDir + "bin\\"))
+                    Directory.CreateDirectory(physicalDir + "bin\\");
+
+                string JustFname = Path.GetFileName(FileName);
+                File.Copy(FileName, physicalDir + "bin\\" + JustFname, true);
+            }
+            catch { ;}
+
+            wwAspRuntimeProxy Proxy = ApplicationHost.CreateApplicationHost(
+                                                                hostType,
+                                                                virtualDir,
+                                                                physicalDir)
+                                                       as wwAspRuntimeProxy;
+
+            if (Proxy != null)
+                // *** Grab the AppDomain reference and add the ApplicationBase
+                // *** Must call into the Proxy to do this
+                Proxy.CaptureAppDomain();
+
+
+            return Proxy;
+        }
+
+
+        /// <summary>
+        /// Internal method that captures the Proxy's AppDomain so we can shut
+        /// the ASP.NET runtime down externally.
+        /// Also serves as an
+        /// </summary>
+        internal void CaptureAppDomain()
+        {
+            this.AppDomain = AppDomain.CurrentDomain;
+        }
+
+
+#if false
+		/// <summary>
+		/// Creates a minimal Application domain to allow the ASP.Net runtime to be hosted.
+		/// </summary>
+		/// <param name="hostType">Type of the application to be hosted. Essentially this class.</param>
+		/// <param name="virtualDir">Name of the Virtual Directory that hosts this application. Not really used, other than on error messages and ASP Server Variable return values.</param>
+		/// <param name="physicalDir">The physical location of the Virtual Directory for the application</param>
+		/// <param name="ApplicationBase">Location of the 'bin' directory</param>
+		/// <param name="ConfigurationFile">Location of the configuration file. Default to web.config in the bin directory.</param>
+		/// <returns>object instance to the wwAspRuntimeProxy class you can call ProcessRequest on.</returns>
+		public static wwAspRuntimeProxy CreateApplicationHostX(Type hostType, string virtualDir, string physicalDir, 
+		                                                      string ApplicationBase, string ConfigurationFile) 
+		{
+			if (!(physicalDir.EndsWith("\\")))
+				physicalDir = physicalDir + "\\";
+
+			string aspDir = HttpRuntime.AspInstallDirectory;
+			string domainId = "ASPHOST_" + DateTime.Now.ToString().GetHashCode().ToString("x");
+			string appName = (virtualDir + physicalDir).GetHashCode().ToString("x");
+			AppDomainSetup setup = new AppDomainSetup();
+
+			//	setup.ApplicationBase =  physicalDir;
+			//	setup.PrivateBinPath = Directory.GetCurrentDirectory();
+			setup.ApplicationName = appName;
+
+			setup.ConfigurationFile = ConfigurationFile;   //"web.config";  // not necessary execept for debugging
+
+			/// Assign the application base where this class' assembly is hosted
+			/// Otherwise the ApplicationBase is inherited from the current process
+			if (ApplicationBase != null && ApplicationBase != "")
+				setup.ApplicationBase = ApplicationBase;
+
+            AppDomain Domain = AppDomain.CreateDomain(domainId, GetDefaultDomainIdentity(), setup);
+			Domain.SetData(".appDomain", "*");
+			Domain.SetData(".appPath", physicalDir);
+			Domain.SetData(".appVPath", virtualDir);
+			Domain.SetData(".domainId", domainId);
+			Domain.SetData(".hostingVirtualPath", virtualDir);
+			Domain.SetData(".hostingInstallDir", aspDir);
+
+			ObjectHandle oh = Domain.CreateInstance(hostType.Module.Assembly.FullName, hostType.FullName);
+			wwAspRuntimeProxy Host = (wwAspRuntimeProxy) oh.Unwrap();
+			
+			// *** Save virtual and physical path so we can tell where app runs later
+			Host.VirtualPath = virtualDir;
+			Host.PhysicalDirectory = physicalDir;
+
+			// *** Save Domain so we can unload later
+			Host.AppDomain = Domain;
+
+			return Host;
+		}
+
+        private static Evidence GetDefaultDomainIdentity()
+        {
+            Evidence evidence1 = new Evidence();
+            bool flag1 = false;
+            IEnumerator enumerator1 = AppDomain.CurrentDomain.Evidence.GetHostEnumerator();
+            while (enumerator1.MoveNext())
+            {
+                if (enumerator1.Current is Zone)
+                {
+                    flag1 = true;
+                }
+                evidence1.AddHost(enumerator1.Current);
+            }
+            enumerator1 = AppDomain.CurrentDomain.Evidence.GetAssemblyEnumerator();
+            while (enumerator1.MoveNext())
+            {
+                evidence1.AddAssembly(enumerator1.Current);
+            }
+            if (!flag1)
+            {
+                evidence1.AddHost(new Zone(SecurityZone.MyComputer));
+            }
+            return evidence1;
+        }
+#endif
+
+
+        /// <summary>
+        /// Starts the Runtime host by creating an AppDomain and loading the runtime into it
+        /// </summary>
+        /// <param name="PhysicalPath">The physical disk path for the 'Web' directory where files are executed</param>
+        /// <param name="VirtualPath">The name of the virtual path. Typically this will be "/" or the root path.</param>
+        /// <param name="PrivateBinPath">The private bin path.</param>
+        /// <param name="ConfigFile">The config file.</param>
+        /// <returns></returns>
+        public static wwAspRuntimeProxy Start(string PhysicalPath, string VirtualPath,
+                                              string PrivateBinPath, string ConfigFile)
+        {
+            wwAspRuntimeProxy Host = wwAspRuntimeProxy.CreateApplicationHost(
+            typeof(wwAspRuntimeProxy),
+            VirtualPath, PhysicalPath, PrivateBinPath, ConfigFile);
+
+            return Host;
+        }
+
+        /// <summary>
+        /// Unloads the runtime host by unloading the AppDomain. Use this to free memory if you are compiling lots of pages or recycle the host.
+        /// </summary>
+        /// <param name="Host">The host.</param>
+        public static void Stop(wwAspRuntimeProxy Host)
+        {
+            if (Host != null)
+            {
+                Host.Context.Clear();
+                Host.Context = null;
+
+                Host.UnloadRuntime();
+
+                AppDomain.Unload(Host.AppDomain);
+                Host = null;
+            }
+        }
+
+        /// <summary>
+        /// Method used to shut down the ASP.NET AppDomain from within
+        /// the AppDomain. 
+        /// </summary>
+        internal void UnloadRuntime()
+        {
+            HttpRuntime.UnloadAppDomain();
+        }
+
+        /// <summary>
+        /// Overrides the default Lease setting to allow the runtime to not
+        /// expire after 5 minutes. 
+        /// </summary>
+        /// <returns></returns>
+        public override Object InitializeLifetimeService()
+        {
+            // return null; // never expire
+            ILease lease = (ILease)base.InitializeLifetimeService();
+
+            // *** Set the initial lease which determines how long the remote ref sticks around
+            // *** before .Net automatically releases it. Although our code has the logic to
+            // *** to automatically restart it's better to keep it loaded
+            if (lease.CurrentState == LeaseState.Initial)
+            {
+                lease.InitialLeaseTime = TimeSpan.FromMinutes(wwAspRuntimeProxy.IdleTimeoutMinutes);
+                lease.RenewOnCallTime = TimeSpan.FromMinutes(wwAspRuntimeProxy.IdleTimeoutMinutes);
+                lease.SponsorshipTimeout = TimeSpan.FromMinutes(5);
+            }
+
+            return lease;
+        }
+    }
+
+    /// <summary>
+    /// A subclass of SimpleWorkerRequest that allows to push data to the ASP.Net request
+    /// via the Context object.
+    /// </summary>
+    public class wwWorkerRequest : SimpleWorkerRequest
+    {
+
+        /// <summary>
+        /// Optional parameter data sent to the ASP.Net page. This value is stored into the 
+        /// Context object as Context["Content"]. Only a single parameter can be passed,
+        /// but you can pass an object that contains additional properties.
+        /// Objects passed must be serializable or inherit from MarshalByRefObject.
+        /// </summary>
+        public object ParameterData = null;
+
+        /// <summary>
+        /// Contains a set of parameters
+        /// </summary>
+        public Hashtable Context = new Hashtable();
+
+        /// <summary>
+        /// Returns optional Response data that is retrieved from the Context object
+        /// via the Context["ResultContent"] key.
+        /// </summary>
+        public object ResponseData = null;
+
+        /// <summary>
+        /// Optional PostBuffer that allows sending Postable data to the ASPX page.
+        /// </summary>
+        public byte[] PostData = null;
+
+        /// <summary>
+        /// The content type for the POST operation. Defaults to application/x-www-form-urlencoded.
+        /// </summary>
+        public string PostContentType = "application/x-www-form-urlencoded";
+
+
+        /// <summary>
+        /// Hashtable that contains the server headers as header/value pairs
+        /// </summary>
+        public Hashtable ResponseHeaders = new Hashtable();
+
+        /// <summary>
+        /// Collection that captures all the cookies in the request
+        /// </summary>
+        public Hashtable Cookies = null;
+
+        /// <summary>
+        /// Pass in a set of request headers as Header / Value pairs
+        /// </summary>
+        public Hashtable RequestHeaders = null;
+
+        /// <summary>
+        /// Numeric Server Response Code
+        /// </summary>
+        public int ResponseStatusCode;
+
+        /// <summary>
+        /// The physical path for this application
+        /// </summary>
+        public string PhysicalPath = "";
+
+
+        /// <summary>
+        /// Internal property used to keep track of the HTTP Context object.
+        /// Used to retrieve the Context.Item["ResultContent"] value
+        /// </summary>
+        private HttpContext CurrentContext = null;
+
+
+        /// <summary>
+        /// Callback to basic constructor
+        /// </summary>
+        /// <param name="Page">Name of the page to execute in the Web app. Must be in the VRoot defined for the app with the app host.</param>
+        /// <param name="QueryString">Optional QueryString. Pass null if no query string data.</param>
+        /// <param name="Output">TextWriter object that receives the output from the request.</param>
+        public wwWorkerRequest(string Page, string QueryString, TextWriter Output)
+            :
+            base(Page, QueryString, Output) { }
+
+
+        /// <summary>
+        /// Returns the UNC-translated path to the currently executing server application.
+        /// </summary>
+        /// <returns>
+        /// The physical path of the current application.
+        /// </returns>
+        public override string GetAppPathTranslated()
+        {
+            return this.PhysicalPath;
+        }
+
+        /// <summary>
+        /// Method that is called just before the ASP.Net page gets executed. Allows
+        /// setting of the Context object item collection with arbitrary data. Also saves
+        /// the Context object so it can be used later to retrieve any result data.
+        /// Inbound: Context.Items["Content"] (Parameter data)
+        ///          OR: you can add Context items directly by name and pick them up by name
+        /// Outbound: Context.Items["ResultContent"]
+        /// </summary>
+        /// <param name="callback">callback delegate</param>
+        /// <param name="extraData">extraData for system purpose</param>
+        public override void SetEndOfSendNotification(EndOfSendNotification callback, object extraData)
+        {
+            base.SetEndOfSendNotification(callback, extraData);
+
+            this.CurrentContext = extraData as HttpContext;
+
+            if (this.ParameterData != null)
+            {
+                // *** Use 'as' instead of cast to ensure additional calls don't throw exceptions
+
+                if (this.CurrentContext != null)
+                    // *** Add any extra data here to the 
+                    this.CurrentContext.Items.Add("Content", this.ParameterData);
+            }
+
+            // *** Copy inbound context data
+            if (this.Context != null)
+            {
+                foreach (object Item in this.Context.Keys)
+                {
+                    this.CurrentContext.Items.Add(Item, this.Context[Item]);
+                }
+            }
+
+        }
+
+
+        // *** the following three methods are overridden to provide the
+        // *** ability to POST information to the Web Server
+
+        /// <summary>
+        /// We must send the Verb so the server knows that it's a POST request.
+        /// </summary>
+        /// <returns></returns>
+        public override String GetHttpVerbName()
+        {
+            if (this.PostData == null)
+                return base.GetHttpVerbName();
+
+            return "POST";
+        }
+
+        /// <summary>
+        /// We must override this method to send the ContentType to the client
+        /// when POSTing so that the request is recognized as a POST.
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public override string GetKnownRequestHeader(int index)
+        {
+            if (index == HttpWorkerRequest.HeaderContentLength)
+            {
+                if (this.PostData != null)
+                    return this.PostData.Length.ToString();
+            }
+            else if (index == HttpWorkerRequest.HeaderContentType)
+            {
+                if (this.PostData != null)
+                    return this.PostContentType;
+            }
+            else
+            {
+                // *** if we need to pass headers write them out
+                if (this.RequestHeaders != null)
+                {
+                    string header = HttpWorkerRequest.GetKnownRequestHeaderName(index);
+                    if (header != null)
+                    {
+                        header = header.ToLower();
+                        if (this.RequestHeaders.Contains(header))
+                            return (string)RequestHeaders[header];
+                    }
+                }
+            }
+
+            return ""; //base.GetKnownRequestHeader(index);
+        }
+
+        /// <summary>
+        /// Return any POST data if provided
+        /// </summary>
+        /// <returns></returns>
+        public override byte[] GetPreloadedEntityBody()
+        {
+            if (this.PostData != null)
+                return this.PostData;
+
+            return base.GetPreloadedEntityBody();
+        }
+
+        /// <summary>
+        /// Set the internal status code we can pick up
+        /// Pick up ResultContent Content variable 
+        /// </summary>
+        /// <param name="statusCode"></param>
+        /// <param name="statusDescription"></param>
+        public override void SendStatus(int statusCode, string statusDescription)
+        {
+            if (this.CurrentContext != null)
+            {
+                this.ResponseData = this.CurrentContext.Items["ResultContent"];
+
+            }
+            // *** Copy outbound Context
+            if (this.CurrentContext.Items.Count > 0)
+            {
+                this.Context.Clear();
+                foreach (object Key in this.CurrentContext.Items.Keys)
+                {
+                    this.Context.Add(Key, this.CurrentContext.Items[Key]);
+                }
+            }
+
+            this.ResponseStatusCode = statusCode;
+            base.SendStatus(statusCode, statusDescription);
+        }
+
+        /// <summary>
+        /// Retrieve Response Headers and store in ResponseHeaders() collection
+        /// so we can simulate them from the browser.
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="value"></param>
+        public override void SendKnownResponseHeader(int index, string value)
+        {
+            string header = HttpWorkerRequest.GetKnownResponseHeaderName(index).ToLower();
+            switch (index)
+            {
+                case HttpWorkerRequest.HeaderSetCookie:
+                    {
+                        if (this.Cookies == null)
+                            this.Cookies = new Hashtable();
+
+                        string CookieName = value.Substring(0, value.IndexOf("=")).ToLower();
+                        if (!Cookies.Contains(CookieName))
+                            Cookies.Add(CookieName, value);
+                        else
+                            Cookies[CookieName] = value;
+
+                        break;
+                    }
+                default:
+                    {
+                        try
+                        {
+                            ResponseHeaders.Add(header, value);
+                        }
+                        catch
+                        {
+                            string name = header;
+                        }
+                        break;
+                    }
+            }
+
+            base.SendKnownResponseHeader(index, value);
+        }
+
+        /// <summary>
+        /// Store custom headers to ResponseHeaders Hashtable collection
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="value"></param>
+        public override void SendUnknownResponseHeader(string name, string value)
+        {
+            ResponseHeaders.Add(name, value);
+
+            base.SendUnknownResponseHeader(name, value);
+        }
     }
 }
 #endif

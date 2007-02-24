@@ -11,6 +11,22 @@ Pierre Vachon (pierrevachon@gmail.com)
 
 Version History
 ===============
+V0.1.26.0
+	[kevgrig@gmail.com]
+		* Interesting new support for limiting the max working set of a process,
+		  using PInvoke into Win32 methods CreateJobObject, SetInformationJobObject,
+		  and AssignProcessToJobObject
+		* Added ASP.NET Runtime Host courtesy of Rick Strahl
+		* Added wrappers for Win32.GetFreeDiskSpace methods
+		* Added SimpleCompositeLogger and SimpleLogFormatter classes for the most common logger usage,
+		  as well as the NullLogger
+		* Added the LoggingConfig class to parse a log option string and retrieve loggers.
+		* Added ConfigurationValues class for common XML option file parsing
+V0.1.24.0
+	[kevgrig@gmail.com]
+		* Added PublicDomain.Configuration
+		* Added LoggingConfig class to load a log string and return loggers
+		* Added Rick Strahl's Public Domain ASP.Net Runtime host
 V0.1.23.0
 	[pierrevachon@gmail.com]
 		* Bug fix in the semantics of GlobalConstants
