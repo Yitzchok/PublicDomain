@@ -179,7 +179,7 @@ namespace PublicDomain
         /// Current version of this code, in string form. In a standalone build,
         /// this is the assembly version and file version of the assembly.
         /// </summary>
-        public const string PublicDomainVersion = "0.1.26.0";
+        public const string PublicDomainVersion = "0.1.27.0";
 
         /// <summary>
         /// The name of the PublicDomain assembly, if this is a standalone build. If
@@ -405,6 +405,17 @@ namespace PublicDomain
             }
             return null;
         }
+
+        /// <summary>
+        /// Returns a <see cref="T:System.String"></see> that represents the current <see cref="T:System.Object"></see>.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="T:System.String"></see> that represents the current <see cref="T:System.Object"></see>.
+        /// </returns>
+        public override string ToString()
+        {
+            return First + "," + Second;
+        }
     }
 
     /// <summary>
@@ -449,6 +460,17 @@ namespace PublicDomain
             First = first;
             Second = second;
             Third = third;
+        }
+
+        /// <summary>
+        /// Returns a <see cref="T:System.String"></see> that represents the current <see cref="T:System.Object"></see>.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="T:System.String"></see> that represents the current <see cref="T:System.Object"></see>.
+        /// </returns>
+        public override string ToString()
+        {
+            return First + "," + Second + "," + Third;
         }
     }
 
@@ -2345,27 +2367,19 @@ namespace PublicDomain
         /// <param name="ex">The ex.</param>
         public static void WriteExceptions(Exception ex)
         {
-            WriteExceptions(ex, Console.Error);
+            WriteExceptions(Console.Error, ex);
         }
 
         /// <summary>
-        /// Writes the exceptions.
+        /// Writes the exception.
         /// </summary>
-        /// <param name="ex">The ex.</param>
         /// <param name="writer">The writer.</param>
-        public static void WriteExceptions(Exception ex, TextWriter writer)
+        /// <param name="exceptions">The exceptions.</param>
+        public static void WriteExceptions(TextWriter writer, params Exception[] exceptions)
         {
-            while (ex != null)
+            foreach (Exception ex in exceptions)
             {
-                writer.WriteLine(ex.Message);
-                writer.WriteLine(ex.StackTrace);
-
-                ex = ex.InnerException;
-
-                if (ex != null)
-                {
-                    writer.WriteLine();
-                }
+                writer.WriteLine(GetExceptionDetailsAsString(ex));
             }
         }
 
@@ -2380,10 +2394,26 @@ namespace PublicDomain
             int i = 0;
             while (ex != null)
             {
-                sb.AppendFormat(@"Exception ({0}), Type={1}, Message={3}, Stack Trace={2}
-", i, ex.GetType().Name, ex.StackTrace, ex.Message);
+                if (i > 0)
+                {
+                    sb.Append("\nInner ");
+                }
+
+                sb.AppendFormat(
+                    @"Exception ({0}), Type={1}, Message={3}, Stack Trace={2}",
+                    i,
+                    ex.GetType().Name,
+                    ex.StackTrace,
+                    ex.Message
+                );
+
                 ex = ex.InnerException;
+
                 i++;
+            }
+            if (i > 0)
+            {
+                sb.Append('\n');
             }
             return sb.ToString();
         }
@@ -5989,6 +6019,17 @@ namespace PublicDomain
                 {
                     GetLastErrorThrow();
                 }
+            }
+
+            /// <summary>
+            /// Returns a <see cref="T:System.String"></see> that represents the current <see cref="T:System.Object"></see>.
+            /// </summary>
+            /// <returns>
+            /// A <see cref="T:System.String"></see> that represents the current <see cref="T:System.Object"></see>.
+            /// </returns>
+            public override string ToString()
+            {
+                return m_name + "(" + m_handle + ")";
             }
         }
 
@@ -27336,43 +27377,87 @@ namespace PublicDomain.Logging
             StackFrame caller = trace.GetFrame(2);
             MethodBase method = caller.GetMethod();
             int cnt = LogStackCount;
+
             if (useMarker)
             {
                 cnt += (isEntry ? 1 : -1);
+
+                if (cnt < 0)
+                {
+                    cnt = 0;
+                }
+
                 LogStackCount = cnt;
             }
-            string message = (useMarker ? new string(' ', isEntry ? cnt - 1 : cnt) : new string(' ', cnt + 1)) + (useMarker ? (isEntry ? "> " : "< ") : "") + method.DeclaringType.ToString() + "." + method.Name + " [" + caller.GetFileLineNumber() + "]";
+
+            StringBuilder sb = new StringBuilder();
+            if (useMarker)
+            {
+                if (isEntry)
+                {
+                    cnt--;
+                }
+            }
+            else
+            {
+                cnt++;
+            }
+
+            if (cnt > 0)
+            {
+                sb.Append(' ', cnt);
+            }
+
+            if (useMarker)
+            {
+                if (isEntry)
+                {
+                    sb.Append("> ");
+                }
+                else
+                {
+                    sb.Append("< ");
+                }
+            }
+
+            sb.AppendFormat(
+                "{0}.{1} [{2}]",
+                method.DeclaringType,
+                method.Name,
+                caller.GetFileLineNumber()
+            );
+
             if (args != null)
             {
-                message += " (";
+                sb.Append(" (");
                 for (int i = 0; i < args.Length; i++)
                 {
                     if (i > 0)
                     {
-                        message += ", ";
+                        sb.Append(", ");
                     }
                     if (args[i] == null)
                     {
-                        message += "[null]";
+                        sb.Append("[null]");
                     }
                     else
                     {
-                        message += args[i];
+                        sb.Append(args[i]);
                     }
                 }
-                message += ")";
+                sb.Append(")");
             }
             StackFrame caller2 = trace.GetFrame(3);
             if (caller2 != null)
             {
-                message += " {" + caller2.GetFileName() + ":" + caller2.GetFileLineNumber() + "}";
+                sb.AppendFormat(
+                    " {{{0}:{1}:{2}}}",
+                    caller2.GetMethod().Name,
+                    caller2.GetFileName(),
+                    caller2.GetFileLineNumber()
+                );
             }
-            LogDebug10(message);
-        }
-
-        private string GetStackString()
-        {
-            return new string(' ', LogStackCount + 1);
+            LogDebug10(sb.ToString());
         }
     }
 
@@ -27382,6 +27467,10 @@ namespace PublicDomain.Logging
     public class FileLogger : Logger
     {
         private string m_fileName;
+
+        private static Dictionary<string, FileStream> m_streams = new Dictionary<string, FileStream>();
+
+        private static object m_streamsLock = new object();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FileLogger"/> class.
@@ -27434,15 +27523,33 @@ namespace PublicDomain.Logging
 
             if (!string.IsNullOrEmpty(fileName))
             {
-                using (FileStream stream = File.Open(fileName, FileMode.Append, FileAccess.Write, FileShare.Write))
+                FileStream stream = GetStream(fileName);
+                byte[] data = Encoding.Default.GetBytes(logLine);
+
+                stream.Write(data, 0, data.Length);
+                stream.WriteByte((byte)'\n');
+                stream.Flush();
+            }
+        }
+
+        /// <summary>
+        /// Gets the stream.
+        /// </summary>
+        /// <param name="fileName">Name of the file.</param>
+        /// <returns></returns>
+        protected virtual FileStream GetStream(string fileName)
+        {
+            FileStream result = null;
+
+            lock (m_streamsLock)
+            {
+                if (!m_streams.TryGetValue(fileName, out result))
                 {
-                    using (StreamWriter writer = new StreamWriter(stream))
-                    {
-                        writer.WriteLine(logLine);
-                        writer.Flush();
-                    }
+                    result = m_streams[fileName] = new FileStream(fileName, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
                 }
             }
+
+            return result;
         }
 
         /// <summary>
@@ -27518,13 +27625,10 @@ namespace PublicDomain.Logging
     {
 		private string m_className;
         private string m_prefix;
-        private const string InitialLine = "NEW RUN";
+        private const string InitialLine = "NEW STATIC INITIALIZATION";
         internal static readonly int CATEGORY_LENGTH = 10;
 
-#if DEBUG
         private static int logcount = 1;
-        private static object logcountlock = new object();
-#endif
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SimpleCompositeLogger"/> class.
@@ -27565,34 +27669,26 @@ namespace PublicDomain.Logging
 		}
 
         /// <summary>
-        /// High level final log that is called with all of the detailed information
-        /// and the final log line as the last parameter.
         /// </summary>
-        /// <param name="severity">The severity.</param>
-        /// <param name="timestamp">The timestamp.</param>
-        /// <param name="entry">The entry.</param>
-        /// <param name="formatParameters">The format parameters.</param>
-        /// <param name="logLine">The log line.</param>
-        protected override void DoLog(LoggerSeverity severity, DateTime timestamp, object entry, object[] formatParameters, string logLine)
+        /// <param name="severity"></param>
+        /// <param name="entry"></param>
+        /// <param name="formatParameters"></param>
+        public override void Log(LoggerSeverity severity, object entry, params object[] formatParameters)
         {
-#if DEBUG
-            lock (logcountlock)
+            if (logcount++ == 1)
             {
-                if (logcount == 1)
-                {
-                    base.DoLog(LoggerSeverity.Info20, timestamp, InitialLine, new object[] { }, InitialLine);
-                }
-                logcount++;
+                base.Log(LoggerSeverity.Infinity, null);
+                base.Log(LoggerSeverity.Infinity, InitialLine);
             }
-#endif
+
             Category = m_prefix;
             if (severity == LoggerSeverity.Fatal50)
             {
                 // TODO call a notification interface, which could do something like
                 // send an email
             }
-            base.DoLog(severity, timestamp, entry, formatParameters, logLine);
-		}
+            base.Log(severity, entry, formatParameters);
+        }
     }
 
     /// <summary>
@@ -27643,6 +27739,7 @@ namespace PublicDomain.Logging
         public NullLogger()
 			: base(null, null)
 		{
+            Threshold = LoggerSeverity.None0;
 		}
 
         /// <summary>
@@ -27650,8 +27747,7 @@ namespace PublicDomain.Logging
         /// <param name="severity"></param>
         /// <param name="entry"></param>
         /// <param name="formatParameters"></param>
-        [Conditional("DEBUG")]
-        public new void Log(LoggerSeverity severity, object entry, params object[] formatParameters)
+        public override void Log(LoggerSeverity severity, object entry, params object[] formatParameters)
         {
         }
 
@@ -27659,8 +27755,7 @@ namespace PublicDomain.Logging
         /// </summary>
         /// <param name="entry"></param>
         /// <param name="formatParameters"></param>
-        [Conditional("DEBUG")]
-        public new void LogDebug10(object entry, params object[] formatParameters)
+        public override void LogDebug10(object entry, params object[] formatParameters)
         {
         }
 
@@ -27668,8 +27763,7 @@ namespace PublicDomain.Logging
         /// </summary>
         /// <param name="entry"></param>
         /// <param name="formatParameters"></param>
-        [Conditional("DEBUG")]
-        public new void LogError40(object entry, params object[] formatParameters)
+        public override void LogError40(object entry, params object[] formatParameters)
         {
         }
 
@@ -27677,8 +27771,7 @@ namespace PublicDomain.Logging
         /// </summary>
         /// <param name="entry"></param>
         /// <param name="formatParameters"></param>
-        [Conditional("DEBUG")]
-        public new void LogFatal50(object entry, params object[] formatParameters)
+        public override void LogFatal50(object entry, params object[] formatParameters)
         {
         }
 
@@ -27686,8 +27779,7 @@ namespace PublicDomain.Logging
         /// </summary>
         /// <param name="entry"></param>
         /// <param name="formatParameters"></param>
-        [Conditional("DEBUG")]
-        public new void LogInfo20(object entry, params object[] formatParameters)
+        public override void LogInfo20(object entry, params object[] formatParameters)
         {
         }
 
@@ -27695,8 +27787,7 @@ namespace PublicDomain.Logging
         /// </summary>
         /// <param name="entry"></param>
         /// <param name="formatParameters"></param>
-        [Conditional("DEBUG")]
-        public new void LogWarn30(object entry, params object[] formatParameters)
+        public override void LogWarn30(object entry, params object[] formatParameters)
         {
         }
 
@@ -27706,8 +27797,7 @@ namespace PublicDomain.Logging
         /// the configuration mode.
         /// </summary>
         /// <param name="args"></param>
-        [Conditional("DEBUG")]
-        public new void Start(params object[] args)
+        public override void Start(params object[] args)
         {
         }
 
@@ -27717,8 +27807,7 @@ namespace PublicDomain.Logging
         /// the configuration mode.
         /// </summary>
         /// <param name="args"></param>
-        [Conditional("DEBUG")]
-        public new void End(params object[] args)
+        public override void End(params object[] args)
         {
         }
 
@@ -27728,8 +27817,7 @@ namespace PublicDomain.Logging
         /// <param name="isEntry">if set to <c>true</c> [is entry].</param>
         /// <param name="useMarker">if set to <c>true</c> [use marker].</param>
         /// <param name="args">The args.</param>
-        [Conditional("DEBUG")]
-        protected new void LogEntryExit(bool isEntry, bool useMarker, object[] args)
+        protected override void LogEntryExit(bool isEntry, bool useMarker, object[] args)
         {
         }
 
@@ -27737,8 +27825,7 @@ namespace PublicDomain.Logging
         /// Logs the exception.
         /// </summary>
         /// <param name="ex">The ex.</param>
-        [Conditional("DEBUG")]
-        public new void LogException(Exception ex)
+        public override void LogException(Exception ex)
         {
         }
 
@@ -27747,8 +27834,7 @@ namespace PublicDomain.Logging
         /// </summary>
         /// <param name="ex">The ex.</param>
         /// <param name="severity">The severity.</param>
-        [Conditional("DEBUG")]
-        public new void LogException(Exception ex, LoggerSeverity severity)
+        public override void LogException(Exception ex, LoggerSeverity severity)
         {
         }
 
@@ -27758,8 +27844,28 @@ namespace PublicDomain.Logging
         /// the configuration mode.
         /// </summary>
         /// <param name="args"></param>
-        [Conditional("DEBUG")]
-        public new void WhereAmI(params object[] args)
+        public override void WhereAmI(params object[] args)
+        {
+        }
+
+        /// <summary>
+        /// High level final log that is called with all of the detailed information
+        /// and the final log line as the last parameter.
+        /// </summary>
+        /// <param name="severity">The severity.</param>
+        /// <param name="timestamp">The timestamp.</param>
+        /// <param name="entry">The entry.</param>
+        /// <param name="formatParameters">The format parameters.</param>
+        /// <param name="logLine">The log line.</param>
+        protected override void DoLog(LoggerSeverity severity, DateTime timestamp, object entry, object[] formatParameters, string logLine)
+        {
+        }
+
+        /// <summary>
+        /// Does the log.
+        /// </summary>
+        /// <param name="logLine">The log line.</param>
+        protected override void DoLog(string logLine)
         {
         }
     }
@@ -27811,6 +27917,10 @@ namespace PublicDomain.Logging
             if (configString != null)
             {
                 string[] pieces = configString.Trim().Split(';');
+                if (pieces.Length == 1 && pieces[0] == "")
+                {
+                    return;
+                }
                 foreach (string piece in pieces)
                 {
                     string[] parts = piece.Trim().Split('=');
@@ -27864,7 +27974,7 @@ namespace PublicDomain.Logging
             {
                 return GetDefaultLogThreshold();
             }
-            else if (val != "off" && val != "0")
+            else if (val == "off" && val == "0")
             {
                 return GetOffValue();
             }
@@ -27889,22 +27999,28 @@ namespace PublicDomain.Logging
         /// <summary>
         /// Gets the <see cref="PublicDomain.Logging.Logger"/> with the specified log class.
         /// </summary>
+        /// <param name="logClasses">The log classes.</param>
+        /// <returns></returns>
         /// <value></value>
-        public Logger CreateLogger(string logClass)
+        public Logger CreateLogger(params string[] logClasses)
         {
-            if (logClass == null)
-            {
-                throw new ArgumentNullException("logClass");
-            }
-            string logClassLower = logClass.ToLower().Trim();
+            Logger result = NullLogger.Current;
 
-            Logger result;
-            if (!m_loggers.TryGetValue(logClassLower, out result))
+            Logger test;
+            string testClass;
+
+            foreach (string logClass in logClasses)
             {
-                if (!m_loggers.TryGetValue(AllLoggersDesignator, out result))
+                testClass = logClass.ToLower().Trim();
+                if (m_loggers.TryGetValue(testClass, out test))
                 {
-                    result = NullLogger.Current;
+                    result = test;
                 }
+            }
+
+            if (object.ReferenceEquals(result, NullLogger.Current) && m_loggers.TryGetValue(AllLoggersDesignator, out test))
+            {
+                result = test;
             }
 
             return result;
@@ -27914,10 +28030,14 @@ namespace PublicDomain.Logging
         /// Creates the logger.
         /// </summary>
         /// <param name="type">The type.</param>
+        /// <param name="otherLogClasses">The other log classes.</param>
         /// <returns></returns>
-        public Logger CreateLogger(Type type)
+        public Logger CreateLogger(Type type, params string[] otherLogClasses)
         {
-            return CreateLogger(type.ToString());
+            string[] classes = new string[otherLogClasses.Length + 1];
+            Array.Copy(otherLogClasses, classes, otherLogClasses.Length);
+            classes[classes.Length - 1] = type.ToString();
+            return CreateLogger(classes);
         }
     }
 

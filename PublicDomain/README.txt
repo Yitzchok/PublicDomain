@@ -11,6 +11,10 @@ Pierre Vachon (pierrevachon@gmail.com)
 
 Version History
 ===============
+V0.1.27.0
+	[kevgrig@gmail.com]
+		* Cache FileStream objects in FileLogger
+		* Added option for multiple categories when creating Logger
 V0.1.26.0
 	[kevgrig@gmail.com]
 		* Interesting new support for limiting the max working set of a process,

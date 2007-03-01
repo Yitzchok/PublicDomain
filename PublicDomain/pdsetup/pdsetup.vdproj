@@ -21,18 +21,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_2513D43D5878402497E78080F5077D11"
-        "OwnerKey" = "8:_232751C70EAD4554B7412280C921C0AC"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_2513D43D5878402497E78080F5077D11"
-        "OwnerKey" = "8:_4DA056F41EEF41BAB6C1A1B2A7C8B906"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_4DA056F41EEF41BAB6C1A1B2A7C8B906"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -41,6 +29,18 @@
         {
         "MsmKey" = "8:_950F1C21072148368AA9FE5C333401D3"
         "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_961EEBDA80A040D3A75242AC449E9042"
+        "OwnerKey" = "8:_232751C70EAD4554B7412280C921C0AC"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_961EEBDA80A040D3A75242AC449E9042"
+        "OwnerKey" = "8:_4DA056F41EEF41BAB6C1A1B2A7C8B906"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -76,7 +76,7 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_2513D43D5878402497E78080F5077D11"
+        "OwnerKey" = "8:_961EEBDA80A040D3A75242AC449E9042"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -300,14 +300,14 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Public Domain"
-        "ProductCode" = "8:{C7356182-F41F-4D57-9A71-D7D9074E1B52}"
-        "PackageCode" = "8:{6DA720D2-1A7A-4E91-B288-E6C4B1EC0A8E}"
+        "ProductCode" = "8:{9B21C75A-A963-41FE-8778-EB336A438935}"
+        "PackageCode" = "8:{C90894F9-A943-416E-853D-5188FB5948C5}"
         "UpgradeCode" = "8:{1DFA6A0E-52E0-4DDC-8B97-584FBFB16243}"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:TRUE"
-        "ProductVersion" = "8:0.1.26"
+        "ProductVersion" = "8:0.1.27"
         "Manufacturer" = "8:Public Domain"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:http://www.codeplex.com/publicdomain"
@@ -768,7 +768,7 @@
         }
         "MergeModule"
         {
-            "{CEE29DC0-9FBA-4B99-8D47-5BC643D9B626}:_2513D43D5878402497E78080F5077D11"
+            "{CEE29DC0-9FBA-4B99-8D47-5BC643D9B626}:_961EEBDA80A040D3A75242AC449E9042"
             {
             "UseDynamicProperties" = "11:TRUE"
             "IsDependency" = "11:TRUE"
@@ -787,7 +787,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_232751C70EAD4554B7412280C921C0AC"
             {
-            "SourcePath" = "8:..\\obj\\Test\\PublicDomain.dll"
+            "SourcePath" = "8:..\\obj\\Debug\\PublicDomain.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_C4684F407DB743C290D1888D967091D8"
@@ -815,7 +815,7 @@
             }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_4DA056F41EEF41BAB6C1A1B2A7C8B906"
             {
-            "SourcePath" = "8:..\\obj\\Test\\PublicDomain.dll"
+            "SourcePath" = "8:..\\obj\\Debug\\PublicDomain.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_936A46F267F043AD8D6D39970AEB0810"
