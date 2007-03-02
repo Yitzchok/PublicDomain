@@ -179,7 +179,7 @@ namespace PublicDomain
         /// Current version of this code, in string form. In a standalone build,
         /// this is the assembly version and file version of the assembly.
         /// </summary>
-        public const string PublicDomainVersion = "0.1.27.0";
+        public const string PublicDomainVersion = "0.1.28.0";
 
         /// <summary>
         /// The name of the PublicDomain assembly, if this is a standalone build. If
@@ -1155,6 +1155,66 @@ namespace PublicDomain
             return str;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="num"></param>
+        /// <param name="showDecimalPart"></param>
+        /// <returns></returns>
+        public static string FormatNumberWithBytes(long num, bool showDecimalPart)
+        {
+            return FormatNumberWithBytes(num, showDecimalPart, 2);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="num">Bytes</param>
+        /// <param name="showDecimalPart"></param>
+        /// <param name="decimalPrecision"></param>
+        /// <returns></returns>
+        public static string FormatNumberWithBytes(long num, bool showDecimalPart, int decimalPrecision)
+        {
+            decimal val = num;
+            string decorator = "B";
+            if (num > GlobalConstants.BytesInAPetabyte)
+            {
+                val = (decimal)num / (decimal)GlobalConstants.BytesInAPetabyte;
+                decorator = "P" + decorator;
+            }
+            else if (num > GlobalConstants.BytesInATerabyte)
+            {
+                val = (decimal)num / (decimal)GlobalConstants.BytesInATerabyte;
+                decorator = "T" + decorator;
+            }
+            else if (num > GlobalConstants.BytesInAGigabyte)
+            {
+                val = (decimal)num / (decimal)GlobalConstants.BytesInAGigabyte;
+                decorator = "G" + decorator;
+            }
+            else if (num > GlobalConstants.BytesInAMegabyte)
+            {
+                val = (decimal)num / (decimal)GlobalConstants.BytesInAMegabyte;
+                decorator = "M" + decorator;
+            }
+            else if (num > GlobalConstants.BytesInAKilobyte)
+            {
+                val = (decimal)num / (decimal)GlobalConstants.BytesInAKilobyte;
+                decorator = "K" + decorator;
+            }
+
+            string result;
+            if (showDecimalPart)
+            {
+                result = FormatPrecision(val, decimalPrecision, true);
+            }
+            else
+            {
+                result = ((long)val).ToString();
+            }
+            return result + " " + decorator;
+        }
+
 #if !(NONUNIT)
         /// <summary>
         /// Tests for <see cref="PublicDomain.StringUtilities"/>
@@ -1182,6 +1242,20 @@ namespace PublicDomain
                 Assert.AreEqual(ReplaceFirst("aa", "aa", ""), "");
                 Assert.AreEqual(ReplaceFirst("baa", "aa", ""), "b");
                 Assert.AreEqual(ReplaceFirst("baab", "aa", ""), "bb");
+            }
+
+            /// <summary>
+            /// 
+            /// </summary>
+            [Test]
+            public void TestFormat()
+            {
+                Console.WriteLine(FormatNumberWithBytes(500, true));
+                Console.WriteLine(FormatNumberWithBytes(5000, true));
+                Console.WriteLine(FormatNumberWithBytes(50000, true));
+                Console.WriteLine(FormatNumberWithBytes(500000, true));
+                Console.WriteLine(FormatNumberWithBytes(5000000, true));
+                Console.WriteLine(FormatNumberWithBytes(50000000, true));
             }
         }
 #endif
@@ -27470,6 +27544,11 @@ namespace PublicDomain.Logging
 
         private static Dictionary<string, FileStream> m_streams = new Dictionary<string, FileStream>();
 
+        /// <summary>
+        /// 
+        /// </summary>
+        public static bool CacheFileStreams = false;
+
         private static object m_streamsLock = new object();
 
         /// <summary>
@@ -27486,6 +27565,27 @@ namespace PublicDomain.Logging
         public FileLogger(string fileName)
         {
             FileName = fileName;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ~FileLogger()
+        {
+            CloseAllStreams();
+        }
+
+        private static void CloseAllStreams()
+        {
+            lock (m_streamsLock)
+            {
+                foreach (FileStream fileStream in m_streams.Values)
+                {
+                    fileStream.Flush();
+                    fileStream.Close();
+                }
+                m_streams.Clear();
+            }
         }
 
         /// <summary>
@@ -27524,11 +27624,22 @@ namespace PublicDomain.Logging
             if (!string.IsNullOrEmpty(fileName))
             {
                 FileStream stream = GetStream(fileName);
-                byte[] data = Encoding.Default.GetBytes(logLine);
 
-                stream.Write(data, 0, data.Length);
-                stream.WriteByte((byte)'\n');
-                stream.Flush();
+                try
+                {
+                    byte[] data = Encoding.Default.GetBytes(logLine);
+
+                    stream.Write(data, 0, data.Length);
+                    stream.WriteByte((byte)'\n');
+                    stream.Flush();
+                }
+                finally
+                {
+                    if (!CacheFileStreams)
+                    {
+                        stream.Close();
+                    }
+                }
             }
         }
 
@@ -27543,9 +27654,14 @@ namespace PublicDomain.Logging
 
             lock (m_streamsLock)
             {
-                if (!m_streams.TryGetValue(fileName, out result))
+                if (!CacheFileStreams || !m_streams.TryGetValue(fileName, out result))
                 {
-                    result = m_streams[fileName] = new FileStream(fileName, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
+                    result = new FileStream(fileName, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
+
+                    if (CacheFileStreams)
+                    {
+                        m_streams[fileName] = result;
+                    }
                 }
             }
 

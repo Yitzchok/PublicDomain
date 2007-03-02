@@ -11,6 +11,9 @@ Pierre Vachon (pierrevachon@gmail.com)
 
 Version History
 ===============
+V0.1.28.0
+	[kevgrig@gmail.com]
+		* * Removed FileStream caching from FileLogger due to WebDev.WebServer crashing issue
 V0.1.27.0
 	[kevgrig@gmail.com]
 		* Cache FileStream objects in FileLogger

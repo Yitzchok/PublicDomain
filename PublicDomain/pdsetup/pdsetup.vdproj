@@ -27,31 +27,37 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_779BE18745154510B221AE3F995C6287"
+        "OwnerKey" = "8:_232751C70EAD4554B7412280C921C0AC"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_779BE18745154510B221AE3F995C6287"
+        "OwnerKey" = "8:_4DA056F41EEF41BAB6C1A1B2A7C8B906"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_950F1C21072148368AA9FE5C333401D3"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_961EEBDA80A040D3A75242AC449E9042"
+        "MsmKey" = "8:_9859F56BCF5695F94D26FAFE3EE75E90"
         "OwnerKey" = "8:_232751C70EAD4554B7412280C921C0AC"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_961EEBDA80A040D3A75242AC449E9042"
+        "MsmKey" = "8:_9859F56BCF5695F94D26FAFE3EE75E90"
         "OwnerKey" = "8:_4DA056F41EEF41BAB6C1A1B2A7C8B906"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_9859F56BCF5695F94D26FAFE3EE75E90"
-        "OwnerKey" = "8:_232751C70EAD4554B7412280C921C0AC"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_9859F56BCF5695F94D26FAFE3EE75E90"
+        "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_4DA056F41EEF41BAB6C1A1B2A7C8B906"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -64,19 +70,13 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_4DA056F41EEF41BAB6C1A1B2A7C8B906"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_232751C70EAD4554B7412280C921C0AC"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_961EEBDA80A040D3A75242AC449E9042"
+        "OwnerKey" = "8:_779BE18745154510B221AE3F995C6287"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -200,7 +200,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:TRUE"
-            "AssemblyAsmDisplayName" = "8:nunit.framework, Version=2.2.8.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:nunit.framework, Version=2.2.8.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77"
                 "ScatterAssemblies"
                 {
                     "_9859F56BCF5695F94D26FAFE3EE75E90"
@@ -300,14 +300,14 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Public Domain"
-        "ProductCode" = "8:{9B21C75A-A963-41FE-8778-EB336A438935}"
-        "PackageCode" = "8:{C90894F9-A943-416E-853D-5188FB5948C5}"
+        "ProductCode" = "8:{C9FDA07B-5917-431B-A525-AD17BC318AB2}"
+        "PackageCode" = "8:{5437204F-4BC7-48B7-A52E-E8DB127E4CCB}"
         "UpgradeCode" = "8:{1DFA6A0E-52E0-4DDC-8B97-584FBFB16243}"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:TRUE"
-        "ProductVersion" = "8:0.1.27"
+        "ProductVersion" = "8:0.1.28"
         "Manufacturer" = "8:Public Domain"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:http://www.codeplex.com/publicdomain"
@@ -768,7 +768,7 @@
         }
         "MergeModule"
         {
-            "{CEE29DC0-9FBA-4B99-8D47-5BC643D9B626}:_961EEBDA80A040D3A75242AC449E9042"
+            "{CEE29DC0-9FBA-4B99-8D47-5BC643D9B626}:_779BE18745154510B221AE3F995C6287"
             {
             "UseDynamicProperties" = "11:TRUE"
             "IsDependency" = "11:TRUE"
