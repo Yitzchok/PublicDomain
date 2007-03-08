@@ -11,9 +11,14 @@ Pierre Vachon (pierrevachon@gmail.com)
 
 Version History
 ===============
+V0.1.30.0
+	[kevgrig@gmail.com]
+		* Added credential support to ScreenScraper
+		* Added ThreadingUtilities class (SetTimeout and SetInterval helper methods)
+		* Added XmlUtilities class (FormatXml method)
 V0.1.28.0
 	[kevgrig@gmail.com]
-		* * Removed FileStream caching from FileLogger due to WebDev.WebServer crashing issue
+		* Removed FileStream caching from FileLogger due to WebDev.WebServer crashing issue
 V0.1.27.0
 	[kevgrig@gmail.com]
 		* Cache FileStream objects in FileLogger

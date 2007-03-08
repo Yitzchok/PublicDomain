@@ -128,7 +128,7 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Cryptography;
 using System.Security.Permissions;
-using System.Security.Policy;
+//using System.Security.Policy;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -151,6 +151,11 @@ using Microsoft.Win32;
 
 namespace PublicDomain
 {
+    /// <summary>
+    /// 
+    /// </summary>
+    public delegate void CallbackNoArgs();
+
     /// <summary>
     /// Various useful global constants.
     /// </summary>
@@ -179,7 +184,7 @@ namespace PublicDomain
         /// Current version of this code, in string form. In a standalone build,
         /// this is the assembly version and file version of the assembly.
         /// </summary>
-        public const string PublicDomainVersion = "0.1.29.0";
+        public const string PublicDomainVersion = "0.1.30.0";
 
         /// <summary>
         /// The name of the PublicDomain assembly, if this is a standalone build. If
@@ -1264,7 +1269,7 @@ namespace PublicDomain
     /// <summary>
     /// Various utilities that work on generics
     /// </summary>
-    public class GenericUtilities
+    public static class GenericUtilities
     {
         /// <summary>
         /// Equalses the comparison.
@@ -1276,6 +1281,186 @@ namespace PublicDomain
         {
             return x != null && x.Equals(y) ? 0 : 1;
         }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static class ThreadingUtilities
+    {
+        /// <summary>
+        /// Sets the timer.
+        /// </summary>
+        /// <param name="afterMilliseconds">The after milliseconds.</param>
+        /// <param name="d">The d.</param>
+        /// <param name="args">The args.</param>
+        /// <returns></returns>
+        public static Thread SetTimer(int afterMilliseconds, Delegate d, params object[] args)
+        {
+            Thread result = new Thread(new ParameterizedThreadStart(ExecuteTimer));
+            result.Start(new Triple<int, Delegate, object[]>(afterMilliseconds, d, args));
+            return result;
+        }
+
+        /// <summary>
+        /// Sets the timer simple.
+        /// </summary>
+        /// <param name="afterMilliseconds">The after milliseconds.</param>
+        /// <param name="callback">The callback.</param>
+        /// <returns></returns>
+        public static Thread SetTimerSimple(int afterMilliseconds, CallbackNoArgs callback)
+        {
+            return SetTimer(afterMilliseconds, callback);
+        }
+
+        /// <summary>
+        /// Sets the interval.
+        /// </summary>
+        /// <param name="periodMilliseconds">The period milliseconds.</param>
+        /// <param name="d">The d.</param>
+        /// <param name="args">The args.</param>
+        /// <returns></returns>
+        public static Thread SetInterval(int periodMilliseconds, Delegate d, params object[] args)
+        {
+            Thread result = new Thread(new ParameterizedThreadStart(ExecuteInterval));
+            result.Start(new Triple<int, Delegate, object[]>(periodMilliseconds, d, args));
+            return result;
+        }
+
+        /// <summary>
+        /// Sets the interval simple.
+        /// </summary>
+        /// <param name="periodMilliseconds">The period milliseconds.</param>
+        /// <param name="callback">The callback.</param>
+        /// <returns></returns>
+        public static Thread SetIntervalSimple(int periodMilliseconds, CallbackNoArgs callback)
+        {
+            return SetInterval(periodMilliseconds, callback);
+        }
+
+        private static void ExecuteTimer(object rock)
+        {
+            Triple<int, Delegate, object[]> state = (Triple<int, Delegate, object[]>)rock;
+            Thread.Sleep(state.First);
+            state.Second.DynamicInvoke(state.Third);
+        }
+
+        private static void ExecuteInterval(object rock)
+        {
+            while (true)
+            {
+                ExecuteTimer(rock);
+            }
+        }
+
+#if !(NONUNIT)
+        /// <summary>
+        /// 
+        /// </summary>
+        [TestFixture]
+        public class ThreadingTests
+        {
+            /// <summary>
+            /// Plays this instance.
+            /// </summary>
+            [Test]
+            public void play()
+            {
+                Thread timer = SetTimer(5000, new CallbackNoArgs(delegate()
+                {
+                    Console.WriteLine("Hello World");
+                }));
+
+                timer.Join();
+
+                timer = SetTimerSimple(5000, delegate()
+                {
+                    Console.WriteLine("Bonjour");
+                });
+
+                timer.Join();
+            }
+
+            /// <summary>
+            /// Tests the interval.
+            /// </summary>
+            [Test]
+            public void TestInterval()
+            {
+                Thread t = SetIntervalSimple(2000, delegate()
+                {
+                    Console.WriteLine("Hello World");
+                });
+
+                // With this we don't even have to explicitly abort the thread
+                t.IsBackground = true;
+
+                Thread.Sleep(10000);
+            }
+        }
+#endif
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static class XmlUtilities
+    {
+        /// <summary>
+        /// Formats the XML.
+        /// </summary>
+        /// <param name="xml">The XML.</param>
+        /// <returns></returns>
+        public static string FormatXml(string xml)
+        {
+            XmlWriterSettings settings = new XmlWriterSettings();
+            settings.ConformanceLevel = ConformanceLevel.Auto;
+            settings.Indent = true;
+
+            return FormatXml(xml, settings);
+        }
+
+        /// <summary>
+        /// Formats the XML.
+        /// </summary>
+        /// <param name="xml">The XML.</param>
+        /// <param name="settings">The settings.</param>
+        /// <returns></returns>
+        public static string FormatXml(string xml, XmlWriterSettings settings)
+        {
+            XmlDocument doc = new XmlDocument();
+            doc.LoadXml(xml);
+
+            StringBuilder sb = new StringBuilder(xml.Length);
+
+            using (StringWriter stringWriter = new StringWriter(sb))
+            {
+                using (XmlWriter xmlWriter = XmlWriter.Create(stringWriter, settings))
+                {
+                    doc.Save(xmlWriter);
+                }
+            }
+
+            return sb.ToString();
+        }
+
+#if !(NONUNIT)
+        /// <summary>
+        /// 
+        /// </summary>
+        [TestFixture]
+        public class XmlTests
+        {
+            /// <summary>
+            /// Plays this instance.
+            /// </summary>
+            [Test]
+            public void play()
+            {
+                Console.WriteLine(FormatXml(@"<html><head><title>Hello World</title></head><body><h1>Hello World</h1></body></html>"));
+            }
+        }
+#endif
     }
 
     /// <summary>
@@ -1672,27 +1857,27 @@ namespace PublicDomain
         }
 
         /// <summary>
-        /// Parses the URL.
+        /// Parses the URI.
         /// </summary>
         /// <param name="str">The STR.</param>
         /// <returns></returns>
-        public static Url ParseUrl(string str)
+        public static Uri ParseUri(string str)
         {
-            return new Url(str);
+            return new Uri(str);
         }
 
         /// <summary>
-        /// Tries the parse URL.
+        /// Tries the parse URI.
         /// </summary>
         /// <param name="str">The STR.</param>
-        /// <param name="url">The URL.</param>
+        /// <param name="uri">The URI.</param>
         /// <returns></returns>
-        public static bool TryParseUrl(string str, out Url url)
+        public static bool TryParseUri(string str, out Uri uri)
         {
-            url = null;
+            uri = null;
             try
             {
-                url = ParseUrl(str);
+                uri = ParseUri(str);
                 return true;
             }
             catch (Exception)
@@ -2458,6 +2643,30 @@ namespace PublicDomain
         }
 
         /// <summary>
+        /// Gets the human readable exception details as string.
+        /// </summary>
+        /// <param name="ex">The ex.</param>
+        /// <returns></returns>
+        public static string GetHumanReadableExceptionDetailsAsString(Exception ex)
+        {
+            StringBuilder sb = new StringBuilder();
+            int i = 0;
+            while (ex != null)
+            {
+                if (i > 0)
+                {
+                    sb.AppendFormat(@"\nRelated to ");
+                }
+
+                sb.AppendFormat(@"{0}", ex.Message);
+
+                ex = ex.InnerException;
+                i++;
+            }
+            return sb.ToString();
+        }
+
+        /// <summary>
         /// Gets the exception details as string.
         /// </summary>
         /// <param name="ex">The ex.</param>
@@ -2598,6 +2807,16 @@ namespace PublicDomain
         private static char[] trackbackChars = new char[] { '\\', '/' };
 
         /// <summary>
+        /// file:///
+        /// </summary>
+        public static readonly string FileUriPrefix;
+
+        static FileSystemUtilities()
+        {
+            FileUriPrefix = "file" + Uri.SchemeDelimiter + "/";
+        }
+
+        /// <summary>
         /// Ensures the directory ending.
         /// </summary>
         /// <param name="directory">The directory.</param>
@@ -2732,21 +2951,29 @@ namespace PublicDomain
         }
 
         /// <summary>
-        /// Gets the name of the temp file.
+        /// Gets the location of a new temporary file name with the given
+        /// extension. Extension should not begin with a period (e.g. just html, not .html).
+        /// The file is created on disk with a file size of 0. It is guaranteed
+        /// that the file is a new file that did not exist before.
         /// </summary>
-        /// <param name="extension">The extension.</param>
-        /// <returns></returns>
+        /// <param name="extension">The preferred file extension. Extension should not begin with a period (e.g. just html, not .html).</param>
+        /// <returns>Location of the 0-byte file in a temporary location with the specified extension.</returns>
         public static string GetTempFileName(string extension)
         {
             return GetTempFileName(extension, null);
         }
 
         /// <summary>
-        /// Gets the name of the temp file.
+        /// Gets the location of a new temporary file name with the given file name and
+        /// extension. Extension should not begin with a period (e.g. just html, not .html).
+        /// File name should not end with a period and should not contain the extension
+        /// (as that is in the extension parameter).
+        /// The file is created on disk with a file size of 0. It is guaranteed
+        /// that the file is a new file that did not exist before.
         /// </summary>
-        /// <param name="extension">The extension.</param>
-        /// <param name="fileName">Name of the file.</param>
-        /// <returns></returns>
+        /// <param name="extension">The preferred file extension. Extension should not begin with a period (e.g. just html, not .html).</param>
+        /// <param name="fileName">The preferred name of the file, without a trailing period, and without an extension (as that is specified by the extension parameter).</param>
+        /// <returns>Location of the 0-byte file in a temporary location with the specified extension and name.</returns>
         public static string GetTempFileName(string extension, string fileName)
         {
             string tempFile = Path.GetTempFileName();
@@ -2989,6 +3216,73 @@ namespace PublicDomain
             }
             return pieces[0];
         }
+
+        /// <summary>
+        /// Gets the file URI as string.
+        /// </summary>
+        /// <param name="path">The path.</param>
+        /// <returns></returns>
+        public static string GetFileUriAsString(string path)
+        {
+            if (path == null)
+            {
+                throw new ArgumentNullException("path");
+            }
+
+            return FileUriPrefix + path.Trim().Replace(Path.DirectorySeparatorChar, '/');
+        }
+
+        /// <summary>
+        /// Gets the file URI.
+        /// </summary>
+        /// <param name="path">The path.</param>
+        /// <returns></returns>
+        public static Uri GetFileUri(string path)
+        {
+            return new Uri(GetFileUriAsString(path));
+        }
+
+        /// <summary>
+        /// Gets the path from URI.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        /// <returns></returns>
+        public static string GetPathFromUri(Uri uri)
+        {
+            if (uri == null)
+            {
+                throw new ArgumentNullException("uri");
+            }
+
+            string str = uri.ToString();
+
+            if (!str.StartsWith(FileUriPrefix))
+            {
+                throw new ArgumentException("The specified uri is not a file system url (" + uri + ")");
+            }
+
+            str = str.Substring(FileUriPrefix.Length).Replace('/', Path.DirectorySeparatorChar);
+
+            return str;
+        }
+
+#if !(NONUNIT)
+        /// <summary>
+        /// 
+        /// </summary>
+        [TestFixture]
+        public class FSTests
+        {
+            /// <summary>
+            /// Plays this instance.
+            /// </summary>
+            [Test]
+            public void play()
+            {
+                Console.WriteLine(GetPathFromUri(GetFileUri(@"C:\test.html")));
+            }
+        }
+#endif
     }
 
     /// <summary>
@@ -3061,7 +3355,7 @@ namespace PublicDomain
         /// </summary>
         /// <param name="assembly">The assembly.</param>
         /// <returns></returns>
-        public static StrongName GetStrongName(Assembly assembly)
+        public static System.Security.Policy.StrongName GetStrongName(Assembly assembly)
         {
             if (assembly == null)
                 throw new ArgumentNullException("assembly");
@@ -3079,7 +3373,7 @@ namespace PublicDomain
                 new StrongNamePublicKeyBlob(publicKey);
 
             // create the StrongName
-            return new StrongName(
+            return new System.Security.Policy.StrongName(
                 keyBlob, assemblyName.Name, assemblyName.Version);
         }
 
@@ -4199,16 +4493,16 @@ namespace PublicDomain
             string UninstallString { get; }
 
             /// <summary>
-            /// Gets or sets the URL info about.
+            /// Gets or sets the URI info about.
             /// </summary>
-            /// <value>The URL info about.</value>
-            Url UrlInfoAbout { get; set; }
+            /// <value>The URI info about.</value>
+            Uri UriInfoAbout { get; set; }
 
             /// <summary>
-            /// Gets or sets the URL update info.
+            /// Gets or sets the URI update info.
             /// </summary>
-            /// <value>The URL update info.</value>
-            Url UrlUpdateInfo { get; set; }
+            /// <value>The URI update info.</value>
+            Uri UriUpdateInfo { get; set; }
 
             /// <summary>
             /// Gets or sets the version.
@@ -4252,8 +4546,8 @@ namespace PublicDomain
             private string m_Readme;
             private string m_Size;
             private string m_UninstallString;
-            private Url m_UrlInfoAbout;
-            private Url m_UrlUpdateInfo;
+            private Uri m_UriInfoAbout;
+            private Uri m_UriUpdateInfo;
             private Version m_Version;
             private string m_keyName;
             private bool m_hasData = false;
@@ -4519,36 +4813,36 @@ namespace PublicDomain
             }
 
             /// <summary>
-            /// Gets or sets the URL info about.
+            /// Gets or sets the URI info about.
             /// </summary>
-            /// <value>The URL info about.</value>
-            public Url UrlInfoAbout
+            /// <value>The URI info about.</value>
+            public Uri UriInfoAbout
             {
                 get
                 {
                     EnsureData();
-                    return m_UrlInfoAbout;
+                    return m_UriInfoAbout;
                 }
                 set
                 {
-                    m_UrlInfoAbout = value;
+                    m_UriInfoAbout = value;
                 }
             }
 
             /// <summary>
-            /// Gets or sets the URL update info.
+            /// Gets or sets the URI update info.
             /// </summary>
-            /// <value>The URL update info.</value>
-            public Url UrlUpdateInfo
+            /// <value>The URI update info.</value>
+            public Uri UriUpdateInfo
             {
                 get
                 {
                     EnsureData();
-                    return m_UrlUpdateInfo;
+                    return m_UriUpdateInfo;
                 }
                 set
                 {
-                    m_UrlUpdateInfo = value;
+                    m_UriUpdateInfo = value;
                 }
             }
 
@@ -4632,19 +4926,19 @@ namespace PublicDomain
                     str = key.GetValue("URLInfoAbout") as string;
                     if (!string.IsNullOrEmpty(str))
                     {
-                        Url url;
-                        if (ConversionUtilities.TryParseUrl(str, out url))
+                        Uri url;
+                        if (ConversionUtilities.TryParseUri(str, out url))
                         {
-                            m_UrlInfoAbout = url;
+                            m_UriInfoAbout = url;
                         }
                     }
                     str = key.GetValue("URLUpdateInfo") as string;
                     if (!string.IsNullOrEmpty(str))
                     {
-                        Url url;
-                        if (ConversionUtilities.TryParseUrl(str, out url))
+                        Uri url;
+                        if (ConversionUtilities.TryParseUri(str, out url))
                         {
-                            m_UrlUpdateInfo = url;
+                            m_UriUpdateInfo = url;
                         }
                     }
                     str = key.GetValue("Version") as string;
@@ -21157,6 +21451,17 @@ namespace PublicDomain.ScreenScraper
         {
             return TzDateTime.TryParse(subject, timeZone, DateTimeStyles.AssumeUniversal, out ret);
         }
+
+        /// <summary>
+        /// Returns a <see cref="T:System.String"></see> that represents the current <see cref="T:System.Object"></see>.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="T:System.String"></see> that represents the current <see cref="T:System.Object"></see>.
+        /// </returns>
+        public override string ToString()
+        {
+            return RawStream;
+        }
     }
 
     /// <summary>
@@ -21238,6 +21543,7 @@ namespace PublicDomain.ScreenScraper
 
     /// <summary>
     /// Entry point to scrape an HTML page.
+    /// This class is not thread safe.
     /// </summary>
     [Serializable]
     public class Scraper
@@ -21407,6 +21713,63 @@ namespace PublicDomain.ScreenScraper
             }
         }
 
+        private ICredentials m_credentials;
+
+        /// <summary>
+        /// Gets or sets the credentials.
+        /// </summary>
+        /// <value>The credentials.</value>
+        public ICredentials Credentials
+        {
+            get
+            {
+                return m_credentials;
+            }
+            set
+            {
+                m_credentials = value;
+            }
+        }
+
+        private bool m_useCredentials = true;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether [use credentials].
+        /// </summary>
+        /// <value><c>true</c> if [use credentials]; otherwise, <c>false</c>.</value>
+        public bool UseCredentials
+        {
+            get
+            {
+                return m_useCredentials;
+            }
+            set
+            {
+                m_useCredentials = value;
+            }
+        }
+
+        /// <summary>
+        /// Sets the network credentials.
+        /// </summary>
+        /// <param name="user">The user.</param>
+        /// <param name="password">The password.</param>
+        public void SetNetworkCredentials(string user, string password)
+        {
+            SetNetworkCredentials(user, password, null);
+        }
+
+        /// <summary>
+        /// Sets the network credentials.
+        /// </summary>
+        /// <param name="user">The user.</param>
+        /// <param name="password">The password.</param>
+        /// <param name="domain">The domain.</param>
+        public void SetNetworkCredentials(string user, string password, string domain)
+        {
+            Credentials = new NetworkCredential(user, password, domain);
+        }
+
         /// <summary>
         /// Scrapes the specified type.
         /// </summary>
@@ -21464,6 +21827,66 @@ namespace PublicDomain.ScreenScraper
                 page = PostProcessData(page);
             }
             return page;
+        }
+
+        /// <summary>
+        /// Requireses the credentials.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <param name="uri">The URI.</param>
+        /// <param name="query">The query.</param>
+        /// <returns></returns>
+        public bool RequiresCredentials(ScrapeType type, string uri, NameValueCollection query)
+        {
+            try
+            {
+                UseCredentials = false;
+                Scrape(type, uri, query);
+            }
+            catch (System.Net.WebException ex)
+            {
+                HttpWebResponse response = ex.Response as HttpWebResponse;
+                if (response != null && response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    return true;
+                }
+            }
+            finally
+            {
+                UseCredentials = true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Requireses the credentials.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <param name="uri">The URI.</param>
+        /// <param name="keyAndValuePairs">The key and value pairs.</param>
+        /// <returns></returns>
+        public bool RequiresCredentials(ScrapeType type, string uri, params string[] keyAndValuePairs)
+        {
+            try
+            {
+                UseCredentials = false;
+                Scrape(type, uri, keyAndValuePairs);
+            }
+            catch (System.Net.WebException ex)
+            {
+                HttpWebResponse response = ex.Response as HttpWebResponse;
+                if (response != null && response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    return true;
+                }
+            }
+            finally
+            {
+                UseCredentials = true;
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -21655,8 +22078,29 @@ namespace PublicDomain.ScreenScraper
             }
             req.CookieContainer = Session.Cookies;
             req.AllowAutoRedirect = true;
+            if (UseCredentials)
+            {
+                req.Credentials = Credentials;
+            }
             return req;
         }
+
+#if !(NONUNIT)
+        /// <summary>
+        /// 
+        /// </summary>
+        [TestFixture]
+        public class ScraperTests
+        {
+            /// <summary>
+            /// Plays this instance.
+            /// </summary>
+            [Test]
+            public void play()
+            {
+            }
+        }
+#endif
     }
 }
 #endif
@@ -27726,9 +28170,16 @@ namespace PublicDomain.Logging
             // Sometimes the Console does not go anywhere logical (or nowhere at all),
             // so it becomes difficult to know where the current directory is. Therefore,
             // we write the same message to a global file
-            Logger loggers = new FileLogger(GlobalConstants.PublicDomainDefaultInstallLocation + @"loggers.log");
-            loggers.Threshold = LoggerSeverity.Info20;
-            loggers.LogInfo20(msg);
+            try
+            {
+                Logger loggers = new FileLogger(GlobalConstants.PublicDomainDefaultInstallLocation + @"loggers.log");
+                loggers.Threshold = LoggerSeverity.Info20;
+                loggers.LogInfo20(msg);
+            }
+            catch (Exception)
+            {
+                // No permissions to write to the directory, and we don't bother trying anywhere else
+            }
 #endif
         }
     }
@@ -28620,6 +29071,30 @@ namespace PublicDomain.Logging
         protected override void DoLog(string logLine)
         {
             // This is not called
+        }
+
+        /// <summary>
+        /// The severity threshold at which point a log message
+        /// is logged. For example, if the threshold is Debug,
+        /// all messages with severity greater than or equal to Debug
+        /// will be logged. All other messages will be discarded.
+        /// The default threshold is Warn.
+        /// </summary>
+        /// <value></value>
+        public override LoggerSeverity Threshold
+        {
+            get
+            {
+                return base.Threshold;
+            }
+            set
+            {
+                base.Threshold = value;
+                foreach (Logger logger in Loggers)
+                {
+                    logger.Threshold = value;
+                }
+            }
         }
     }
 }
