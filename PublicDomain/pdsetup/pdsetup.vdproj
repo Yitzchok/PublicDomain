@@ -15,18 +15,6 @@
     {
         "Entry"
         {
-        "MsmKey" = "8:_074B5082A16B41D29A76A35FDD8AEF5B"
-        "OwnerKey" = "8:_232751C70EAD4554B7412280C921C0AC"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_074B5082A16B41D29A76A35FDD8AEF5B"
-        "OwnerKey" = "8:_4DA056F41EEF41BAB6C1A1B2A7C8B906"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_232751C70EAD4554B7412280C921C0AC"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -45,14 +33,8 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_9859F56BCF5695F94D26FAFE3EE75E90"
-        "OwnerKey" = "8:_232751C70EAD4554B7412280C921C0AC"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_9859F56BCF5695F94D26FAFE3EE75E90"
-        "OwnerKey" = "8:_4DA056F41EEF41BAB6C1A1B2A7C8B906"
+        "MsmKey" = "8:_95BC75E936E64B0DADC6A759EC540B2D"
+        "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -64,19 +46,7 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_9859F56BCF5695F94D26FAFE3EE75E90"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_232751C70EAD4554B7412280C921C0AC"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_074B5082A16B41D29A76A35FDD8AEF5B"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -196,23 +166,12 @@
         }
         "File"
         {
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_9859F56BCF5695F94D26FAFE3EE75E90"
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_95BC75E936E64B0DADC6A759EC540B2D"
             {
-            "AssemblyRegister" = "3:1"
-            "AssemblyIsInGAC" = "11:TRUE"
-            "AssemblyAsmDisplayName" = "8:nunit.framework, Version=2.2.8.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77"
-                "ScatterAssemblies"
-                {
-                    "_9859F56BCF5695F94D26FAFE3EE75E90"
-                    {
-                    "Name" = "8:nunit.framework.dll"
-                    "Attributes" = "3:512"
-                    }
-                }
-            "SourcePath" = "8:nunit.framework.dll"
-            "TargetName" = "8:"
+            "SourcePath" = "8:..\\pd.ico"
+            "TargetName" = "8:pd.ico"
             "Tag" = "8:"
-            "Folder" = "8:_936A46F267F043AD8D6D39970AEB0810"
+            "Folder" = "8:_C4684F407DB743C290D1888D967091D8"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -224,7 +183,7 @@
             "PackageAs" = "3:1"
             "Register" = "3:1"
             "Exclude" = "11:FALSE"
-            "IsDependency" = "11:TRUE"
+            "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
         }
@@ -300,14 +259,14 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Public Domain"
-        "ProductCode" = "8:{185F5983-5F58-4BD6-89FD-DFAF2BB43183}"
-        "PackageCode" = "8:{B03048DB-92BD-4BDF-A0DE-AD4EDC5B1F3E}"
+        "ProductCode" = "8:{34D774AD-3148-4F3A-9453-CB085AF0DA9E}"
+        "PackageCode" = "8:{8C3A972E-6889-4F78-8582-1E2434103764}"
         "UpgradeCode" = "8:{1DFA6A0E-52E0-4DDC-8B97-584FBFB16243}"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:TRUE"
-        "ProductVersion" = "8:0.1.30"
+        "ProductVersion" = "8:0.2.0"
         "Manufacturer" = "8:Public Domain"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:http://www.codeplex.com/publicdomain"
@@ -317,7 +276,7 @@
         "Keywords" = "8:Public Domain"
         "ARPCOMMENTS" = "8:Public Domain"
         "ARPURLINFOABOUT" = "8:http://www.codeplex.com/publicdomain"
-        "ARPPRODUCTICON" = "8:"
+        "ARPPRODUCTICON" = "8:_95BC75E936E64B0DADC6A759EC540B2D"
         "ARPIconIndex" = "3:0"
         "SearchPath" = "8:"
         "UseSystemSearchPath" = "11:TRUE"
@@ -768,20 +727,6 @@
         }
         "MergeModule"
         {
-            "{CEE29DC0-9FBA-4B99-8D47-5BC643D9B626}:_074B5082A16B41D29A76A35FDD8AEF5B"
-            {
-            "UseDynamicProperties" = "11:TRUE"
-            "IsDependency" = "11:TRUE"
-            "SourcePath" = "8:vjsharpredist_x86.msm"
-                "Properties"
-                {
-                }
-            "LanguageId" = "3:0"
-            "Exclude" = "11:TRUE"
-            "Folder" = "8:"
-            "Feature" = "8:"
-            "IsolateTo" = "8:"
-            }
         }
         "ProjectOutput"
         {

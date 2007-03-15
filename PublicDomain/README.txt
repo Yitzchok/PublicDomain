@@ -11,6 +11,10 @@ Pierre Vachon (pierrevachon@gmail.com)
 
 Version History
 ===============
+V0.2.0.0
+	[kevgrig@gmail.com]
+		* Basic feature set is in. Needs to be used by the massive.
+		* Took out default VJ# dependency so that installing PublicDomain doesn't require vjslib.
 V0.1.30.0
 	[kevgrig@gmail.com]
 		* Added credential support to ScreenScraper

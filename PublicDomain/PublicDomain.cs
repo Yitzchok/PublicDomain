@@ -152,11 +152,6 @@ using Microsoft.Win32;
 namespace PublicDomain
 {
     /// <summary>
-    /// 
-    /// </summary>
-    public delegate void CallbackNoArgs();
-
-    /// <summary>
     /// Various useful global constants.
     /// </summary>
     public static class GlobalConstants
@@ -184,7 +179,7 @@ namespace PublicDomain
         /// Current version of this code, in string form. In a standalone build,
         /// this is the assembly version and file version of the assembly.
         /// </summary>
-        public const string PublicDomainVersion = "0.1.30.0";
+        public const string PublicDomainVersion = "0.2.0.0";
 
         /// <summary>
         /// The name of the PublicDomain assembly, if this is a standalone build. If
@@ -350,6 +345,17 @@ namespace PublicDomain
         /// </summary>
         public const string PublicDomainDefaultInstallLocation = @"C:\Program Files\Public Domain\";
     }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public delegate void CallbackNoArgs();
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="rock"></param>
+    public delegate void CallbackWithRock(object rock);
 
     /// <summary>
     /// Generic class that encapsulates a pair of objects of any types. This class is similar
@@ -3298,10 +3304,12 @@ namespace PublicDomain
         /// <returns></returns>
         public static MemoryStream SerializeObjectToBinaryStream(object o)
         {
-            MemoryStream ms = new MemoryStream();
-            BinaryFormatter b = new BinaryFormatter();
-            b.Serialize(ms, o);
-            return ms;
+            using (MemoryStream ms = new MemoryStream())
+            {
+                BinaryFormatter b = new BinaryFormatter();
+                b.Serialize(ms, o);
+                return ms;
+            }
         }
 
         /// <summary>
@@ -3321,9 +3329,11 @@ namespace PublicDomain
         /// <returns></returns>
         public static T DeserializeObjectFromBinary<T>(byte[] data)
         {
-            MemoryStream ms = new MemoryStream(data);
-            BinaryFormatter b = new BinaryFormatter();
-            return (T)b.Deserialize(ms);
+            using (MemoryStream ms = new MemoryStream(data))
+            {
+                BinaryFormatter b = new BinaryFormatter();
+                return (T)b.Deserialize(ms);
+            }
         }
 
         /// <summary>
@@ -21558,6 +21568,25 @@ namespace PublicDomain.ScreenScraper
         /// </summary>
         protected bool m_FollowEquivRefreshes = true;
 
+        private int m_timeout = 100000;
+
+        /// <summary>
+        /// The number of milliseconds to wait before the request times out. The default
+        /// is 100,000 milliseconds (100 seconds).
+        /// </summary>
+        /// <value>The timeout.</value>
+        public int Timeout
+        {
+            get
+            {
+                return m_timeout;
+            }
+            set
+            {
+                m_timeout = value;
+            }
+        }
+
         /// <summary>
         /// Gets or sets a value indicating whether [follow equiv refreshes].
         /// </summary>
@@ -22078,6 +22107,7 @@ namespace PublicDomain.ScreenScraper
             }
             req.CookieContainer = Session.Cookies;
             req.AllowAutoRedirect = true;
+            req.Timeout = Timeout;
             if (UseCredentials)
             {
                 req.Credentials = Credentials;
