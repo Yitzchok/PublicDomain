@@ -8,9 +8,14 @@ Contributing Authors
 ====================
 William M. Leszczuk (billl@eden.rutgers.edu)
 Pierre Vachon (pierrevachon@gmail.com)
+Simon Mourier
 
 Version History
 ===============
+V0.2.1.0
+	[kevgrig@gmail.com]
+		* Added Simon Mourier's CRC32 class
+		* Added MD5 Sum method to StringUtilities
 V0.2.0.0
 	[kevgrig@gmail.com]
 		* Basic feature set is in. Needs to be used by the massive.
