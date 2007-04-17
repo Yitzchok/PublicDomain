@@ -121,6 +121,7 @@ using System.Configuration;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Management;
 using System.Net;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -180,7 +181,7 @@ namespace PublicDomain
         /// Current version of this code, in string form. In a standalone build,
         /// this is the assembly version and file version of the assembly.
         /// </summary>
-        public const string PublicDomainVersion = "0.2.1.0";
+        public const string PublicDomainVersion = "0.2.3.0";
 
         /// <summary>
         /// The name of the PublicDomain assembly, if this is a standalone build. If
@@ -483,6 +484,70 @@ namespace PublicDomain
         public override string ToString()
         {
             return First + "," + Second + "," + Third;
+        }
+    }
+
+    /// <summary>
+    /// Generic class that encapsulates four objects of any type.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="U"></typeparam>
+    /// <typeparam name="V"></typeparam>
+    /// <typeparam name="W"></typeparam>
+    [Serializable]
+    public class Quadruple<T, U, V, W>
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        public T First;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public U Second;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public V Third;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public W Fourth;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Quadruple&lt;T, U, V, W&gt;"/> class.
+        /// </summary>
+        public Quadruple()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Quadruple&lt;T, U, V, W&gt;"/> class.
+        /// </summary>
+        /// <param name="first">The first.</param>
+        /// <param name="second">The second.</param>
+        /// <param name="third">The third.</param>
+        /// <param name="fourth">The fourth.</param>
+        public Quadruple(T first, U second, V third, W fourth)
+        {
+            First = first;
+            Second = second;
+            Third = third;
+            Fourth = fourth;
+        }
+
+        /// <summary>
+        /// Returns a <see cref="T:System.String"></see> that represents the current <see cref="T:System.Object"></see>.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="T:System.String"></see> that represents the current <see cref="T:System.Object"></see>.
+        /// </returns>
+        public override string ToString()
+        {
+            return First + "," + Second + "," + Third + "," + Fourth;
         }
     }
 
@@ -1447,6 +1512,35 @@ namespace PublicDomain
             }
         }
 #endif
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static class ManagementUtilities
+    {
+        /// <summary>
+        /// Gets the total physical memory.
+        /// </summary>
+        /// <returns></returns>
+        public static ulong GetTotalPhysicalMemory()
+        {
+            ManagementObjectSearcher mos = new ManagementObjectSearcher(@"SELECT TotalPhysicalMemory FROM Win32_ComputerSystem");
+
+            ulong totalPhysicalMemory = 0;
+
+            foreach (ManagementObject mo in mos.Get())
+            {
+                totalPhysicalMemory += (ulong)mo["TotalPhysicalMemory"];
+            }
+
+            if (totalPhysicalMemory <= 0)
+            {
+                throw new Exception("Could not query total physical memory");
+            }
+
+            return totalPhysicalMemory;
+        }
     }
 
     /// <summary>
@@ -17988,6 +18082,17 @@ namespace PublicDomain
         /// Tries the parse.
         /// </summary>
         /// <param name="input">The input.</param>
+        /// <param name="val">The val.</param>
+        /// <returns></returns>
+        public static bool TryParse(string input, out TzDateTime val)
+        {
+            return TryParse(input, null, DateTimeStyles.None, out val);
+        }
+
+        /// <summary>
+        /// Tries the parse.
+        /// </summary>
+        /// <param name="input">The input.</param>
         /// <param name="timeZone">The time zone.</param>
         /// <param name="val">The val.</param>
         /// <returns></returns>
@@ -19770,7 +19875,9 @@ namespace PublicDomain
         /// <returns></returns>
         public static TzDateTime ConvertToTzDateTime(string input)
         {
-            return TzDateTime.Parse(input);
+            TzDateTime result;
+            TzDateTime.TryParse(input, out result);
+            return result;
         }
 
         /// <summary>

@@ -12,6 +12,13 @@ Simon Mourier
 
 Version History
 ===============
+V0.2.3.0
+	[kevgrig@gmail.com]
+		* Added Quadruple class
+		* Fixed bug reading malformed RSS feed date/time
+V0.2.2.0
+	[kevgrig@gmail.com]
+		* Added ManagementUtilities class with GetTotalPhysicalMemory method that uses System.Management
 V0.2.1.0
 	[kevgrig@gmail.com]
 		* Added Simon Mourier's CRC32 class
