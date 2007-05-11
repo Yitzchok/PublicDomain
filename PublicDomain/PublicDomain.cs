@@ -136,6 +136,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Web.Hosting;
 using System.Xml;
+using System.Xml.Serialization;
 using PublicDomain;
 using PublicDomain.Feeder.Opml;
 using PublicDomain.Feeder.Rss;
@@ -181,7 +182,7 @@ namespace PublicDomain
         /// Current version of this code, in string form. In a standalone build,
         /// this is the assembly version and file version of the assembly.
         /// </summary>
-        public const string PublicDomainVersion = "0.2.3.0";
+        public const string PublicDomainVersion = "0.2.4.0";
 
         /// <summary>
         /// The name of the PublicDomain assembly, if this is a standalone build. If
@@ -1399,6 +1400,92 @@ namespace PublicDomain
     /// <summary>
     /// 
     /// </summary>
+    public static class General
+    {
+        /// <summary>
+        /// Determines whether [is flag on] [the specified x].
+        /// </summary>
+        /// <param name="x">The x.</param>
+        /// <param name="flag">The flag.</param>
+        /// <returns>
+        /// 	<c>true</c> if [is flag on] [the specified x]; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool IsFlagOn(int x, int flag)
+        {
+            return (x & flag) == flag;
+        }
+
+        /// <summary>
+        /// Determines whether [is flag off] [the specified x].
+        /// </summary>
+        /// <param name="x">The x.</param>
+        /// <param name="flag">The flag.</param>
+        /// <returns>
+        /// 	<c>true</c> if [is flag off] [the specified x]; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool IsFlagOff(int x, int flag)
+        {
+            return (x & flag) == 0;
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public interface IInitializable
+    {
+        /// <summary>
+        /// Initializes the specified stage.
+        /// </summary>
+        /// <param name="state">The state.</param>
+        /// <returns></returns>
+        int Initialize(InitializeState state);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public enum InitializeState : int
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        Nothing = 0,
+
+        /// <summary>
+        /// Only initialize what is absolutely required
+        /// </summary>
+        Minimum = 1,
+
+        /// <summary>
+        /// Initialize the minimum as well as other basics
+        /// </summary>
+        Basic = 2,
+
+        /// <summary>
+        /// 
+        /// </summary>
+        Stage1 = 3,
+
+        /// <summary>
+        /// 
+        /// </summary>
+        Stage2 = 4,
+
+        /// <summary>
+        /// 
+        /// </summary>
+        Stage3 = 5,
+
+        /// <summary>
+        /// 
+        /// </summary>
+        Everything = unchecked((int)-1),
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
     public static class ThreadingUtilities
     {
         /// <summary>
@@ -2412,6 +2499,39 @@ namespace PublicDomain
             {
             }
             return false;
+        }
+
+        /// <summary>
+        /// Toes the binary.
+        /// </summary>
+        /// <param name="num">The num.</param>
+        /// <returns></returns>
+        public static string ToBinary(int num)
+        {
+            return Convert.ToString(num, 2);
+        }
+
+        /// <summary>
+        /// Toes the hexadecimal.
+        /// </summary>
+        /// <param name="num">The num.</param>
+        /// <returns></returns>
+        public static string ToHexadecimal(int num)
+        {
+            return ToHexadecimal(num, false);
+        }
+
+        /// <summary>
+        /// Toes the hexadecimal.
+        /// </summary>
+        /// <param name="num">The num.</param>
+        /// <param name="prependZeroX">if set to <c>true</c> [prepend zero X].</param>
+        /// <returns></returns>
+        public static string ToHexadecimal(int num, bool prependZeroX)
+        {
+            string result = prependZeroX ? "0x" : "";
+            result += Convert.ToString(num, 16);
+            return result;
         }
     }
 
@@ -8395,6 +8515,9 @@ namespace PublicDomain
 
             return error;
         }
+
+#if !(NONUNIT)
+#endif
     }
 
     /// <summary>
@@ -17939,6 +18062,8 @@ namespace PublicDomain
         /// Gets the date time local.
         /// </summary>
         /// <value>The date time local.</value>
+        [XmlIgnore]
+        [SoapIgnore]
         public DateTime DateTimeLocal
         {
             get
@@ -20697,6 +20822,223 @@ namespace PublicDomain
 #endif
     }
 #endif
+}
+
+namespace PublicDomain.Web
+{
+    /// <summary>
+    /// http://www.javascriptkit.com/dhtmltutors/csscursors.shtml
+    /// </summary>
+    public static class Cursors
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        public const string HandAndPointer = "cursor: pointer; cursor: hand;";
+
+        /// <summary>
+        /// Gets the cursor style. Returns 'cursor: {0};' without the quotes,
+        /// and with {0} replaced by the cursor style. This method may
+        /// also return a compound style, such as 'cursor: {0};cursor: {1};'.
+        /// Always ends in a trailing semicolon;
+        /// </summary>
+        /// <param name="cursor">The cursor.</param>
+        /// <returns></returns>
+        public static string GetStyle(CursorStyle cursor)
+        {
+            string result = null;
+            switch (cursor)
+            {
+                case CursorStyle.ResizeEast:
+                    result = "cursor: e-resize;";
+                    break;
+                case CursorStyle.ResizeNorth:
+                    result = "cursor: n-resize;";
+                    break;
+                case CursorStyle.ResizeNorthEast:
+                    result = "cursor: ne-resize;";
+                    break;
+                case CursorStyle.ResizeNorthWest:
+                    result = "cursor: nw-resize;";
+                    break;
+                case CursorStyle.ResizeSouth:
+                    result = "cursor: s-resize;";
+                    break;
+                case CursorStyle.ResizeSouthEast:
+                    result = "cursor: se-resize;";
+                    break;
+                case CursorStyle.ResizeSouthWest:
+                    result = "cursor: sw-resize;";
+                    break;
+                case CursorStyle.ResizeWest:
+                    result = "cursor: w-resize;";
+                    break;
+                case CursorStyle.AllScroll:
+                    result = "cursor: all-scroll;";
+                    break;
+                case CursorStyle.ColumnResize:
+                    result = "cursor: col-resize;";
+                    break;
+                case CursorStyle.RowResize:
+                    result = "cursor: row-resize;";
+                    break;
+                case CursorStyle.NoDrop:
+                    result = "cursor: no-drop;";
+                    break;
+                case CursorStyle.NotAllowed:
+                    result = "cursor: not-allowed;";
+                    break;
+                case CursorStyle.VerticalText:
+                    result = "cursor: vertical-text;";
+                    break;
+                case CursorStyle.Inherit:
+                    return "";
+                case CursorStyle.HandAndPointer:
+                    result = HandAndPointer;
+                    break;
+                default:
+                    result = "cursor: " + cursor.ToString().ToLower() + ";";
+                    break;
+            }
+            return result;
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public enum CursorStyle
+    {
+        /// <summary>
+        /// Support: All Browsers
+        /// </summary>
+        Auto,
+
+        /// <summary>
+        /// Support: All Browsers
+        /// </summary>
+        Default,
+
+        /// <summary>
+        /// Support: Only IE. Use HandAndPointer instead
+        /// </summary>
+        Hand,
+
+        /// <summary>
+        /// Support: NS6+/IE6+ only. Use HandAndPointer instead
+        /// </summary>
+        Pointer,
+
+        /// <summary>
+        /// Support: Cross browser
+        /// </summary>
+        HandAndPointer,
+
+        /// <summary>
+        /// Support: All Browsers
+        /// </summary>
+        Crosshair,
+
+        /// <summary>
+        /// Support: All Browsers
+        /// </summary>
+        Text,
+
+        /// <summary>
+        /// Support: All Browsers
+        /// </summary>
+        Wait,
+
+        /// <summary>
+        /// Support: All Browsers
+        /// </summary>
+        Help,
+
+        /// <summary>
+        /// Support: All Browsers
+        /// </summary>
+        Inherit,
+
+        /// <summary>
+        /// Support: All Browsers
+        /// </summary>
+        Move,
+
+        /// <summary>
+        /// Support: All Browsers
+        /// </summary>
+        ResizeEast,
+
+        /// <summary>
+        /// Support: All Browsers
+        /// </summary>
+        ResizeNorthEast,
+
+        /// <summary>
+        /// Support: All Browsers
+        /// </summary>
+        ResizeNorthWest,
+
+        /// <summary>
+        /// Support: All Browsers
+        /// </summary>
+        ResizeNorth,
+
+        /// <summary>
+        /// Support: All Browsers
+        /// </summary>
+        ResizeSouthEast,
+
+        /// <summary>
+        /// Support: All Browsers
+        /// </summary>
+        ResizeSouthWest,
+
+        /// <summary>
+        /// Support: All Browsers
+        /// </summary>
+        ResizeSouth,
+
+        /// <summary>
+        /// Support: All Browsers
+        /// </summary>
+        ResizeWest,
+
+        /// <summary>
+        /// Support: IE6+
+        /// </summary>
+        Progress,
+
+        /// <summary>
+        /// Support: IE6+
+        /// </summary>
+        AllScroll,
+
+        /// <summary>
+        /// Support: IE6+
+        /// </summary>
+        ColumnResize,
+
+        /// <summary>
+        /// Support: IE6+
+        /// </summary>
+        NoDrop,
+
+        /// <summary>
+        /// Support: IE6+
+        /// </summary>
+        NotAllowed,
+
+        /// <summary>
+        /// Support: IE6+
+        /// </summary>
+        RowResize,
+
+        /// <summary>
+        /// Support: IE6+
+        /// </summary>
+        VerticalText
+    }
 }
 
 #if !(NOCODECOUNT)
