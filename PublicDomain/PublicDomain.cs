@@ -59,7 +59,6 @@
 // Commonly non-referenced projects:
 #define NOVJSLIB
 #define NOSYSTEMWEB
-#define NONUNIT
 #define NOASPELL
 
 // Other switches:
@@ -73,10 +72,6 @@
 //#define NODYNACODE
 //#define NOASPNETRUNTIMEHOST
 
-#endif
-
-#if !(TEST)
-#define NONUNIT
 #endif
 
 // !!!EDIT DIRECTIVES END!!!!!
@@ -104,9 +99,6 @@ using java.util.zip;
 #endif
 #if !(NOSYSTEMWEB)
 using System.Web;
-#endif
-#if !(NONUNIT)
-using NUnit.Framework;
 #endif
 
 // Core includes
@@ -154,340 +146,6 @@ using Microsoft.Win32;
 
 namespace PublicDomain
 {
-    /// <summary>
-    /// Various useful global constants.
-    /// </summary>
-    public static class GlobalConstants
-    {
-        /// <summary>
-        /// Static Initializer
-        /// </summary>
-        static GlobalConstants()
-        {
-            BitsInAByte = (int)Math.Pow(2, 3);
-            BytesInAKilobyte = (int)Math.Pow(2, 10);
-            BitsInAKilobyte = BitsInAByte * BytesInAKilobyte;
-            BytesInAMegabyte = (int)Math.Pow(2, 20);
-            BitsInAMegabyte = BitsInAByte * BytesInAMegabyte;
-            BytesInAGigabyte = (long)Math.Pow(2, 30);
-            BitsInAGigabyte = BitsInAByte * BytesInAGigabyte;
-            BytesInATerabyte = (long)Math.Pow(2, 40);
-            BitsInATerabyte = BitsInAByte * BytesInATerabyte;
-            BytesInAPetabyte = (long)Math.Pow(2, 50);
-            BitsInAPetabyte = BitsInAByte * BytesInAPetabyte;
-            KilometersInAStatuteMile = ((FeetInAStatuteMile) * (InchesInAFoot) * (CentimetersInAnInch)) / (Math.Pow(10, 5));
-        }
-
-        /// <summary>
-        /// Current version of this code, in string form. In a standalone build,
-        /// this is the assembly version and file version of the assembly.
-        /// </summary>
-        public const string PublicDomainVersion = "0.2.4.0";
-
-        /// <summary>
-        /// The name of the PublicDomain assembly, if this is a standalone build. If
-        /// this file is included in an existing project, this is purely a logical name.
-        /// </summary>
-        public const string PublicDomainName = "PublicDomain";
-
-        /// <summary>
-        /// Strong, public name of the PublicDomain assembly, if this is a standalone
-        /// build. If this file is included in an existing project, this is meaningless.
-        /// </summary>
-        public const string PublicDomainStrongName = PublicDomainName + ", Version=" + PublicDomainVersion + ", Culture=neutral, PublicKeyToken=FD3F43B5776A962B";
-
-        /// <summary>
-        /// The number of bits in 1 Byte (8)
-        /// </summary>
-        public static readonly int BitsInAByte;
-
-        /// <summary>
-        /// The number of bytes in 1KB (1024).
-        /// </summary>
-        public static readonly int BytesInAKilobyte;
-
-        /// <summary>
-        /// The number of bits in 1KB (8192).
-        /// </summary>
-        public static readonly int BitsInAKilobyte;
-
-        /// <summary>
-        /// The number of bytes in 1MB (1048576).
-        /// </summary>
-        public static readonly int BytesInAMegabyte;
-
-        /// <summary>
-        /// The number of bits in 1MB (8388608).
-        /// </summary>
-        public static readonly int BitsInAMegabyte;
-
-        /// <summary>
-        /// The number of bytes in 1GB (1073741824).
-        /// </summary>
-        public static readonly long BytesInAGigabyte;
-
-        /// <summary>
-        /// The number of bits in 1GB (8589934592).
-        /// </summary>
-        public static readonly long BitsInAGigabyte;
-
-        /// <summary>
-        /// The number of bytes in 1TB (1099511627776).
-        /// </summary>
-        public static readonly long BytesInATerabyte;
-
-        /// <summary>
-        /// The number of bits in 1TB (8796093022208).
-        /// </summary>
-        public static readonly long BitsInATerabyte;
-
-        /// <summary>
-        /// The number of bytes in 1PB (1125899906842624).
-        /// </summary>
-        public static readonly long BytesInAPetabyte;
-
-        /// <summary>
-        /// The number of bits in 1PB (9007199254740992).
-        /// </summary>
-        public static readonly long BitsInAPetabyte;
-
-        /// <summary>
-        /// A reasonable default block size for block reading/writing to and from
-        /// a Stream.
-        /// </summary>
-        public const int DefaultStreamBlockSize = 1024;
-
-        /// <summary>
-        /// A reasonable default timeout value, in milliseconds, for a
-        /// small process to timeout.
-        /// </summary>
-        public const int DefaultExecuteSmallProcessTimeout = 60000;
-
-        /// <summary>
-        /// 5280
-        /// http://scienceworld.wolfram.com/physics/Mile.html
-        /// </summary>
-        public const int FeetInAStatuteMile = 5280;
-
-        /// <summary>
-        /// 0.3937007874015748031496062992126
-        /// http://scienceworld.wolfram.com/physics/Inch.html
-        /// </summary>
-        public const double InchesInACentimeter = 0.3937007874015748031496062992126;
-
-        /// <summary>
-        /// 2.54
-        /// http://scienceworld.wolfram.com/physics/Inch.html
-        /// </summary>
-        public const double CentimetersInAnInch = 2.54;
-
-        /// <summary>
-        /// 12
-        /// http://scienceworld.wolfram.com/physics/Inch.html
-        /// </summary>
-        public const int InchesInAFoot = 12;
-
-        /// <summary>
-        /// 3
-        /// http://scienceworld.wolfram.com/physics/Yard.html
-        /// </summary>
-        public const int FeetInAYard = 3;
-
-        /// <summary>
-        /// http://scienceworld.wolfram.com/physics/Mile.html
-        /// </summary>
-        public static readonly double KilometersInAStatuteMile;
-
-        /// <summary>
-        /// 3963.19
-        /// http://scienceworld.wolfram.com/astronomy/EarthRadius.html
-        /// </summary>
-        public const double EarthEquatorialRadiusInStatuteMiles = 3963.19;
-
-        /// <summary>
-        /// 3443.9
-        /// </summary>
-        public const double EarthEquatorialRadiusInNauticalMiles = 3443.9;
-        
-        /// <summary>
-        /// 6378.137
-        /// http://scienceworld.wolfram.com/astronomy/EarthRadius.html
-        /// </summary>
-        public const double EarthEquatorialRadiusInKilometers = 6378.137;
-
-        /// <summary>
-        /// 24901.5
-        /// http://scienceworld.wolfram.com/astronomy/EarthRadius.html
-        /// </summary>
-        public const double EarthEquatorialCircumferenceInStatuteMiles = 24901.5;
-
-        /// <summary>
-        /// 40075
-        /// http://scienceworld.wolfram.com/astronomy/EarthRadius.html
-        /// </summary>
-        public const int EarthEquatorialCircumferenceInKilometers = 40075;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public const double EarthEquatorialDiameterInStatuteMiles = EarthEquatorialRadiusInStatuteMiles * 2;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public const double EarthEquatorialDiameterInNauticalMiles = EarthEquatorialRadiusInNauticalMiles * 2;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public const double EarthEquatorialDiameterInKilometers = EarthEquatorialRadiusInKilometers * 2;
-
-        /// <summary>
-        /// The default installation diretory of a standalone PublicDomain assembly.
-        /// Always ends in a trailing slash.
-        /// </summary>
-        public const string PublicDomainDefaultInstallLocation = @"C:\Program Files\Public Domain\";
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public delegate void CallbackNoArgs();
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="rock"></param>
-    public delegate void CallbackWithRock(object rock);
-
-    /// <summary>
-    /// Generic class that encapsulates a pair of objects of any types. This class is similar
-    /// to System.Collections.Generic.KeyValuePair except that it is a class, not
-    /// a struct and also exposes the values as public fields and more generically than a "key" and
-    /// a "value."
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <typeparam name="U"></typeparam>
-    [Serializable]
-    public class Pair<T, U>
-    {
-        /// <summary>
-        /// 
-        /// </summary>
-        public T First;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public U Second;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Pair&lt;T, U&gt;"/> class.
-        /// </summary>
-        public Pair()
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Pair&lt;T, U&gt;"/> class.
-        /// </summary>
-        /// <param name="first">The first.</param>
-        /// <param name="second">The second.</param>
-        public Pair(T first, U second)
-        {
-            First = first;
-            Second = second;
-        }
-
-        /// <summary>
-        /// Finds the pair by key.
-        /// </summary>
-        /// <param name="search">The search.</param>
-        /// <param name="find">The find.</param>
-        /// <returns></returns>
-        public static Pair<T, U> FindPairByKey(Pair<T, U>[] search, T find)
-        {
-            if (search != null)
-            {
-                foreach (Pair<T, U> item in search)
-                {
-                    if (item.First.Equals(find))
-                    {
-                        return item;
-                    }
-                }
-            }
-            return null;
-        }
-
-        /// <summary>
-        /// Returns a <see cref="T:System.String"></see> that represents the current <see cref="T:System.Object"></see>.
-        /// </summary>
-        /// <returns>
-        /// A <see cref="T:System.String"></see> that represents the current <see cref="T:System.Object"></see>.
-        /// </returns>
-        public override string ToString()
-        {
-            return First + "," + Second;
-        }
-    }
-
-    /// <summary>
-    /// Generic class that encapsulates three objects of any type.
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <typeparam name="U"></typeparam>
-    /// <typeparam name="V"></typeparam>
-    [Serializable]
-    public class Triple<T, U, V>
-    {
-        /// <summary>
-        /// 
-        /// </summary>
-        public T First;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public U Second;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public V Third;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Triple&lt;T, U, V&gt;"/> class.
-        /// </summary>
-        public Triple()
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Triple&lt;T, U, V&gt;"/> class.
-        /// </summary>
-        /// <param name="first">The first.</param>
-        /// <param name="second">The second.</param>
-        /// <param name="third">The third.</param>
-        public Triple(T first, U second, V third)
-        {
-            First = first;
-            Second = second;
-            Third = third;
-        }
-
-        /// <summary>
-        /// Returns a <see cref="T:System.String"></see> that represents the current <see cref="T:System.Object"></see>.
-        /// </summary>
-        /// <returns>
-        /// A <see cref="T:System.String"></see> that represents the current <see cref="T:System.Object"></see>.
-        /// </returns>
-        public override string ToString()
-        {
-            return First + "," + Second + "," + Third;
-        }
-    }
-
     /// <summary>
     /// Generic class that encapsulates four objects of any type.
     /// </summary>
@@ -1333,51 +991,6 @@ namespace PublicDomain
         {
             return Crc32.Compute(str);
         }
-
-#if !(NONUNIT)
-        /// <summary>
-        /// Tests for <see cref="PublicDomain.StringUtilities"/>
-        /// </summary>
-        [TestFixture]
-        public class Tests
-        {
-            /// <summary>
-            /// Tests the replace first.
-            /// </summary>
-            [Test]
-            public void TestReplaceFirst()
-            {
-                // Test single character finds
-                Assert.AreEqual(ReplaceFirst("aa", "a", "b"), "ba");
-                Assert.AreEqual(ReplaceFirst("bba", "a", "b"), "bbb");
-                Assert.AreEqual(ReplaceFirst("baa", "a", "b"), "bba");
-
-                // Test multi-character finds
-                Assert.AreEqual(ReplaceFirst("aa", "aa", "bb"), "bb");
-                Assert.AreEqual(ReplaceFirst("baa", "aa", "bb"), "bbb");
-                Assert.AreEqual(ReplaceFirst("baab", "aa", "bb"), "bbbb");
-
-                // Test empty replaces
-                Assert.AreEqual(ReplaceFirst("aa", "aa", ""), "");
-                Assert.AreEqual(ReplaceFirst("baa", "aa", ""), "b");
-                Assert.AreEqual(ReplaceFirst("baab", "aa", ""), "bb");
-            }
-
-            /// <summary>
-            /// 
-            /// </summary>
-            [Test]
-            public void TestFormat()
-            {
-                Console.WriteLine(FormatNumberWithBytes(500, true));
-                Console.WriteLine(FormatNumberWithBytes(5000, true));
-                Console.WriteLine(FormatNumberWithBytes(50000, true));
-                Console.WriteLine(FormatNumberWithBytes(500000, true));
-                Console.WriteLine(FormatNumberWithBytes(5000000, true));
-                Console.WriteLine(FormatNumberWithBytes(50000000, true));
-            }
-        }
-#endif
     }
 
     /// <summary>
@@ -1552,53 +1165,6 @@ namespace PublicDomain
                 ExecuteTimer(rock);
             }
         }
-
-#if !(NONUNIT)
-        /// <summary>
-        /// 
-        /// </summary>
-        [TestFixture]
-        public class ThreadingTests
-        {
-            /// <summary>
-            /// Plays this instance.
-            /// </summary>
-            [Test]
-            public void play()
-            {
-                Thread timer = SetTimer(5000, new CallbackNoArgs(delegate()
-                {
-                    Console.WriteLine("Hello World");
-                }));
-
-                timer.Join();
-
-                timer = SetTimerSimple(5000, delegate()
-                {
-                    Console.WriteLine("Bonjour");
-                });
-
-                timer.Join();
-            }
-
-            /// <summary>
-            /// Tests the interval.
-            /// </summary>
-            [Test]
-            public void TestInterval()
-            {
-                Thread t = SetIntervalSimple(2000, delegate()
-                {
-                    Console.WriteLine("Hello World");
-                });
-
-                // With this we don't even have to explicitly abort the thread
-                t.IsBackground = true;
-
-                Thread.Sleep(10000);
-            }
-        }
-#endif
     }
 
     /// <summary>
@@ -2028,32 +1594,11 @@ namespace PublicDomain
 
             return sb.ToString();
         }
-
-#if !(NONUNIT)
-        /// <summary>
-        /// 
-        /// </summary>
-        [TestFixture]
-        public class XmlTests
-        {
-            /// <summary>
-            /// Plays this instance.
-            /// </summary>
-            [Test]
-            public void play()
-            {
-                Console.WriteLine(FormatXml(@"<html><head><title>Hello World</title></head><body><h1>Hello World</h1></body></html>"));
-            }
-        }
-#endif
     }
 
     /// <summary>
     /// Methods to work with characters, such as an indexable ASCII table.
     /// </summary>
-#if !(NONUNIT)
-    [TestFixture]
-#endif
     public class CharUtilities
     {
         /// <summary>
@@ -2067,20 +1612,6 @@ namespace PublicDomain
         static CharUtilities()
         {
             AsciiCharacters = GetAsciiCharacters().ToArray();
-        }
-
-        /// <summary>
-        /// Prints the ASCII table.
-        /// </summary>
-#if !(NONUNIT)
-        [Test]
-#endif
-        public void PrintAsciiTable()
-        {
-            for (int i = 0; i < AsciiCharacters.Length; i++)
-            {
-                Console.WriteLine("{0}: {1}", i, AsciiCharacters[i]);
-            }
         }
 
         /// <summary>
@@ -3419,6 +2950,7 @@ namespace PublicDomain
 
     /// <summary>
     /// Methods to help in file system related manipulations.
+    /// TODO Directory.Copy()
     /// </summary>
     public static class FileSystemUtilities
     {
@@ -3883,24 +3415,6 @@ namespace PublicDomain
 
             return str;
         }
-
-#if !(NONUNIT)
-        /// <summary>
-        /// 
-        /// </summary>
-        [TestFixture]
-        public class FSTests
-        {
-            /// <summary>
-            /// Plays this instance.
-            /// </summary>
-            [Test]
-            public void play()
-            {
-                Console.WriteLine(GetPathFromUri(GetFileUri(@"C:\test.html")));
-            }
-        }
-#endif
     }
 
     /// <summary>
@@ -7930,121 +7444,6 @@ namespace PublicDomain
         {
             throw new Win32Exception(GetLastError());
         }
-
-#if !(NONUNIT)
-        /// <summary>
-        /// 
-        /// </summary>
-        [TestFixture]
-        public class Win32Tests
-        {
-            /// <summary>
-            /// Tests the GAC.
-            /// </summary>
-            [Test]
-            public void TestGAC()
-            {
-                Console.WriteLine(GlobalAssemblyCache.Path);
-                Console.WriteLine(GlobalAssemblyCache.ZapPath);
-                Console.WriteLine(GlobalAssemblyCache.DownloadPath);
-            }
-
-            /// <summary>
-            /// Gets the assembly.
-            /// </summary>
-            [Test]
-            public void GetAssembly()
-            {
-                foreach (GacAssemblyName it in GlobalAssemblyCache.FindAssemblies("System"))
-                {
-                    Console.WriteLine(it);
-                }
-            }
-
-            /// <summary>
-            /// Finds the largest assembly.
-            /// </summary>
-            [Test]
-            public void FindLargestAssembly()
-            {
-                Console.WriteLine(GlobalAssemblyCache.FindAssemblyWithLargestVersion("System"));
-            }
-
-            /// <summary>
-            /// Enumerates the GAC.
-            /// </summary>
-            [Test]
-            public void EnumerateGAC()
-            {
-                foreach (GacAssemblyName name in GlobalAssemblyCache.GetAllAssemblies())
-                {
-                    Console.WriteLine(name.AssemblyName);
-                }
-            }
-
-            /// <summary>
-            /// Test1s this instance.
-            /// </summary>
-            [Test]
-            public void Test1()
-            {
-                foreach (GacAssemblyName assembly in GlobalAssemblyCache.FindAssemblies("PublicDomain"))
-                {
-                    Console.WriteLine(assembly);
-                }
-            }
-
-            /// <summary>
-            /// Test2s this instance.
-            /// </summary>
-            [Test]
-            public void Test2()
-            {
-                List<GacAssemblyName> pds = ArrayUtilities.GetListFromEnumerable<GacAssemblyName>(GlobalAssemblyCache.FindAssemblies("PublicDomain"));
-                foreach (GacAssemblyName pd in pds)
-                {
-                    PublicDomain.Win32.Win32Enums.AssemblyCacheUninstallDisposition result = 
-                        GlobalAssemblyCache.UninstallAssembly(pd.DisplayName);
-                    Console.WriteLine(result);
-                }
-            }
-
-            /// <summary>
-            /// Test3s this instance.
-            /// </summary>
-            [Test]
-            public void Test3()
-            {
-            }
-
-            /// <summary>
-            /// Tests the add remove list.
-            /// </summary>
-            [Test]
-            public void TestAddRemoveList()
-            {
-                List<IInstalledProgram> programs = GetAddRemoveProgramList();
-                foreach (IInstalledProgram program in programs)
-                {
-                    Console.WriteLine(program.DisplayName);
-                }
-            }
-
-            /// <summary>
-            /// Tests the add remove list.
-            /// </summary>
-            [Test]
-            public void TestUninstall()
-            {
-                List<IInstalledProgram> programs = GetAddRemoveProgramList("Public Domain");
-                foreach (IInstalledProgram program in programs)
-                {
-                    Console.WriteLine("Uninstalling " + program.DisplayName);
-                    program.Uninstall();
-                }
-            }
-        }
-#endif
     }
 #endif
 
@@ -8515,9 +7914,6 @@ namespace PublicDomain
 
             return error;
         }
-
-#if !(NONUNIT)
-#endif
     }
 
     /// <summary>
@@ -11020,31 +10416,6 @@ namespace PublicDomain
             result.Append(input);
             return result.ToString();
         }
-
-#if !(NONUNIT)
-        /// <summary>
-        /// 
-        /// </summary>
-        [TestFixture]
-        public class RegexTests
-        {
-            /// <summary>
-            /// Simples this instance.
-            /// </summary>
-            [Test]
-            public void Simple()
-            {
-                Assert.AreEqual(Replace("abcdabcd", @"(bc)", 1, delegate(int captureIndex, string captureValue)
-                {
-                    return captureValue + " ";
-                }), "abc dabc d");
-                Assert.AreEqual(Replace("abcdabcd", @"(bc)", 1, delegate(int captureIndex, string captureValue)
-                {
-                    return captureValue;
-                }), "abcdabcd");
-            }
-        }
-#endif
     }
 
     /// <summary>
@@ -11396,36 +10767,6 @@ namespace PublicDomain
             }
             return result;
         }
-
-#if !(NONUNIT)
-        /// <summary>
-        /// 
-        /// </summary>
-        [TestFixture]
-        public class Iso8601Tests
-        {
-            /// <summary>
-            /// Test1s this instance.
-            /// </summary>
-            [Test]
-            public void Test1()
-            {
-                foreach (string test in new string[] {
-                    "2007", "2007-02", "2007-02-15",
-                    "2007-02-15T14:57Z",
-                    "2007-02-15T14:57-05:00",
-                    "2007-02-15T14:57+03:00",
-                    "2007-02-15T14:57:30Z",
-                    "2007-02-15T14:57:30-08:00",
-                    "2007-02-15T14:57:30.983Z",
-                })
-                {
-                    TzDateTime dt = Iso8601.Parse(test, TzTimeZone.TimeZoneAmericaEastern);
-                    Console.WriteLine(dt + "," + dt.ToStringLocal());
-                }
-            }
-        }
-#endif
     }
 
     /// <summary>
@@ -17712,97 +17053,6 @@ namespace PublicDomain
             /// </summary>
             public const string TimezonePacificKiritimati = "Pacific/Kiritimati";
         }
-
-#if !(NONUNIT)
-        /// <summary>
-        /// 
-        /// </summary>
-        [TestFixture]
-        public class TzTimeZoneTests
-        {
-            /// <summary>
-            /// Prints the time zones.
-            /// </summary>
-            [Test]
-            public void PrintTimeZones()
-            {
-                foreach (string timeZone in TzTimeZone.Zones.Keys)
-                {
-                    Console.WriteLine(timeZone);
-                }
-            }
-
-            /// <summary>
-            /// 
-            /// </summary>
-            [Test]
-            public void TestTimeZones()
-            {
-                // Try getting the US easter time zone
-                TzTimeZone easternTimeZone = TzTimeZone.GetTimeZone(TzConstants.TimezoneUsEastern);
-
-                // Make sure some things are there
-                Assert.IsNotNull(easternTimeZone);
-                Assert.Greater(TzTimeZone.ZoneList.Count, 0);
-                Assert.Greater(TzTimeZone.Zones.Count, 0);
-                Assert.AreEqual(TzTimeZone.Zones.Count, TzTimeZone.ZoneList.Count);
-                Assert.AreEqual(easternTimeZone.DaylightName, TzConstants.TimezoneUsEastern);
-                Assert.AreEqual(easternTimeZone.StandardName, TzConstants.TimezoneUsEastern);
-
-                // Create a test time
-                DateTime test = new DateTime(2000, 1, 1, 0, 0, 0, DateTimeKind.Local);
-
-                // Get the UTC offset
-                TimeSpan testUtcOffset = easternTimeZone.GetUtcOffset(test);
-
-                TimeSpan minusFive = new TimeSpan(-5, 0, 0);
-
-                // We expect the offset to be -5
-                Assert.AreEqual(testUtcOffset, minusFive);
-
-                Console.WriteLine(testUtcOffset);
-
-                Console.WriteLine("Now: " + DateTime.Now);
-                Console.WriteLine("Now (Local): " + easternTimeZone.ToLocalTime(DateTime.Now));
-                Console.WriteLine("Now (UTC): " + easternTimeZone.ToUniversalTime(DateTime.Now));
-
-                // Now, check the actual offset
-                //DaylightTime daylightTime = easternTimeZone.GetDaylightChanges(DateTime.Now.Year);
-
-                // Create a local DateTime
-                //DateTime test = new DateTime(2000, 1, 1, 0, 0, 0, DateTimeKind.Local);
-                //easternTimeZone.ToUniversalTime(test);
-            }
-
-            /// <summary>
-            /// Make sure that all <see cref="PublicDomain.TzDatabase.TzZone"/> objects
-            /// in the zone lists have a unique time, and that only one goes to infinity.
-            /// </summary>
-            [Test]
-            public void TestUniqueTimeZoneInfo()
-            {
-                foreach (TzZoneInfo zone in TzTimeZone.ZoneList)
-                {
-                    bool containsInfinity = false;
-                    foreach (TzDatabase.TzZone zoneInfo in zone.Zones)
-                    {
-                        if (zoneInfo.UntilYear == int.MaxValue)
-                        {
-                            if (containsInfinity)
-                            {
-                                throw new TzDatabase.TzException("Multiple ZONE information lines with infinity end dates");
-                            }
-                            containsInfinity = true;
-                        }
-                    }
-                    if (!containsInfinity)
-                    {
-                        throw new TzDatabase.TzException("No zone goes to infinity for " + zone.ZoneName);
-                    }
-                }
-            }
-        }
-#endif
     }
 
     /// <summary>
@@ -18536,31 +17786,6 @@ namespace PublicDomain
         {
             return x.DateTimeUtc <= y.DateTimeUtc;
         }
-
-#if !(NONUNIT)
-        /// <summary>
-        /// 
-        /// </summary>
-        [TestFixture]
-        public class TzDateTimeTests
-        {
-            /// <summary>
-            /// Test1s this instance.
-            /// </summary>
-            [Test]
-            public void Test1()
-            {
-                foreach (string test in new string[] {
-                    "06/20/1984 3:00:00 PM-05:00",
-                    "1/1/2007+00:00",
-                })
-                {
-                    TzDateTime dt = Parse(test);
-                    Console.WriteLine(dt + "," + dt.ToStringLocal());
-                }
-            }
-        }
-#endif
     }
 
     /// <summary>
@@ -18569,9 +17794,6 @@ namespace PublicDomain
     /// The zone.tab file is a mapping between ISO 3166 2-character country codes
     /// and the main ZONE for that country.
     /// </summary>
-#if !(NONUNIT)
-    [TestFixture]
-#endif
     public class TzDatabase
     {
         /// <summary>
@@ -18579,295 +17801,25 @@ namespace PublicDomain
         /// </summary>
         public const string NotApplicableValue = "-";
 
-        private const string TzDatabaseDirectory = @"C:\temp\tzdata\";
-        private const string Iso3166TabFile = TzDatabaseDirectory + @"iso3166.tab";
-        private const string ZoneTabFile = TzDatabaseDirectory + @"zone.tab";
-        private const string FactoryZoneName = "Factory";
-
-#if !(NONUNIT)
         /// <summary>
-        /// Parse3166s the tab.
+        /// 
         /// </summary>
-        [Test]
-        public void Parse3166Tab()
-        {
-            Dictionary<string, Iso3166> map = ParseIso3166Tab(Iso3166TabFile);
-            foreach (string key in map.Keys)
-            {
-                Iso3166 data = map[key];
-                Console.WriteLine(data);
-            }
-        }
+        public const string TzDatabaseDirectory = @"C:\temp\tzdata\";
 
         /// <summary>
-        /// Parses the zone tab.
+        /// 
         /// </summary>
-        [Test]
-        public void ParseZoneTab()
-        {
-            List<PublicDomain.TzTimeZone.TzZoneDescription> items = ParseZoneTab(ZoneTabFile);
-            foreach (PublicDomain.TzTimeZone.TzZoneDescription item in items)
-            {
-                Console.WriteLine(item);
-            }
-        }
+        public const string Iso3166TabFile = TzDatabaseDirectory + @"iso3166.tab";
 
         /// <summary>
-        /// Reads the database.
+        /// 
         /// </summary>
-        [Test]
-        public void ReadDatabase()
-        {
-            bool generateList;
-            generateList = true;
-            // First, get all of the data from the tz db
-            List<string[]> links = new List<string[]>();
-            List<TzRule> rules = new List<TzRule>();
-            List<TzZone> zones = new List<TzZone>();
-            ReadDatabase(TzDatabaseDirectory, rules, zones, links);
+        public const string ZoneTabFile = TzDatabaseDirectory + @"zone.tab";
 
-            // Now, get all of the tab files
-            Dictionary<string, Iso3166> map = ParseIso3166Tab(Iso3166TabFile);
-            List<PublicDomain.TzTimeZone.TzZoneDescription> items = ParseZoneTab(ZoneTabFile);
-
-            // Build up the rule lists based on names
-            Dictionary<string, List<TzRule>> ruleList = new Dictionary<string, List<TzRule>>();
-            foreach (TzRule rule in rules)
-            {
-                if (!ruleList.ContainsKey(rule.RuleName))
-                {
-                    ruleList[rule.RuleName] = new List<TzRule>();
-                }
-                ruleList[rule.RuleName].Add(rule);
-            }
-
-            // Build up the zone lists based on names
-            Dictionary<string, List<TzZone>> zonesList = new Dictionary<string, List<TzZone>>();
-            foreach (TzZone zone in zones)
-            {
-                if (!zonesList.ContainsKey(zone.ZoneName))
-                {
-                    zonesList[zone.ZoneName] = new List<TzZone>();
-                }
-                zonesList[zone.ZoneName].Add(zone);
-            }
-
-            Dictionary<string, PublicDomain.TzTimeZone.TzZoneInfo> zoneList = new Dictionary<string, PublicDomain.TzTimeZone.TzZoneInfo>();
-            List<TzZone> dataZones;
-            List<TzRule> dataRules;
-            foreach (string zoneKey in zonesList.Keys)
-            {
-                zonesList.TryGetValue(zoneKey, out dataZones);
-
-                dataRules = null;
-                // Go through each zone and get the associated rules
-                if (dataZones != null)
-                {
-                    dataRules = new List<TzRule>();
-                    foreach (TzZone dataZone in dataZones)
-                    {
-                        if (dataZone.HasRules())
-                        {
-                            ArrayUtilities.AppendList<TzRule>(dataRules, ruleList[dataZone.RuleName]);
-                        }
-                        else if (ConversionUtilities.IsStringATimeSpan(dataZone.RuleName))
-                        {
-                            TimeSpan timedRule = DateTimeUtlities.ParseTimeSpan(dataZone.RuleName);
-                            dataRules.Add(new TzRule(dataZone.RuleName, int.MinValue, int.MaxValue, Month.January,
-                                1, null, new TimeSpan(), null, timedRule, null, null));
-                        }
-                    }
-                }
-
-                zoneList[zoneKey] = new TzTimeZone.TzZoneInfo(zoneKey, dataZones, dataRules);
-            }
-
-            // Finally, clone the links
-            foreach (string[] pieces in links)
-            {
-                // Find the time zone this is a link to
-                TzTimeZone.TzZoneInfo linkedTo = zoneList[pieces[1]];
-
-                TzTimeZone.TzZoneInfo link = linkedTo.Clone(pieces[2]);
-
-                zoneList[link.ZoneName] = link;
-            }
-
-            // Now, get the zone list as a List
-            List<PublicDomain.TzTimeZone.TzZoneInfo> tzzones = new List<PublicDomain.TzTimeZone.TzZoneInfo>();
-            foreach (string key in zoneList.Keys)
-            {
-                tzzones.Add(zoneList[key]);
-            }
-
-            // Sort it by zone name
-            tzzones.Sort(delegate(PublicDomain.TzTimeZone.TzZoneInfo x, PublicDomain.TzTimeZone.TzZoneInfo y)
-            {
-                return x.ZoneName.CompareTo(y.ZoneName);
-            });
-
-            // Print out the zone names
-            //tzzones.ForEach(delegate(PublicDomain.TzTimeZone.TzZoneInfo z)
-            //{
-            //    Console.WriteLine(z.ZoneName);
-            //});
-
-            CreateTzCode(generateList, tzzones, 3);
-        }
-
-        private void CreateTzCode(bool generateList, List<PublicDomain.TzTimeZone.TzZoneInfo> tzzones, int numberOfTabs)
-        {
-            string tabs = new string('\t', numberOfTabs);
-            string tabs1 = new string('\t', numberOfTabs - 1);
-            Console.WriteLine(@"
-{1}#region Generated Time Zones
-
-{1}private static void InitializeZones()
-{1}{{
-{0}if (m_zones != null) return;
-
-{0}Dictionary<string, PublicDomain.TzTimeZone.TzZoneInfo> zones = new Dictionary<string, PublicDomain.TzTimeZone.TzZoneInfo>();
-{0}List<PublicDomain.TzTimeZone.TzZoneInfo> zoneList = new List<PublicDomain.TzTimeZone.TzZoneInfo>();
-{0}PublicDomain.TzTimeZone.TzZoneInfo zone = null;
-", tabs, tabs1);
-
-            StringBuilder sb = new StringBuilder();
-            TextWriter sbwriter = new StringWriter(sb), writer;
-
-            TzTimeZone.TzZoneInfo zone;
-            for (int i = 0; i < tzzones.Count; i++)
-            {
-                zone = tzzones[i];
-
-                string rulesArray = "", zonesArray = "";
-
-                TzZone[] zones = ArrayUtilities.ConvertToArray<TzZone>(zone.Zones);
-                TzRule[] rules = ArrayUtilities.ConvertToArray<TzRule>(zone.Rules);
-
-                // Remove rule duplicates and sort both lists
-
-                zonesArray = SortZones(zonesArray, zones);
-
-                rulesArray = SortRules(rulesArray, rules);
-
-                if (NeedsFunction(i))
-                {
-                    writer = sbwriter;
-                    string funcName = CodeUtilities.StripNonIdentifierCharacters(Language.CSharp, zone.ZoneName) + '_' + i;
-                    Console.WriteLine(@"{0}InitializeZones{1}(zone, zones, zoneList);", tabs, funcName);
-                    writer.WriteLine(@"{1}private static void InitializeZones{0}(PublicDomain.TzTimeZone.TzZoneInfo zone, Dictionary<string, PublicDomain.TzTimeZone.TzZoneInfo> zones, List<PublicDomain.TzTimeZone.TzZoneInfo> zoneList)
-{1}{{", funcName, tabs1);
-                }
-                else
-                {
-                    writer = Console.Out;
-                }
-
-                writer.WriteLine(@"{3}zone = new PublicDomain.TzTimeZone.TzZoneInfo(""{0}"", {1}, {2});
-{3}zones[""{0}""] = zone;", zone.ZoneName, zonesArray, rulesArray, tabs);
-
-                if (generateList)
-                {
-                    writer.WriteLine(@"{3}zoneList.Add(zone);", zone.ZoneName, zonesArray, rulesArray, tabs);
-                }
-
-                if (NeedsFunction(i))
-                {
-                    writer.WriteLine(@"{0}}}
-", tabs1);
-                }
-                else
-                {
-                    writer.WriteLine();
-                }
-            }
-
-            Console.WriteLine(@"
-{0}m_zones = ReadOnlyDictionary<string, TzZoneInfo>.AsReadOnly(zones);
-{0}m_zoneList = zoneList.AsReadOnly();
-{1}}}
-", tabs, tabs1);
-
-            if (sb.Length > 0)
-            {
-                Console.WriteLine(sb);
-            }
-
-            Console.WriteLine(@"
-{1}#endregion", tabs, tabs1);
-        }
-
-        private static string SortZones(string zonesArray, TzZone[] zones)
-        {
-            if (zones.Length > 0)
-            {
-                // First remove any duplicates
-                List<TzZone> tempZones = new List<TzZone>(zones);
-                ArrayUtilities.RemoveDuplicates<TzZone>(tempZones);
-
-                tempZones.Sort(SortZonesComparison);
-
-                foreach (TzZone zoneData in tempZones)
-                {
-                    if (zonesArray.Length > 0)
-                    {
-                        zonesArray += ",";
-                    }
-                    zonesArray += zoneData.GetObjectString();
-                }
-                zonesArray = "new List<PublicDomain.TzDatabase.TzZone>(new PublicDomain.TzDatabase.TzZone[] {" + zonesArray + "})";
-            }
-            else
-            {
-                zonesArray = "null";
-            }
-            return zonesArray;
-        }
-
-        private static string SortRules(string rulesArray, TzRule[] rules)
-        {
-            if (rules.Length > 0)
-            {
-                // First remove any duplicates
-                List<TzRule> tempRules = new List<TzRule>(rules);
-                ArrayUtilities.RemoveDuplicates<TzRule>(tempRules);
-
-                // Next, sort the items
-                tempRules.Sort(SortRulesComparison);
-
-                foreach (TzRule rule in tempRules)
-                {
-                    if (rulesArray.Length > 0)
-                    {
-                        rulesArray += ",";
-                    }
-                    rulesArray += rule.GetObjectString();
-                }
-                rulesArray = "new List<PublicDomain.TzDatabase.TzRule>(new PublicDomain.TzDatabase.TzRule[] {" + rulesArray + "})";
-            }
-            else
-            {
-                rulesArray = "null";
-            }
-            return rulesArray;
-        }
-
-        private static int SortRulesComparison(TzRule x, TzRule y)
-        {
-            return x.CompareTo(y);
-        }
-
-        private static int SortZonesComparison(TzZone x, TzZone y)
-        {
-            return x.CompareTo(y);
-        }
-
-        private bool NeedsFunction(int i)
-        {
-            return true;
-        }
-
-#endif
+        /// <summary>
+        /// 
+        /// </summary>
+        public const string FactoryZoneName = "Factory";
 
         /// <summary>
         /// Reads the database.
@@ -20271,107 +19223,6 @@ namespace PublicDomain
         }
     }
 
-#if !(NONUNIT)
-    /// <summary>
-    /// 
-    /// </summary>
-    [TestFixture]
-    public class GeneralTests
-    {
-        /// <summary>
-        /// Plays this instance.
-        /// </summary>
-        [Test]
-        public void play()
-        {
-            using (PublicDomain.Win32.Job job = new PublicDomain.Win32.Job("dorp"))
-            {
-                job.SetLimitWorkingSetSize((uint)GlobalConstants.BytesInAMegabyte, (uint)GlobalConstants.BytesInAMegabyte * 10);
-
-                PublicDomain.Win32.Win32Structures.JOBOBJECT_BASIC_LIMIT_INFORMATION limitInfo = job.QueryInformationJobObjectLimit();
-
-                Console.WriteLine(limitInfo.MaximumWorkingSetSize);
-
-                Process p = new Process();
-                p.StartInfo = new ProcessStartInfo(@"c:\windows\system32\cmd.exe");
-                p.Start();
-
-                job.AssignProcess(p);
-            }
-        }
-
-        /// <summary>
-        /// Adds the revision.
-        /// </summary>
-        [Test]
-        public void AddRevision()
-        {
-            string csFile = FileSystemUtilities.PathCombine(Environment.CurrentDirectory, @"..\..\PublicDomain.cs");
-            string text = File.ReadAllText(csFile);
-            Version newVersion = null;
-            string newText = RegexUtilities.Replace(text, @"public const string PublicDomainVersion = ""(\d+\.\d+\.\d+\.\d+)"";", 1, delegate(int captureIndex, string captureValue)
-            {
-                newVersion = VersionUtilities.AddBuild(new Version(captureValue), 1);
-                return newVersion.ToString();
-            });
-
-            if (text != newText)
-            {
-                File.WriteAllText(csFile, newText);
-                Console.WriteLine("PublicDomain version updated");
-                UpdateProductVersion(newVersion);
-            }
-            else
-            {
-                Console.WriteLine("PublicDomain version NOT updated");
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        [Test]
-        public void UpdateProductVersion()
-        {
-            Version currentVersion = new Version(GlobalConstants.PublicDomainVersion);
-            UpdateProductVersion(currentVersion);
-        }
-
-        private static void UpdateProductVersion(Version currentVersion)
-        {
-            string newProductVersion = currentVersion.ToString(3);
-
-            string projFile = FileSystemUtilities.CombineTrackbacksInPath(FileSystemUtilities.PathCombine(Environment.CurrentDirectory, @"..\..\pdsetup\pdsetup.vdproj"));
-            string text = File.ReadAllText(projFile);
-            string newText = RegexUtilities.Replace(text, @"""ProductVersion"" = ""\d+:(\d+\.\d+\.\d+)""", 1, delegate(int captureIndex, string captureValue)
-            {
-                return newProductVersion;
-            });
-
-            if (text != newText)
-            {
-                // We also need a new ProductCode and PackageCode
-                newText = RegexUtilities.Replace(newText, @"""ProductCode"" = ""8:{(....................................)}""", 1, delegate(int captureIndex, string captureValue)
-                {
-                    return Guid.NewGuid().ToString().ToUpper();
-                });
-
-                newText = RegexUtilities.Replace(newText, @"""PackageCode"" = ""8:{(....................................)}""", 1, delegate(int captureIndex, string captureValue)
-                {
-                    return Guid.NewGuid().ToString().ToUpper();
-                });
-
-                File.WriteAllText(projFile, newText);
-                Console.WriteLine("Version updated");
-            }
-            else
-            {
-                Console.WriteLine("Version NOT updated");
-            }
-        }
-    }
-#endif
-
     /// <summary>
     /// 
     /// </summary>
@@ -20745,81 +19596,6 @@ namespace PublicDomain
             /// </summary>
             public int Size;
         }
-
-#if !(NONUNIT)
-        /// <summary>
-        /// 
-        /// </summary>
-        [TestFixture]
-        public class SpellCheckerTests
-        {
-            /// <summary>
-            /// Tests the valid check.
-            /// </summary>
-            [Test]
-            public void TestValidCheck()
-            {
-                SetupValidDirectories();
-
-                Assert.IsFalse(SpellChecker.IsWordSpelledCorrectly("perfuntory"));
-                Assert.IsTrue(SpellChecker.IsWordSpelledCorrectly("perfunctory"));
-            }
-
-            /// <summary>
-            /// Tests the valid suggest.
-            /// </summary>
-            [Test]
-            public void TestValidSuggest()
-            {
-                SetupValidDirectories();
-
-                List<string> suggestions = SpellChecker.SuggestWords("perfuntory");
-
-                Assert.AreNotSame(suggestions.IndexOf("perfunctory"), -1);
-
-                foreach (string suggestion in suggestions)
-                {
-                    Console.WriteLine(suggestion);
-                }
-            }
-
-            /// <summary>
-            /// Tests the invalid check.
-            /// </summary>
-            [Test]
-            [ExpectedException(typeof(SpellCheckerException))]
-            public void TestInvalidCheck()
-            {
-                SetupInvalidDirectories();
-
-                SpellChecker.IsWordSpelledCorrectly("test");
-            }
-
-            /// <summary>
-            /// Tests the invalid suggest.
-            /// </summary>
-            [Test]
-            [ExpectedException(typeof(SpellCheckerException))]
-            public void TestInvalidSuggest()
-            {
-                SetupInvalidDirectories();
-
-                SpellChecker.SuggestWords("test");
-            }
-
-            private static void SetupInvalidDirectories()
-            {
-                SpellChecker.DataDirectory = Path.GetTempPath();
-                SpellChecker.DictionaryDirectory = Path.GetTempPath();
-            }
-
-            private static void SetupValidDirectories()
-            {
-                SpellChecker.DataDirectory = SpellChecker.DefaultDataDirectory;
-                SpellChecker.DictionaryDirectory = SpellChecker.DefaultDictionaryDirectory;
-            }
-        }
-#endif
     }
 #endif
 }
@@ -22961,23 +21737,6 @@ namespace PublicDomain.ScreenScraper
             }
             return req;
         }
-
-#if !(NONUNIT)
-        /// <summary>
-        /// 
-        /// </summary>
-        [TestFixture]
-        public class ScraperTests
-        {
-            /// <summary>
-            /// Plays this instance.
-            /// </summary>
-            [Test]
-            public void play()
-            {
-            }
-        }
-#endif
     }
 }
 #endif
@@ -30867,25 +29626,6 @@ End Namespace
               System.Runtime.Serialization.StreamingContext context)
                 : base(info, context) { }
         }
-
-#if !(NONUNIT)
-        /// <summary>
-        /// 
-        /// </summary>
-        [TestFixture]
-        public class CodeUtilityTests
-        {
-            /// <summary>
-            /// Test1s this instance.
-            /// </summary>
-            [Test]
-            public void Test1()
-            {
-                Console.WriteLine(EvalSnippet(Language.CSharp, "TimeSpan.Parse(\"-05:00\").Hours"));
-                Console.WriteLine(EvalSnippet(Language.VisualBasic, "TimeSpan.Parse(\"-05:00\").Hours"));
-            }
-        }
-#endif
     }
 }
 #endif

@@ -57,8 +57,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GlobalConstants.cs" />
+    <Compile Include="Pair.cs" />
     <Compile Include="PublicDomain.cs" />
     <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="Triple.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="doc\Documentation.chm" />
@@ -69,7 +72,17 @@
     <Content Include="README.txt" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="AspRuntimeHost\" />
+    <Folder Include="CodeCount\" />
+    <Folder Include="Config\" />
+    <Folder Include="Dynacode\" />
+    <Folder Include="Feeder\Atom\" />
+    <Folder Include="Feeder\Opml\" />
+    <Folder Include="Feeder\Rss\" />
+    <Folder Include="Logging\" />
     <Folder Include="Properties\" />
+    <Folder Include="ScreenScraper\" />
+    <Folder Include="Web\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
