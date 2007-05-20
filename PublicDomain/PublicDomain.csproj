@@ -57,11 +57,59 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Archiver.cs" />
+    <Compile Include="ArrayUtilities.cs" />
+    <Compile Include="CachedPropertiesProvider.cs" />
+    <Compile Include="CharUtilities.cs" />
+    <Compile Include="ConsoleRerouter.cs" />
+    <Compile Include="ConversionUtilities.cs" />
+    <Compile Include="Crc32.cs" />
+    <Compile Include="Cryptography.cs" />
+    <Compile Include="CryptographyUtilities.cs" />
+    <Compile Include="CultureConstants.cs" />
+    <Compile Include="Web\Cursors.cs" />
+    <Compile Include="DateTimeUtlities.cs" />
+    <Compile Include="DefaultCryptographer.cs" />
+    <Compile Include="DisposableReaderWriter.cs" />
+    <Compile Include="DistanceType.cs" />
+    <Compile Include="ExceptionUtilities.cs" />
+    <Compile Include="FileSystemUtilities.cs" />
+    <Compile Include="General.cs" />
+    <Compile Include="GenericUtilities.cs" />
     <Compile Include="GlobalConstants.cs" />
+    <Compile Include="ICachedPropertiesProvider.cs" />
+    <Compile Include="ICryptographer.cs" />
+    <Compile Include="IExposesReaderWriterLock.cs" />
+    <Compile Include="IInitializable.cs" />
+    <Compile Include="InvariantCultureContext.cs" />
+    <Compile Include="Iso3166.cs" />
+    <Compile Include="Iso6709.cs" />
+    <Compile Include="Iso8601.cs" />
+    <Compile Include="Language.cs" />
+    <Compile Include="LatitudeLongitudePoint.cs" />
+    <Compile Include="ManagementUtilities.cs" />
+    <Compile Include="Month.cs" />
+    <Compile Include="ObjectUtilities.cs" />
     <Compile Include="Pair.cs" />
+    <Compile Include="PendingPublicDomainAttribute.cs" />
+    <Compile Include="ProcessHelper.cs" />
     <Compile Include="PublicDomain.cs" />
     <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="Quadruple.cs" />
+    <Compile Include="RandomGenerationUtilities.cs" />
+    <Compile Include="ReadOnlyDictionary.cs" />
+    <Compile Include="ReadOnlyICollection.cs" />
+    <Compile Include="ReflectionUtilities.cs" />
+    <Compile Include="RegexUtilities.cs" />
+    <Compile Include="SpellCheckerException.cs" />
+    <Compile Include="StringUtilities.cs" />
+    <Compile Include="ThreadingUtilities.cs" />
     <Compile Include="Triple.cs" />
+    <Compile Include="TzTimeZone.cs" />
+    <Compile Include="UnitedStatesUtilities.cs" />
+    <Compile Include="VersionUtilities.cs" />
+    <Compile Include="Win32.cs" />
+    <Compile Include="XmlUtilities.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="doc\Documentation.chm" />
@@ -72,17 +120,7 @@
     <Content Include="README.txt" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="AspRuntimeHost\" />
-    <Folder Include="CodeCount\" />
-    <Folder Include="Config\" />
-    <Folder Include="Dynacode\" />
-    <Folder Include="Feeder\Atom\" />
-    <Folder Include="Feeder\Opml\" />
-    <Folder Include="Feeder\Rss\" />
-    <Folder Include="Logging\" />
     <Folder Include="Properties\" />
-    <Folder Include="ScreenScraper\" />
-    <Folder Include="Web\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
