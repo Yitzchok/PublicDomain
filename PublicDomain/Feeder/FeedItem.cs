@@ -7,6 +7,7 @@ namespace PublicDomain.Feeder
     /// <summary>
     /// 
     /// </summary>
+    [CLSCompliant(false)]
     public abstract class FeedItem : CachedPropertiesProvider, IFeedItem
     {
         /// <summary>

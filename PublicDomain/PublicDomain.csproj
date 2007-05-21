@@ -22,7 +22,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;PD,NOVJSLIB</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;NOVJSLIB</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Debug\PublicDomain.XML</DocumentationFile>
@@ -59,6 +59,9 @@
   <ItemGroup>
     <Compile Include="Archiver.cs" />
     <Compile Include="ArrayUtilities.cs" />
+    <Compile Include="AspRuntimeHost\wwAspRuntimeHost.cs" />
+    <Compile Include="AspRuntimeHost\wwAspRuntimeProxy.cs" />
+    <Compile Include="AspRuntimeHost\wwWorkerRequest.cs" />
     <Compile Include="CachedPropertiesProvider.cs" />
     <Compile Include="CharUtilities.cs" />
     <Compile Include="CodeCount\Countable.cs" />
@@ -70,14 +73,25 @@
     <Compile Include="CodeCount\DotNetProject.cs" />
     <Compile Include="CodeCount\DotNetSolution.cs" />
     <Compile Include="CodeCount\ICountable.cs" />
+    <Compile Include="Config\ConfigurationValues.cs" />
     <Compile Include="ConsoleRerouter.cs" />
     <Compile Include="ConversionUtilities.cs" />
     <Compile Include="Crc32.cs" />
     <Compile Include="Cryptography.cs" />
     <Compile Include="CryptographyUtilities.cs" />
     <Compile Include="CultureConstants.cs" />
+    <Compile Include="Dynacode\CodeUtilities.cs" />
+    <Compile Include="Dynacode\DotNetCodeRunner.cs" />
+    <Compile Include="Dynacode\ICodeRunner.cs" />
     <Compile Include="Feeder\AtomFeed.cs" />
     <Compile Include="Feeder\AtomFeedItem.cs" />
+    <Compile Include="Feeder\Atom\AtomFeedParser.cs" />
+    <Compile Include="Feeder\Atom\IAtomCategory.cs" />
+    <Compile Include="Feeder\Atom\IAtomContent.cs" />
+    <Compile Include="Feeder\Atom\IAtomGenerator.cs" />
+    <Compile Include="Feeder\Atom\IAtomLink.cs" />
+    <Compile Include="Feeder\Atom\IAtomPerson.cs" />
+    <Compile Include="Feeder\Atom\IAtomText.cs" />
     <Compile Include="Feeder\DistilledFeed.cs" />
     <Compile Include="Feeder\DistilledFeedItem.cs" />
     <Compile Include="Feeder\Feed.cs" />
@@ -97,16 +111,51 @@
     <Compile Include="Feeder\IXmlFeed.cs" />
     <Compile Include="Feeder\OpmlFeed.cs" />
     <Compile Include="Feeder\OpmlSerializer.cs" />
+    <Compile Include="Feeder\Opml\IOpmlBody.cs" />
+    <Compile Include="Feeder\Opml\IOpmlHead.cs" />
+    <Compile Include="Feeder\Opml\IOpmlOutline.cs" />
+    <Compile Include="Feeder\Opml\IOpmlOutlineProvider.cs" />
+    <Compile Include="Feeder\Opml\OpmlParser.cs" />
     <Compile Include="Feeder\Parser.cs" />
     <Compile Include="Feeder\RssFeed.cs" />
     <Compile Include="Feeder\RssFeedItem.cs" />
+    <Compile Include="Feeder\Rss\IRssCategory.cs" />
+    <Compile Include="Feeder\Rss\IRssCloud.cs" />
+    <Compile Include="Feeder\Rss\IRssEnclosure.cs" />
+    <Compile Include="Feeder\Rss\IRssGuid.cs" />
+    <Compile Include="Feeder\Rss\IRssImage.cs" />
+    <Compile Include="Feeder\Rss\IRssSource.cs" />
+    <Compile Include="Feeder\Rss\IRssTextInput.cs" />
+    <Compile Include="Feeder\Rss\RssFeedParser.cs" />
     <Compile Include="Feeder\Serializer.cs" />
     <Compile Include="Feeder\SerializeType.cs" />
+    <Compile Include="Logging\ApplicationLogger.cs" />
+    <Compile Include="Logging\CompositeLogger.cs" />
+    <Compile Include="Logging\ConsoleLogger.cs" />
+    <Compile Include="Logging\DefaultLogFilter.cs" />
+    <Compile Include="Logging\DefaultLogFormatter.cs" />
+    <Compile Include="Logging\FileLogger.cs" />
+    <Compile Include="Logging\FileSizeRollOverStrategy.cs" />
+    <Compile Include="Logging\ILogFilter.cs" />
+    <Compile Include="Logging\ILogFormatter.cs" />
+    <Compile Include="Logging\IRollOverStrategy.cs" />
+    <Compile Include="Logging\LogFormatter.cs" />
+    <Compile Include="Logging\Logger.cs" />
+    <Compile Include="Logging\LoggerSeverity.cs" />
+    <Compile Include="Logging\LoggingConfig.cs" />
+    <Compile Include="Logging\NullLogger.cs" />
+    <Compile Include="Logging\RollingFileLogger.cs" />
+    <Compile Include="Logging\SevereLogFilter.cs" />
+    <Compile Include="Logging\SimpleCompositeLogger.cs" />
+    <Compile Include="Logging\SimpleLogFormatter.cs" />
+    <Compile Include="Logging\TextWriterLogger.cs" />
     <Compile Include="ScreenScraper\ScrapedPage.cs" />
     <Compile Include="ScreenScraper\Scraper.cs" />
     <Compile Include="ScreenScraper\ScrapeSession.cs" />
     <Compile Include="ScreenScraper\ScrapeType.cs" />
     <Compile Include="ScreenScraper\ScreenScraperTag.cs" />
+    <Compile Include="TzDatabase.cs" />
+    <Compile Include="TzDateTime.cs" />
     <Compile Include="Web\Cursors.cs" />
     <Compile Include="DateTimeUtlities.cs" />
     <Compile Include="DefaultCryptographer.cs" />

@@ -8,6 +8,7 @@ namespace PublicDomain
     /// <summary>
     /// 
     /// </summary>
+    [CLSCompliant(false)]
     public class CachedPropertiesProvider : ICachedPropertiesProvider
     {
         private IDictionary<string, string> m_properties = new Dictionary<string, string>();

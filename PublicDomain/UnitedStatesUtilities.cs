@@ -4,7 +4,6 @@ using System.Text;
 
 namespace PublicDomain
 {
-#if !(NOSTATES)
     /// <summary>
     /// Methods and date related to the United States, such as a list
     /// of States.
@@ -221,5 +220,4 @@ namespace PublicDomain
                 : base(info, context) { }
         }
     }
-#endif
 }

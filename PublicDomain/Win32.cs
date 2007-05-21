@@ -11,7 +11,6 @@ using System.ComponentModel;
 
 namespace PublicDomain
 {
-#if !(NOPINVOKE)
     /// <summary>
     /// Interfaces into Win32 calls.
     /// http://www.codeproject.com/csharp/essentialpinvoke.asp
@@ -3009,5 +3008,4 @@ namespace PublicDomain
             throw new Win32Exception(GetLastError());
         }
     }
-#endif
 }

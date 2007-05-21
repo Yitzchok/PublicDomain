@@ -6,7 +6,6 @@ using System.Runtime.Serialization;
 
 namespace PublicDomain
 {
-#if !(NOASPELL)
     /// <summary>
     /// 
     /// </summary>
@@ -225,5 +224,4 @@ namespace PublicDomain
             public int Size;
         }
     }
-#endif
 }

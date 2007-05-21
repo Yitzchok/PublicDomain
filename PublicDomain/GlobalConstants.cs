@@ -32,7 +32,7 @@ namespace PublicDomain
         /// Current version of this code, in string form. In a standalone build,
         /// this is the assembly version and file version of the assembly.
         /// </summary>
-        public const string PublicDomainVersion = "0.2.4.0";
+        public const string PublicDomainVersion = "0.2.5.0";
 
         /// <summary>
         /// The name of the PublicDomain assembly, if this is a standalone build. If
@@ -45,6 +45,13 @@ namespace PublicDomain
         /// build. If this file is included in an existing project, this is meaningless.
         /// </summary>
         public const string PublicDomainStrongName = PublicDomainName + ", Version=" + PublicDomainVersion + ", Culture=neutral, PublicKeyToken=FD3F43B5776A962B";
+
+        /// <summary>
+        /// Fully qualified, absolute URL which acts as a namespace for the classes in the
+        /// PublicDomain.
+        /// Always ends in a trailing slash.
+        /// </summary>
+        public const string PublicDomainNamespace = "http://www.codeplex.com/PublicDomain/";
 
         /// <summary>
         /// The number of bits in 1 Byte (8)
