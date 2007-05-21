@@ -191,7 +191,6 @@
     <Compile Include="ReadOnlyICollection.cs" />
     <Compile Include="ReflectionUtilities.cs" />
     <Compile Include="RegexUtilities.cs" />
-    <Compile Include="SpellCheckerException.cs" />
     <Compile Include="StringUtilities.cs" />
     <Compile Include="ThreadingUtilities.cs" />
     <Compile Include="Triple.cs" />

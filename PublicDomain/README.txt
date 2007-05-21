@@ -12,6 +12,9 @@ Simon Mourier
 
 Version History
 ===============
+V0.2.5.0
+	[kevgrig@gmail.com]
+		* Refactored PublicDomain solution
 V0.2.4.0
 	[kevgrig@gmail.com]
 		* BUG: TzDateTime should not serialize DateTimeLocal
