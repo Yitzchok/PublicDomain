@@ -292,6 +292,7 @@ namespace PublicDomain
         /// </summary>
         /// <param name="str">The STR.</param>
         /// <returns></returns>
+        [CLSCompliant(false)]
         public static uint ParseUInt(string str)
         {
             uint result;
@@ -304,6 +305,7 @@ namespace PublicDomain
         /// </summary>
         /// <param name="str">The STR.</param>
         /// <returns></returns>
+        [CLSCompliant(false)]
         public static ushort ParseUShort(string str)
         {
             ushort result;
@@ -316,6 +318,7 @@ namespace PublicDomain
         /// </summary>
         /// <param name="str">The STR.</param>
         /// <returns></returns>
+        [CLSCompliant(false)]
         public static ulong ParseULong(string str)
         {
             ulong result;

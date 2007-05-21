@@ -13,11 +13,17 @@ namespace PublicDomain
     [TestFixture]
     public class GeneralTests
     {
+        [Test]
+        public void play()
+        {
+            Console.WriteLine("done");
+        }
+
         /// <summary>
         /// Plays this instance.
         /// </summary>
         [Test]
-        public void play()
+        public void TestJobs()
         {
             using (PublicDomain.Win32.Job job = new PublicDomain.Win32.Job("dorp"))
             {

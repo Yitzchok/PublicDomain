@@ -37,6 +37,7 @@ namespace PublicDomain.Feeder.Opml
     /// <summary>
     /// 
     /// </summary>
+    [CLSCompliant(false)]
     public class OpmlOutline : OpmlOutlineProvider, IOpmlOutline
     {
         /// <summary>

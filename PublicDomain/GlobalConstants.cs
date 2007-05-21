@@ -216,4 +216,16 @@ namespace PublicDomain
     /// </summary>
     /// <param name="rock"></param>
     public delegate void CallbackWithRock(object rock);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="str"></param>
+    public delegate void CallbackWithString(string str);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="i"></param>
+    public delegate void CallbackWithInt(int i);
 }

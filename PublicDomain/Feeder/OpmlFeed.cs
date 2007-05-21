@@ -8,6 +8,7 @@ namespace PublicDomain.Feeder
     /// <summary>
     /// 
     /// </summary>
+    [CLSCompliant(false)]
     public class OpmlFeed : CachedPropertiesProvider, IOpmlFeed
     {
         private string rawContents;

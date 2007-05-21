@@ -62,6 +62,7 @@
     <Compile Include="AspRuntimeHost\wwAspRuntimeHost.cs" />
     <Compile Include="AspRuntimeHost\wwAspRuntimeProxy.cs" />
     <Compile Include="AspRuntimeHost\wwWorkerRequest.cs" />
+    <Compile Include="BaseException.cs" />
     <Compile Include="CachedPropertiesProvider.cs" />
     <Compile Include="CharUtilities.cs" />
     <Compile Include="CodeCount\Countable.cs" />

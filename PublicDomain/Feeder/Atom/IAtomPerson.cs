@@ -32,6 +32,7 @@ namespace PublicDomain.Feeder.Atom
     /// <summary>
     /// 
     /// </summary>
+    [CLSCompliant(false)]
     public class AtomPerson : CachedPropertiesProvider, Feeder.Atom.IAtomPerson
     {
         #region IAtomPerson Members

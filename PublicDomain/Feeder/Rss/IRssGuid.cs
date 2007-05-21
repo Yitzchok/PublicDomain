@@ -34,6 +34,7 @@ namespace PublicDomain.Feeder.Rss
     /// <summary>
     /// 
     /// </summary>
+    [CLSCompliant(false)]
     public class RssGuid : CachedPropertiesProvider, Feeder.Rss.IRssGuid
     {
         #region IRssGuid Members

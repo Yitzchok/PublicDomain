@@ -74,6 +74,7 @@ namespace PublicDomain.Feeder.Rss
     /// <summary>
     /// 
     /// </summary>
+    [CLSCompliant(false)]
     public class RssImage : CachedPropertiesProvider, Feeder.Rss.IRssImage
     {
         #region IRssImage Members

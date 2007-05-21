@@ -91,6 +91,7 @@ namespace PublicDomain.Feeder.Rss
     /// <summary>
     /// 
     /// </summary>
+    [CLSCompliant(false)]
     public class RssCloud : CachedPropertiesProvider, Feeder.Rss.IRssCloud
     {
         #region IRssCloud Members

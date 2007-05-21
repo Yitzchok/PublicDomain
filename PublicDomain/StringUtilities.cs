@@ -755,6 +755,7 @@ namespace PublicDomain
         /// </summary>
         /// <param name="str">The STR.</param>
         /// <returns></returns>
+        [CLSCompliant(false)]
         public static uint CalculateCRC32(string str)
         {
             return Crc32.Compute(str);

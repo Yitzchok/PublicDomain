@@ -774,6 +774,7 @@ namespace PublicDomain
         /// Exits the windows.
         /// </summary>
         /// <param name="control">The control.</param>
+        [CLSCompliant(false)]
         public static void ExitWindows(WindowsControl control)
         {
             ExitWindows(control, false);
@@ -784,6 +785,7 @@ namespace PublicDomain
         /// </summary>
         /// <param name="control">The control.</param>
         /// <param name="force">if set to <c>true</c> [force].</param>
+        [CLSCompliant(false)]
         public static void ExitWindows(WindowsControl control, bool force)
         {
             ExitWindows(control, force, true, Win32Constants.SHTDN_REASON_MAJOR_OTHER, Win32Constants.SHTDN_REASON_MINOR_OTHER);
@@ -797,6 +799,7 @@ namespace PublicDomain
         /// <param name="planned">if set to <c>true</c> [planned].</param>
         /// <param name="majorReason">The major reason.</param>
         /// <param name="minorReason">The minor reason.</param>
+        [CLSCompliant(false)]
         public static void ExitWindows(WindowsControl control, bool force, bool planned, uint majorReason, uint minorReason)
         {
             uint flags = (uint)control;
@@ -820,6 +823,7 @@ namespace PublicDomain
         /// <summary>
         /// Wrapper around <see cref="PublicDomain.Win32.Win32Interfaces.IAssemblyName"/>
         /// </summary>
+        [CLSCompliant(false)]
         public class GacAssemblyName : IComWrapper<PublicDomain.Win32.Win32Interfaces.IAssemblyName>
         {
             private PublicDomain.Win32.Win32Interfaces.IAssemblyName m_assemblyName;
@@ -1002,6 +1006,7 @@ namespace PublicDomain
         /// <summary>
         /// Wraps <see cref="PublicDomain.Win32.Win32Interfaces.IAssemblyEnum"/>
         /// </summary>
+        [CLSCompliant(false)]
         public class GacAssemblyEnum : IComWrapper<Win32Interfaces.IAssemblyEnum>, IEnumerable<GacAssemblyName>
         {
             private PublicDomain.Win32.Win32Interfaces.IAssemblyEnum m_assemblyEnum;
@@ -1132,6 +1137,7 @@ namespace PublicDomain
         /// <summary>
         /// 
         /// </summary>
+        [CLSCompliant(false)]
         public class GlobalAssemblyCache
         {
             private static string s_path;
@@ -1380,6 +1386,7 @@ namespace PublicDomain
             /// </summary>
             /// <param name="dll">The DLL.</param>
             /// <param name="references">The references.</param>
+            [CLSCompliant(false)]
             public static void InstallAssembly(string dll, params PublicDomain.Win32.Win32Structures.FUSION_INSTALL_REFERENCE[] references)
             {
                 InstallAssembly(dll, Win32Enums.IASSEMBLYCACHE_INSTALL_FLAG.IASSEMBLYCACHE_INSTALL_FLAG_REFRESH, references);
@@ -1391,6 +1398,7 @@ namespace PublicDomain
             /// <param name="dll">The DLL.</param>
             /// <param name="flag">The flag.</param>
             /// <param name="references">The references.</param>
+            [CLSCompliant(false)]
             public static void InstallAssembly(string dll, Win32Enums.IASSEMBLYCACHE_INSTALL_FLAG flag, params PublicDomain.Win32.Win32Structures.FUSION_INSTALL_REFERENCE[] references)
             {
                 if (references.Length == 0)
@@ -1465,6 +1473,7 @@ namespace PublicDomain
         /// <summary>
         /// Win32 constants
         /// </summary>
+        [CLSCompliant(false)]
         public static class Win32Constants
         {
             /// <summary>
@@ -1704,6 +1713,7 @@ namespace PublicDomain
         /// <summary>
         /// Class that contains PInvoke methods into Win32
         /// </summary>
+        [CLSCompliant(false)]
         public static class ExternalMethods
         {
             /// <summary>
@@ -1893,6 +1903,7 @@ namespace PublicDomain
         /// <summary>
         /// 
         /// </summary>
+        [CLSCompliant(false)]
         public class Job : IDisposable
         {
             private string m_name;
@@ -2103,6 +2114,7 @@ namespace PublicDomain
         /// <summary>
         /// Enumeration that directs a windows control action.
         /// </summary>
+        [CLSCompliant(false)]
         public enum WindowsControl : uint
         {
             /// <summary>
@@ -2613,6 +2625,7 @@ namespace PublicDomain
             /// that is made when an application has installed an assembly in the GAC.
             /// </summary>
             [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+            [CLSCompliant(false)]
             public struct FUSION_INSTALL_REFERENCE
             {
                 /// <summary>
@@ -2652,6 +2665,7 @@ namespace PublicDomain
             /// assembly in the assembly cache.
             /// </summary>
             [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+            [CLSCompliant(false)]
             public struct ASSEMBLY_INFO
             {
                 /// <summary>
@@ -2711,6 +2725,7 @@ namespace PublicDomain
             /// 
             /// </summary>
             [StructLayout(LayoutKind.Sequential)]
+            [CLSCompliant(false)]
             public struct JOBOBJECT_BASIC_LIMIT_INFORMATION
             {
                 /// <summary>
@@ -2763,6 +2778,7 @@ namespace PublicDomain
         /// <summary>
         /// 
         /// </summary>
+        [CLSCompliant(false)]
         public static class Win32Interfaces
         {
             /// <summary>

@@ -94,6 +94,7 @@ namespace PublicDomain
         /// <summary>
         /// Gets or sets the current checksum value.
         /// </summary>
+        [CLSCompliant(false)]
         public uint CheckSum
         {
             get
@@ -111,6 +112,7 @@ namespace PublicDomain
         /// </summary>
         /// <param name="c">The new System.Int32 to add to the current checksum computation.</param>
         /// <returns>The current checksum value.</returns>
+        [CLSCompliant(false)]
         public uint AddToCrc32(int c)
         {
             return AddToCrc32((ushort)c);
@@ -121,6 +123,7 @@ namespace PublicDomain
         /// </summary>
         /// <param name="c">The new System.UInt16 to add to the current checksum computation.</param>
         /// <returns>The current checksum value.</returns>
+        [CLSCompliant(false)]
         public uint AddToCrc32(ushort c)
         {
             byte lowByte = (byte)(c & 0x00FF);
@@ -135,7 +138,8 @@ namespace PublicDomain
         /// </summary>
         /// <param name="stream">The stream to compute the checksum on. May not be null.</param>
         /// <returns>The computed checksum.</returns>
-        static public uint Compute(Stream stream)
+        [CLSCompliant(false)]
+        public static uint Compute(Stream stream)
         {
             if (stream == null)
                 throw new ArgumentNullException("stream");
@@ -159,7 +163,8 @@ namespace PublicDomain
         /// </summary>
         /// <param name="filePath">The path of the file to compute the checksum for. May not be null.</param>
         /// <returns>The computed checksum.</returns>
-        static public uint ComputeFile(string filePath)
+        [CLSCompliant(false)]
+        public static uint ComputeFile(string filePath)
         {
             if (filePath == null)
                 throw new ArgumentNullException("filePath");
@@ -175,7 +180,8 @@ namespace PublicDomain
         /// </summary>
         /// <param name="text">The string to compute the checksum for. May not be null.</param>
         /// <returns>The computed checksum.</returns>
-        static public uint Compute(string text)
+        [CLSCompliant(false)]
+        public static uint Compute(string text)
         {
             if (text == null)
                 throw new ArgumentNullException("text");
@@ -206,7 +212,8 @@ namespace PublicDomain
         /// </summary>
         /// <param name="bytes">The array of bytes to compute the checksum for. May not be null.</param>
         /// <returns>The computed checksum.</returns>
-        static public uint Compute(byte[] bytes)
+        [CLSCompliant(false)]
+        public static uint Compute(byte[] bytes)
         {
             if (bytes == null)
                 throw new ArgumentNullException("bytes");

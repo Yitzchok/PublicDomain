@@ -7,6 +7,7 @@ namespace PublicDomain.Feeder
     /// <summary>
     /// 
     /// </summary>
+    [CLSCompliant(false)]
     public abstract class Feed : CachedPropertiesProvider, IFeed
     {
         private IList<IFeedItem> m_items = new List<IFeedItem>();

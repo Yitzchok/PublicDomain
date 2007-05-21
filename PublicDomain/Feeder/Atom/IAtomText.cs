@@ -26,6 +26,7 @@ namespace PublicDomain.Feeder.Atom
     /// <summary>
     /// 
     /// </summary>
+    [CLSCompliant(false)]
     public class AtomText : CachedPropertiesProvider, Feeder.Atom.IAtomText
     {
         #region IAtomText Members

@@ -7,6 +7,7 @@ namespace PublicDomain.Feeder
     /// <summary>
     /// 
     /// </summary>
+    [CLSCompliant(false)]
     public class DistilledFeedItem : CachedPropertiesProvider, IDistilledFeedItem
     {
         #region IDistilledFeedItem Members

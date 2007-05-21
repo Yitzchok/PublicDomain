@@ -44,6 +44,7 @@ namespace PublicDomain.Feeder.Rss
     /// <summary>
     /// 
     /// </summary>
+    [CLSCompliant(false)]
     public class RssEnclosure : CachedPropertiesProvider, Feeder.Rss.IRssEnclosure
     {
         #region IRssEnclosure Members

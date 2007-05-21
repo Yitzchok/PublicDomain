@@ -14,6 +14,7 @@ namespace PublicDomain
         /// Gets the total physical memory.
         /// </summary>
         /// <returns></returns>
+        [CLSCompliant(false)]
         public static ulong GetTotalPhysicalMemory()
         {
             ManagementObjectSearcher mos = new ManagementObjectSearcher(@"SELECT TotalPhysicalMemory FROM Win32_ComputerSystem");

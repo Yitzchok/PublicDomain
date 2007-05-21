@@ -7,6 +7,7 @@ namespace PublicDomain.Feeder
     /// <summary>
     /// 
     /// </summary>
+    [CLSCompliant(false)]
     public class DistilledFeed : CachedPropertiesProvider, IDistilledFeed
     {
         private IList<IDistilledFeedItem> m_items = new List<IDistilledFeedItem>();

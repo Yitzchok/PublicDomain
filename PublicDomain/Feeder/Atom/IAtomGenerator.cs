@@ -32,6 +32,7 @@ namespace PublicDomain.Feeder.Atom
     /// <summary>
     /// 
     /// </summary>
+    [CLSCompliant(false)]
     public class AtomGenerator : CachedPropertiesProvider, Feeder.Atom.IAtomGenerator
     {
         #region IAtomGenerator Members

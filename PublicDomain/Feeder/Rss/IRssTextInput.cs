@@ -54,6 +54,7 @@ namespace PublicDomain.Feeder.Rss
     /// <summary>
     /// 
     /// </summary>
+    [CLSCompliant(false)]
     public class RssTextInput : CachedPropertiesProvider, Feeder.Rss.IRssTextInput
     {
         #region IRssTextInput Members

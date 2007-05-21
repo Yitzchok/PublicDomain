@@ -9,6 +9,7 @@ namespace PublicDomain.Feeder
     /// <summary>
     /// 
     /// </summary>
+    [CLSCompliant(false)]
     public class RssFeed : Feed, IRssFeed
     {
         #region IRssFeed Members

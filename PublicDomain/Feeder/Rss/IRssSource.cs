@@ -34,6 +34,7 @@ namespace PublicDomain.Feeder.Rss
     /// <summary>
     /// 
     /// </summary>
+    [CLSCompliant(false)]
     public class RssSource : CachedPropertiesProvider, Feeder.Rss.IRssSource
     {
         #region IRssSource Members

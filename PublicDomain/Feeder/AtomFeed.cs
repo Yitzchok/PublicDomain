@@ -8,6 +8,7 @@ namespace PublicDomain.Feeder
     /// <summary>
     /// 
     /// </summary>
+    [CLSCompliant(false)]
     public class AtomFeed : Feed, IAtomFeed
     {
         private IList<IAtomPerson> m_authors = new List<IAtomPerson>();

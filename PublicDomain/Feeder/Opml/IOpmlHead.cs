@@ -92,6 +92,7 @@ namespace PublicDomain.Feeder.Opml
     /// <summary>
     /// 
     /// </summary>
+    [CLSCompliant(false)]
     public class OpmlHead : CachedPropertiesProvider, IOpmlHead
     {
         #region IOpmlHead Members

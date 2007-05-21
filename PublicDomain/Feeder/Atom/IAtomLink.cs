@@ -50,6 +50,7 @@ namespace PublicDomain.Feeder.Atom
     /// <summary>
     /// 
     /// </summary>
+    [CLSCompliant(false)]
     public class AtomLink : CachedPropertiesProvider, Feeder.Atom.IAtomLink
     {
         #region IAtomLink Members

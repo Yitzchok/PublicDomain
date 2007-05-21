@@ -27,7 +27,7 @@ namespace PublicDomain
         /// Ensures the directory ending.
         /// </summary>
         /// <param name="directory">The directory.</param>
-        public static void EnsureDirectoryEnding(ref string directory)
+        public static void EnsureDirectoryEndingRef(ref string directory)
         {
             if (directory != null && directory[directory.Length - 1] != '\\')
             {
@@ -42,7 +42,7 @@ namespace PublicDomain
         /// <returns></returns>
         public static string EnsureDirectoryEnding(string directory)
         {
-            EnsureDirectoryEnding(ref directory);
+            EnsureDirectoryEndingRef(ref directory);
             return directory;
         }
 
