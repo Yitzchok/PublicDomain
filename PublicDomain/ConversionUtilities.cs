@@ -442,5 +442,32 @@ namespace PublicDomain
             result += Convert.ToString(num, 16);
             return result;
         }
+
+        /// <summary>
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <param name="val">if set to <c>true</c> [val].</param>
+        /// <returns></returns>
+        public static bool BooleanLaxTryParse(string str, out bool val)
+        {
+            val = false;
+
+            if (!string.IsNullOrEmpty(str))
+            {
+                str = str.Trim().ToLower();
+                if (str == "off" || str == "false" || str == "0")
+                {
+                    val = false;
+                    return true;
+                }
+                else if (str == "on" || str == "true" || str == "1")
+                {
+                    val = true;
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 }

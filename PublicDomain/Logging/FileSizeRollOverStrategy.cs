@@ -101,7 +101,8 @@ namespace PublicDomain.Logging
                 string checkFileName = string.Format(fileName, maxNumber);
 
                 // Check if this file is too big or not
-                if (new FileInfo(checkFileName).Length >= MaxFileSize)
+                FileInfo info = new FileInfo(checkFileName);
+                if (info.Exists && info.Length >= MaxFileSize)
                 {
                     // Increment the file number
                     fileName = string.Format(fileName, maxNumber + 1);

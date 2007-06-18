@@ -760,5 +760,54 @@ namespace PublicDomain
         {
             return Crc32.Compute(str);
         }
+
+        /// <summary>
+        /// Gets the extension in lower case, without a period in the beginning
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        /// <returns></returns>
+        public static string GetExtension(string uri)
+        {
+            return GetExtension(uri, true);
+        }
+
+        /// <summary>
+        /// Gets the extension, without a period in the beginning
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        /// <param name="lowerCase">if set to <c>true</c> [lower case].</param>
+        /// <returns></returns>
+        public static string GetExtension(string uri, bool lowerCase)
+        {
+            string result = null;
+
+            if (!string.IsNullOrEmpty(uri))
+            {
+                uri = uri.Trim();
+
+                string[] pieces = uri.Split(FileSystemUtilities.TrackbackChars);
+                if (pieces.Length > 0)
+                {
+                    result = pieces[pieces.Length - 1];
+                    if (!string.IsNullOrEmpty(result))
+                    {
+                        int periodIndex = result.IndexOf('.');
+                        if (periodIndex != -1)
+                        {
+                            result = result.Substring(periodIndex + 1);
+                            if (!string.IsNullOrEmpty(result))
+                            {
+                                if (lowerCase)
+                                {
+                                    result = result.ToLower();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return string.IsNullOrEmpty(result) ? null : result;
+        }
     }
 }

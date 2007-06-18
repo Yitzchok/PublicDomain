@@ -12,6 +12,9 @@ Simon Mourier
 
 Version History
 ===============
+V0.2.6.0
+	[kevgrig@gmail.com]
+		* Log guards
 V0.2.5.0
 	[kevgrig@gmail.com]
 		* Refactored PublicDomain solution

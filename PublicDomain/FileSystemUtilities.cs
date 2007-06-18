@@ -11,7 +11,10 @@ namespace PublicDomain
     /// </summary>
     public static class FileSystemUtilities
     {
-        private static char[] trackbackChars = new char[] { '\\', '/' };
+        /// <summary>
+        /// / and \
+        /// </summary>
+        public static readonly char[] TrackbackChars = new char[] { '\\', '/' };
 
         /// <summary>
         /// file:///
@@ -289,7 +292,7 @@ namespace PublicDomain
             {
                 // There is a trackback starting at the index, so from
                 // there we find the nearest slash, and remove that piece
-                slashIndex = uri.LastIndexOfAny(trackbackChars, trackbackIndex - 2);
+                slashIndex = uri.LastIndexOfAny(TrackbackChars, trackbackIndex - 2);
                 if (slashIndex == -1)
                 {
                     break;
@@ -397,7 +400,7 @@ namespace PublicDomain
         /// <returns></returns>
         public static string[] SplitFileIntoDirectoryAndName(string path, bool ensureDirectoryElementEndingSlash)
         {
-            string[] result = StringUtilities.SplitAround(path, path.LastIndexOfAny(trackbackChars));
+            string[] result = StringUtilities.SplitAround(path, path.LastIndexOfAny(TrackbackChars));
 
             if (ensureDirectoryElementEndingSlash)
             {

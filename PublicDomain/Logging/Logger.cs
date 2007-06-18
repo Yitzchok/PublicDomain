@@ -63,6 +63,11 @@ namespace PublicDomain.Logging
         }
 
         /// <summary>
+        /// Can be used as a log guard
+        /// </summary>
+        public bool Enabled = true;
+
+        /// <summary>
         /// The severity threshold at which point a log message
         /// is logged. For example, if the threshold is Debug,
         /// all messages with severity greater than or equal to Debug
@@ -169,36 +174,49 @@ namespace PublicDomain.Logging
         /// <param name="formatParameters"></param>
         public virtual void Log(LoggerSeverity severity, object entry, params object[] formatParameters)
         {
-            // Get the current timestamp
-            DateTime timestamp = DateTime.UtcNow;
-
-            // Check all the filters
-            if (Filters != null)
+            try
             {
-                foreach (ILogFilter filter in Filters)
+                // Get the current timestamp
+                DateTime timestamp = DateTime.UtcNow;
+
+                // Check all the filters
+                if (m_filters != null)
                 {
-                    if (!filter.IsLoggable(Threshold, severity, timestamp, entry, formatParameters))
+                    foreach (ILogFilter filter in m_filters)
                     {
-                        return;
+                        if (!filter.IsLoggable(m_threshold, severity, timestamp, entry, formatParameters))
+                        {
+                            return;
+                        }
                     }
                 }
-            }
 
-            string logLine = null;
+                string logLine = null;
 
-            if (Formatter == null)
-            {
-                if (entry != null)
+                if (m_formatter == null)
                 {
-                    logLine = entry.ToString();
+                    if (entry != null)
+                    {
+                        logLine = entry.ToString();
+                    }
                 }
-            }
-            else
-            {
-                logLine = Formatter.FormatEntry(severity, timestamp, entry, formatParameters, Category, Data);
-            }
+                else
+                {
+                    logLine = Formatter.FormatEntry(severity, timestamp, entry, formatParameters, m_category, m_data);
+                }
 
-            DoLog(severity, timestamp, entry, formatParameters, logLine);
+                DoLog(severity, timestamp, entry, formatParameters, logLine);
+            }
+#if DEBUG
+            catch (Exception ex)
+            {
+                Console.WriteLine(ExceptionUtilities.GetHumanReadableExceptionDetailsAsString(ex));
+            }
+#else
+            catch (Exception)
+            {
+            }
+#endif
         }
 
         /// <summary>
@@ -293,9 +311,9 @@ namespace PublicDomain.Logging
         /// </summary>
         /// <param name="args"></param>
         [Conditional("DEBUG")]
-        public virtual void Start(params object[] args)
+        public virtual void DebugDumpEntry(params object[] args)
         {
-            LogEntryExit(true, true, args);
+            DebugLogEntryExit(true, true, args);
         }
 
         /// <summary>
@@ -305,9 +323,55 @@ namespace PublicDomain.Logging
         /// </summary>
         /// <param name="args"></param>
         [Conditional("DEBUG")]
-        public virtual void End(params object[] args)
+        public virtual void DebugDumpExit(params object[] args)
         {
-            LogEntryExit(false, true, args);
+            DebugLogEntryExit(false, true, args);
+        }
+
+        /// <summary>
+        /// Dumps the entry.
+        /// </summary>
+        /// <param name="methodName">Name of the method.</param>
+        /// <param name="args">The args.</param>
+        public virtual void Entry(string methodName, params object[] args)
+        {
+            LogEntryExit(methodName, true, args);
+        }
+
+        /// <summary>
+        /// Logs the entry exit.
+        /// </summary>
+        /// <param name="methodName">Name of the method.</param>
+        /// <param name="isEntry">if set to <c>true</c> [is entry].</param>
+        /// <param name="args">The args.</param>
+        protected virtual void LogEntryExit(string methodName, bool isEntry, params object[] args)
+        {
+            StringBuilder sb = new StringBuilder(32);
+            if (isEntry)
+            {
+                sb.Append("> ");
+            }
+            else
+            {
+                sb.Append("< ");
+            }
+            sb.Append(methodName);
+            if (args.Length > 0)
+            {
+                sb.Append(": ");
+                BuildArgList(sb, args);
+            }
+            LogDebug10(sb.ToString());
+        }
+
+        /// <summary>
+        /// Exits
+        /// </summary>
+        /// <param name="methodName">Name of the method.</param>
+        /// <param name="args">The args.</param>
+        public virtual void Exit(string methodName, params object[] args)
+        {
+            LogEntryExit(methodName, false, args);
         }
 
         /// <summary>
@@ -316,10 +380,9 @@ namespace PublicDomain.Logging
         /// the configuration mode.
         /// </summary>
         /// <param name="args"></param>
-        [Conditional("DEBUG")]
-        public virtual void WhereAmI(params object[] args)
+        public virtual void DumpStack(params object[] args)
         {
-            LogEntryExit(false, false, args);
+            DebugLogEntryExit(false, false, args);
         }
 
         /// <summary>
@@ -328,7 +391,7 @@ namespace PublicDomain.Logging
         /// <param name="isEntry">if set to <c>true</c> [is entry].</param>
         /// <param name="useMarker">if set to <c>true</c> [use marker].</param>
         /// <param name="args">The args.</param>
-        protected virtual void LogEntryExit(bool isEntry, bool useMarker, object[] args)
+        protected virtual void DebugLogEntryExit(bool isEntry, bool useMarker, object[] args)
         {
             StackTrace trace = new StackTrace(true);
             StackFrame caller = trace.GetFrame(2);
@@ -384,6 +447,23 @@ namespace PublicDomain.Logging
                 caller.GetFileLineNumber()
             );
 
+            BuildArgList(sb, args);
+
+            StackFrame caller2 = trace.GetFrame(3);
+            if (caller2 != null)
+            {
+                sb.AppendFormat(
+                    " {{{0}:{1}:{2}}}",
+                    caller2.GetMethod().Name,
+                    caller2.GetFileName(),
+                    caller2.GetFileLineNumber()
+                );
+            }
+            LogDebug10(sb.ToString());
+        }
+
+        private static void BuildArgList(StringBuilder sb, object[] args)
+        {
             if (args != null)
             {
                 sb.Append(" (");
@@ -404,17 +484,6 @@ namespace PublicDomain.Logging
                 }
                 sb.Append(")");
             }
-            StackFrame caller2 = trace.GetFrame(3);
-            if (caller2 != null)
-            {
-                sb.AppendFormat(
-                    " {{{0}:{1}:{2}}}",
-                    caller2.GetMethod().Name,
-                    caller2.GetFileName(),
-                    caller2.GetFileLineNumber()
-                );
-            }
-            LogDebug10(sb.ToString());
         }
     }
 }

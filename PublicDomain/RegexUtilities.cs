@@ -180,6 +180,25 @@ namespace PublicDomain
         /// </summary>
         /// <param name="input">The input.</param>
         /// <param name="regularExpression">The regular expression.</param>
+        /// <param name="captureIndex">Index of the capture.</param>
+        /// <param name="options">The options.</param>
+        /// <returns></returns>
+        public static string Extract(string input, string regularExpression, int captureIndex, RegexOptions options)
+        {
+            Match m = Regex.Match(input, regularExpression, options);
+            if (m.Success)
+            {
+                return RegexUtilities.GetCapture(m, captureIndex);
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Capture index number 0 is the entire match. Capture
+        /// index 1 is the first matched group from the left, and so on.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <param name="regularExpression">The regular expression.</param>
         /// <param name="captureIndex">Capture index number 0 is the entire match. Capture
         /// index 1 is the first matched group from the left, and so on.
         /// </param>

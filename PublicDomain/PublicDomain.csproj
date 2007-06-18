@@ -197,6 +197,8 @@
     <Compile Include="TzTimeZone.cs" />
     <Compile Include="UnitedStatesUtilities.cs" />
     <Compile Include="VersionUtilities.cs" />
+    <Compile Include="Web\WebConstants.cs" />
+    <Compile Include="Web\WebUtilities.cs" />
     <Compile Include="Win32.cs" />
     <Compile Include="XmlUtilities.cs" />
   </ItemGroup>

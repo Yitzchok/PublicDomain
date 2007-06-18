@@ -73,32 +73,30 @@ namespace PublicDomain.Logging
         }
 
         /// <summary>
-        /// Prints method information and the arguments passed.
-        /// This code is only compiled in with DEBUG set as
-        /// the configuration mode.
-        /// </summary>
-        /// <param name="args"></param>
-        public override void Start(params object[] args)
-        {
-        }
-
-        /// <summary>
-        /// Prints method information and the arguments passed.
-        /// This code is only compiled in with DEBUG set as
-        /// the configuration mode.
-        /// </summary>
-        /// <param name="args"></param>
-        public override void End(params object[] args)
-        {
-        }
-
-        /// <summary>
         /// Logs the entry exit.
         /// </summary>
         /// <param name="isEntry">if set to <c>true</c> [is entry].</param>
         /// <param name="useMarker">if set to <c>true</c> [use marker].</param>
         /// <param name="args">The args.</param>
-        protected override void LogEntryExit(bool isEntry, bool useMarker, object[] args)
+        protected override void DebugLogEntryExit(bool isEntry, bool useMarker, object[] args)
+        {
+        }
+
+        /// <summary>
+        /// Dumps the entry.
+        /// </summary>
+        /// <param name="methodName"></param>
+        /// <param name="args">The args.</param>
+        public override void Entry(string methodName, params object[] args)
+        {
+        }
+
+        /// <summary>
+        /// Exits
+        /// </summary>
+        /// <param name="methodName"></param>
+        /// <param name="args">The args.</param>
+        public override void Exit(string methodName, params object[] args)
         {
         }
 
@@ -116,16 +114,6 @@ namespace PublicDomain.Logging
         /// <param name="ex">The ex.</param>
         /// <param name="severity">The severity.</param>
         public override void LogException(Exception ex, LoggerSeverity severity)
-        {
-        }
-
-        /// <summary>
-        /// Prints method information and the arguments passed.
-        /// This code is only compiled in with DEBUG set as
-        /// the configuration mode.
-        /// </summary>
-        /// <param name="args"></param>
-        public override void WhereAmI(params object[] args)
         {
         }
 
