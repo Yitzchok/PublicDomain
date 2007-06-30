@@ -93,9 +93,14 @@ namespace PublicDomain
         }
 
         /// <summary>
-        /// Throws the exception list, if there are any.
+        /// Throws the exception list, if there are any. Null and zero-length
+        /// lists are permissable and will not throw an Exception. If there
+        /// are more than one exceptions, then the ultimate Exception that
+        /// will be thrown is a <see cref="PublicDomain.ExceptionUtilities.WrappedException"/>
+        /// with all exceptions as a chain of Inner exceptions in WrappedException objects
         /// </summary>
         /// <param name="exceptions">The exceptions.</param>
+        /// <exception cref="PublicDomain.ExceptionUtilities.WrappedException">If <paramref name="exceptions"/> has more than one element.</exception>
         public static void ThrowExceptionList(ICollection<Exception> exceptions)
         {
             if (exceptions != null && exceptions.Count > 0)
@@ -120,6 +125,7 @@ namespace PublicDomain
                             exception = new WrappedException(exceptionList[i], exception);
                         }
                     }
+                    throw exception;
                 }
             }
         }

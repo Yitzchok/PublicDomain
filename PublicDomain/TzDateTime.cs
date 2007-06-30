@@ -16,7 +16,11 @@ namespace PublicDomain
     [SoapType(Namespace = GlobalConstants.PublicDomainNamespace)]
     public class TzDateTime
     {
-        private const string UtcOffsetModifier = "+00:00";
+        /// <summary>
+        /// +00:00
+        /// </summary>
+        public const string UtcOffsetModifier = "+00:00";
+
         private DateTime m_dateTimeUtc;
         private TzTimeZone m_timeZone;
 

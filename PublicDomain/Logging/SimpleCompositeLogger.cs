@@ -12,10 +12,7 @@ namespace PublicDomain.Logging
     {
         private string m_className;
         private string m_prefix;
-        private const string InitialLine = "NEW STATIC INITIALIZATION";
         internal static readonly int CATEGORY_LENGTH = 10;
-
-        private static int logcount = 1;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SimpleCompositeLogger"/> class.
@@ -62,12 +59,6 @@ namespace PublicDomain.Logging
         /// <param name="formatParameters"></param>
         public override void Log(LoggerSeverity severity, object entry, params object[] formatParameters)
         {
-            if (logcount++ == 1)
-            {
-                base.Log(LoggerSeverity.Infinity, null);
-                base.Log(LoggerSeverity.Infinity, InitialLine);
-            }
-
             Category = m_prefix;
             if (severity == LoggerSeverity.Fatal50)
             {
