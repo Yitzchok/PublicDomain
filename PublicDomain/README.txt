@@ -12,7 +12,7 @@ Simon Mourier
 
 Version History
 ===============
-V0.2.8.0
+V0.2.7.0
 	[kevgrig@gmail.com]
 		* BUG: ExceptionUtilities didn't throw a list of Exceptions
 V0.2.6.0
