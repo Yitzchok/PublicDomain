@@ -536,5 +536,20 @@ namespace PublicDomain
 
             return string.IsNullOrEmpty(result) ? null : result;
         }
+
+        /// <summary>
+        /// Replaces the extension. <paramref name="newExtension"/> does not
+        /// begin with a period.
+        /// </summary>
+        /// <param name="path">The path.</param>
+        /// <param name="newExtension">The new extension.</param>
+        /// <returns></returns>
+        [PendingPublicDomain]
+        public static string ReplaceExtension(string path, string newExtension)
+        {
+            string existingExtension = GetExtension(path, false, true);
+            path = path.Substring(0, path.Length - existingExtension.Length) + newExtension;
+            return path;
+        }
     }
 }

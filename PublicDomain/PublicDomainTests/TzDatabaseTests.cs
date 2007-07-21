@@ -4,12 +4,16 @@ using System.Text;
 using NUnit.Framework;
 using System.IO;
 using PublicDomain.Dynacode;
+using System.Text.RegularExpressions;
 
 namespace PublicDomain
 {
     [TestFixture]
     public class TzDatabaseTests
     {
+        public const string RegionStart = "#region Generated Time Zones";
+        public const string RegionEnd = "#endregion";
+
         /// <summary>
         /// Parse3166s the tab.
         /// </summary>
@@ -145,7 +149,7 @@ namespace PublicDomain
             string tabs = new string('\t', numberOfTabs);
             string tabs1 = new string('\t', numberOfTabs - 1);
             Console.WriteLine(@"
-{1}#region Generated Time Zones
+{1}{2}
 
 {1}private static void InitializeZones()
 {1}{{
@@ -154,7 +158,7 @@ namespace PublicDomain
 {0}Dictionary<string, PublicDomain.TzTimeZone.TzZoneInfo> zones = new Dictionary<string, PublicDomain.TzTimeZone.TzZoneInfo>();
 {0}List<PublicDomain.TzTimeZone.TzZoneInfo> zoneList = new List<PublicDomain.TzTimeZone.TzZoneInfo>();
 {0}PublicDomain.TzTimeZone.TzZoneInfo zone = null;
-", tabs, tabs1);
+", tabs, tabs1, RegionStart);
 
             StringBuilder sb = new StringBuilder();
             TextWriter sbwriter = new StringWriter(sb), writer;
@@ -219,7 +223,7 @@ namespace PublicDomain
             }
 
             Console.WriteLine(@"
-{1}#endregion", tabs, tabs1);
+{1}{2}", tabs, tabs1, RegionEnd);
         }
 
         private static string SortZones(string zonesArray, PublicDomain.TzDatabase.TzZone[] zones)
@@ -290,6 +294,43 @@ namespace PublicDomain
         private bool NeedsFunction(int i)
         {
             return true;
+        }
+
+        /// <summary>
+        /// Reads the database and then overwrites TzTimeZone.cs
+        /// which has the codified data.
+        /// </summary>
+        public void ExecuteReplaceData()
+        {
+            string fileLocation = @"..\..\..\TzTimeZone.cs";
+            StringBuilder sb = new StringBuilder(5092);
+            using (new ConsoleRerouter(sb))
+            {
+                ReadDatabase();
+            }
+            string content = StringUtilities.TrimNewlines(sb.ToString());
+            if (content.Length < 100)
+            {
+                throw new Exception("Content does not appear to be correct (too short)");
+            }
+
+            string tzTimeZoneFile = File.ReadAllText(fileLocation);
+            Regex r = new Regex(RegionStart + ".+" + RegionEnd, RegexOptions.Singleline);
+            bool replaced = false;
+            tzTimeZoneFile = r.Replace(tzTimeZoneFile, new MatchEvaluator(delegate(Match m)
+            {
+                replaced = true;
+                return content;
+            }));
+
+            Console.WriteLine("{0} content to replace", replaced ? "Successfully found" : "Did not find");
+
+            if (replaced)
+            {
+                Console.Write("Paching...");
+                File.WriteAllText(fileLocation, tzTimeZoneFile);
+                Console.WriteLine("OK");
+            }
         }
     }
 }

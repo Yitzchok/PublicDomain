@@ -160,7 +160,7 @@ namespace PublicDomain
 
         private static void ThrowInvalidFormatException(string str)
         {
-            throw new TzDatabase.TzParseException(string.Format("Date/time does not conform to ISO 8601 format ({0}).", str));
+            throw new TzDatabase.TzParseException("Date/time does not conform to ISO 8601 format ({0}).", str);
         }
 
         /// <summary>

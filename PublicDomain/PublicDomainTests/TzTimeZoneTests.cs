@@ -74,21 +74,21 @@ namespace PublicDomain
         {
             foreach (PublicDomain.TzTimeZone.TzZoneInfo zone in TzTimeZone.ZoneList)
             {
-                bool containsInfinity = false;
+                TzDatabase.TzZone infinityZone = null;
                 foreach (TzDatabase.TzZone zoneInfo in zone.Zones)
                 {
                     if (zoneInfo.UntilYear == int.MaxValue)
                     {
-                        if (containsInfinity)
+                        if (infinityZone != null)
                         {
-                            throw new TzDatabase.TzException("Multiple ZONE information lines with infinity end dates");
+                            throw new TzDatabase.TzException("Multiple ZONE information lines with infinity end dates ({0}, {1})", infinityZone, zoneInfo);
                         }
-                        containsInfinity = true;
+                        infinityZone = zoneInfo;
                     }
                 }
-                if (!containsInfinity)
+                if (infinityZone == null)
                 {
-                    throw new TzDatabase.TzException("No zone goes to infinity for " + zone.ZoneName);
+                    throw new TzDatabase.TzException("No zone goes to infinity for {0}", zone.ZoneName);
                 }
             }
         }

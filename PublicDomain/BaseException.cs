@@ -8,7 +8,7 @@ namespace PublicDomain
 {
     /// <summary>
     /// This simply extends the <see cref="Exception"/> class
-    /// by adding a variable length parameters list in the basic
+    /// by adding a variable length parameter list in the basic
     /// constructor which takes the exception message, and then
     /// apply string.Format if necessary, which is an incredibly
     /// common expectation when throwing exceptions, and should have been
@@ -39,10 +39,11 @@ namespace PublicDomain
         /// <summary>
         /// Initializes a new instance of the <see cref="Exception"/> class.
         /// </summary>
-        /// <param name="message">The message.</param>
         /// <param name="inner">The inner.</param>
-        public BaseException(string message, Exception inner)
-            : base(message, inner)
+        /// <param name="message">The message.</param>
+        /// <param name="formatParameters">The format parameters.</param>
+        public BaseException(Exception inner, string message, params object[] formatParameters)
+            : base(formatParameters.Length > 0 ? string.Format(message, formatParameters) : message, inner)
         {
         }
 

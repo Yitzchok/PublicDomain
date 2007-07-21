@@ -205,16 +205,11 @@ namespace PublicDomain
         /// <returns></returns>
         public static bool TryParseTimeSpan(string timeSpan, out TimeSpan result)
         {
-            result = TimeSpan.Zero;
-            try
+            if (timeSpan != null && timeSpan[0] == '+')
             {
-                result = ParseTimeSpan(timeSpan);
-                return true;
+                timeSpan = timeSpan.Substring(1);
             }
-            catch (Exception)
-            {
-            }
-            return false;
+            return TimeSpan.TryParse(timeSpan, out result);
         }
 
         /// <summary>

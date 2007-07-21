@@ -60,6 +60,28 @@ namespace PublicDomain
         }
 
         /// <summary>
+        /// Finds the types by interface.
+        /// </summary>
+        /// <param name="assembly">The assembly.</param>
+        /// <returns></returns>
+        [PendingPublicDomain]
+        public static List<Type> FindTypesByInterface<T>(Assembly assembly) where T : class
+        {
+            Type[] types = assembly.GetTypes();
+            Type interfaceType;
+            List<Type> result = new List<Type>();
+            foreach (Type type in types)
+            {
+                interfaceType = type.GetInterface(typeof(T).ToString(), false);
+                if (interfaceType != null)
+                {
+                    result.Add(type);
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
         /// Finds the instance by interface.
         /// </summary>
         /// <param name="assembly">The assembly.</param>

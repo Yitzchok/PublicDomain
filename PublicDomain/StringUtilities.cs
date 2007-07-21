@@ -11,6 +11,11 @@ namespace PublicDomain
     /// </summary>
     public static class StringUtilities
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        public static char[] DefaultQuoteSensitiveChars = new char[] { '\"' };
+
         private static Random s_random;
 
         /// <summary>
@@ -345,6 +350,123 @@ namespace PublicDomain
             }
 
             return pieces;
+        }
+
+        /// <summary>
+        /// Splits the string based on whitespace, being sensitive to
+        /// quotes. Always returns a non-null array, possibly zero-length.
+        /// </summary>
+        /// <param name="line">The line.</param>
+        /// <param name="dividerChars">The divider chars.</param>
+        /// <returns></returns>
+        public static string[] SplitQuoteSensitive(string line, params char[] dividerChars)
+        {
+            return SplitQuoteSensitive(line, false, dividerChars);
+        }
+
+        /// <summary>
+        /// Splits the string based on whitespace, being sensitive to
+        /// quotes. Always returns a non-null array, possibly zero-length.
+        /// </summary>
+        /// <param name="line">The line.</param>
+        /// <param name="retainDivider">if set to <c>true</c> [retain divider].</param>
+        /// <param name="dividerChars">The divider chars.</param>
+        /// <returns></returns>
+        public static string[] SplitQuoteSensitive(string line, bool retainDivider, params char[] dividerChars)
+        {
+            List<string> result = new List<string>();
+            if (line != null)
+            {
+                if (dividerChars.Length == 0)
+                {
+                    // no divider chars specified, use the default
+                    dividerChars = DefaultQuoteSensitiveChars;
+                }
+
+                SplitQuoteSensitiveState state = SplitQuoteSensitiveState.InEther;
+                int length = line.Length;
+                char c;
+                StringBuilder sb = new StringBuilder(length);
+                char matchChar = '\0';
+
+                for (int i = 0; i < length; i++)
+                {
+                    c = line[i];
+                    if (char.IsWhiteSpace(c))
+                    {
+                        switch (state)
+                        {
+                            case SplitQuoteSensitiveState.InPiece:
+                                // the piece has ended
+                                result.Add(sb.ToString());
+                                sb.Length = 0;
+                                state = SplitQuoteSensitiveState.InEther;
+                                break;
+                            case SplitQuoteSensitiveState.InDivision:
+                                // whitespace within quotes
+                                sb.Append(c);
+                                break;
+
+                            // ignore:
+                            //case SplitQuoteSensitiveState.InEther:
+                        }
+                    }
+                    else if (CharUtilities.IsCharacterOneOf(c, dividerChars) && (matchChar == '\0' || matchChar == c))
+                    {
+                        switch (state)
+                        {
+                            case SplitQuoteSensitiveState.InEther:
+                                state = SplitQuoteSensitiveState.InDivision;
+                                matchChar = c;
+                                if (retainDivider)
+                                {
+                                    sb.Append(c);
+                                }
+                                break;
+                            case SplitQuoteSensitiveState.InPiece:
+                                // quote in the middle of a piece
+                                sb.Append(c);
+                                break;
+                            case SplitQuoteSensitiveState.InDivision:
+                                // Finish the piece
+                                result.Add(sb.ToString());
+                                sb.Length = 0;
+                                matchChar = '\0';
+                                state = SplitQuoteSensitiveState.InEther;
+                                if (retainDivider)
+                                {
+                                    sb.Append(c);
+                                }
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        if (state == SplitQuoteSensitiveState.InEther)
+                        {
+                            state = SplitQuoteSensitiveState.InPiece;
+                        }
+                        sb.Append(c);
+                    }
+                }
+
+                // See if there is any trailing content
+                switch (state)
+                {
+                    case SplitQuoteSensitiveState.InPiece:
+                    case SplitQuoteSensitiveState.InDivision:
+                        result.Add(sb.ToString());
+                        break;
+                }
+            }
+            return result.ToArray();
+        }
+
+        private enum SplitQuoteSensitiveState
+        {
+            InEther,
+            InPiece,
+            InDivision
         }
 
         /// <summary>
@@ -759,6 +881,84 @@ namespace PublicDomain
         public static uint CalculateCRC32(string str)
         {
             return Crc32.Compute(str);
+        }
+
+        /// <summary>
+        /// Trims the newlines.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns></returns>
+        public static string TrimNewlines(string str)
+        {
+            return TrimNewlinesRight(TrimNewlinesLeft(str));
+        }
+
+        /// <summary>
+        /// Trims the newlines left.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns></returns>
+        public static string TrimNewlinesLeft(string str)
+        {
+            if (str != null)
+            {
+                int cutLeft = 0;
+                int length = str.Length;
+                char c;
+
+                for (int i = 0; i < length; i++)
+                {
+                    c = str[i];
+                    if (c == '\r' || c == '\n')
+                    {
+                        cutLeft++;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+
+                if (cutLeft > 0)
+                {
+                    str = str.Substring(cutLeft);
+                }
+            }
+            return str;
+        }
+
+        /// <summary>
+        /// Trims the newlines right.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns></returns>
+        public static string TrimNewlinesRight(string str)
+        {
+            if (str != null)
+            {
+                int cutRight = 0;
+                int length = str.Length;
+                char c;
+
+                for (int i = length - 1; i >= 0; i--)
+                {
+                    c = str[i];
+                    if (c == '\r' || c == '\n')
+                    {
+                        cutRight++;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+
+                if (cutRight > 0)
+                {
+                    str = str.Substring(0, str.Length - cutRight);
+                }
+            }
+            return str;
         }
     }
 }

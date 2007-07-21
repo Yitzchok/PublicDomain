@@ -81,6 +81,7 @@
     <Compile Include="Cryptography.cs" />
     <Compile Include="CryptographyUtilities.cs" />
     <Compile Include="CultureConstants.cs" />
+    <Compile Include="CurrentDirectoryRerouter.cs" />
     <Compile Include="Dynacode\CodeUtilities.cs" />
     <Compile Include="Dynacode\DotNetCodeRunner.cs" />
     <Compile Include="Dynacode\ICodeRunner.cs" />
@@ -150,11 +151,16 @@
     <Compile Include="Logging\SimpleCompositeLogger.cs" />
     <Compile Include="Logging\SimpleLogFormatter.cs" />
     <Compile Include="Logging\TextWriterLogger.cs" />
+    <Compile Include="LogicalDisposeScope.cs" />
+    <Compile Include="LogicalTransactionScope.cs" />
+    <Compile Include="RevertAsserts.cs" />
     <Compile Include="ScreenScraper\ScrapedPage.cs" />
     <Compile Include="ScreenScraper\Scraper.cs" />
     <Compile Include="ScreenScraper\ScrapeSession.cs" />
     <Compile Include="ScreenScraper\ScrapeType.cs" />
     <Compile Include="ScreenScraper\ScreenScraperTag.cs" />
+    <Compile Include="SecurityUtilities.cs" />
+    <Compile Include="TransactionCombinationLogic.cs" />
     <Compile Include="TzDatabase.cs" />
     <Compile Include="TzDateTime.cs" />
     <Compile Include="Web\Cursors.cs" />

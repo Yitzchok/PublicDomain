@@ -2,15 +2,19 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.IO;
+using System.Runtime.Serialization;
 
 namespace PublicDomain
 {
     /// <summary>
     /// Parses the tz database files.
     /// 
-    /// The zone.tab file is a mapping between ISO 3166 2-character country codes
+    /// Notes:
+    /// * The zone.tab file is a mapping between ISO 3166 2-character country codes
     /// and the main ZONE for that country.
+    /// * See the 'Theory' file in tzcode
     /// </summary>
+    [Serializable]
     public class TzDatabase
     {
         /// <summary>
@@ -21,7 +25,7 @@ namespace PublicDomain
         /// <summary>
         /// 
         /// </summary>
-        public const string TzDatabaseDirectory = @"C:\temp\tzdata\";
+        public const string TzDatabaseDirectory = @"..\..\..\tzdata\";
 
         /// <summary>
         /// 
@@ -39,7 +43,11 @@ namespace PublicDomain
         public const string FactoryZoneName = "Factory";
 
         /// <summary>
-        /// Reads the database.
+        /// Reads the tz database from the specific <paramref name="dir"/>.
+        /// All files without extensions are checked for relevant data. The
+        /// directory is not recursively searched. Parameters <paramref name="rules"/>,
+        /// <paramref name="zones"/>, and <paramref name="links"/> should be non-null
+        /// arrays into which the database will be added.
         /// </summary>
         /// <param name="dir">The dir.</param>
         /// <param name="rules">The rules.</param>
@@ -55,6 +63,8 @@ namespace PublicDomain
             FileInfo[] files = dirInfo.GetFiles();
             foreach (FileInfo file in files)
             {
+                // If there is no file extension, we assume
+                // that it is a data file.
                 if (string.IsNullOrEmpty(file.Extension))
                 {
                     ReadDatabaseFile(file, rules, zones, links);
@@ -64,6 +74,8 @@ namespace PublicDomain
 
         /// <summary>
         /// Reads the database file.
+        /// 
+        /// See zic.txt in tzcode
         /// </summary>
         /// <param name="file">The file.</param>
         /// <param name="rules">The rules.</param>
@@ -74,25 +86,36 @@ namespace PublicDomain
         {
             string[] lines = System.IO.File.ReadAllLines(file.FullName);
             TzZone tempZone;
-            foreach (string line in lines)
+            int length = lines.Length;
+            for (int i = 0; i < length; i++)
             {
-                // This line may be a continuation Zone
-                if (!string.IsNullOrEmpty(line))
+                string line = lines[i];
+                if (line == null)
                 {
-                    if (line.TrimStart()[0] != '#')
+                    continue;
+                }
+
+                // This line may be a continuation Zone
+                if (line.Length > 0)
+                {
+                    // Avoid comment lines
+                    string leftTrimmed = line.TrimStart();
+
+                    if (leftTrimmed.Length > 0 && leftTrimmed[0] != '#')
                     {
+                        // Non-comment line
                         if (char.IsWhiteSpace(line[0]) && zones.Count > 0)
                         {
                             if (line.Trim() != string.Empty)
                             {
                                 // This is a continuation of a previous Zone
-                                zones.Add(TzDatabase.CloneDataZone(zones[zones.Count - 1], line));
+                                TzZone previousZone = zones[zones.Count - 1];
+                                zones.Add(TzDatabase.CloneDataZone(previousZone, line));
                             }
                         }
                         else
                         {
-                            string[] pieces = line.Split('\t');
-                            pieces = StringUtilities.Split(pieces, ' ', 0);
+                            string[] pieces = StringUtilities.SplitQuoteSensitive(line, true, '\"', '#');
                             if (pieces.Length > 0)
                             {
                                 switch (pieces[0].ToLower())
@@ -130,7 +153,7 @@ namespace PublicDomain
                     return zone;
                 }
             }
-            throw new TzParseException("Could not find LINKed zone " + zoneName);
+            throw new TzParseException("Could not find LINKed zone {0}", zoneName);
         }
 
         /// <summary>
@@ -159,6 +182,11 @@ namespace PublicDomain
 
         /// <summary>
         /// Parses the tz database zone.tab file into all the zone descriptions.
+        /// 
+        /// From 'Theory' file:
+        /// "The file 'zone.tab' lists the geographical locations used to name
+        /// time zone rule files.  It is intended to be an exhaustive list
+        /// of canonical names for geographic regions."
         /// </summary>
         /// <param name="tabFile"></param>
         /// <returns></returns>
@@ -762,18 +790,10 @@ namespace PublicDomain
                 throw new ArgumentNullException("str");
             }
             TzRule t = new TzRule();
-            string[] pieces = str.Split('\t');
-            pieces = StringUtilities.Split(pieces, ' ', 0);
-            if (pieces.Length == 11 && pieces[10][0] == '#')
+            string[] pieces = StringUtilities.SplitQuoteSensitive(str, true, '\"', '#');
+            if (pieces.Length != 10 && pieces.Length != 11)
             {
-                // the comment was tabbed off the end
-                string comment = pieces[10];
-                Array.Resize<string>(ref pieces, 10);
-                pieces[9] += " " + comment;
-            }
-            if (pieces.Length != 10)
-            {
-                throw new TzParseException("Rule has an invalid number of pieces: " + pieces.Length + " (" + str + ")");
+                throw new TzParseException("Rule has an invalid number of pieces: {0}, expecting {1} ({2})", pieces.Length, 10, str);
             }
             t.RuleName = pieces[1];
             if (pieces[2] == "min")
@@ -803,9 +823,9 @@ namespace PublicDomain
             t.StartTime = TzDatabase.GetTzDataTime(pieces[7], out t.StartTimeModifier);
             t.SaveTime = DateTimeUtlities.ParseTimeSpan(pieces[8]);
             t.Modifier = pieces[9];
-            if (t.Modifier != null && t.Modifier.IndexOf('#') != 1)
+            if (pieces.Length == 11)
             {
-                StringUtilities.FirstSplit(t.Modifier, '#', true, out t.Modifier, out t.Comment);
+                t.Comment = pieces[10].Trim();
             }
             return t;
         }
@@ -833,9 +853,7 @@ namespace PublicDomain
         /// <param name="z">The z.</param>
         private static void ParsePieces(string str, TzZone z)
         {
-            string[] pieces = str.Split('\t');
-            pieces = StringUtilities.Split(pieces, ' ');
-            pieces = StringUtilities.RemoveEmptyPieces(pieces);
+            string[] pieces = StringUtilities.SplitQuoteSensitive(str, true, '\"', '#');
             z.ZoneName = pieces[1];
 
             if (z.ZoneName != FactoryZoneName)
@@ -848,36 +866,51 @@ namespace PublicDomain
                 // the rest of the array into a big string
                 if (pieces.Length > 5)
                 {
-                    string ending = String.Join(" ", pieces, 5, pieces.Length - 5);
-                    int poundIndex;
-
-                    // If there's a comment, chop it off the end
-                    if ((poundIndex = ending.IndexOf('#')) != -1)
+                    if (pieces[5][0] == '#')
                     {
-                        z.Comment = ending.Substring(poundIndex + 1).Trim();
-                        ending = ending.Substring(0, poundIndex).Trim();
-                    }
-                    if (ending != "")
-                    {
-                        string[] untilPieces = StringUtilities.RemoveEmptyPieces(ending.Split(' '));
-                        z.UntilYear = int.Parse(untilPieces[0]);
-                        if (untilPieces.Length > 1)
-                        {
-                            z.UntilMonth = DateTimeUtlities.ParseMonth(untilPieces[1]);
-                            if (untilPieces.Length > 2)
-                            {
-                                TzDatabase.GetTzDataDay(untilPieces[2], out z.UntilDay, out z.UntilDay_DayOfWeek);
-
-                                if (untilPieces.Length > 3)
-                                {
-                                    z.UntilTime = TzDatabase.GetTzDataTime(untilPieces[3], out z.UntilTimeModifier);
-                                }
-                            }
-                        }
+                        z.Comment = pieces[5].Trim();
+                        SetMaxZone(z);
                     }
                     else
                     {
-                        SetMaxZone(z);
+                        z.UntilYear = int.Parse(pieces[5]);
+                        if (pieces.Length > 6)
+                        {
+                            if (pieces[6][0] == '#')
+                            {
+                                z.Comment = pieces[6].Trim();
+                            }
+                            else
+                            {
+                                z.UntilMonth = DateTimeUtlities.ParseMonth(pieces[6]);
+                                if (pieces.Length > 7)
+                                {
+                                    if (pieces[7][0] == '#')
+                                    {
+                                        z.Comment = pieces[7].Trim();
+                                    }
+                                    else
+                                    {
+                                        TzDatabase.GetTzDataDay(pieces[7], out z.UntilDay, out z.UntilDay_DayOfWeek);
+                                        if (pieces.Length > 8)
+                                        {
+                                            if (pieces[8][0] == '#')
+                                            {
+                                                z.Comment = pieces[8].Trim();
+                                            }
+                                            else
+                                            {
+                                                z.UntilTime = TzDatabase.GetTzDataTime(pieces[8], out z.UntilTimeModifier);
+                                                if (pieces.Length > 9)
+                                                {
+                                                    z.Comment = pieces[9].Trim();
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
                 else
@@ -917,25 +950,35 @@ namespace PublicDomain
         /// Thrown when there is an error interpreting the tz database.
         /// </summary>
         [Serializable]
-        public class TzException : Exception
+        public class TzException : BaseException
         {
             /// <summary>
             /// Initializes a new instance of the <see cref="TzException"/> class.
             /// </summary>
-            public TzException() { }
+            public TzException()
+            {
+            }
 
             /// <summary>
             /// Initializes a new instance of the <see cref="TzException"/> class.
             /// </summary>
             /// <param name="message">The message.</param>
-            public TzException(string message) : base(message) { }
+            /// <param name="formatParameters">The format parameters.</param>
+            public TzException(string message, params object[] formatParameters)
+                : base(message, formatParameters)
+            {
+            }
 
             /// <summary>
             /// Initializes a new instance of the <see cref="TzException"/> class.
             /// </summary>
-            /// <param name="message">The message.</param>
             /// <param name="inner">The inner.</param>
-            public TzException(string message, Exception inner) : base(message, inner) { }
+            /// <param name="message">The message.</param>
+            /// <param name="formatParameters">The format parameters.</param>
+            public TzException(Exception inner, string message, params object[] formatParameters)
+                : base(inner, message, formatParameters)
+            {
+            }
 
             /// <summary>
             /// Initializes a new instance of the <see cref="TzException"/> class.
@@ -944,10 +987,10 @@ namespace PublicDomain
             /// <param name="context">The <see cref="T:System.Runtime.Serialization.StreamingContext"></see> that contains contextual information about the source or destination.</param>
             /// <exception cref="T:System.Runtime.Serialization.SerializationException">The class name is null or <see cref="P:System.Exception.HResult"></see> is zero (0). </exception>
             /// <exception cref="T:System.ArgumentNullException">The info parameter is null. </exception>
-            protected TzException(
-              System.Runtime.Serialization.SerializationInfo info,
-              System.Runtime.Serialization.StreamingContext context)
-                : base(info, context) { }
+            protected TzException(SerializationInfo info, StreamingContext context)
+                : base(info, context)
+            {
+            }
         }
 
         /// <summary>
@@ -959,20 +1002,30 @@ namespace PublicDomain
             /// <summary>
             /// Initializes a new instance of the <see cref="TzParseException"/> class.
             /// </summary>
-            public TzParseException() { }
+            public TzParseException()
+            {
+            }
 
             /// <summary>
             /// Initializes a new instance of the <see cref="TzParseException"/> class.
             /// </summary>
             /// <param name="message">The message.</param>
-            public TzParseException(string message) : base(message) { }
+            /// <param name="formatParameters">The format parameters.</param>
+            public TzParseException(string message, params object[] formatParameters)
+                : base(message, formatParameters)
+            {
+            }
 
             /// <summary>
             /// Initializes a new instance of the <see cref="TzParseException"/> class.
             /// </summary>
-            /// <param name="message">The message.</param>
             /// <param name="inner">The inner.</param>
-            public TzParseException(string message, Exception inner) : base(message, inner) { }
+            /// <param name="message">The message.</param>
+            /// <param name="formatParameters">The format parameters.</param>
+            public TzParseException(Exception inner, string message, params object[] formatParameters)
+                : base(message, inner, formatParameters)
+            {
+            }
 
             /// <summary>
             /// Initializes a new instance of the <see cref="TzParseException"/> class.
@@ -981,10 +1034,10 @@ namespace PublicDomain
             /// <param name="context">The <see cref="T:System.Runtime.Serialization.StreamingContext"></see> that contains contextual information about the source or destination.</param>
             /// <exception cref="T:System.Runtime.Serialization.SerializationException">The class name is null or <see cref="P:System.Exception.HResult"></see> is zero (0). </exception>
             /// <exception cref="T:System.ArgumentNullException">The info parameter is null. </exception>
-            protected TzParseException(
-              System.Runtime.Serialization.SerializationInfo info,
-              System.Runtime.Serialization.StreamingContext context)
-                : base(info, context) { }
+            protected TzParseException(SerializationInfo info, StreamingContext context)
+                : base(info, context)
+            {
+            }
         }
 
         /// <summary>

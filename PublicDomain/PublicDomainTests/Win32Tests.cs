@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using NUnit.Framework;
+using System.Runtime.InteropServices;
 
 namespace PublicDomain
 {
@@ -49,9 +50,18 @@ namespace PublicDomain
         [Test]
         public void EnumerateGAC()
         {
-            foreach (Win32.GacAssemblyName name in Win32.GlobalAssemblyCache.GetAllAssemblies())
+            try
             {
-                Console.WriteLine(name.AssemblyName);
+                foreach (Win32.GacAssemblyName name in Win32.GlobalAssemblyCache.GetAllAssemblies())
+                {
+                    Console.WriteLine(name.AssemblyName);
+                }
+            }
+            catch (SEHException)
+            {
+            }
+            catch (AccessViolationException)
+            {
             }
         }
 

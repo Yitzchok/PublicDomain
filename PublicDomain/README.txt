@@ -12,6 +12,11 @@ Simon Mourier
 
 Version History
 ===============
+V0.2.8.0
+	[kevgrig@gmail.com]
+		* Added CurrentDirectoryRerouter
+		* Updated olson tz database to 2007f
+		* Fixed various tests
 V0.2.7.0
 	[kevgrig@gmail.com]
 		* BUG: ExceptionUtilities didn't throw a list of Exceptions
