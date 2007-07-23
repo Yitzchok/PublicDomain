@@ -612,7 +612,7 @@ namespace PublicDomain
                     if (!string.IsNullOrEmpty(str))
                     {
                         TzDateTime dateTime;
-                        if (TzDateTime.TryParse(str, TzTimeZone.TimeZoneLocal, out dateTime))
+                        if (TzDateTime.TryParseTz(str, out dateTime, TzTimeZone.CurrentTimeZone))
                         {
                             m_InstallDate = dateTime;
                         }

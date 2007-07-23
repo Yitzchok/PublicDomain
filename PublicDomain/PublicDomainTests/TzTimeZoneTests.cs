@@ -29,16 +29,16 @@ namespace PublicDomain
         [Test]
         public void TestTimeZones()
         {
-            // Try getting the US easter time zone
-            TzTimeZone easternTimeZone = TzTimeZone.GetTimeZone(PublicDomain.TzTimeZone.TzConstants.TimezoneUsEastern);
+            // Try getting the US eastern time zone
+            TzTimeZone easternTimeZone = TzTimeZone.GetTimeZone(TzConstants.TimezoneUsEastern);
 
             // Make sure some things are there
             Assert.IsNotNull(easternTimeZone);
             Assert.Greater(TzTimeZone.ZoneList.Count, 0);
             Assert.Greater(TzTimeZone.Zones.Count, 0);
             Assert.AreEqual(TzTimeZone.Zones.Count, TzTimeZone.ZoneList.Count);
-            Assert.AreEqual(easternTimeZone.DaylightName, PublicDomain.TzTimeZone.TzConstants.TimezoneUsEastern);
-            Assert.AreEqual(easternTimeZone.StandardName, PublicDomain.TzTimeZone.TzConstants.TimezoneUsEastern);
+            Assert.AreEqual(easternTimeZone.DaylightName, TzConstants.TimezoneUsEastern);
+            Assert.AreEqual(easternTimeZone.StandardName, TzConstants.TimezoneUsEastern);
 
             // Create a test time
             DateTime test = new DateTime(2000, 1, 1, 0, 0, 0, DateTimeKind.Local);

@@ -28,16 +28,25 @@ namespace PublicDomain
         public static bool TreatUnspecifiedKindAsLocal = true;
 
         private static Dictionary<double, string> s_mainTimeZones = new Dictionary<double, string>();
+        private static ReadOnlyDictionary<string, TzZoneInfo> m_zones;
+        private static ReadOnlyCollection<TzZoneInfo> m_zoneList;
+        private static TzTimeZone m_currentTimeZone;
+        private static string[] m_allZoneNames;
+
+        private TzZoneInfo m_info;
 
         static TzTimeZone()
         {
+            // Do the monolitich static initialization
+            InitializeZones();
+
             s_mainTimeZones[DateTimeUtlities.ConvertTimeSpanToDouble("-11:00")] = TzConstants.TimezonePacificMidway;
             s_mainTimeZones[DateTimeUtlities.ConvertTimeSpanToDouble("-10:00")] = TzConstants.TimezonePacificHonolulu;
             s_mainTimeZones[DateTimeUtlities.ConvertTimeSpanToDouble("-9:30")] = TzConstants.TimezonePacificMarquesas;
             s_mainTimeZones[DateTimeUtlities.ConvertTimeSpanToDouble("-9:00")] = TzConstants.TimezoneAmericaAnchorage;
             s_mainTimeZones[DateTimeUtlities.ConvertTimeSpanToDouble("-8:00")] = TzConstants.TimezoneAmericaLosAngeles;
             s_mainTimeZones[DateTimeUtlities.ConvertTimeSpanToDouble("-7:00")] = TzConstants.TimezoneAmericaDenver;
-            s_mainTimeZones[DateTimeUtlities.ConvertTimeSpanToDouble("-6:00")] = TzConstants.TiemzoneAmericaChicago;
+            s_mainTimeZones[DateTimeUtlities.ConvertTimeSpanToDouble("-6:00")] = TzConstants.TimezoneAmericaChicago;
             s_mainTimeZones[DateTimeUtlities.ConvertTimeSpanToDouble("-5:00")] = TzConstants.TimezoneAmericaNewYork;
             s_mainTimeZones[DateTimeUtlities.ConvertTimeSpanToDouble("-4:00")] = TzConstants.TimezoneAmericaLaPaz;
             s_mainTimeZones[DateTimeUtlities.ConvertTimeSpanToDouble("-3:30")] = TzConstants.TimezoneAmericaStJohns;
@@ -66,25 +75,16 @@ namespace PublicDomain
             s_mainTimeZones[DateTimeUtlities.ConvertTimeSpanToDouble("12:00")] = TzConstants.TimezonePacificFiji;
             s_mainTimeZones[DateTimeUtlities.ConvertTimeSpanToDouble("13:00")] = TzConstants.TimezonePacificEnderbury;
             s_mainTimeZones[DateTimeUtlities.ConvertTimeSpanToDouble("14:00")] = TzConstants.TimezonePacificKiritimati;
-            s_localTimeZone = TzTimeZone.GetTimeZoneByOffset(TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now));
-        }
 
-        private static TzTimeZone s_localTimeZone;
+            // Get all the zone names
+            List<string> zoneNames = new List<string>(Zones.Keys);
+            zoneNames.Sort();
+            m_allZoneNames = zoneNames.ToArray();
 
-        /// <summary>
-        /// Gets or sets the local time zone.
-        /// </summary>
-        /// <value>The local time zone.</value>
-        public static TzTimeZone TimeZoneLocal
-        {
-            get
-            {
-                return s_localTimeZone;
-            }
-            set
-            {
-                s_localTimeZone = value;
-            }
+            // Get the current time zone
+            TimeZone cur = TimeZone.CurrentTimeZone;
+            TimeSpan utcOffset = cur.GetUtcOffset(DateTime.MinValue);
+            m_currentTimeZone = GetTimeZoneByOffset(utcOffset);
         }
 
         /// <summary>
@@ -94,13 +94,6 @@ namespace PublicDomain
         {
             get
             {
-                if (m_zones == null)
-                {
-                    lock (m_loadLock)
-                    {
-                        InitializeZones();
-                    }
-                }
                 return m_zones;
             }
         }
@@ -112,77 +105,9 @@ namespace PublicDomain
         {
             get
             {
-                if (m_zoneList == null)
-                {
-                    lock (m_loadLock)
-                    {
-                        InitializeZones();
-                    }
-                }
                 return m_zoneList;
             }
         }
-
-        /// <summary>
-        /// Gets the time zone utc.
-        /// </summary>
-        /// <value>The time zone utc.</value>
-        public static TzTimeZone TimeZoneUtc
-        {
-            get
-            {
-                return m_utcTimeZone;
-            }
-        }
-
-        /// <summary>
-        /// UTC-5, main point New York
-        /// </summary>
-        /// <value>The time zone america eastern.</value>
-        public static TzTimeZone TimeZoneAmericaEastern
-        {
-            get
-            {
-                return m_americaEasternTimeZone;
-            }
-        }
-
-        /// <summary>
-        /// UTC-6, main point Chicago
-        /// </summary>
-        /// <value>The time zone america central.</value>
-        public static TzTimeZone TimeZoneAmericaCentral
-        {
-            get
-            {
-                return m_americaCentralTimeZone;
-            }
-        }
-
-        /// <summary>
-        /// UTC-7, main point Denver
-        /// </summary>
-        /// <value>The time zone america mountain.</value>
-        public static TzTimeZone TimeZoneAmericaMountain
-        {
-            get
-            {
-                return m_americaMountainTimeZone;
-            }
-        }
-
-        /// <summary>
-        /// UTC-8, main point Los Angeles
-        /// </summary>
-        /// <value>The time zone america pacific.</value>
-        public static TzTimeZone TimeZoneAmericaPacific
-        {
-            get
-            {
-                return m_americaPacificTimeZone;
-            }
-        }
-
 
         /// <summary>
         /// Gets all zone names.
@@ -192,34 +117,9 @@ namespace PublicDomain
         {
             get
             {
-                if (m_allZoneNames == null)
-                {
-                    lock (m_loadLock)
-                    {
-                        List<string> zoneNames = new List<string>(Zones.Keys);
-                        zoneNames.Sort();
-                        m_allZoneNames = zoneNames.ToArray();
-                    }
-                }
                 return m_allZoneNames;
             }
         }
-
-        private static ReadOnlyDictionary<string, TzZoneInfo> m_zones;
-
-        private static ReadOnlyCollection<TzZoneInfo> m_zoneList;
-
-        private static object m_loadLock = new object();
-
-        private static TzTimeZone m_utcTimeZone = TzTimeZone.GetTimeZone(TzConstants.TimezoneUtc);
-        private static TzTimeZone m_americaEasternTimeZone = TzTimeZone.GetTimeZone(TzConstants.TimezoneUsEastern);
-        private static TzTimeZone m_americaCentralTimeZone = TzTimeZone.GetTimeZone(TzConstants.TimezoneUsCentral);
-        private static TzTimeZone m_americaMountainTimeZone = TzTimeZone.GetTimeZone(TzConstants.TimezoneUsMountain);
-        private static TzTimeZone m_americaPacificTimeZone = TzTimeZone.GetTimeZone(TzConstants.TimezoneUsPacific);
-
-        private static string[] m_allZoneNames;
-
-        private TzZoneInfo m_info;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TzTimeZone"/> class.
@@ -276,7 +176,7 @@ namespace PublicDomain
         {
             get
             {
-                return m_info.ZoneName;
+                return StandardName;
             }
         }
 
@@ -372,10 +272,14 @@ namespace PublicDomain
             {
                 Console.WriteLine("Either start or end are null for GetChangeRules " + ruleName);
             }
+
+            throw new NotImplementedException();
         }
 
         /// <summary>
         /// Returns the coordinated universal time (UTC) offset for the specified local time.
+        /// This method is regardless of the type of the time,
+        /// whether it is local, UTC, specified, or other.
         /// </summary>
         /// <param name="time">The local date and time.</param>
         /// <returns>
@@ -383,20 +287,6 @@ namespace PublicDomain
         /// </returns>
         public override TimeSpan GetUtcOffset(DateTime time)
         {
-            // This method is regardless of the type of the time,
-            // whether it is local, UTC, specified, or other.
-            /*switch (time.Kind)
-            {
-                case DateTimeKind.Utc:
-                    return TimeSpan.Zero;
-                case DateTimeKind.Unspecified:
-                    if (!TreatUnspecifiedKindAsLocal)
-                    {
-                        throw new ArgumentException("unspecified type");
-                    }
-                    break;
-            }*/
-
             // Figure out the offset for the local time
             TzDatabase.TzZone zone = GetZone(ref time);
             if (zone != null)
@@ -416,7 +306,14 @@ namespace PublicDomain
         /// </returns>
         public override bool IsDaylightSavingTime(DateTime time)
         {
-            return base.IsDaylightSavingTime(time);
+            int length = Info.Rules.Count;
+            int a = 0;
+            for (int i = 0; i < length; i++)
+            {
+                PublicDomain.TzDatabase.TzRule rule = Info.Rules[i];
+                a += rule.FromYear;
+            }
+            return false;
         }
 
         /// <summary>
@@ -486,11 +383,11 @@ namespace PublicDomain
         /// Gets the current time in this time zone.
         /// </summary>
         /// <value>The now.</value>
-        public TzDateTime Now
+        public virtual TzDateTime Now
         {
             get
             {
-                return new TzDateTime(DateTime.Now, this);
+                return new TzDateTime(DateTime.UtcNow, this);
             }
         }
 
@@ -499,12 +396,8 @@ namespace PublicDomain
         /// the same as finding a new zone.
         /// </summary>
         /// <value>The name of the zone.</value>
-        public string ZoneName
+        internal string ZoneName
         {
-            get
-            {
-                return this.m_info.ZoneName;
-            }
             set
             {
                 if (string.IsNullOrEmpty(value))
@@ -527,6 +420,12 @@ namespace PublicDomain
         {
             TimeSpan utcOffset = GetUtcOffset(time);
             DateTime result = !addUtc ? time + utcOffset : time - utcOffset;
+
+            // If it's daylight savings time, we need to offset it
+            if (IsDaylightSavingTime(time))
+            {
+            }
+
             return DateTimeUtlities.CloneDateTimeAsUTC(result);
         }
 
@@ -538,14 +437,18 @@ namespace PublicDomain
         /// </returns>
         public override string ToString()
         {
-            return ZoneName;
+            return StandardName;
         }
 
         /// <summary>
-        /// Gets the time zone.
+        /// Gets a new object representing the time zone with the
+        /// name <paramref name="tzName"/> or null if none can be found.
+        /// These <see cref="PublicDomain.TzTimeZone"/> instances are
+        /// not cached, so constantly calling this method will continuously
+        /// create new <see cref="PublicDomain.TzTimeZone"/> objects.
         /// </summary>
-        /// <param name="tzName">Name of the tz.</param>
-        /// <returns></returns>
+        /// <param name="tzName">Name of the time zone.</param>
+        /// <returns>null if no time zone can by found or a TzTimeZone object</returns>
         public static TzTimeZone GetTimeZone(string tzName)
         {
             TzTimeZone result = null;
@@ -576,7 +479,7 @@ namespace PublicDomain
         {
             if (utcOffsetTime.Equals(TimeSpan.Zero))
             {
-                return TimeZoneUtc;
+                return TzConstants.CommonZoneUTC;
             }
             else
             {
@@ -592,6 +495,60 @@ namespace PublicDomain
                 }
             }
             throw new TzDatabase.TzException("Cannot find time zone with UTC offset {0}.", utcOffsetTime);
+        }
+
+        /// <summary>
+        /// Gets the time zone of the current computer system.
+        /// </summary>
+        /// <value>A System.TimeZone instance representing the current, local time zone.</value>
+        public static new TzTimeZone CurrentTimeZone
+        {
+            get
+            {
+                return m_currentTimeZone;
+            }
+        }
+
+        /// <summary>
+        ///     Returns a value indicating whether the specified date and time is within
+        ///     the specified daylight saving time period.
+        /// </summary>
+        /// <param name="time">A date and time.</param>
+        /// <param name="daylightTimes">A daylight saving time period.</param>
+        /// <returns>
+        /// 	true if time is in daylightTimes; otherwise, false.
+        /// </returns>
+        public static new bool IsDaylightSavingTime(DateTime time, DaylightTime daylightTimes)
+        {
+            return TimeZone.IsDaylightSavingTime(time, daylightTimes);
+        }
+
+        /// <summary>
+        /// Determines whether the specified <see cref="T:System.Object"></see> is equal to the current <see cref="T:System.Object"></see>.
+        /// </summary>
+        /// <param name="obj">The <see cref="T:System.Object"></see> to compare with the current <see cref="T:System.Object"></see>.</param>
+        /// <returns>
+        /// true if the specified <see cref="T:System.Object"></see> is equal to the current <see cref="T:System.Object"></see>; otherwise, false.
+        /// </returns>
+        public override bool Equals(object obj)
+        {
+            TzTimeZone cmp = obj as TzTimeZone;
+            if (cmp != null)
+            {
+                return StandardName.Equals(cmp.StandardName);
+            }
+            return base.Equals(obj);
+        }
+
+        /// <summary>
+        /// Serves as a hash function for a particular type. <see cref="M:System.Object.GetHashCode"></see> is suitable for use in hashing algorithms and data structures like a hash table.
+        /// </summary>
+        /// <returns>
+        /// A hash code for the current <see cref="T:System.Object"></see>.
+        /// </returns>
+        public override int GetHashCode()
+        {
+            return StandardName.GetHashCode();
         }
 
         				#region Generated Time Zones
@@ -5242,208 +5199,6 @@ namespace PublicDomain
             {
                 return string.Format("{0}\t{1}\t{2}\t{3}", TwoLetterCode, Location, ZoneName, Comments);
             }
-        }
-
-        /// <summary>
-        /// http://wwp.greenwichmeantime.com/info/timezone.htm
-        /// </summary>
-        [Serializable]
-        public static class TzConstants
-        {
-            /// <summary>
-            /// UTC-5
-            /// </summary>
-            public const string TimezoneUsEastern = "US/Eastern";
-
-            /// <summary>
-            /// UTC-6
-            /// </summary>
-            public const string TimezoneUsCentral = "US/Central";
-
-            /// <summary>
-            /// UTC-7
-            /// </summary>
-            public const string TimezoneUsMountain = "US/Mountain";
-
-            /// <summary>
-            /// UTC-8
-            /// </summary>
-            public const string TimezoneUsPacific = "US/Pacific";
-
-            /// <summary>
-            /// UTC-11
-            /// </summary>
-            public const string TimezonePacificMidway = "Pacific/Midway";
-
-            /// <summary>
-            /// UTC-10
-            /// </summary>
-            public const string TimezonePacificHonolulu = "Pacific/Honolulu";
-
-            /// <summary>
-            /// UTC-9:30
-            /// </summary>
-            public const string TimezonePacificMarquesas = "Pacific/Marquesas";
-
-            /// <summary>
-            /// UTC-9
-            /// </summary>
-            public const string TimezoneAmericaAnchorage = "America/Anchorage";
-
-            /// <summary>
-            /// UTC-8
-            /// </summary>
-            public const string TimezoneAmericaLosAngeles = "America/Los_Angeles";
-
-            /// <summary>
-            /// UTC-7
-            /// </summary>
-            public const string TimezoneAmericaDenver = "America/Denver";
-
-            /// <summary>
-            /// UTC-6
-            /// </summary>
-            public const string TiemzoneAmericaChicago = "America/Chicago";
-
-            /// <summary>
-            /// UTC-5
-            /// </summary>
-            public const string TimezoneAmericaNewYork = "America/New_York";
-
-            /// <summary>
-            /// UTC-4
-            /// </summary>
-            public const string TimezoneAmericaLaPaz = "America/La_Paz";
-
-            /// <summary>
-            /// UTC-3:30
-            /// </summary>
-            public const string TimezoneAmericaStJohns = "America/St_Johns";
-
-            /// <summary>
-            /// UTC-3
-            /// </summary>
-            public const string TimezoneAmericaArgentinaBuenosAires = "America/Argentina/Buenos_Aires";
-
-            /// <summary>
-            /// UTC-2
-            /// </summary>
-            public const string TimezoneAmericaNoronha = "America/Noronha";
-
-            /// <summary>
-            /// UTC-1
-            /// </summary>
-            public const string TimezoneAtlanticAzores = "Atlantic/Azores";
-
-            /// <summary>
-            /// UTC+0
-            /// </summary>
-            public const string TimezoneUtc = "UTC";
-
-            /// <summary>
-            /// UTC+1
-            /// </summary>
-            public const string TimezoneEuropeParis = "Europe/Paris";
-
-            /// <summary>
-            /// UTC+2
-            /// </summary>
-            public const string TimezoneEuropeAthens = "Europe/Athens";
-
-            /// <summary>
-            /// UTC+3
-            /// </summary>
-            public const string TimezoneEuropeMoscow = "Europe/Moscow";
-
-            /// <summary>
-            /// UTC+3:30
-            /// </summary>
-            public const string TimezoneAsiaTehran = "Asia/Tehran";
-
-            /// <summary>
-            /// UTC+4
-            /// </summary>
-            public const string TimezoneAsiaDubai = "Asia/Dubai";
-
-            /// <summary>
-            /// UTC+4:30
-            /// </summary>
-            public const string TimezoneAsiaKabul = "Asia/Kabul";
-
-            /// <summary>
-            /// UTC+5
-            /// </summary>
-            public const string TimezoneAsiaKarachi = "Asia/Karachi";
-
-            /// <summary>
-            /// UTC+5:30
-            /// </summary>
-            public const string TimezoneAsiaCalcutta = "Asia/Calcutta";
-
-            /// <summary>
-            /// UTC+6
-            /// </summary>
-            public const string TimezoneAsiaOmsk = "Asia/Omsk";
-
-            /// <summary>
-            /// UTC+6:30
-            /// </summary>
-            public const string TimezoneIndianCocos = "Indian/Cocos";
-
-            /// <summary>
-            /// UTC+7
-            /// </summary>
-            public const string TimezoneAsiaJakarta = "Asia/Jakarta";
-
-            /// <summary>
-            /// UTC+8
-            /// </summary>
-            public const string TimezoneAsiaShanghai = "Asia/Shanghai";
-
-            /// <summary>
-            /// UTC+9
-            /// </summary>
-            public const string TimezoneAsiaTokyo = "Asia/Tokyo";
-
-            /// <summary>
-            /// UTC+9:30
-            /// </summary>
-            public const string TimezoneAustraliaDarwin = "Australia/Darwin";
-
-            /// <summary>
-            /// UTC+10
-            /// </summary>
-            public const string TimezonePacificGuam = "Pacific/Guam";
-
-            /// <summary>
-            /// UTC+10:30
-            /// </summary>
-            public const string TimezoneAustraliaLordHowe = "Australia/Lord_Howe";
-
-            /// <summary>
-            /// UTC+11
-            /// </summary>
-            public const string TimezonePacificGuadalcanal = "Pacific/Guadalcanal";
-
-            /// <summary>
-            /// UTC+11:30
-            /// </summary>
-            public const string TimezonePacificNorfolk = "Pacific/Norfolk";
-
-            /// <summary>
-            /// UTC+12
-            /// </summary>
-            public const string TimezonePacificFiji = "Pacific/Fiji";
-
-            /// <summary>
-            /// UTC+13
-            /// </summary>
-            public const string TimezonePacificEnderbury = "Pacific/Enderbury";
-
-            /// <summary>
-            /// UTC+14
-            /// </summary>
-            public const string TimezonePacificKiritimati = "Pacific/Kiritimati";
         }
     }
 }

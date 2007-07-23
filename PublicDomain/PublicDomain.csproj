@@ -161,6 +161,7 @@
     <Compile Include="ScreenScraper\ScreenScraperTag.cs" />
     <Compile Include="SecurityUtilities.cs" />
     <Compile Include="TransactionCombinationLogic.cs" />
+    <Compile Include="TzConstants.cs" />
     <Compile Include="TzDatabase.cs" />
     <Compile Include="TzDateTime.cs" />
     <Compile Include="Web\Cursors.cs" />

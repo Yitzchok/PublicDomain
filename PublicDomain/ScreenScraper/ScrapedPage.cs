@@ -580,7 +580,7 @@ namespace PublicDomain.ScreenScraper
         /// <returns></returns>
         public static bool ConvertStringToDateTime(string subject, TzTimeZone timeZone, out TzDateTime ret)
         {
-            return TzDateTime.TryParse(subject, timeZone, DateTimeStyles.AssumeUniversal, out ret);
+            return TzDateTime.TryParseTz(subject, DateTimeStyles.AssumeUniversal, out ret, timeZone);
         }
 
         /// <summary>
