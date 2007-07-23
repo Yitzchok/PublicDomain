@@ -32,7 +32,7 @@ namespace PublicDomain
         /// Current version of this code, in string form. In a standalone build,
         /// this is the assembly version and file version of the assembly.
         /// </summary>
-        public const string PublicDomainVersion = "0.2.8.0";
+        public const string PublicDomainVersion = "0.2.9.0";
 
         /// <summary>
         /// The name of the PublicDomain assembly, if this is a standalone build. If
@@ -204,6 +204,12 @@ namespace PublicDomain
         /// Always ends in a trailing slash.
         /// </summary>
         public const string PublicDomainDefaultInstallLocation = @"C:\Program Files\Public Domain\";
+
+        /// <summary>
+        /// Represents the string (50 characters): 
+        /// ==================================================
+        /// </summary>
+        public const string DividerEquals = "==================================================";
     }
 
     /// <summary>

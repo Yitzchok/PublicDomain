@@ -12,6 +12,10 @@ Simon Mourier
 
 Version History
 ===============
+V0.2.9.0
+	[kevgrig@gmail.com]
+		* Historical TzZoneInfo exposed through TzTimeZone
+		* Added capability to retrieve DaylightTime info for a particular year
 V0.2.8.0
 	[kevgrig@gmail.com]
 		* Added CurrentDirectoryRerouter

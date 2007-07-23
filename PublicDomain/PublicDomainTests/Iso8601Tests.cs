@@ -27,7 +27,7 @@ namespace PublicDomain
                     "2007-02-15T14:57:30.983Z",
                 })
             {
-                TzDateTime dt = Iso8601.Parse(test, TzConstants.CommonZoneUsEastern);
+                TzDateTime dt = Iso8601.Parse(test, TzTimeZone.ZoneUsEastern);
                 Console.WriteLine(dt + "," + dt.ToStringLocal());
             }
         }

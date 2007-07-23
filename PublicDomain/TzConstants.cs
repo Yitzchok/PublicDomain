@@ -204,40 +204,5 @@ namespace PublicDomain
         /// UTC+14
         /// </summary>
         public const string TimezonePacificKiritimati = "Pacific/Kiritimati";
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public static readonly TzTimeZone CommonZoneUTC;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public static readonly TzTimeZone CommonZoneUsEastern;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public static readonly TzTimeZone CommonZoneUsCentral;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public static readonly TzTimeZone CommonZoneUsMountain;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public static readonly TzTimeZone CommonZoneUsPacific;
-
-        static TzConstants()
-        {
-            // Initialize "common" zones
-            CommonZoneUTC = TzTimeZone.GetTimeZone(TimezoneUtc);
-            CommonZoneUsEastern = TzTimeZone.GetTimeZone(TimezoneUsEastern);
-            CommonZoneUsCentral = TzTimeZone.GetTimeZone(TimezoneUsCentral);
-            CommonZoneUsMountain = TzTimeZone.GetTimeZone(TimezoneUsMountain);
-            CommonZoneUsPacific = TzTimeZone.GetTimeZone(TimezoneUsPacific);
-        }
     }
 }

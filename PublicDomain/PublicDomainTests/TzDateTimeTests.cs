@@ -47,7 +47,7 @@ namespace PublicDomain
         [Test]
         public void SimpleTest()
         {
-            TzTimeZone timeZone = TzConstants.CommonZoneUsEastern;
+            TzTimeZone timeZone = TzTimeZone.ZoneUsEastern;
             Console.WriteLine(timeZone.StandardName);
             TzDateTime dt = TzDateTime.UtcNow(timeZone);
             DateTime local = dt.DateTimeLocal;

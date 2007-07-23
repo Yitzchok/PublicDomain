@@ -8,6 +8,9 @@ using System.Text.RegularExpressions;
 
 namespace PublicDomain
 {
+    /// <summary>
+    /// To update the code in TzTimeZone.cs, run ExecuteReplaceData()
+    /// </summary>
     [TestFixture]
     public class TzDatabaseTests
     {

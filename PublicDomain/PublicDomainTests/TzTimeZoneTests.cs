@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using NUnit.Framework;
+using System.Globalization;
 
 namespace PublicDomain
 {
@@ -89,6 +90,93 @@ namespace PublicDomain
                 if (infinityZone == null)
                 {
                     throw new TzDatabase.TzException("No zone goes to infinity for {0}", zone.ZoneName);
+                }
+            }
+        }
+
+        [Test]
+        public void TestRules()
+        {
+            TzTimeZone eastern = TzTimeZone.ZoneUsEastern;
+            Console.WriteLine(eastern.StandardName);
+            Console.WriteLine(eastern.HistoricalData.ZoneName);
+
+            Console.WriteLine(GlobalConstants.DividerEquals);
+            foreach (TzDatabase.TzRule rule in eastern.HistoricalData.Rules)
+            {
+                Console.WriteLine(rule.ToString());
+                Console.WriteLine(rule.GetFromDateTime());
+                Console.WriteLine();
+            }
+
+            Console.WriteLine(GlobalConstants.DividerEquals);
+            foreach (TzDatabase.TzZone zone in eastern.HistoricalData.Zones)
+            {
+                Console.WriteLine(zone.GetObjectString());
+                Console.WriteLine(zone.GetUntilDateTime());
+                Console.WriteLine();
+            }
+
+            Console.WriteLine(GlobalConstants.DividerEquals);
+        }
+
+        [Test]
+        public void UseCase1()
+        {
+            // Emulate discovering the offset of a UTC value
+            DateTime dt = DateTime.UtcNow;
+            TzTimeZone timeZone = TzTimeZone.ZoneUsEastern;
+            PublicDomain.TzDatabase.TzZone zone = timeZone.FindZone(dt);
+            dt = zone.GetLocalTime(dt);
+            PublicDomain.TzDatabase.TzRule rule = timeZone.FindRule(zone, dt);
+            if (rule != null)
+            {
+                dt += rule.SaveTime;
+            }
+            Console.WriteLine(dt);
+        }
+
+        [Test]
+        public void TestCurrentTimeZone()
+        {
+            Console.WriteLine(TzTimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now));
+            Console.WriteLine(TzTimeZone.CurrentTimeZone.ToLocalTime(DateTime.Now));
+            Console.WriteLine(TzTimeZone.CurrentTimeZone.ToLocalTime(DateTime.UtcNow));
+            Console.WriteLine(TzTimeZone.CurrentTimeZone.ToUniversalTime(DateTime.Now));
+            Console.WriteLine(TzTimeZone.CurrentTimeZone.ToUniversalTime(DateTime.UtcNow));
+            Console.WriteLine(TzTimeZone.CurrentTimeZone.IsDaylightSavingTime(DateTime.Now));
+            Console.WriteLine(TzTimeZone.CurrentTimeZone.IsDaylightSavingTime(DateTime.UtcNow));
+            Console.WriteLine(TzTimeZone.CurrentTimeZone.GetAbbreviation(DateTime.Now));
+            Console.WriteLine(TzTimeZone.CurrentTimeZone.GetAbbreviation(DateTime.UtcNow));
+        }
+
+        [Test]
+        public void TestAbbreviations()
+        {
+            foreach (string zName in TzTimeZone.AllZoneNames)
+            {
+                TzTimeZone zone = TzTimeZone.GetTimeZone(zName);
+                Console.WriteLine(zone.GetAbbreviation());
+            }
+        }
+
+        [Test]
+        public void Simple()
+        {
+            Console.WriteLine(TzTimeZone.CurrentTimeZone.Now.DateTimeLocal);
+        }
+
+        [Test]
+        public void DaylightChanges()
+        {
+            foreach (string zName in TzTimeZone.AllZoneNames)
+            {
+                TzTimeZone zone = TzTimeZone.GetTimeZone(zName);
+                DaylightTime daylightTime = zone.GetDaylightChanges(DateTime.Now.Year);
+                if (daylightTime != null)
+                {
+                    Console.WriteLine(daylightTime.Start);
+                    Console.WriteLine(daylightTime.End);
                 }
             }
         }

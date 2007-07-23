@@ -41,8 +41,8 @@ namespace PublicDomain
         /// </summary>
         static TzDateTime()
         {
-            MinValue = new TzDateTime(DateTime.MinValue.Ticks, TzConstants.CommonZoneUTC);
-            MaxValue = new TzDateTime(DateTime.MaxValue.Ticks, TzConstants.CommonZoneUTC);
+            MinValue = new TzDateTime(DateTime.MinValue.Ticks, TzTimeZone.ZoneUTC);
+            MaxValue = new TzDateTime(DateTime.MaxValue.Ticks, TzTimeZone.ZoneUTC);
         }
 
         /// <summary>

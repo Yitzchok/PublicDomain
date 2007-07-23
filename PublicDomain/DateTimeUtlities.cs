@@ -105,6 +105,20 @@ namespace PublicDomain
         }
 
         /// <summary>
+        /// Returns the absolute value of the specified TimeSpan.
+        /// </summary>
+        /// <param name="val">The val.</param>
+        /// <returns></returns>
+        public static TimeSpan AbsTimeSpan(TimeSpan val)
+        {
+            if (IsTimeSpanNegative(val))
+            {
+                val = val.Negate();
+            }
+            return val;
+        }
+
+        /// <summary>
         /// Thrown when there is an error relating to dates.
         /// </summary>
         [Serializable]

@@ -231,67 +231,17 @@ namespace PublicDomain
             /// </summary>
             public const string ModifierPeace = "P";
 
-            /// <summary>
-            /// Each Zone rule has a name which each zone refers to.
-            /// A zone rule name is not unique in its own right, but
-            /// only with all of its properties. Therefore, there may
-            /// be multiple zone rules with the same name but different properties.
-            /// </summary>
-            public string RuleName;
-
-            /// <summary>
-            /// The effective year the zone rule is effective on.
-            /// </summary>
-            public int FromYear;
-
-            /// <summary>
-            /// The year the zone rule effectively ends.
-            /// </summary>
-            public int ToYear;
-
-            /// <summary>
-            /// The integer month the rule starts on. January = 1, February = 2, ..., December = 12
-            /// </summary>
-            public Month StartMonth;
-
-            /// <summary>
-            /// The day of the month the rule starts on.
-            /// </summary>
-            public int StartDay = -1;
-
-            /// <summary>
-            /// The day of the month is optionally modified by
-            /// a day of week.
-            /// </summary>
-            public DayOfWeek? StartDay_DayOfWeek;
-
-            /// <summary>
-            /// The time of the day the Rule starts on.
-            /// </summary>
-            public TimeSpan StartTime;
-
-            /// <summary>
-            /// 
-            /// </summary>
-            public string StartTimeModifier;
-
-            /// <summary>
-            /// The amount of time saved by the Rule.
-            /// </summary>
-            public TimeSpan SaveTime;
-
-            /// <summary>
-            /// The character D means daylight savings time.
-            /// The character S means standard time.
-            /// Other characters may also be presents, such as
-            /// W for War, P for Peace, etc.
-            /// </summary>
-            public string Modifier;
-
-            /// <summary>
-            /// 
-            /// </summary>
-            public string Comment;
+            private string m_ruleName;
+            private int m_fromYear;
+            private int m_toYear;
+            private Month m_startMonth;
+            private int m_startDay = -1;
+            private DayOfWeek? m_startDay_DayOfWeek;
+            private TimeSpan m_startTime;
+            private string m_startTimeModifier;
+            private TimeSpan m_saveTime;
+            private string m_modifier;
+            private string m_comment;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="PublicDomain.TzDatabase.TzRule"/> class.
@@ -318,36 +268,215 @@ namespace PublicDomain
                 DayOfWeek? startDay_dayOfWeek, TimeSpan startTime, string startTimeModifier,
                 TimeSpan saveTime, string modifier, string comment)
             {
-                RuleName = ruleName;
-                FromYear = fromYear;
-                ToYear = toYear;
-                StartMonth = startMonth;
-                StartDay = startDay;
-                StartDay_DayOfWeek = startDay_dayOfWeek;
-                StartTime = startTime;
-                StartTimeModifier = startTimeModifier;
-                SaveTime = saveTime;
-                Modifier = modifier;
-                Comment = comment;
+                m_ruleName = ruleName;
+                m_fromYear = fromYear;
+                m_toYear = toYear;
+                m_startMonth = startMonth;
+                m_startDay = startDay;
+                m_startDay_DayOfWeek = startDay_dayOfWeek;
+                m_startTime = startTime;
+                m_startTimeModifier = startTimeModifier;
+                m_saveTime = saveTime;
+                m_modifier = modifier;
+                m_comment = PrepareComment(comment);
             }
 
             /// <summary>
-            /// Gets the on date time.
+            /// Gives the (arbitrary) name of the set of rules this
+            /// rule is part of.
+            /// </summary>
+            public string RuleName
+            {
+                get
+                {
+                    return m_ruleName;
+                }
+            }
+
+            /// <summary>
+            /// Gives the first year in which the rule applies.  Any
+            /// integer year can be supplied; the Gregorian calendar
+            /// is assumed.  The word minimum (or an abbreviation)
+            /// means the minimum year representable as an integer.
+            /// The word maximum (or an abbreviation) means the
+            /// maximum year representable as an integer.  Rules can
+            /// describe times that are not representable as time
+            /// values, with the unrepresentable times ignored; this
+            /// allows rules to be portable among hosts with
+            /// differing time value types.
+            /// </summary>
+            public int FromYear
+            {
+                get
+                {
+                    return m_fromYear;
+                }
+            }
+
+            /// <summary>
+            /// Gives the final year in which the rule applies.  In
+            /// addition to minimum and maximum (as above), the word
+            /// only (or an abbreviation) may be used to repeat the
+            /// value of the FROM field.
+            /// </summary>
+            public int ToYear
+            {
+                get
+                {
+                    return m_toYear;
+                }
+            }
+
+            /// <summary>
+            /// Names the month in which the rule takes effect.
+            /// January = 1, February = 2, ..., December = 12
+            /// </summary>
+            public Month StartMonth
+            {
+                get
+                {
+                    return m_startMonth;
+                }
+            }
+
+            /// <summary>
+            /// Gives the day on which the rule takes effect.
+            /// Recognized forms include:
+            /// 
+            ///      5        the fifth of the month
+            ///      lastSun  the last Sunday in the month
+            ///      lastMon  the last Monday in the month
+            ///      Sun&gt;=8   first Sunday on or after the eighth
+            ///      Sun&lt;=25  last Sunday on or before the 25th
+            /// </summary>
+            public int StartDay
+            {
+                get
+                {
+                    return m_startDay;
+                }
+            }
+
+            /// <summary>
+            /// Gives the day on which the rule takes effect.
+            /// Recognized forms include:
+            /// 
+            ///      5        the fifth of the month
+            ///      lastSun  the last Sunday in the month
+            ///      lastMon  the last Monday in the month
+            ///      Sun&gt;=8   first Sunday on or after the eighth
+            ///      Sun&lt;=25  last Sunday on or before the 25th
+            /// </summary>
+            public DayOfWeek? StartDay_DayOfWeek
+            {
+                get
+                {
+                    return m_startDay_DayOfWeek;
+                }
+            }
+
+            /// <summary>
+            /// Gives the time of day at which the rule takes
+            /// effect.  Recognized forms include:
+            /// 
+            ///      2        time in hours
+            ///      2:00     time in hours and minutes
+            ///      15:00    24-hour format time (for times after noon)
+            ///      1:28:14  time in hours, minutes, and seconds
+            ///      -        equivalent to 0
+            /// 
+            ///  where hour 0 is midnight at the start of the day,
+            ///  and hour 24 is midnight at the end of the day.
+            /// </summary>
+            public TimeSpan StartTime
+            {
+                get
+                {
+                    return m_startTime;
+                }
+            }
+
+            /// <summary>
+            /// Applies to the StartTime parameter.
+            ///  Value of the letter w if
+            ///  the given time is local "wall clock" time, s if the
+            ///  given time is local "standard" time, or u (or g or
+            ///  z) if the given time is universal time; in the
+            ///  absence of an indicator, wall clock time is assumed.
+            /// </summary>
+            public string StartTimeModifier
+            {
+                get
+                {
+                    return m_startTimeModifier;
+                }
+            }
+
+            /// <summary>
+            /// Gives the amount of time to be added to local
+            /// standard time when the rule is in effect.  This
+            /// field has the same format as the AT field (although,
+            /// of course, the w and s suffixes are not used).
+            /// </summary>
+            public TimeSpan SaveTime
+            {
+                get
+                {
+                    return m_saveTime;
+                }
+            }
+
+            /// <summary>
+            /// Gives the "variable part" (for example, the "S" or
+            /// "D" in "EST" or "EDT") of time zone abbreviations to
+            /// be used when this rule is in effect.  If this field
+            /// is -, the variable part is null.
+            /// </summary>
+            public string Modifier
+            {
+                get
+                {
+                    return m_modifier;
+                }
+            }
+
+            /// <summary>
+            /// 
+            /// </summary>
+            public string Comment
+            {
+                get
+                {
+                    return m_comment;
+                }
+            }
+
+            /// <summary>
+            /// Gets the start date time.
             /// </summary>
             /// <returns></returns>
-            public DateTime GetOnDateTime()
+            public DateTime GetFromDateTime()
             {
-                return GetOnDateTime(1);
+                return GetDateTime(FromYear);
             }
 
             /// <summary>
-            /// Gets the on date time.
+            /// Gets the start date time.
             /// </summary>
             /// <param name="year">The year.</param>
             /// <returns></returns>
-            public DateTime GetOnDateTime(int year)
+            public DateTime GetDateTime(int year)
             {
-                return GetDateTime(year, StartMonth, StartDay, StartDay_DayOfWeek, StartTime);
+                return TzDatabase.GetDateTime(year, StartMonth, StartDay, StartDay_DayOfWeek, StartTime);
+            }
+
+            /// <summary>
+            /// Gets the end date time.
+            /// </summary>
+            /// <returns></returns>
+            public DateTime GetToDateTime()
+            {
+                return GetDateTime(ToYear);
             }
 
             /// <summary>
@@ -410,9 +539,9 @@ namespace PublicDomain
                     StartMonth == 0 ? "0" : "PublicDomain.Month." + StartMonth.ToString(),
                     StartDay,
                     StartDay_DayOfWeek == null ? "null" : "DayOfWeek." + StartDay_DayOfWeek.Value.ToString(),
-                    "new TimeSpan(" + StartTime.Ticks + ")",
+                    GetNewTimeSpanString(StartTime.Ticks),
                     StartTimeModifier == null ? "null" : '\"' + StartTimeModifier + '\"',
-                    "new TimeSpan(" + SaveTime.Ticks + ")",
+                    GetNewTimeSpanString(SaveTime.Ticks),
                     Modifier == null ? "null" : '\"' + Modifier + '\"',
                     Comment == null ? "null" : '\"' + Comment + '\"'
                 );
@@ -470,9 +599,7 @@ namespace PublicDomain
                 }
                 else
                 {
-                    if ((FromYear > other.FromYear) ||
-                        (FromYear == other.FromYear && StartMonth > other.StartMonth) ||
-                        (FromYear == other.FromYear && StartMonth == other.StartMonth && StartDay > other.StartDay))
+                    if (GetFromDateTime() > other.GetFromDateTime())
                     {
                         return 1;
                     }
@@ -487,61 +614,17 @@ namespace PublicDomain
         [Serializable]
         public class TzZone : ICloneable, IComparable<TzZone>
         {
-            /// <summary>
-            /// Unique name for each zone, for example America/New_York, though
-            /// there can be multiple zones with the same name but different properties.
-            /// </summary>
-            public string ZoneName;
-
-            /// <summary>
-            /// Offset from UTC
-            /// </summary>
-            public TimeSpan UtcOffset;
-
-            /// <summary>
-            /// The rule that applies to this zone.
-            /// </summary>
-            public string RuleName;
-
-            /// <summary>
-            /// 
-            /// </summary>
-            public string Format;
-
-            /// <summary>
-            /// 
-            /// </summary>
-            public int UntilYear;
-
-            /// <summary>
-            /// 
-            /// </summary>
-            public Month UntilMonth = 0;
-
-            /// <summary>
-            /// 
-            /// </summary>
-            public int UntilDay = -1;
-
-            /// <summary>
-            /// 
-            /// </summary>
-            public DayOfWeek? UntilDay_DayOfWeek;
-
-            /// <summary>
-            /// 
-            /// </summary>
-            public TimeSpan UntilTime;
-
-            /// <summary>
-            /// 
-            /// </summary>
-            public string UntilTimeModifier;
-
-            /// <summary>
-            /// 
-            /// </summary>
-            public string Comment;
+            private string m_zoneName;
+            private TimeSpan m_utcOffset;
+            private string m_ruleName;
+            private string m_format;
+            private int m_untilYear;
+            private Month m_untilMonth = 0;
+            private int m_untilDay = -1;
+            private DayOfWeek? m_untilDay_DayOfWeek;
+            private TimeSpan m_untilTime;
+            private string m_untilTimeModifier;
+            private string m_comment;
 
             /// <summary>
             /// Caches the until time value
@@ -573,17 +656,216 @@ namespace PublicDomain
                 string format, int untilYear, Month untilMonth, int untilDay, DayOfWeek? untilDay_dayOfWeek,
                 TimeSpan untilTime, string untilTimeModifier, string comment)
             {
-                ZoneName = zoneName;
-                UtcOffset = utcOffset;
-                RuleName = ruleName;
-                Format = format;
-                UntilYear = untilYear;
-                UntilMonth = untilMonth;
-                UntilDay = untilDay;
-                UntilDay_DayOfWeek = untilDay_dayOfWeek;
-                UntilTime = untilTime;
-                UntilTimeModifier = untilTimeModifier;
-                Comment = comment;
+                m_zoneName = zoneName;
+                m_utcOffset = utcOffset;
+                m_ruleName = ruleName;
+                m_format = format;
+                m_untilYear = untilYear;
+                m_untilMonth = untilMonth;
+                m_untilDay = untilDay;
+                m_untilDay_DayOfWeek = untilDay_dayOfWeek;
+                m_untilTime = untilTime;
+                m_untilTimeModifier = untilTimeModifier;
+                m_comment = PrepareComment(comment);
+            }
+
+            /// <summary>
+            /// The name of the time zone.  This is the name used in
+            /// creating the time conversion information file for the
+            /// zone.
+            /// </summary>
+            public string ZoneName
+            {
+                get
+                {
+                    return m_zoneName;
+                }
+            }
+
+            /// <summary>
+            /// The amount of time to add to UTC to get standard time
+            /// in this zone.  This field has the same format as the
+            /// AT and SAVE fields of rule lines; begin the field with
+            /// a minus sign if time must be subtracted from UTC.
+            /// </summary>
+            public TimeSpan UtcOffset
+            {
+                get
+                {
+                    return m_utcOffset;
+                }
+            }
+
+            /// <summary>
+            /// The name of the rule(s) that apply in the time zone
+            /// or, alternately, an amount of time to add to local
+            /// standard time.  If this field is - then standard time
+            /// always applies in the time zone.
+            /// </summary>
+            public string RuleName
+            {
+                get
+                {
+                    return m_ruleName;
+                }
+            }
+
+            /// <summary>
+            /// The format for time zone abbreviations in this time
+            /// zone.  The pair of characters %s is used to show where
+            /// the "variable part" of the time zone abbreviation
+            /// goes.  Alternately, a slash (/) separates standard and
+            /// daylight abbreviations.
+            /// </summary>
+            public string Format
+            {
+                get
+                {
+                    return m_format;
+                }
+            }
+
+            /// <summary>
+            /// </summary>
+            /// <param name="rule">The rule.</param>
+            /// <returns></returns>
+            public string FormatModifier(TzRule rule)
+            {
+                string result = Format;
+                if (!string.IsNullOrEmpty(result) && result != TzDatabase.NotApplicableValue)
+                {
+                    string modifier = rule.Modifier;
+                    if (!string.IsNullOrEmpty(modifier) && modifier != TzDatabase.NotApplicableValue)
+                    {
+                        result = result.Replace("%s", modifier);
+                    }
+                }
+                return result;
+            }
+
+            /// <summary>
+            /// The time at which the UTC offset or the rule(s) change
+            /// for a location.  It is specified as a year, a month, a
+            /// day, and a time of day.  If this is specified, the
+            /// time zone information is generated from the given UTC
+            /// offset and rule change until the time specified.  The
+            /// month, day, and time of day have the same format as
+            /// the IN, ON, and AT fields of a rule; trailing fields
+            /// can be omitted, and default to the earliest possible
+            /// value for the missing fields.
+            /// </summary>
+            public int UntilYear
+            {
+                get
+                {
+                    return m_untilYear;
+                }
+            }
+
+            /// <summary>
+            /// The time at which the UTC offset or the rule(s) change
+            /// for a location.  It is specified as a year, a month, a
+            /// day, and a time of day.  If this is specified, the
+            /// time zone information is generated from the given UTC
+            /// offset and rule change until the time specified.  The
+            /// month, day, and time of day have the same format as
+            /// the IN, ON, and AT fields of a rule; trailing fields
+            /// can be omitted, and default to the earliest possible
+            /// value for the missing fields.
+            /// </summary>
+            public Month UntilMonth
+            {
+                get
+                {
+                    return m_untilMonth;
+                }
+            }
+
+            /// <summary>
+            /// The time at which the UTC offset or the rule(s) change
+            /// for a location.  It is specified as a year, a month, a
+            /// day, and a time of day.  If this is specified, the
+            /// time zone information is generated from the given UTC
+            /// offset and rule change until the time specified.  The
+            /// month, day, and time of day have the same format as
+            /// the IN, ON, and AT fields of a rule; trailing fields
+            /// can be omitted, and default to the earliest possible
+            /// value for the missing fields.
+            /// </summary>
+            public int UntilDay
+            {
+                get
+                {
+                    return m_untilDay;
+                }
+            }
+
+            /// <summary>
+            /// The time at which the UTC offset or the rule(s) change
+            /// for a location.  It is specified as a year, a month, a
+            /// day, and a time of day.  If this is specified, the
+            /// time zone information is generated from the given UTC
+            /// offset and rule change until the time specified.  The
+            /// month, day, and time of day have the same format as
+            /// the IN, ON, and AT fields of a rule; trailing fields
+            /// can be omitted, and default to the earliest possible
+            /// value for the missing fields.
+            /// </summary>
+            public DayOfWeek? UntilDay_DayOfWeek
+            {
+                get
+                {
+                    return m_untilDay_DayOfWeek;
+                }
+            }
+
+            /// <summary>
+            /// The time at which the UTC offset or the rule(s) change
+            /// for a location.  It is specified as a year, a month, a
+            /// day, and a time of day.  If this is specified, the
+            /// time zone information is generated from the given UTC
+            /// offset and rule change until the time specified.  The
+            /// month, day, and time of day have the same format as
+            /// the IN, ON, and AT fields of a rule; trailing fields
+            /// can be omitted, and default to the earliest possible
+            /// value for the missing fields.
+            /// </summary>
+            public TimeSpan UntilTime
+            {
+                get
+                {
+                    return m_untilTime;
+                }
+            }
+
+            /// <summary>
+            /// The time at which the UTC offset or the rule(s) change
+            /// for a location.  It is specified as a year, a month, a
+            /// day, and a time of day.  If this is specified, the
+            /// time zone information is generated from the given UTC
+            /// offset and rule change until the time specified.  The
+            /// month, day, and time of day have the same format as
+            /// the IN, ON, and AT fields of a rule; trailing fields
+            /// can be omitted, and default to the earliest possible
+            /// value for the missing fields.
+            /// </summary>
+            public string UntilTimeModifier
+            {
+                get
+                {
+                    return m_untilTimeModifier;
+                }
+            }
+
+            /// <summary>
+            /// 
+            /// </summary>
+            public string Comment
+            {
+                get
+                {
+                    return m_comment;
+                }
             }
 
             /// <summary>
@@ -597,6 +879,61 @@ namespace PublicDomain
                     m_cachedUntilTime = GetDateTime(UntilYear, UntilMonth, UntilDay, UntilDay_DayOfWeek, UntilTime);
                 }
                 return m_cachedUntilTime.Value;
+            }
+
+            /// <summary>
+            /// Gets the local time.
+            /// </summary>
+            /// <param name="point">The point.</param>
+            /// <returns></returns>
+            public DateTime GetLocalTime(DateTime point)
+            {
+                switch (point.Kind)
+                {
+                    case DateTimeKind.Local:
+                        return point + UtcOffset;
+                    case DateTimeKind.Unspecified:
+                        if (TzTimeZone.TreatUnspecifiedKindAsLocal)
+                        {
+                            return point + UtcOffset;
+                        }
+                        else
+                        {
+                            throw new ArgumentException("unspecified kind");
+                        }
+                    case DateTimeKind.Utc:
+                        return new DateTime(point.Ticks, DateTimeKind.Local) + UtcOffset;
+                    default:
+                        throw new NotImplementedException();
+                }
+            }
+
+
+            /// <summary>
+            /// Gets the universal time.
+            /// </summary>
+            /// <param name="point">The point.</param>
+            /// <returns></returns>
+            public DateTime GetUniversalTime(DateTime point)
+            {
+                switch (point.Kind)
+                {
+                    case DateTimeKind.Local:
+                        return new DateTime(point.Ticks, DateTimeKind.Utc) - UtcOffset;
+                    case DateTimeKind.Unspecified:
+                        if (TzTimeZone.TreatUnspecifiedKindAsLocal)
+                        {
+                            return new DateTime(point.Ticks, DateTimeKind.Utc) - UtcOffset;
+                        }
+                        else
+                        {
+                            throw new ArgumentException("unspecified kind");
+                        }
+                    case DateTimeKind.Utc:
+                        return point - UtcOffset;
+                    default:
+                        throw new NotImplementedException();
+                }
             }
 
             /// <summary>
@@ -693,14 +1030,14 @@ namespace PublicDomain
             {
                 string result = string.Format("new PublicDomain.TzDatabase.TzZone({0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10})",
                     '\"' + ZoneName + '\"',
-                    "new TimeSpan(" + UtcOffset.Ticks + ")",
+                    GetNewTimeSpanString(UtcOffset.Ticks),
                     '\"' + RuleName + '\"',
                     Format == null ? "null" : '\"' + Format + '\"',
                     UntilYear,
                     UntilMonth == 0 ? "0" : "PublicDomain.Month." + UntilMonth.ToString(),
                     UntilDay,
                     UntilDay_DayOfWeek == null ? "null" : ("DayOfWeek." + UntilDay_DayOfWeek.Value.ToString()),
-                    "new TimeSpan(" + UntilTime.Ticks + ")",
+                    GetNewTimeSpanString(UntilTime.Ticks),
                     UntilTimeModifier == null ? "null" : '\"' + UntilTimeModifier + '\"',
                     Comment == null ? "null" : '\"' + Comment + '\"'
                 );
@@ -723,12 +1060,67 @@ namespace PublicDomain
                 }
                 else
                 {
-                    if (UntilYear > other.UntilYear)
+                    if (GetUntilDateTime() > other.GetUntilDateTime())
                     {
                         return 1;
                     }
                     return -1;
                 }
+            }
+
+            internal void SetZoneName(string zoneName)
+            {
+                m_zoneName = zoneName;
+            }
+
+            internal void SetUtcOffset(TimeSpan utcOffset)
+            {
+                m_utcOffset = utcOffset;
+            }
+
+            internal void SetRuleName(string ruleName)
+            {
+                m_ruleName = ruleName;
+            }
+
+            internal void SetFormat(string format)
+            {
+                m_format = format;
+            }
+
+            internal void SetUntilYear(int untilYear)
+            {
+                m_untilYear = untilYear;
+            }
+
+            internal void SetUntilMonth(Month untilMonth)
+            {
+                m_untilMonth = untilMonth;
+            }
+
+            internal void SetUntilDay(int untilDay)
+            {
+                m_untilDay = untilDay;
+            }
+
+            internal void SetUntilDay_DayOfWeek(DayOfWeek? untilDay_DayOfWeek)
+            {
+                m_untilDay_DayOfWeek = untilDay_DayOfWeek;
+            }
+
+            internal void SetUntilTime(TimeSpan untilTime)
+            {
+                m_untilTime = untilTime;
+            }
+
+            internal void SetUntilTimeModifier(string untilTimeModifier)
+            {
+                m_untilTimeModifier = untilTimeModifier;
+            }
+
+            internal void SetComment(string comment)
+            {
+                m_comment = PrepareComment(comment);
             }
         }
 
@@ -789,45 +1181,59 @@ namespace PublicDomain
             {
                 throw new ArgumentNullException("str");
             }
-            TzRule t = new TzRule();
             string[] pieces = StringUtilities.SplitQuoteSensitive(str, true, '\"', '#');
             if (pieces.Length != 10 && pieces.Length != 11)
             {
                 throw new TzParseException("Rule has an invalid number of pieces: {0}, expecting {1} ({2})", pieces.Length, 10, str);
             }
-            t.RuleName = pieces[1];
-            if (pieces[2] == "min")
+            string ruleName = pieces[1];
+            int fromYear = 0;
+            if (pieces[2] != "min")
             {
-                t.FromYear = 0;
+                fromYear = int.Parse(pieces[2]);
             }
-            else
-            {
-                t.FromYear = int.Parse(pieces[2]);
-            }
+            int toYear;
             switch (pieces[3])
             {
                 case "only":
-                    t.ToYear = t.FromYear;
+                    toYear = fromYear;
                     break;
                 case "max":
-                    t.ToYear = int.MaxValue;
+                    toYear = int.MaxValue;
                     break;
                 default:
-                    t.ToYear = int.Parse(pieces[3]);
+                    toYear = int.Parse(pieces[3]);
                     break;
             }
-            t.StartMonth = DateTimeUtlities.ParseMonth(pieces[5]);
+            Month startMonth = DateTimeUtlities.ParseMonth(pieces[5]);
 
-            TzDatabase.GetTzDataDay(pieces[6], out t.StartDay, out t.StartDay_DayOfWeek);
+            int startDay;
+            DayOfWeek? startDay_DayOfWeek;
+            TzDatabase.GetTzDataDay(pieces[6], out startDay, out startDay_DayOfWeek);
 
-            t.StartTime = TzDatabase.GetTzDataTime(pieces[7], out t.StartTimeModifier);
-            t.SaveTime = DateTimeUtlities.ParseTimeSpan(pieces[8]);
-            t.Modifier = pieces[9];
+            string startTimeModifier;
+            TimeSpan startTime = TzDatabase.GetTzDataTime(pieces[7], out startTimeModifier);
+            TimeSpan saveTime = DateTimeUtlities.ParseTimeSpan(pieces[8]);
+            string modifier = pieces[9];
+            string comment = null;
             if (pieces.Length == 11)
             {
-                t.Comment = pieces[10].Trim();
+                comment = pieces[10].Trim();
             }
-            return t;
+            return new TzRule(ruleName, fromYear, toYear, startMonth, startDay, startDay_DayOfWeek, startTime, startTimeModifier, saveTime, modifier, comment);
+        }
+
+        private static string PrepareComment(string comment)
+        {
+            if (comment != null)
+            {
+                comment = comment.Trim();
+                if (comment.Length >= 1 && comment[0] == '#')
+                {
+                    comment = comment.Substring(1).Trim();
+                }
+            }
+            return comment;
         }
 
         /// <summary>
@@ -854,13 +1260,16 @@ namespace PublicDomain
         private static void ParsePieces(string str, TzZone z)
         {
             string[] pieces = StringUtilities.SplitQuoteSensitive(str, true, '\"', '#');
-            z.ZoneName = pieces[1];
+            z.SetZoneName(pieces[1]);
 
             if (z.ZoneName != FactoryZoneName)
             {
-                z.UtcOffset = DateTimeUtlities.ParseTimeSpan(pieces[2]);
-                z.RuleName = pieces[3];
-                z.Format = pieces[4];
+                z.SetUtcOffset(DateTimeUtlities.ParseTimeSpan(pieces[2]));
+                z.SetRuleName(pieces[3]);
+                z.SetFormat(pieces[4]);
+
+                z.SetComment(null);
+                SetMaxZone(z);
 
                 // The rest of the format is optional an erratic, so we combine
                 // the rest of the array into a big string
@@ -868,42 +1277,51 @@ namespace PublicDomain
                 {
                     if (pieces[5][0] == '#')
                     {
-                        z.Comment = pieces[5].Trim();
-                        SetMaxZone(z);
+                        z.SetComment(pieces[5].Trim());
                     }
                     else
                     {
-                        z.UntilYear = int.Parse(pieces[5]);
+                        z.SetUntilYear(int.Parse(pieces[5]));
+                        z.SetUntilDay(1);
+                        z.SetUntilMonth(Month.January);
+                        z.SetUntilTime(TimeSpan.Zero);
+
                         if (pieces.Length > 6)
                         {
                             if (pieces[6][0] == '#')
                             {
-                                z.Comment = pieces[6].Trim();
+                                z.SetComment(pieces[6].Trim());
                             }
                             else
                             {
-                                z.UntilMonth = DateTimeUtlities.ParseMonth(pieces[6]);
+                                z.SetUntilMonth(DateTimeUtlities.ParseMonth(pieces[6]));
                                 if (pieces.Length > 7)
                                 {
                                     if (pieces[7][0] == '#')
                                     {
-                                        z.Comment = pieces[7].Trim();
+                                        z.SetComment(pieces[7].Trim());
                                     }
                                     else
                                     {
-                                        TzDatabase.GetTzDataDay(pieces[7], out z.UntilDay, out z.UntilDay_DayOfWeek);
+                                        int untilDay;
+                                        DayOfWeek? untilDay_DayOfWeek;
+                                        TzDatabase.GetTzDataDay(pieces[7], out untilDay, out untilDay_DayOfWeek);
+                                        z.SetUntilDay(untilDay);
+                                        z.SetUntilDay_DayOfWeek(untilDay_DayOfWeek);
                                         if (pieces.Length > 8)
                                         {
                                             if (pieces[8][0] == '#')
                                             {
-                                                z.Comment = pieces[8].Trim();
+                                                z.SetComment(pieces[8].Trim());
                                             }
                                             else
                                             {
-                                                z.UntilTime = TzDatabase.GetTzDataTime(pieces[8], out z.UntilTimeModifier);
+                                                string untilTimeModifier;
+                                                z.SetUntilTime(TzDatabase.GetTzDataTime(pieces[8], out untilTimeModifier));
+                                                z.SetUntilTimeModifier(untilTimeModifier);
                                                 if (pieces.Length > 9)
                                                 {
-                                                    z.Comment = pieces[9].Trim();
+                                                    z.SetComment(pieces[9].Trim());
                                                 }
                                             }
                                         }
@@ -913,23 +1331,18 @@ namespace PublicDomain
                         }
                     }
                 }
-                else
-                {
-                    z.Comment = null;
-                    SetMaxZone(z);
-                }
             }
         }
 
         private static void SetMaxZone(TzZone z)
         {
             // Reset any potential cloned date
-            z.UntilYear = int.MaxValue;
-            z.UntilMonth = Month.December;
-            z.UntilDay = 31;
-            z.UntilDay_DayOfWeek = null;
-            z.UntilTime = TimeSpan.Zero;
-            z.UntilTimeModifier = null;
+            z.SetUntilYear(int.MaxValue);
+            z.SetUntilMonth(Month.December);
+            z.SetUntilDay(31);
+            z.SetUntilDay_DayOfWeek(null);
+            z.SetUntilTime(TimeSpan.Zero);
+            z.SetUntilTimeModifier(null);
         }
 
         /// <summary>
@@ -1057,9 +1470,11 @@ namespace PublicDomain
 
             if (year == int.MaxValue)
             {
-                // This means that there is no Until Year, and no Until time
-                // at all, and runs until infinity
                 return DateTime.MaxValue;
+            }
+            else if (year == int.MinValue)
+            {
+                return DateTime.MinValue;
             }
             else
             {
@@ -1087,6 +1502,11 @@ namespace PublicDomain
 
                 return new DateTime(year, month, day, pieceTime.Hours, pieceTime.Minutes, pieceTime.Seconds);
             }
+        }
+
+        private static string GetNewTimeSpanString(long val)
+        {
+            return val == 0 ? "TimeSpan.Zero" : "new TimeSpan(" + val + ")";
         }
     }
 }

@@ -137,7 +137,7 @@ namespace PublicDomain
                     string tzd = RegexUtilities.GetLastCapture(m, 2);
                     if (tzd == UtcZuluIdentifier.ToString())
                     {
-                        timezone = TzConstants.CommonZoneUTC;
+                        timezone = TzTimeZone.ZoneUTC;
                     }
                     else
                     {
