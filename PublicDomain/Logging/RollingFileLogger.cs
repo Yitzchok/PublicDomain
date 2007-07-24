@@ -61,7 +61,7 @@ namespace PublicDomain.Logging
         /// <param name="formatParameters"></param>
         /// <param name="logLine"></param>
         /// <returns></returns>
-        protected override string GetFileName(LoggerSeverity severity, DateTime timestamp, object entry, object[] formatParameters, string logLine)
+        public override string GetFileName(LoggerSeverity severity, DateTime timestamp, object entry, object[] formatParameters, string logLine)
         {
             string fileName = base.GetFileName(severity, timestamp, entry, formatParameters, logLine);
 

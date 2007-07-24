@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using NUnit.Framework;
 using PublicDomain.Logging;
+using System.IO;
 
 namespace PublicDomain
 {
@@ -50,6 +51,28 @@ namespace PublicDomain
 
             logger = config.CreateLogger("test3");
             Assert.AreEqual((int)logger.Threshold, (int)LoggerSeverity.Debug10);
+        }
+
+        [Test]
+        public void SimpleApplicationLogging()
+        {
+            string line = "test" + RandomGenerationUtilities.GetRandomInteger();
+            ApplicationLogger.Current.Threshold = LoggerSeverity.Debug10;
+            ApplicationLogger.Current.Log(LoggerSeverity.Debug10, line);
+
+            // Find the file logger
+            FileLogger fileLogger = null;
+            foreach (Logger logger in ApplicationLogger.Current.Loggers)
+            {
+                fileLogger = logger as FileLogger;
+            }
+
+            if (fileLogger != null)
+            {
+                string fileName = fileLogger.GetFileName(LoggerSeverity.Infinity, DateTime.UtcNow, null, null, null);
+                Console.WriteLine(fileName);
+                Assert.IsTrue(File.Exists(fileName));
+            }
         }
     }
 }

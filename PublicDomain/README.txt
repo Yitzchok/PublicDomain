@@ -12,6 +12,9 @@ Simon Mourier
 
 Version History
 ===============
+V0.2.10.0
+	[kevgrig@gmail.com]
+		* Added threading to logging
 V0.2.9.0
 	[kevgrig@gmail.com]
 		* Historical TzZoneInfo exposed through TzTimeZone

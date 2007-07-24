@@ -43,7 +43,19 @@ namespace PublicDomain.Logging
         /// <param name="logLine">The log line.</param>
         protected override void DoLog(string logLine)
         {
-            m_writer.WriteLine(logLine);
+            LogArtifact artifact = new LogArtifact();
+            artifact.Logger = this;
+            artifact.LogLine = logLine;
+            Logger.PushArtifact(artifact);
+        }
+
+        /// <summary>
+        /// Writes the specified artifact.
+        /// </summary>
+        /// <param name="artifact">The artifact.</param>
+        public override void Write(LogArtifact artifact)
+        {
+            m_writer.WriteLine(artifact.LogLine);
         }
     }
 }

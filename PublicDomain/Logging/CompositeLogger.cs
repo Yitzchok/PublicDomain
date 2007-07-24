@@ -83,5 +83,17 @@ namespace PublicDomain.Logging
                 }
             }
         }
+
+        /// <summary>
+        /// Writes the specified artifact.
+        /// </summary>
+        /// <param name="artifact">The artifact.</param>
+        public override void Write(LogArtifact artifact)
+        {
+            foreach (Logger logger in Loggers)
+            {
+                logger.Write(artifact);
+            }
+        }
     }
 }

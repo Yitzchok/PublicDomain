@@ -12,15 +12,6 @@ namespace PublicDomain.Logging
     {
         private string m_fileName;
 
-        private static Dictionary<string, FileStream> m_streams = new Dictionary<string, FileStream>();
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public static bool CacheFileStreams = false;
-
-        private static object m_streamsLock = new object();
-
         /// <summary>
         /// Initializes a new instance of the <see cref="FileLogger"/> class.
         /// </summary>
@@ -35,27 +26,6 @@ namespace PublicDomain.Logging
         public FileLogger(string fileName)
         {
             FileName = fileName;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        ~FileLogger()
-        {
-            CloseAllStreams();
-        }
-
-        private static void CloseAllStreams()
-        {
-            lock (m_streamsLock)
-            {
-                foreach (FileStream fileStream in m_streams.Values)
-                {
-                    fileStream.Flush();
-                    fileStream.Close();
-                }
-                m_streams.Clear();
-            }
         }
 
         /// <summary>
@@ -89,26 +59,27 @@ namespace PublicDomain.Logging
         /// <param name="logLine">The log line.</param>
         protected override void DoLog(LoggerSeverity severity, DateTime timestamp, object entry, object[] formatParameters, string logLine)
         {
-            string fileName = GetFileName(severity, timestamp, entry, formatParameters, logLine);
+            LogArtifact artifact = new LogArtifact(this, severity, timestamp, entry, formatParameters, logLine);
+            Logger.PushArtifact(artifact);
+        }
+
+        /// <summary>
+        /// Writes the specified artifact.
+        /// </summary>
+        /// <param name="artifact">The artifact.</param>
+        public override void Write(LogArtifact artifact)
+        {
+            string fileName = GetFileName(artifact.Severity, artifact.Timestamp, artifact.Entry, artifact.FormatParameters, artifact.LogLine);
 
             if (!string.IsNullOrEmpty(fileName))
             {
-                FileStream stream = GetStream(fileName);
-
-                try
+                using (FileStream stream = GetStream(fileName))
                 {
-                    byte[] data = Encoding.Default.GetBytes(logLine);
+                    byte[] data = Encoding.Default.GetBytes(artifact.LogLine);
 
                     stream.Write(data, 0, data.Length);
                     stream.WriteByte((byte)'\n');
                     stream.Flush();
-                }
-                finally
-                {
-                    if (!CacheFileStreams)
-                    {
-                        stream.Close();
-                    }
                 }
             }
         }
@@ -120,22 +91,7 @@ namespace PublicDomain.Logging
         /// <returns></returns>
         protected virtual FileStream GetStream(string fileName)
         {
-            FileStream result = null;
-
-            lock (m_streamsLock)
-            {
-                if (!CacheFileStreams || !m_streams.TryGetValue(fileName, out result))
-                {
-                    result = new FileStream(fileName, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
-
-                    if (CacheFileStreams)
-                    {
-                        m_streams[fileName] = result;
-                    }
-                }
-            }
-
-            return result;
+            return new FileStream(fileName, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
         }
 
         /// <summary>
@@ -152,7 +108,7 @@ namespace PublicDomain.Logging
         /// Gets the name of the file.
         /// </summary>
         /// <returns></returns>
-        protected virtual string GetFileName(LoggerSeverity severity, DateTime timestamp, object entry, object[] formatParameters, string logLine)
+        public virtual string GetFileName(LoggerSeverity severity, DateTime timestamp, object entry, object[] formatParameters, string logLine)
         {
             return FileName;
         }

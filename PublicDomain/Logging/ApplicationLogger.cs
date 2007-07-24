@@ -44,6 +44,7 @@ namespace PublicDomain.Logging
             // we write the same message to a global file
             try
             {
+                FileSystemUtilities.EnsureDirectoriesInPath(GlobalConstants.PublicDomainDefaultInstallLocation);
                 Logger loggers = new FileLogger(GlobalConstants.PublicDomainDefaultInstallLocation + @"loggers.log");
                 loggers.Threshold = LoggerSeverity.Info20;
                 loggers.LogInfo20(msg);

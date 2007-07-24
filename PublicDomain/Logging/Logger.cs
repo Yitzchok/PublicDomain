@@ -14,16 +14,13 @@ namespace PublicDomain.Logging
     public abstract class Logger
     {
         private LoggerSeverity m_threshold = LoggerSeverity.Warn30;
-
         private List<ILogFilter> m_filters = new List<ILogFilter>();
-
         private ILogFormatter m_formatter = new DefaultLogFormatter();
-
         private string m_category;
-
         private Dictionary<string, object> m_data = new Dictionary<string, object>();
-
         private static Dictionary<int, int> m_stack = new Dictionary<int, int>();
+        private static FinalizableBackgroundThread m_loggerThread = new FinalizableBackgroundThread(1000 * 5, LoggerThread);
+        private static List<LogArtifact> s_artifacts = new List<LogArtifact>();
 
         internal static int LogStackCount
         {
@@ -43,6 +40,17 @@ namespace PublicDomain.Logging
             }
         }
 
+        private static void LoggerThread(bool isFinal)
+        {
+            int length = s_artifacts.Count;
+            for (int i = 0; i < length; i++)
+            {
+                LogArtifact artifact = s_artifacts[i];
+                artifact.Logger.Write(artifact);
+            }
+            s_artifacts.RemoveRange(0, length);
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Logger"/> class.
         /// </summary>
@@ -60,6 +68,15 @@ namespace PublicDomain.Logging
             {
                 AddLogFilter(logFilter);
             }
+        }
+
+        /// <summary>
+        /// Pushes the artifact.
+        /// </summary>
+        /// <param name="artifact">The artifact.</param>
+        public static void PushArtifact(LogArtifact artifact)
+        {
+            s_artifacts.Add(artifact);
         }
 
         /// <summary>
@@ -239,6 +256,12 @@ namespace PublicDomain.Logging
         /// </summary>
         /// <param name="logLine">The log line.</param>
         protected abstract void DoLog(string logLine);
+
+        /// <summary>
+        /// Writes the specified artifact.
+        /// </summary>
+        /// <param name="artifact">The artifact.</param>
+        public abstract void Write(LogArtifact artifact);
 
         /// <summary>
         /// </summary>

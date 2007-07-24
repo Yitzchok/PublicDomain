@@ -138,9 +138,11 @@
     <Compile Include="Logging\DefaultLogFormatter.cs" />
     <Compile Include="Logging\FileLogger.cs" />
     <Compile Include="Logging\FileSizeRollOverStrategy.cs" />
+    <Compile Include="Logging\FinalizableBackgroundThread.cs" />
     <Compile Include="Logging\ILogFilter.cs" />
     <Compile Include="Logging\ILogFormatter.cs" />
     <Compile Include="Logging\IRollOverStrategy.cs" />
+    <Compile Include="Logging\LogArtifact.cs" />
     <Compile Include="Logging\LogFormatter.cs" />
     <Compile Include="Logging\Logger.cs" />
     <Compile Include="Logging\LoggerSeverity.cs" />
