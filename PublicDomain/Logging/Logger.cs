@@ -324,7 +324,7 @@ namespace PublicDomain.Logging
         /// <param name="severity">The severity.</param>
         public virtual void LogException(Exception ex, LoggerSeverity severity)
         {
-            Log(severity, ex);
+            Log(severity, ExceptionUtilities.GetExceptionDetailsAsString(ex));
         }
 
         /// <summary>

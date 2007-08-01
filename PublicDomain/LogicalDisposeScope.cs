@@ -50,7 +50,7 @@ namespace PublicDomain
             {
                 base.Dispose();
 
-                List<Exception> exceptions = null;
+                List<Exception> exceptions = new List<Exception>();
                 foreach (IDisposable disposable in Target.m_disposables)
                 {
                     try

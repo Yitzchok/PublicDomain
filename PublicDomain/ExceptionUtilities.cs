@@ -34,7 +34,11 @@ namespace PublicDomain
         }
 
         /// <summary>
-        /// Gets the human readable exception details as string.
+        /// Gets the human readable exception details as a string. This
+        /// simply accumulates the Message value of this exception and
+        /// all inner exceptions. It does not return programmer related details
+        /// such as the stack trace. For that, use the GetExceptionDetailsAsString
+        /// method.
         /// </summary>
         /// <param name="ex">The ex.</param>
         /// <returns></returns>
@@ -58,9 +62,12 @@ namespace PublicDomain
         }
 
         /// <summary>
-        /// Gets the exception details as string.
+        /// Gets the exception details as a string. This will also
+        /// gather together all inner exceptions in the result. The results
+        /// are not in a human-readable form. For that, see the GetHumanReadable
+        /// method.
         /// </summary>
-        /// <param name="ex">The ex.</param>
+        /// <param name="ex">The exception.</param>
         /// <returns></returns>
         public static string GetExceptionDetailsAsString(Exception ex)
         {

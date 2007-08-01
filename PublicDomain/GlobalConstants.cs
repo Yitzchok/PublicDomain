@@ -32,7 +32,7 @@ namespace PublicDomain
         /// Current version of this code, in string form. In a standalone build,
         /// this is the assembly version and file version of the assembly.
         /// </summary>
-        public const string PublicDomainVersion = "0.2.10.0";
+        public const string PublicDomainVersion = "0.2.11.0";
 
         /// <summary>
         /// The name of the PublicDomain assembly, if this is a standalone build. If

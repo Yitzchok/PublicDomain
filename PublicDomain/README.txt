@@ -12,6 +12,9 @@ Simon Mourier
 
 Version History
 ===============
+V0.2.11.0
+	[kevgrig@gmail.com]
+		* Updated LoggingConfig
 V0.2.10.0
 	[kevgrig@gmail.com]
 		* Added threading to logging

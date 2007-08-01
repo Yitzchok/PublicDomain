@@ -56,6 +56,8 @@ namespace PublicDomain.Logging
         private CallbackCreateLogger m_createLogger;
         private CallbackUpdateLogger m_updateLogger;
 
+        private string m_value;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="LoggingConfig"/> class.
         /// </summary>
@@ -102,6 +104,19 @@ namespace PublicDomain.Logging
         }
 
         /// <summary>
+        /// Gets the configuration string value
+        /// previously loaded.
+        /// </summary>
+        /// <value>The value.</value>
+        public string Value
+        {
+            get
+            {
+                return m_value;
+            }
+        }
+
+        /// <summary>
         /// Loads the specified config string.
         /// </summary>
         /// <example>Namespace1.Class1=*;Class2=off;Namespace1.Namespace2.Class3=Debug</example>
@@ -120,6 +135,8 @@ namespace PublicDomain.Logging
         /// <param name="updateLogger">The update logger.</param>
         public void Load(string configString, CallbackCreateLogger createLogger, CallbackUpdateLogger updateLogger)
         {
+            m_value = configString;
+
             if (createLogger == null)
             {
                 createLogger = DefaultCallbackCreateLogger;
