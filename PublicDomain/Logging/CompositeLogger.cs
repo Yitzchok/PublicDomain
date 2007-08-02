@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Collections.ObjectModel;
 
 namespace PublicDomain.Logging
 {
@@ -9,7 +10,10 @@ namespace PublicDomain.Logging
     /// </summary>
     public class CompositeLogger : Logger
     {
-        private List<Logger> m_loggers = new List<Logger>();
+        /// <summary>
+        /// 
+        /// </summary>
+        protected List<Logger> m_loggers = new List<Logger>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CompositeLogger"/> class.
@@ -21,20 +25,29 @@ namespace PublicDomain.Logging
             {
                 if (logger != null)
                 {
-                    Loggers.Add(logger);
+                    AddLogger(logger);
                 }
             }
+        }
+
+        /// <summary>
+        /// Adds the logger.
+        /// </summary>
+        /// <param name="logger">The logger.</param>
+        public virtual void AddLogger(Logger logger)
+        {
+            m_loggers.Add(logger);
         }
 
         /// <summary>
         /// Gets the loggers.
         /// </summary>
         /// <value>The loggers.</value>
-        public virtual List<Logger> Loggers
+        public virtual ReadOnlyCollection<Logger> Loggers
         {
             get
             {
-                return m_loggers;
+                return m_loggers.AsReadOnly();
             }
         }
 
@@ -45,7 +58,7 @@ namespace PublicDomain.Logging
         /// <param name="formatParameters"></param>
         public override void Log(LoggerSeverity severity, object entry, params object[] formatParameters)
         {
-            foreach (Logger logger in Loggers)
+            foreach (Logger logger in m_loggers)
             {
                 logger.Log(severity, entry, formatParameters);
             }
@@ -77,7 +90,7 @@ namespace PublicDomain.Logging
             set
             {
                 base.Threshold = value;
-                foreach (Logger logger in Loggers)
+                foreach (Logger logger in m_loggers)
                 {
                     logger.Threshold = value;
                 }
@@ -90,7 +103,7 @@ namespace PublicDomain.Logging
         /// <param name="artifact">The artifact.</param>
         public override void Write(LogArtifact artifact)
         {
-            foreach (Logger logger in Loggers)
+            foreach (Logger logger in m_loggers)
             {
                 logger.Write(artifact);
             }

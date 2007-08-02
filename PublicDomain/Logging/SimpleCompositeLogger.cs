@@ -53,6 +53,26 @@ namespace PublicDomain.Logging
         }
 
         /// <summary>
+        /// Gets or sets the category.
+        /// </summary>
+        /// <value>The category.</value>
+        public override string Category
+        {
+            get
+            {
+                return base.Category;
+            }
+            set
+            {
+                base.Category = value;
+                foreach (Logger logger in m_loggers)
+                {
+                    logger.Category = value;
+                }
+            }
+        }
+
+        /// <summary>
         /// </summary>
         /// <param name="severity"></param>
         /// <param name="entry"></param>
@@ -66,6 +86,16 @@ namespace PublicDomain.Logging
                 // send an email
             }
             base.Log(severity, entry, formatParameters);
+        }
+
+        /// <summary>
+        /// Adds the logger.
+        /// </summary>
+        /// <param name="logger">The logger.</param>
+        public override void AddLogger(Logger logger)
+        {
+            base.AddLogger(logger);
+            logger.Category = Category;
         }
     }
 }

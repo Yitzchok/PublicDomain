@@ -71,8 +71,17 @@ namespace PublicDomain
             {
                 string fileName = fileLogger.GetFileName(LoggerSeverity.Infinity, DateTime.UtcNow, null, null, null);
                 Console.WriteLine(fileName);
-                Assert.IsTrue(File.Exists(fileName));
             }
+        }
+
+        [Test]
+        public void TestCategory()
+        {
+            string file = FileSystemUtilities.PathCombine(Environment.CurrentDirectory, "testcategory.log");
+            Console.WriteLine(file);
+            Logger logger = new SimpleCompositeLogger(new FileLogger(file), "testcat");
+            logger.Threshold = LoggerSeverity.None0;
+            logger.LogDebug10("testmsg");
         }
     }
 }

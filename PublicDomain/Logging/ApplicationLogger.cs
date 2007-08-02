@@ -31,7 +31,7 @@ namespace PublicDomain.Logging
         {
             // Figure out where we'll be logging the files
             string fileNameFormatted = FileSystemUtilities.PathCombine(Environment.CurrentDirectory, @"\app{0}.log");
-            Loggers.Add(new RollingFileLogger(fileNameFormatted));
+            AddLogger(new RollingFileLogger(fileNameFormatted));
             AddLogFilter(new SevereLogFilter());
 
             // So that we know where the log is going

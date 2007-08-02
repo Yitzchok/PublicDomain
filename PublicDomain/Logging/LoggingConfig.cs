@@ -321,6 +321,8 @@ namespace PublicDomain.Logging
 
                     result = m_createLogger(key, fallbackThreshold);
 
+                    key = key.ToLower();
+
                     PostProcessNewLogger(key, fallbackThreshold, result);
                 }
             }
