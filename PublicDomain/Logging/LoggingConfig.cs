@@ -10,7 +10,7 @@ namespace PublicDomain.Logging
     public class LoggingConfig
     {
         /// <summary>
-        /// Returned for off
+        /// Returned for off (value is Infinity)
         /// </summary>
         public const LoggerSeverity OffValue = LoggerSeverity.Infinity;
 
@@ -149,6 +149,8 @@ namespace PublicDomain.Logging
             m_createLogger = createLogger;
             m_updateLogger = updateLogger;
 
+            DisableAllLoggers();
+
             if (configString != null && Enabled)
             {
                 string[] pieces = configString.Trim().Split(';', ',');
@@ -232,10 +234,7 @@ namespace PublicDomain.Logging
 
         private void PrepareLogger(LoggerSeverity threshold, Logger logger)
         {
-            if (threshold == OffValue)
-            {
-                logger.Enabled = false;
-            }
+            logger.Enabled = threshold != OffValue;
         }
 
         /// <summary>
@@ -342,6 +341,30 @@ namespace PublicDomain.Logging
             Array.Copy(otherLogClasses, classes, otherLogClasses.Length);
             classes[classes.Length - 1] = type.ToString();
             return CreateLogger(classes);
+        }
+
+        /// <summary>
+        /// Enables all loggers.
+        /// </summary>
+        public void EnableAllLoggers()
+        {
+            UpdateAllLoggers(true);
+        }
+
+        /// <summary>
+        /// Disables all loggers.
+        /// </summary>
+        public void DisableAllLoggers()
+        {
+            UpdateAllLoggers(false);
+        }
+
+        private void UpdateAllLoggers(bool enabled)
+        {
+            foreach (Logger logger in m_loggers.Values)
+            {
+                logger.Enabled = enabled;
+            }
         }
     }
 }
