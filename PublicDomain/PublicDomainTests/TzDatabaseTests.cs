@@ -105,8 +105,21 @@ namespace PublicDomain
                         else if (ConversionUtilities.IsStringATimeSpan(dataZone.RuleName))
                         {
                             TimeSpan timedRule = DateTimeUtlities.ParseTimeSpan(dataZone.RuleName);
-                            dataRules.Add(new PublicDomain.TzDatabase.TzRule(dataZone.RuleName, int.MinValue, int.MaxValue, Month.January,
-                                1, null, new TimeSpan(), null, timedRule, null, null));
+                            dataRules.Add(
+                                new PublicDomain.TzDatabase.TzRule(
+                                    dataZone.RuleName,
+                                    int.MinValue,
+                                    int.MaxValue,
+                                    Month.January,
+                                    1,
+                                    null,
+                                    TimeSpan.Zero,
+                                    null,
+                                    timedRule,
+                                    null,
+                                    null
+                                )
+                            );
                         }
                     }
                 }

@@ -256,118 +256,71 @@ namespace PublicDomain
 
             DaylightTime result = null;
 
-            // First, figure out which zone we're in
             DateTime point = new DateTime(year, 1, 1);
             TzDatabase.TzZone targetZone = FindZone(point);
+
+            PublicDomain.TzDatabase.TzRule one;
+            PublicDomain.TzDatabase.TzRule two;
+            bool rulesSwitched;
+            GetDaylightChangeRules(ref point, targetZone, out one, out two, out result, out rulesSwitched);
+
+            return result;
+        }
+
+        private void GetDaylightChangeRules(ref DateTime time, TzDatabase.TzZone targetZone, out TzDatabase.TzRule one, out TzDatabase.TzRule two, out DaylightTime daylightTime, out bool rulesSwitched)
+        {
+            one = two = null;
+            daylightTime = null;
+            rulesSwitched = false;
+
+            // First, figure out which zone we're in
 
             if (targetZone != null)
             {
                 // The zone might not have any daylight savings time rules
                 if (targetZone.RuleName != TzDatabase.NotApplicableValue)
                 {
-                    int index = FindRuleIndex(targetZone, point);
+                    int index = FindRuleIndex(targetZone, time);
                     if (index != -1)
                     {
-                        PublicDomain.TzDatabase.TzRule rule = m_info.Rules[index], end = null;
+                        one = m_info.Rules[index];
+
                         // Get the next closest rule, opposite of the type of
                         // the current index rule, preferrably in the same year
-                        string mod = rule.Modifier;
+                        string mod = one.Modifier;
                         if (IsRelevantDaylightChangesModifier(mod))
                         {
-                            // Find the closest previous rule
-                            PublicDomain.TzDatabase.TzRule prevRule = null, nextRule = null;
-                            for (int i = index - 1; i >= 0; i--)
-                            {
-                                PublicDomain.TzDatabase.TzRule r = m_info.Rules[i];
-                                if (r.Modifier != mod && IsRelevantDaylightChangesModifier(r.Modifier))
-                                {
-                                    prevRule = r;
-                                    break;
-                                }
-                            }
+                            two = GetCompanionRule(targetZone, one, time);
 
-                            int length = m_info.Rules.Count;
-                            for (int i = index + 1; i < length; i++)
+                            if (one != null && two != null)
                             {
-                                PublicDomain.TzDatabase.TzRule r = m_info.Rules[i];
-                                if (r.Modifier != mod && IsRelevantDaylightChangesModifier(r.Modifier))
-                                {
-                                    nextRule = r;
-                                    break;
-                                }
-                            }
-
-                            // We have the two rules, we try to pick which is more
-                            // logical
-                            if (prevRule == null && nextRule == null)
-                            {
-                                // no info
-                            }
-                            else if (prevRule != null && nextRule != null)
-                            {
-                                if (rule.ToYear == prevRule.ToYear || rule.FromYear == prevRule.FromYear)
-                                {
-                                    end = prevRule;
-                                }
-                                else if (rule.ToYear == nextRule.ToYear || rule.FromYear == nextRule.FromYear)
-                                {
-                                    end = nextRule;
-                                }
-                                else
-                                {
-                                    DateTime ruleFrom = rule.GetFromDateTime();
-                                    DateTime prevFrom = prevRule.GetFromDateTime();
-                                    DateTime nextFrom = nextRule.GetFromDateTime();
-
-                                    TimeSpan prevDiff = DateTimeUtlities.AbsTimeSpan(ruleFrom - prevFrom);
-                                    TimeSpan nextDiff = DateTimeUtlities.AbsTimeSpan(ruleFrom - nextFrom);
-
-                                    if (prevDiff < nextDiff)
-                                    {
-                                        end = prevRule;
-                                    }
-                                    else
-                                    {
-                                        end = nextRule;
-                                    }
-                                }
-                            }
-                            else if (prevRule != null)
-                            {
-                                end = prevRule;
-                            }
-                            else if (nextRule != null)
-                            {
-                                end = nextRule;
-                            }
-
-                            if (end != null)
-                            {
-                                DateTime from = rule.GetFromDateTime();
-                                DateTime to = end.GetFromDateTime();
-                                if (from.Year != year)
-                                {
-                                    from = new DateTime(year, from.Month, from.Day, from.Hour, from.Minute, from.Second, from.Millisecond, from.Kind);
-                                }
-                                if (to.Year != from.Year)
-                                {
-                                    to = new DateTime(from.Year, to.Month, to.Day, to.Hour, to.Minute, to.Second, to.Millisecond, to.Kind);
-                                }
+                                DateTime from = one.GetDateTime(time.Year);
+                                DateTime to = two.GetDateTime(time.Year);
 
                                 if (from > to)
                                 {
+                                    rulesSwitched = true;
                                     DateTime swap = to;
                                     to = from;
                                     from = swap;
                                 }
 
-                                result = new DaylightTime(from, to, to - from);
+                                daylightTime = new DaylightTime(from, to, to - from);
                             }
                         }
                     }
                 }
             }
+        }
 
+        private PublicDomain.TzDatabase.TzRule GetCompanionRule(TzDatabase.TzZone zone, PublicDomain.TzDatabase.TzRule rule, DateTime point)
+        {
+            TzDatabase.TzRule result = null;
+            int companionIndex = FindRuleIndex(zone, point, rule.Modifier, false);
+            if (companionIndex != -1)
+            {
+                result = m_info.Rules[companionIndex];
+            }
             return result;
         }
 
@@ -444,12 +397,25 @@ namespace PublicDomain
         }
 
         /// <summary>
-        /// Finds the rule.
+        /// Finds the index of the rule.
         /// </summary>
         /// <param name="zone">The zone.</param>
         /// <param name="point">The point.</param>
         /// <returns></returns>
         public int FindRuleIndex(TzDatabase.TzZone zone, DateTime point)
+        {
+            return FindRuleIndex(zone, point, null, true);
+        }
+
+        /// <summary>
+        /// Finds the rule.
+        /// </summary>
+        /// <param name="zone">The zone.</param>
+        /// <param name="point">The point.</param>
+        /// <param name="avoidModifier">The avoid modifier.</param>
+        /// <param name="exactComparison">if set to <c>true</c> [exact comparison].</param>
+        /// <returns></returns>
+        public int FindRuleIndex(TzDatabase.TzZone zone, DateTime point, string avoidModifier, bool exactComparison)
         {
             // Now, we have the zone, we can start to figure out the amount
             // of time to add to UTC to get standard time
@@ -480,9 +446,13 @@ namespace PublicDomain
                     if (r.RuleName == ruleName)
                     {
                         curRuleIndex = j;
-                        if (point >= r.GetFromDateTime() && point <= r.GetToDateTime())
+                        if ((exactComparison && point >= r.GetFromDateTime() && point <= r.GetToDateTime()) ||
+                            (!exactComparison && point.Year >= r.FromYear && point.Year <= r.ToYear))
                         {
-                            break;
+                            if (avoidModifier == null || avoidModifier != r.Modifier)
+                            {
+                                break;
+                            }
                         }
                     }
                 }
@@ -515,12 +485,19 @@ namespace PublicDomain
             {
                 result += zone.UtcOffset;
 
-                time = zone.GetLocalTime(time);
-                PublicDomain.TzDatabase.TzRule rule = FindRule(zone, time);
+                // First, figure out which zone we're in
+                DateTime point = new DateTime(time.Year, 1, 1);
 
-                if (rule != null)
+                PublicDomain.TzDatabase.TzRule one;
+                PublicDomain.TzDatabase.TzRule two;
+                DaylightTime daylightTime;
+                bool rulesSwitched;
+
+                GetDaylightChangeRules(ref point, zone, out one, out two, out daylightTime, out rulesSwitched);
+
+                if (daylightTime != null && time >= daylightTime.Start && time <= daylightTime.End)
                 {
-                    result += rule.SaveTime;
+                    result += rulesSwitched ? two.SaveTime : one.SaveTime;
                 }
             }
 
@@ -573,9 +550,23 @@ namespace PublicDomain
         /// </returns>
         public override bool IsDaylightSavingTime(DateTime time)
         {
-            PublicDomain.TzDatabase.TzZone zone = FindZone(time);
-            PublicDomain.TzDatabase.TzRule rule = FindRule(zone, time);
-            return rule == null ? false : rule.SaveTime != TimeSpan.Zero;
+            DaylightTime daylightTime = GetDaylightChanges(time.Year);
+            if (daylightTime != null)
+            {
+                if (time < daylightTime.Start)
+                {
+                    return false;
+                }
+                else if (time >= daylightTime.Start && time <= daylightTime.End)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            return false;
         }
 
         /// <summary>
