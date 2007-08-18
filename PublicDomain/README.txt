@@ -12,6 +12,9 @@ Simon Mourier
 
 Version History
 ===============
+V0.2.13.0
+	[kevgrig@gmail.com]
+		* More bug fixes for workitem http://www.codeplex.com/publicdomain/WorkItem/View.aspx?WorkItemId=12159
 V0.2.12.0
 	[kevgrig@gmail.com]
 		* BUG: http://www.codeplex.com/publicdomain/WorkItem/View.aspx?WorkItemId=12159

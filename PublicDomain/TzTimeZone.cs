@@ -446,7 +446,7 @@ namespace PublicDomain
                     if (r.RuleName == ruleName)
                     {
                         curRuleIndex = j;
-                        if ((exactComparison && point >= r.GetFromDateTime() && point <= r.GetToDateTime()) ||
+                        if ((exactComparison && point >= r.GetFromDateTime() && point < r.GetToDateTime()) ||
                             (!exactComparison && point.Year >= r.FromYear && point.Year <= r.ToYear))
                         {
                             if (avoidModifier == null || avoidModifier != r.Modifier)
@@ -474,7 +474,11 @@ namespace PublicDomain
         /// </returns>
         public override TimeSpan GetUtcOffset(DateTime time)
         {
-            if (time.Kind != DateTimeKind.Local)
+            if (time.Kind == DateTimeKind.Unspecified && TreatUnspecifiedKindAsLocal)
+            {
+                time = new DateTime(time.Ticks, DateTimeKind.Local);
+            }
+            else if (time.Kind != DateTimeKind.Local)
             {
                 throw new ArgumentException("time must be a local DateTime");
             }
@@ -485,23 +489,28 @@ namespace PublicDomain
             {
                 result += zone.UtcOffset;
 
-                // First, figure out which zone we're in
-                DateTime point = new DateTime(time.Year, 1, 1);
-
-                PublicDomain.TzDatabase.TzRule one;
-                PublicDomain.TzDatabase.TzRule two;
-                DaylightTime daylightTime;
-                bool rulesSwitched;
-
-                GetDaylightChangeRules(ref point, zone, out one, out two, out daylightTime, out rulesSwitched);
-
-                if (daylightTime != null && time >= daylightTime.Start && time <= daylightTime.End)
-                {
-                    result += rulesSwitched ? two.SaveTime : one.SaveTime;
-                }
+                PrepOffset(ref time, ref result, zone);
             }
 
             return result;
+        }
+
+        private void PrepOffset(ref DateTime time, ref TimeSpan result, PublicDomain.TzDatabase.TzZone zone)
+        {
+            // First, figure out which zone we're in
+            DateTime point = new DateTime(time.Year, 1, 1);
+
+            PublicDomain.TzDatabase.TzRule one;
+            PublicDomain.TzDatabase.TzRule two;
+            DaylightTime daylightTime;
+            bool rulesSwitched;
+
+            GetDaylightChangeRules(ref point, zone, out one, out two, out daylightTime, out rulesSwitched);
+
+            if (daylightTime != null && time >= daylightTime.Start && time < daylightTime.End)
+            {
+                result += rulesSwitched ? two.SaveTime : one.SaveTime;
+            }
         }
 
         /// <summary>
@@ -557,7 +566,7 @@ namespace PublicDomain
                 {
                     return false;
                 }
-                else if (time >= daylightTime.Start && time <= daylightTime.End)
+                else if (time >= daylightTime.Start && time < daylightTime.End)
                 {
                     return true;
                 }
@@ -571,8 +580,16 @@ namespace PublicDomain
 
         /// <summary>
         /// Returns the local time that corresponds to a specified coordinated universal time (UTC).
+        /// The <paramref name="time"/> parameters must have its Kind specifically set to UTC,
+        /// otherwise this code will treat the time as a local DateTime and simply return the same
+        /// value. It is important to note that normal usage of DateTime's, such as DateTime.Parse
+        /// will create a DateTime with Kind Unspecified, which is treated as Local, therefore,
+        /// if you are manually creating UTC DateTimes to pass to this function, you must explicitly
+        /// create one with the UTC Kind. If you already have a DateTime (from a method like Parse)
+        /// with a Local or Unspecified Kind, you can create one with UTC, simply with
+        /// new DateTime(oldDateTime.Ticks, DateTimeKind.Utc)
         /// </summary>
-        /// <param name="time">A UTC time.</param>
+        /// <param name="time">A UTC time. See summary of method.</param>
         /// <returns>
         /// A <see cref="T:System.DateTime"></see> instance whose value is the local time that corresponds to time.
         /// </returns>
@@ -632,26 +649,26 @@ namespace PublicDomain
 
         private DateTime GetLocalTimeFromUniversalTime(DateTime time)
         {
-            PublicDomain.TzDatabase.TzZone zone = FindZone(time);
-            time = zone.GetLocalTime(time);
-            PublicDomain.TzDatabase.TzRule rule = FindRule(zone, time);
-            if (rule != null)
+            if (time.Kind != DateTimeKind.Local)
             {
-                time += rule.SaveTime;
+                time = new DateTime(time.Ticks, DateTimeKind.Local);
             }
-            return time;
+
+            time += GetUtcOffset(time);
+
+            return new DateTime(time.Ticks, DateTimeKind.Local);
         }
 
         private DateTime GetUniversalTimeFromLocalTime(DateTime time)
         {
-            PublicDomain.TzDatabase.TzZone zone = FindZone(time);
-            time = zone.GetUniversalTime(time);
-            PublicDomain.TzDatabase.TzRule rule = FindRule(zone, time);
-            if (rule != null)
+            if (time.Kind == DateTimeKind.Unspecified && TreatUnspecifiedKindAsLocal)
             {
-                time -= rule.SaveTime;
+                time = new DateTime(time.Ticks, DateTimeKind.Local);
             }
-            return time;
+
+            time -= GetUtcOffset(time);
+
+            return new DateTime(time.Ticks, DateTimeKind.Utc);
         }
 
         /// <summary>
