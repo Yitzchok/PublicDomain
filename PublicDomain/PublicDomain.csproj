@@ -161,6 +161,7 @@
     <Compile Include="Logging\SimpleLogFormatter.cs" />
     <Compile Include="Logging\StringLogger.cs" />
     <Compile Include="Logging\TextWriterLogger.cs" />
+    <Compile Include="Logging\TzSensitiveTimestampProvider.cs" />
     <Compile Include="Logging\UtcLogTimestampProvider.cs" />
     <Compile Include="LogicalDisposeScope.cs" />
     <Compile Include="LogicalTransactionScope.cs" />

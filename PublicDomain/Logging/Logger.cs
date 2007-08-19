@@ -239,6 +239,7 @@ namespace PublicDomain.Logging
             {
                 // Get the current timestamp
                 DateTime timestamp = m_timestampProvider.Now;
+                TimeSpan? utcOffset = m_timestampProvider.UtcOffset;
 
                 // Check all the filters
                 if (m_filters != null)
@@ -263,7 +264,7 @@ namespace PublicDomain.Logging
                 }
                 else
                 {
-                    logLine = Formatter.FormatEntry(severity, timestamp, entry, formatParameters, m_category, m_data);
+                    logLine = Formatter.FormatEntry(severity, timestamp, utcOffset, entry, formatParameters, m_category, m_data);
                 }
 
                 DoLog(severity, timestamp, entry, formatParameters, logLine);

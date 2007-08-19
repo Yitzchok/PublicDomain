@@ -12,6 +12,10 @@ Simon Mourier
 
 Version History
 ===============
+V0.2.15.0
+	[kevgrig@gmail.com]
+		* Added UtcOffset to ILogTimestampProvider and updated ILogFormatter to use it
+		* BUG: http://www.codeplex.com/publicdomain/WorkItem/View.aspx?WorkItemId=12315
 V0.2.14.0
 	[kevgrig@gmail.com]
 		* Added EventLogLogger, CriticalLogger, StringLogger

@@ -547,6 +547,10 @@ namespace PublicDomain
             {
                 return zone.FormatModifier(rule);
             }
+            else if (zone != null && !string.IsNullOrEmpty(zone.Format) && zone.Format != TzDatabase.NotApplicableValue)
+            {
+                return zone.Format;
+            }
             return StandardName;
         }
 

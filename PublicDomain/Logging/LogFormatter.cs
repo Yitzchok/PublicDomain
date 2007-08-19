@@ -27,19 +27,21 @@ namespace PublicDomain.Logging
         }
 
         /// <summary>
+        /// Formats the entry.
         /// </summary>
-        /// <param name="severity"></param>
-        /// <param name="timestamp"></param>
-        /// <param name="entry"></param>
-        /// <param name="formatParameters"></param>
-        /// <param name="category"></param>
-        /// <param name="data"></param>
+        /// <param name="severity">The severity.</param>
+        /// <param name="timestamp">The timestamp.</param>
+        /// <param name="utcOffset">The utc offset.</param>
+        /// <param name="entry">The entry.</param>
+        /// <param name="formatParameters">The format parameters.</param>
+        /// <param name="category">The category.</param>
+        /// <param name="data">The data.</param>
         /// <returns></returns>
-        public string FormatEntry(LoggerSeverity severity, DateTime timestamp, object entry, object[] formatParameters, string category, Dictionary<string, object> data)
+        public string FormatEntry(LoggerSeverity severity, DateTime timestamp, TimeSpan? utcOffset, object entry, object[] formatParameters, string category, Dictionary<string, object> data)
         {
             string logEntry = PrepareEntry(entry, formatParameters);
 
-            return DoFormatEntry(severity, timestamp, logEntry, category, data);
+            return DoFormatEntry(severity, timestamp, utcOffset, logEntry, category, data);
         }
 
         /// <summary>
@@ -47,11 +49,12 @@ namespace PublicDomain.Logging
         /// </summary>
         /// <param name="severity">The severity.</param>
         /// <param name="timestamp">The timestamp.</param>
+        /// <param name="utcOffset">The utc offset.</param>
         /// <param name="logEntry">The log entry.</param>
         /// <param name="category">The category.</param>
         /// <param name="data">The data.</param>
         /// <returns></returns>
-        protected abstract string DoFormatEntry(LoggerSeverity severity, DateTime timestamp, string logEntry, string category, Dictionary<string, object> data);
+        protected abstract string DoFormatEntry(LoggerSeverity severity, DateTime timestamp, TimeSpan? utcOffset, string logEntry, string category, Dictionary<string, object> data);
 
         /// <summary>
         /// Prepares the entry.

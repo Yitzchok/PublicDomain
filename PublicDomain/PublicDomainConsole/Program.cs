@@ -11,7 +11,8 @@ namespace PublicDomainConsole
     {
         public static void Main(string[] args)
         {
-            new LoggerTests().TestCriticalLogger();
+            Console.WriteLine(PublicDomain.TzTimeZone.GetTimeZone("America/Phoenix").GetAbbreviation());
+            Console.ReadKey(true);
         }
     }
 }

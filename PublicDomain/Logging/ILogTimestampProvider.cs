@@ -14,5 +14,12 @@ namespace PublicDomain.Logging
         /// </summary>
         /// <value>The now.</value>
         DateTime Now { get; }
+
+        /// <summary>
+        /// Gets the offset of the DateTime provided by Now from UTC.
+        /// If unknown, returns null.
+        /// </summary>
+        /// <value>The utc offset.</value>
+        TimeSpan? UtcOffset { get; }
     }
 }

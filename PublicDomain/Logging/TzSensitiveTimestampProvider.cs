@@ -7,8 +7,21 @@ namespace PublicDomain.Logging
     /// <summary>
     /// 
     /// </summary>
-    public class UtcLogTimestampProvider : ILogTimestampProvider
+    public class TzSensitiveTimestampProvider : ILogTimestampProvider
     {
+        private TzTimeZone m_timeZone;
+        private TimeSpan m_offset;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TzSensitiveTimestampProvider"/> class.
+        /// </summary>
+        /// <param name="timeZone">The time zone.</param>
+        public TzSensitiveTimestampProvider(TzTimeZone timeZone)
+        {
+            m_timeZone = timeZone;
+            m_offset = timeZone.GetUtcOffset(DateTime.Now);
+        }
+
         /// <summary>
         /// Gets the now.
         /// </summary>
@@ -17,7 +30,7 @@ namespace PublicDomain.Logging
         {
             get
             {
-                return DateTime.UtcNow;
+                return m_timeZone.Now.DateTimeLocal;
             }
         }
 
@@ -30,7 +43,7 @@ namespace PublicDomain.Logging
         {
             get
             {
-                return TimeSpan.Zero;
+                return m_offset;
             }
         }
     }

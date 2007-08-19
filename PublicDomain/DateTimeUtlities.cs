@@ -241,5 +241,47 @@ namespace PublicDomain
             }
             return TimeSpan.Parse(timeSpan);
         }
+
+        /// <summary>
+        /// Returns the value of the TimeSpan as a string, and ensures
+        /// that there is a leading character specifying either whether
+        /// it is positive or negative.
+        /// </summary>
+        /// <param name="span">The span.</param>
+        /// <returns></returns>
+        public static string ToStringTimeSpan(TimeSpan span)
+        {
+            return (IsTimeSpanNegative(span) ? "" : "+") + span.ToString();
+        }
+
+        /// <summary>
+        /// Returns the value of the TimeSpan as a string, and ensures
+        /// that there is a leading character specifying either whether
+        /// it is positive or negative.
+        /// </summary>
+        /// <param name="span">The span.</param>
+        /// <returns></returns>
+        public static string ToStringTimeSpan(TimeSpan? span)
+        {
+            if (span == null) return null;
+            return ToStringTimeSpan(span.Value);
+        }
+
+        /// <summary>
+        /// Trims the time span.
+        /// </summary>
+        /// <param name="span">The span.</param>
+        /// <returns></returns>
+        public static string TrimTimeSpan(string span)
+        {
+            if (span != null)
+            {
+                if (span.EndsWith(":00"))
+                {
+                    span = span.Substring(0, span.Length - 3);
+                }
+            }
+            return span;
+        }
     }
 }
