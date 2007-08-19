@@ -13,42 +13,52 @@ namespace PublicDomain.Logging
     /// </summary>
     public abstract class Logger
     {
+        /// <summary>
+        /// In milliseconds
+        /// </summary>
+        private static int BackgroundThreadInterval = 1000 * 5;
+        private static Dictionary<int, int> m_stack = new Dictionary<int, int>();
+        private static FinalizableBackgroundThread m_loggerThread = new LoggerBackgroundThread(BackgroundThreadInterval, LoggerThread);
+        private static List<LogArtifact> s_artifacts = new List<LogArtifact>();
+        private static ILogTimestampProvider s_defaultTimestampProvider = new LocalLogTimestampProvider();
+
         private LoggerSeverity m_threshold = LoggerSeverity.Warn30;
         private List<ILogFilter> m_filters = new List<ILogFilter>();
         private ILogFormatter m_formatter = new DefaultLogFormatter();
+        private ILogTimestampProvider m_timestampProvider = s_defaultTimestampProvider;
         private string m_category;
         private Dictionary<string, object> m_data = new Dictionary<string, object>();
-        private static Dictionary<int, int> m_stack = new Dictionary<int, int>();
-        private static FinalizableBackgroundThread m_loggerThread = new FinalizableBackgroundThread(1000 * 5, LoggerThread);
-        private static List<LogArtifact> s_artifacts = new List<LogArtifact>();
 
-        internal static int LogStackCount
-        {
-            get
-            {
-                int threadId = Thread.CurrentThread.ManagedThreadId;
-                if (!m_stack.ContainsKey(threadId))
-                {
-                    m_stack[threadId] = 0;
-                }
-                return m_stack[threadId];
-            }
-            set
-            {
-                int threadId = Thread.CurrentThread.ManagedThreadId;
-                m_stack[threadId] = value;
-            }
-        }
-
+        /// <summary>
+        /// Actually does the processing of the background thread to call the writes
+        /// </summary>
+        /// <param name="isFinal">if set to <c>true</c> [is final].</param>
         private static void LoggerThread(bool isFinal)
         {
             int length = s_artifacts.Count;
-            for (int i = 0; i < length; i++)
+
+            if (length > 0)
             {
-                LogArtifact artifact = s_artifacts[i];
-                artifact.Logger.Write(artifact);
+                for (int i = 0; i < length; i++)
+                {
+                    LogArtifact artifact = s_artifacts[i];
+                    try
+                    {
+                        artifact.Logger.Write(artifact);
+                    }
+                    catch (Exception ex)
+                    {
+                        try
+                        {
+                            CriticalLogger.Current.LogException(ex);
+                        }
+                        catch (Exception)
+                        {
+                        }
+                    }
+                }
+                s_artifacts.RemoveRange(0, length);
             }
-            s_artifacts.RemoveRange(0, length);
         }
 
         /// <summary>
@@ -67,6 +77,24 @@ namespace PublicDomain.Logging
             if (logFilter != null)
             {
                 AddLogFilter(logFilter);
+            }
+        }
+
+        internal static int LogStackCount
+        {
+            get
+            {
+                int threadId = Thread.CurrentThread.ManagedThreadId;
+                if (!m_stack.ContainsKey(threadId))
+                {
+                    m_stack[threadId] = 0;
+                }
+                return m_stack[threadId];
+            }
+            set
+            {
+                int threadId = Thread.CurrentThread.ManagedThreadId;
+                m_stack[threadId] = value;
             }
         }
 
@@ -116,6 +144,22 @@ namespace PublicDomain.Logging
             set
             {
                 m_formatter = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the timestamp provider.
+        /// </summary>
+        /// <value>The timestamp provider.</value>
+        public virtual ILogTimestampProvider TimestampProvider
+        {
+            get
+            {
+                return m_timestampProvider;
+            }
+            set
+            {
+                m_timestampProvider = value;
             }
         }
 
@@ -194,7 +238,7 @@ namespace PublicDomain.Logging
             try
             {
                 // Get the current timestamp
-                DateTime timestamp = DateTime.UtcNow;
+                DateTime timestamp = m_timestampProvider.Now;
 
                 // Check all the filters
                 if (m_filters != null)
@@ -247,15 +291,9 @@ namespace PublicDomain.Logging
         /// <param name="logLine">The log line.</param>
         protected virtual void DoLog(LoggerSeverity severity, DateTime timestamp, object entry, object[] formatParameters, string logLine)
         {
-            DoLog(logLine);
+            LogArtifact artifact = new LogArtifact(this, severity, timestamp, entry, formatParameters, logLine);
+            Logger.PushArtifact(artifact);
         }
-
-        /// <summary>
-        /// Called by the detailed version, forgetting about the details
-        /// and simply having the final log line.
-        /// </summary>
-        /// <param name="logLine">The log line.</param>
-        protected abstract void DoLog(string logLine);
 
         /// <summary>
         /// Writes the specified artifact.

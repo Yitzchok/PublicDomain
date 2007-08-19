@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 
-namespace PublicDomain.Logging
+namespace PublicDomain
 {
     /// <summary>
     /// 
@@ -82,8 +82,7 @@ namespace PublicDomain.Logging
         /// <param name="ex">The ex.</param>
         protected virtual void HandleExecutionException(Exception ex)
         {
-            Console.WriteLine(ex.Message);
-            Console.WriteLine(ex.StackTrace);
+            Console.WriteLine(ExceptionUtilities.GetExceptionDetailsAsString(ex));
         }
 
         /// <summary>

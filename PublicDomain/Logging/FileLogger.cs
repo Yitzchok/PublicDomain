@@ -49,33 +49,18 @@ namespace PublicDomain.Logging
         }
 
         /// <summary>
-        /// High level final log that is called with all of the detailed information
-        /// and the final log line as the last parameter.
-        /// </summary>
-        /// <param name="severity">The severity.</param>
-        /// <param name="timestamp">The timestamp.</param>
-        /// <param name="entry">The entry.</param>
-        /// <param name="formatParameters">The format parameters.</param>
-        /// <param name="logLine">The log line.</param>
-        protected override void DoLog(LoggerSeverity severity, DateTime timestamp, object entry, object[] formatParameters, string logLine)
-        {
-            LogArtifact artifact = new LogArtifact(this, severity, timestamp, entry, formatParameters, logLine);
-            Logger.PushArtifact(artifact);
-        }
-
-        /// <summary>
         /// Writes the specified artifact.
         /// </summary>
         /// <param name="artifact">The artifact.</param>
         public override void Write(LogArtifact artifact)
         {
-            string fileName = GetFileName(artifact.Severity, artifact.Timestamp, artifact.Entry, artifact.FormatParameters, artifact.LogLine);
+            string fileName = GetFileName(artifact.Severity, artifact.Timestamp, artifact.RawEntry, artifact.RawFormatParameters, artifact.FormattedMessage);
 
             if (!string.IsNullOrEmpty(fileName))
             {
                 using (FileStream stream = GetStream(fileName))
                 {
-                    byte[] data = Encoding.Default.GetBytes(artifact.LogLine);
+                    byte[] data = Encoding.Default.GetBytes(artifact.FormattedMessage);
 
                     stream.Write(data, 0, data.Length);
                     stream.WriteByte((byte)'\n');
@@ -92,16 +77,6 @@ namespace PublicDomain.Logging
         protected virtual FileStream GetStream(string fileName)
         {
             return new FileStream(fileName, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
-        }
-
-        /// <summary>
-        /// Called by the detailed version, forgetting about the details
-        /// and simply having the final log line.
-        /// </summary>
-        /// <param name="logLine">The log line.</param>
-        protected override void DoLog(string logLine)
-        {
-            // Should never get here
         }
 
         /// <summary>

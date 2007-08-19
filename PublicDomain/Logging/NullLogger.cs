@@ -131,10 +131,10 @@ namespace PublicDomain.Logging
         }
 
         /// <summary>
-        /// Does the log.
+        /// Writes the specified artifact.
         /// </summary>
-        /// <param name="logLine">The log line.</param>
-        protected override void DoLog(string logLine)
+        /// <param name="artifact">The artifact.</param>
+        public override void Write(LogArtifact artifact)
         {
         }
     }

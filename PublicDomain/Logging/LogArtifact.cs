@@ -28,17 +28,17 @@ namespace PublicDomain.Logging
         /// <summary>
         /// 
         /// </summary>
-        public object Entry;
+        public object RawEntry;
 
         /// <summary>
         /// 
         /// </summary>
-        public object[] FormatParameters;
+        public object[] RawFormatParameters;
 
         /// <summary>
-        /// 
+        /// This is the actual log message that should be written.
         /// </summary>
-        public string LogLine;
+        public string FormattedMessage;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LogArtifact"/> class.
@@ -53,17 +53,17 @@ namespace PublicDomain.Logging
         /// <param name="logger">The logger.</param>
         /// <param name="severity">The severity.</param>
         /// <param name="timestamp">The timestamp.</param>
-        /// <param name="entry">The entry.</param>
-        /// <param name="formatParameters">The format parameters.</param>
-        /// <param name="logLine">The log line.</param>
-        public LogArtifact(Logger logger, LoggerSeverity severity, DateTime timestamp, object entry, object[] formatParameters, string logLine)
+        /// <param name="rawEntry">The raw entry.</param>
+        /// <param name="rawFormatParameters">The raw format parameters.</param>
+        /// <param name="formattedMessage">The formatted message.</param>
+        public LogArtifact(Logger logger, LoggerSeverity severity, DateTime timestamp, object rawEntry, object[] rawFormatParameters, string formattedMessage)
         {
             Logger = logger;
             Severity = severity;
             Timestamp = timestamp;
-            Entry = entry;
-            FormatParameters = formatParameters;
-            LogLine = logLine;
+            RawEntry = rawEntry;
+            RawFormatParameters = rawFormatParameters;
+            FormattedMessage = formattedMessage;
         }
     }
 }

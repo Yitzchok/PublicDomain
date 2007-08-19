@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using PublicDomain;
 using System.Threading;
+using PublicDomain.Logging;
 
 namespace PublicDomainConsole
 {
@@ -10,7 +11,7 @@ namespace PublicDomainConsole
     {
         public static void Main(string[] args)
         {
-            new LoggerTests().SimpleApplicationLogging();
+            new LoggerTests().TestCriticalLogger();
         }
     }
 }

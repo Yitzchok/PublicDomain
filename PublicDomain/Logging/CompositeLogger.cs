@@ -65,15 +65,6 @@ namespace PublicDomain.Logging
         }
 
         /// <summary>
-        /// Does the log.
-        /// </summary>
-        /// <param name="logLine">The log line.</param>
-        protected override void DoLog(string logLine)
-        {
-            // This is not called
-        }
-
-        /// <summary>
         /// The severity threshold at which point a log message
         /// is logged. For example, if the threshold is Debug,
         /// all messages with severity greater than or equal to Debug
@@ -103,10 +94,8 @@ namespace PublicDomain.Logging
         /// <param name="artifact">The artifact.</param>
         public override void Write(LogArtifact artifact)
         {
-            foreach (Logger logger in m_loggers)
-            {
-                logger.Write(artifact);
-            }
+            // should never get here
+            throw new NotImplementedException();
         }
     }
 }

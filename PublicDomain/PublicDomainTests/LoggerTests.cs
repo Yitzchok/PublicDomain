@@ -83,5 +83,24 @@ namespace PublicDomain
             logger.Threshold = LoggerSeverity.None0;
             logger.LogDebug10("testmsg");
         }
+
+        [Test]
+        public void TestCriticalLogger()
+        {
+            try
+            {
+                throw new ArgumentNullException("test");
+            }
+            catch (Exception ex)
+            {
+                CriticalLogger.Current.LogException(ex);
+            }
+        }
+
+        [Test]
+        public void TestConsoleLogger()
+        {
+            ConsoleLogger.Current.Log(LoggerSeverity.Infinity, "test");
+        }
     }
 }

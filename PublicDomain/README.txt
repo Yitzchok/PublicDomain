@@ -12,6 +12,10 @@ Simon Mourier
 
 Version History
 ===============
+V0.2.14.0
+	[kevgrig@gmail.com]
+		* Added EventLogLogger, CriticalLogger, StringLogger
+		* Added ILogTimestampProvider and changed the default to local time
 V0.2.13.0
 	[kevgrig@gmail.com]
 		* More bug fixes for workitem http://www.codeplex.com/publicdomain/WorkItem/View.aspx?WorkItemId=12159
