@@ -132,6 +132,9 @@
     <Compile Include="Feeder\Rss\RssFeedParser.cs" />
     <Compile Include="Feeder\Serializer.cs" />
     <Compile Include="Feeder\SerializeType.cs" />
+    <Compile Include="IMonotonicNumberGenerator.cs" />
+    <Compile Include="INumberGenerator.cs" />
+    <Compile Include="IRandomNumberGenerator.cs" />
     <Compile Include="Logging\ApplicationLogger.cs" />
     <Compile Include="Logging\CompositeLogger.cs" />
     <Compile Include="Logging\ConsoleLogger.cs" />

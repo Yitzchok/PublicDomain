@@ -586,7 +586,7 @@ namespace PublicDomain
                     process.AddArguments("/quiet", "/qn");
                     process.Arguments = process.Arguments.Replace("/I", "/x");
                 }
-                process.StartAndWaitForExit(true);
+                process.StartAndWaitForExit(1200000, true);
             }
 
             /// <summary>

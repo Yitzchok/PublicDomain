@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+using System.Runtime.ConstrainedExecution;
 
 namespace PublicDomain
 {
@@ -14,11 +15,12 @@ namespace PublicDomain
     /// <summary>
     /// 
     /// </summary>
-    public class FinalizableBackgroundThread
+    public class FinalizableBackgroundThread : CriticalFinalizerObject
     {
         private Thread m_thread;
         private int m_intervalMs;
         private CallbackBackgroundThread m_exec;
+        private bool m_isDisposed;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FinalizableBackgroundThread"/> class.
@@ -108,14 +110,19 @@ namespace PublicDomain
         /// </summary>
         protected virtual void DoFinalize()
         {
-            // do the final execute
-            try
+            if (!m_isDisposed)
             {
-                Execute(true);
-            }
-            catch (Exception ex)
-            {
-                HandleExecutionException(ex);
+                m_isDisposed = true;
+
+                // do the final execute
+                try
+                {
+                    Execute(true);
+                }
+                catch (Exception ex)
+                {
+                    HandleExecutionException(ex);
+                }
             }
         }
     }

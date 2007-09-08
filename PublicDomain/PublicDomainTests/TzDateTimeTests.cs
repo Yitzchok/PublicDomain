@@ -623,7 +623,6 @@ namespace PublicDomain
             Assert.AreEqual(7, zone.ToUniversalTime(DateTime.Parse("2006-04-02 02:00")).Hour);
             Console.WriteLine("zone.ToUniversalTime('2006-04-02 03:00'): '" + zone.ToUniversalTime(DateTime.Parse("2006-04-02 03:00")) + "'");
             Assert.AreEqual(8, zone.ToUniversalTime(DateTime.Parse("2006-04-02 03:00")).Hour);
-
             Console.WriteLine(zone.ToLocalTime(new DateTime(DateTime.Parse("2006-04-02 07:00").Ticks, DateTimeKind.Utc)));
         }
     }

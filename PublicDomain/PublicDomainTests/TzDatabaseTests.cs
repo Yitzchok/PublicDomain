@@ -114,7 +114,7 @@ namespace PublicDomain
                                     1,
                                     null,
                                     TimeSpan.Zero,
-                                    null,
+                                    PublicDomain.TzDatabase.TimeModifier.LocalWallTime,
                                     timedRule,
                                     null,
                                     null

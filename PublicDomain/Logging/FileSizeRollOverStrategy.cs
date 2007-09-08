@@ -84,7 +84,7 @@ namespace PublicDomain.Logging
             {
                 foreach (string foundFile in files)
                 {
-                    int foundNumber = StringUtilities.ExtractFirstNumber(foundFile);
+                    int foundNumber = StringUtilities.ExtractFirstNumber(Path.GetFileName(foundFile));
                     if (foundNumber > maxNumber)
                     {
                         maxNumber = foundNumber;

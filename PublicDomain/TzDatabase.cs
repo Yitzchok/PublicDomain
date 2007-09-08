@@ -238,7 +238,7 @@ namespace PublicDomain
             private int m_startDay = -1;
             private DayOfWeek? m_startDay_DayOfWeek;
             private TimeSpan m_startTime;
-            private string m_startTimeModifier;
+            private TimeModifier m_startTimeModifier;
             private TimeSpan m_saveTime;
             private string m_modifier;
             private string m_comment;
@@ -265,7 +265,7 @@ namespace PublicDomain
             /// <param name="modifier">The modifier.</param>
             /// <param name="comment">The comment.</param>
             public TzRule(string ruleName, int fromYear, int toYear, Month startMonth, int startDay,
-                DayOfWeek? startDay_dayOfWeek, TimeSpan startTime, string startTimeModifier,
+                DayOfWeek? startDay_dayOfWeek, TimeSpan startTime, TimeModifier startTimeModifier,
                 TimeSpan saveTime, string modifier, string comment)
             {
                 m_ruleName = ruleName;
@@ -397,14 +397,9 @@ namespace PublicDomain
             }
 
             /// <summary>
-            /// Applies to the StartTime parameter.
-            ///  Value of the letter w if
-            ///  the given time is local "wall clock" time, s if the
-            ///  given time is local "standard" time, or u (or g or
-            ///  z) if the given time is universal time; in the
-            ///  absence of an indicator, wall clock time is assumed.
+            /// In the absence of an indicator, wall clock time is assumed.
             /// </summary>
-            public string StartTimeModifier
+            public TimeModifier StartTimeModifier
             {
                 get
                 {
@@ -454,29 +449,44 @@ namespace PublicDomain
             /// <summary>
             /// Gets the start date time.
             /// </summary>
+            /// <param name="utcOffset">The utc offset.</param>
             /// <returns></returns>
-            public DateTime GetFromDateTime()
+            public DateTime GetFromDateTime(TimeSpan utcOffset)
             {
-                return GetDateTime(FromYear);
+                return GetDateTime(FromYear, utcOffset);
+            }
+
+            /// <summary>
+            /// Gets the date time.
+            /// </summary>
+            /// <param name="year">The year.</param>
+            /// <param name="utcOffset">The utc offset.</param>
+            /// <returns></returns>
+            public DateTime GetDateTime(int year, TimeSpan utcOffset)
+            {
+                return GetDateTime(year, utcOffset, null);
             }
 
             /// <summary>
             /// Gets the start date time.
             /// </summary>
             /// <param name="year">The year.</param>
+            /// <param name="utcOffset">The utc offset.</param>
+            /// <param name="rule2">The rule2.</param>
             /// <returns></returns>
-            public DateTime GetDateTime(int year)
+            public DateTime GetDateTime(int year, TimeSpan utcOffset, TzRule rule2)
             {
-                return TzDatabase.GetDateTime(year, StartMonth, StartDay, StartDay_DayOfWeek, StartTime);
+                return TzDatabase.GetDateTime(year, StartMonth, StartDay, StartDay_DayOfWeek, StartTime, StartTimeModifier, DateTimeKind.Local, utcOffset, rule2 != null ? rule2.SaveTime : SaveTime);
             }
 
             /// <summary>
             /// Gets the end date time.
             /// </summary>
+            /// <param name="utcOffset">The utc offset.</param>
             /// <returns></returns>
-            public DateTime GetToDateTime()
+            public DateTime GetToDateTime(TimeSpan utcOffset)
             {
-                return GetDateTime(ToYear);
+                return GetDateTime(ToYear, utcOffset);
             }
 
             /// <summary>
@@ -516,7 +526,7 @@ namespace PublicDomain
                     }
                     result += this.StartDay;
                 }
-                result += "\t" + this.StartTime + StartTimeModifier;
+                result += "\t" + this.StartTime + TzDatabase.GetTimeModifierToString(StartTimeModifier);
                 result += " " + this.SaveTime;
                 result += "\t" + this.Modifier;
                 if (!string.IsNullOrEmpty(Comment))
@@ -540,7 +550,7 @@ namespace PublicDomain
                     StartDay,
                     StartDay_DayOfWeek == null ? "null" : "DayOfWeek." + StartDay_DayOfWeek.Value.ToString(),
                     GetNewTimeSpanString(StartTime.Ticks),
-                    StartTimeModifier == null ? "null" : '\"' + StartTimeModifier + '\"',
+                    "TzDatabase.TimeModifier." + StartTimeModifier.ToString(),
                     GetNewTimeSpanString(SaveTime.Ticks),
                     Modifier == null ? "null" : '\"' + Modifier + '\"',
                     Comment == null ? "null" : '\"' + Comment + '\"'
@@ -599,7 +609,7 @@ namespace PublicDomain
                 }
                 else
                 {
-                    if (GetFromDateTime() > other.GetFromDateTime())
+                    if (GetFromDateTime(TimeSpan.Zero) > other.GetFromDateTime(TimeSpan.Zero))
                     {
                         return 1;
                     }
@@ -623,13 +633,8 @@ namespace PublicDomain
             private int m_untilDay = -1;
             private DayOfWeek? m_untilDay_DayOfWeek;
             private TimeSpan m_untilTime;
-            private string m_untilTimeModifier;
+            private TimeModifier m_untilTimeModifier;
             private string m_comment;
-
-            /// <summary>
-            /// Caches the until time value
-            /// </summary>
-            private DateTime? m_cachedUntilTime;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="PublicDomain.TzDatabase.TzZone"/> class.
@@ -654,7 +659,7 @@ namespace PublicDomain
             /// <param name="comment">The comment.</param>
             public TzZone(string zoneName, TimeSpan utcOffset, string ruleName,
                 string format, int untilYear, Month untilMonth, int untilDay, DayOfWeek? untilDay_dayOfWeek,
-                TimeSpan untilTime, string untilTimeModifier, string comment)
+                TimeSpan untilTime, TimeModifier untilTimeModifier, string comment)
             {
                 m_zoneName = zoneName;
                 m_utcOffset = utcOffset;
@@ -839,17 +844,8 @@ namespace PublicDomain
             }
 
             /// <summary>
-            /// The time at which the UTC offset or the rule(s) change
-            /// for a location.  It is specified as a year, a month, a
-            /// day, and a time of day.  If this is specified, the
-            /// time zone information is generated from the given UTC
-            /// offset and rule change until the time specified.  The
-            /// month, day, and time of day have the same format as
-            /// the IN, ON, and AT fields of a rule; trailing fields
-            /// can be omitted, and default to the earliest possible
-            /// value for the missing fields.
             /// </summary>
-            public string UntilTimeModifier
+            public TimeModifier UntilTimeModifier
             {
                 get
                 {
@@ -874,11 +870,7 @@ namespace PublicDomain
             /// <returns></returns>
             public DateTime GetUntilDateTime()
             {
-                if (m_cachedUntilTime == null)
-                {
-                    m_cachedUntilTime = GetDateTime(UntilYear, UntilMonth, UntilDay, UntilDay_DayOfWeek, UntilTime);
-                }
-                return m_cachedUntilTime.Value;
+                return TzDatabase.GetDateTime(UntilYear, UntilMonth, UntilDay, UntilDay_DayOfWeek, UntilTime, UntilTimeModifier, DateTimeKind.Local, UtcOffset, TimeSpan.Zero);
             }
 
             /// <summary>
@@ -1038,7 +1030,7 @@ namespace PublicDomain
                     UntilDay,
                     UntilDay_DayOfWeek == null ? "null" : ("DayOfWeek." + UntilDay_DayOfWeek.Value.ToString()),
                     GetNewTimeSpanString(UntilTime.Ticks),
-                    UntilTimeModifier == null ? "null" : '\"' + UntilTimeModifier + '\"',
+                    "TzDatabase.TimeModifier." + UntilTimeModifier.ToString(),
                     Comment == null ? "null" : '\"' + Comment + '\"'
                 );
 
@@ -1113,7 +1105,7 @@ namespace PublicDomain
                 m_untilTime = untilTime;
             }
 
-            internal void SetUntilTimeModifier(string untilTimeModifier)
+            internal void SetUntilTimeModifier(TimeModifier untilTimeModifier)
             {
                 m_untilTimeModifier = untilTimeModifier;
             }
@@ -1159,12 +1151,12 @@ namespace PublicDomain
         /// <param name="saveTime">The save time.</param>
         /// <param name="timeModifier">The time modifier.</param>
         /// <returns></returns>
-        public static TimeSpan GetTzDataTime(string saveTime, out string timeModifier)
+        public static TimeSpan GetTzDataTime(string saveTime, out TimeModifier timeModifier)
         {
-            timeModifier = null;
+            timeModifier = TimeModifier.LocalWallTime;
             if (char.IsLetter(saveTime[saveTime.Length - 1]))
             {
-                timeModifier = saveTime[saveTime.Length - 1].ToString();
+                timeModifier = ParseTimeModifier(saveTime[saveTime.Length - 1].ToString());
                 saveTime = saveTime.Substring(0, saveTime.Length - 1);
             }
             return DateTimeUtlities.ParseTimeSpan(saveTime);
@@ -1211,7 +1203,7 @@ namespace PublicDomain
             DayOfWeek? startDay_DayOfWeek;
             TzDatabase.GetTzDataDay(pieces[6], out startDay, out startDay_DayOfWeek);
 
-            string startTimeModifier;
+            TimeModifier startTimeModifier;
             TimeSpan startTime = TzDatabase.GetTzDataTime(pieces[7], out startTimeModifier);
             TimeSpan saveTime = DateTimeUtlities.ParseTimeSpan(pieces[8]);
             string modifier = pieces[9];
@@ -1316,7 +1308,7 @@ namespace PublicDomain
                                             }
                                             else
                                             {
-                                                string untilTimeModifier;
+                                                TimeModifier untilTimeModifier;
                                                 z.SetUntilTime(TzDatabase.GetTzDataTime(pieces[8], out untilTimeModifier));
                                                 z.SetUntilTimeModifier(untilTimeModifier);
                                                 if (pieces.Length > 9)
@@ -1342,7 +1334,7 @@ namespace PublicDomain
             z.SetUntilDay(31);
             z.SetUntilDay_DayOfWeek(null);
             z.SetUntilTime(TimeSpan.Zero);
-            z.SetUntilTimeModifier(null);
+            z.SetUntilTimeModifier(TimeModifier.LocalWallTime);
         }
 
         /// <summary>
@@ -1461,8 +1453,12 @@ namespace PublicDomain
         /// <param name="pieceDay">The piece day.</param>
         /// <param name="pieceDayOfWeek">The piece day of week.</param>
         /// <param name="pieceTime">The piece time.</param>
+        /// <param name="timeModifier">The time modifier.</param>
+        /// <param name="inflectionKind">Kind of the inflection.</param>
+        /// <param name="utcOffset">The utc offset.</param>
+        /// <param name="save">The save.</param>
         /// <returns></returns>
-        public static DateTime GetDateTime(int pieceYear, Month pieceMonth, int pieceDay, DayOfWeek? pieceDayOfWeek, TimeSpan pieceTime)
+        public static DateTime GetDateTime(int pieceYear, Month pieceMonth, int pieceDay, DayOfWeek? pieceDayOfWeek, TimeSpan pieceTime, TimeModifier timeModifier, DateTimeKind inflectionKind, TimeSpan utcOffset, TimeSpan save)
         {
             int year = pieceYear;
             int month = pieceMonth == 0 ? (int)Month.January : (int)pieceMonth;
@@ -1478,6 +1474,11 @@ namespace PublicDomain
             }
             else
             {
+                if (inflectionKind == DateTimeKind.Unspecified)
+                {
+                    throw new ArgumentException("inflectionKind cannot be " + DateTimeKind.Unspecified);
+                }
+
                 // Check if it is a last* day
                 if (pieceDayOfWeek != null)
                 {
@@ -1500,13 +1501,152 @@ namespace PublicDomain
                     }
                 }
 
-                return new DateTime(year, month, day, pieceTime.Hours, pieceTime.Minutes, pieceTime.Seconds);
+                DateTime result = new DateTime(year, month, day, pieceTime.Hours, pieceTime.Minutes, pieceTime.Seconds, inflectionKind);
+
+                ApplyTimeModifier(timeModifier, inflectionKind, ref utcOffset, ref save, ref result);
+
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Applies the time modifier.
+        /// </summary>
+        /// <param name="timeModifier">The time modifier.</param>
+        /// <param name="inflectionKind">Kind of the inflection.</param>
+        /// <param name="utcOffset">The utc offset.</param>
+        /// <param name="save">The save.</param>
+        /// <param name="result">The result.</param>
+        public static void ApplyTimeModifier(TimeModifier timeModifier, DateTimeKind inflectionKind, ref TimeSpan utcOffset, ref TimeSpan save, ref DateTime result)
+        {
+            switch (inflectionKind)
+            {
+                case DateTimeKind.Local:
+
+                    switch (timeModifier)
+                    {
+                        case TimeModifier.LocalStandardTime:
+                            result += save;
+                            break;
+                        case TimeModifier.LocalWallTime:
+                            // do nothing
+                            break;
+                        case TimeModifier.UniversalTime:
+                            result += utcOffset;
+                            break;
+                        default:
+                            throw new NotImplementedException();
+                    }
+
+                    break;
+                case DateTimeKind.Utc:
+
+                    switch (timeModifier)
+                    {
+                        case TimeModifier.LocalStandardTime:
+                            result -= utcOffset;
+                            //result += save;
+                            break;
+                        case TimeModifier.LocalWallTime:
+                            result -= utcOffset;
+                            break;
+                        case TimeModifier.UniversalTime:
+                            // do nothing
+                            break;
+                        default:
+                            throw new NotImplementedException();
+                    }
+
+                    break;
+                default:
+                    throw new NotImplementedException();
             }
         }
 
         private static string GetNewTimeSpanString(long val)
         {
             return val == 0 ? "TimeSpan.Zero" : "new TimeSpan(" + val + ")";
+        }
+
+        /// <summary>
+        /// Gets the time modifier to string.
+        /// </summary>
+        /// <param name="timeModifier">The time modifier.</param>
+        /// <returns></returns>
+        public static string GetTimeModifierToString(TimeModifier timeModifier)
+        {
+            return GetTimeModifierToString(timeModifier, true);
+        }
+
+        /// <summary>
+        /// Gets the time modifier to string.
+        /// </summary>
+        /// <param name="timeModifier">The time modifier.</param>
+        /// <param name="useEmptyDefault">if set to <c>true</c> [use empty default].</param>
+        /// <returns></returns>
+        public static string GetTimeModifierToString(TimeModifier timeModifier, bool useEmptyDefault)
+        {
+            switch (timeModifier)
+            {
+                case TimeModifier.LocalStandardTime:
+                    return "s";
+                case TimeModifier.LocalWallTime:
+                    return useEmptyDefault ? string.Empty : "w";
+                case TimeModifier.UniversalTime:
+                    return "u";
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        /// <summary>
+        /// Parses the time modifier.
+        /// </summary>
+        /// <param name="timeModifier">The time modifier.</param>
+        /// <returns></returns>
+        public static TimeModifier ParseTimeModifier(string timeModifier)
+        {
+            if (!string.IsNullOrEmpty(timeModifier))
+            {
+                timeModifier = timeModifier.Trim().ToLower();
+                switch (timeModifier)
+                {
+                    case "w":
+                        return TimeModifier.LocalWallTime;
+                    case "s":
+                        return TimeModifier.LocalStandardTime;
+                    case "u":
+                    case "g":
+                    case "z":
+                        return TimeModifier.UniversalTime;
+                }
+            }
+
+            return TimeModifier.LocalWallTime;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public enum TimeModifier
+        {
+            /// <summary>
+            /// Default. Wall clock time; actual local time
+            /// tz modifier: no letter or w
+            /// </summary>
+            LocalWallTime,
+
+            /// <summary>
+            /// Local standard time; winter time
+            /// tz modifier: s
+            /// </summary>
+            LocalStandardTime,
+
+            /// <summary>
+            /// UTC time
+            /// tz modifier: u or g or z
+            /// </summary>
+            UniversalTime
         }
     }
 }

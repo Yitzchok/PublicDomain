@@ -105,7 +105,7 @@ namespace PublicDomain
             foreach (TzDatabase.TzRule rule in eastern.HistoricalData.Rules)
             {
                 Console.WriteLine(rule.ToString());
-                Console.WriteLine(rule.GetFromDateTime());
+                Console.WriteLine(rule.GetFromDateTime(TimeSpan.Zero));
                 Console.WriteLine();
             }
 
@@ -179,6 +179,93 @@ namespace PublicDomain
                     Console.WriteLine(daylightTime.End);
                 }
             }
+        }
+
+        [Test]
+        public void Bug12541()
+        {
+            TzTimeZone timeZone = TzTimeZone.GetTimeZone("America/Denver");
+            Assert.AreEqual("MST", timeZone.GetAbbreviation(DateTime.Parse("1/1/2008 12:00:00")));
+            Assert.AreEqual("MDT", timeZone.GetAbbreviation(DateTime.Parse("5/1/2008 12:00:00")));
+            Assert.AreEqual("MST", timeZone.GetAbbreviation(DateTime.Parse("12/1/2008 12:00:00")));
+        }
+
+        [Test]
+        public void Bug12480()
+        {
+            TzTimeZone zone = TzTimeZone.GetTimeZone("America/Chicago");
+
+            Console.WriteLine(zone.ToUniversalTime(DateTime.Parse("2006-04-02 01:00")));
+            Assert.AreEqual(7, zone.ToUniversalTime(DateTime.Parse("2006-04-02 01:00")).Hour);
+            Console.WriteLine(zone.ToUniversalTime(DateTime.Parse("2006-04-02 01:30")));
+            Assert.AreEqual(7, zone.ToUniversalTime(DateTime.Parse("2006-04-02 01:30")).Hour);
+            Console.WriteLine(zone.ToUniversalTime(DateTime.Parse("2006-04-02 02:00")));
+            Assert.AreEqual(7, zone.ToUniversalTime(DateTime.Parse("2006-04-02 02:00")).Hour);
+            Console.WriteLine(zone.ToUniversalTime(DateTime.Parse("2006-04-02 02:30")));
+            Assert.AreEqual(7, zone.ToUniversalTime(DateTime.Parse("2006-04-02 02:30")).Hour);
+
+            Assert.AreEqual(19, zone.ToLocalTime(DateTime.SpecifyKind(DateTime.Parse("2006-04-02 01:30"), DateTimeKind.Utc)).Hour);
+            Console.WriteLine(zone.ToLocalTime(DateTime.SpecifyKind(DateTime.Parse("2006-04-02 01:30"), DateTimeKind.Utc)));
+            Assert.AreEqual(20, zone.ToLocalTime(DateTime.SpecifyKind(DateTime.Parse("2006-04-02 02:00"), DateTimeKind.Utc)).Hour);
+            Console.WriteLine(zone.ToLocalTime(DateTime.SpecifyKind(DateTime.Parse("2006-04-02 02:00"), DateTimeKind.Utc)));
+            Assert.AreEqual(20, zone.ToLocalTime(DateTime.SpecifyKind(DateTime.Parse("2006-04-02 02:30"), DateTimeKind.Utc)).Hour);
+            Console.WriteLine(zone.ToLocalTime(DateTime.SpecifyKind(DateTime.Parse("2006-04-02 02:30"), DateTimeKind.Utc)));
+            Assert.AreEqual(21, zone.ToLocalTime(DateTime.SpecifyKind(DateTime.Parse("2006-04-02 03:00"), DateTimeKind.Utc)).Hour);
+            Console.WriteLine(zone.ToLocalTime(DateTime.SpecifyKind(DateTime.Parse("2006-04-02 03:00"), DateTimeKind.Utc)));
+            Assert.AreEqual(1, zone.ToLocalTime(DateTime.SpecifyKind(DateTime.Parse("2006-04-02 07:00"), DateTimeKind.Utc)).Hour);
+            Console.WriteLine(zone.ToLocalTime(DateTime.SpecifyKind(DateTime.Parse("2006-04-02 07:00"), DateTimeKind.Utc)));
+            Assert.AreEqual(1, zone.ToLocalTime(DateTime.SpecifyKind(DateTime.Parse("2006-04-02 07:30"), DateTimeKind.Utc)).Hour);
+            Console.WriteLine(zone.ToLocalTime(DateTime.SpecifyKind(DateTime.Parse("2006-04-02 07:30"), DateTimeKind.Utc)));
+            Assert.AreEqual(3, zone.ToLocalTime(DateTime.SpecifyKind(DateTime.Parse("2006-04-02 08:00"), DateTimeKind.Utc)).Hour);
+            Console.WriteLine(zone.ToLocalTime(DateTime.SpecifyKind(DateTime.Parse("2006-04-02 08:00"), DateTimeKind.Utc)));
+            Assert.AreEqual(3, zone.ToLocalTime(DateTime.SpecifyKind(DateTime.Parse("2006-04-02 08:30"), DateTimeKind.Utc)).Hour);
+            Console.WriteLine(zone.ToLocalTime(DateTime.SpecifyKind(DateTime.Parse("2006-04-02 08:30"), DateTimeKind.Utc)));
+
+            zone = TzTimeZone.GetTimeZone(TzConstants.TimezoneEuropeParis);
+            Console.WriteLine(zone.ToUniversalTime(DateTime.Parse("2007-03-25 00:00")));
+            Assert.AreEqual(23, zone.ToUniversalTime(DateTime.Parse("2007-03-25 00:00")).Hour);
+            Console.WriteLine(zone.ToUniversalTime(DateTime.Parse("2007-03-25 00:30")));
+            Assert.AreEqual(23, zone.ToUniversalTime(DateTime.Parse("2007-03-25 00:30")).Hour);
+            Console.WriteLine(zone.ToUniversalTime(DateTime.Parse("2007-03-25 01:00")));
+            Assert.AreEqual(0, zone.ToUniversalTime(DateTime.Parse("2007-03-25 01:00")).Hour);
+            Console.WriteLine(zone.ToUniversalTime(DateTime.Parse("2007-03-25 01:30")));
+            Assert.AreEqual(0, zone.ToUniversalTime(DateTime.Parse("2007-03-25 01:30")).Hour);
+            Console.WriteLine(zone.ToUniversalTime(DateTime.Parse("2007-03-25 02:00")));
+            Assert.AreEqual(0, zone.ToUniversalTime(DateTime.Parse("2007-03-25 02:00")).Hour);
+
+            Console.WriteLine(zone.ToLocalTime(DateTime.SpecifyKind(DateTime.Parse("2007-03-25 00:00"), DateTimeKind.Utc)));
+            Assert.AreEqual(1, zone.ToLocalTime(DateTime.SpecifyKind(DateTime.Parse("2007-03-25 00:00"), DateTimeKind.Utc)).Hour);
+            Console.WriteLine(zone.ToLocalTime(DateTime.SpecifyKind(DateTime.Parse("2007-03-25 00:30"), DateTimeKind.Utc)));
+            Assert.AreEqual(1, zone.ToLocalTime(DateTime.SpecifyKind(DateTime.Parse("2007-03-25 00:30"), DateTimeKind.Utc)).Hour);
+            Console.WriteLine(zone.ToLocalTime(DateTime.SpecifyKind(DateTime.Parse("2007-03-25 01:00"), DateTimeKind.Utc)));
+            Assert.AreEqual(3, zone.ToLocalTime(DateTime.SpecifyKind(DateTime.Parse("2007-03-25 01:00"), DateTimeKind.Utc)).Hour);
+            Console.WriteLine(zone.ToLocalTime(DateTime.SpecifyKind(DateTime.Parse("2007-03-25 01:30"), DateTimeKind.Utc)));
+            Assert.AreEqual(3, zone.ToLocalTime(DateTime.SpecifyKind(DateTime.Parse("2007-03-25 01:30"), DateTimeKind.Utc)).Hour);
+
+            zone = TzTimeZone.GetTimeZone(TzConstants.TimezoneEuropeMoscow);
+            Console.WriteLine(zone.ToUniversalTime(DateTime.Parse("2007-03-25 01:00")));
+            Assert.AreEqual(22, zone.ToUniversalTime(DateTime.Parse("2007-03-25 01:00")).Hour);
+            Console.WriteLine(zone.ToUniversalTime(DateTime.Parse("2007-03-25 01:30")));
+            Assert.AreEqual(22, zone.ToUniversalTime(DateTime.Parse("2007-03-25 01:30")).Hour);
+            Console.WriteLine(zone.ToUniversalTime(DateTime.Parse("2007-03-25 02:00")));
+            Assert.AreEqual(22, zone.ToUniversalTime(DateTime.Parse("2007-03-25 02:00")).Hour);
+            Console.WriteLine(zone.ToUniversalTime(DateTime.Parse("2007-03-25 02:30")));
+            Assert.AreEqual(22, zone.ToUniversalTime(DateTime.Parse("2007-03-25 02:30")).Hour);
+
+            Console.WriteLine(zone.ToUniversalTime(DateTime.Parse("2007-10-28 00:00")));
+            Console.WriteLine(zone.ToUniversalTime(DateTime.Parse("2007-10-28 01:00")));
+            Console.WriteLine(zone.ToUniversalTime(DateTime.Parse("2007-10-28 01:30")));
+            Console.WriteLine(zone.ToUniversalTime(DateTime.Parse("2007-10-28 02:00")));
+            Console.WriteLine(zone.ToUniversalTime(DateTime.Parse("2007-10-28 02:30")));
+            Console.WriteLine(zone.ToUniversalTime(DateTime.Parse("2007-10-28 03:00")));
+            Console.WriteLine(zone.ToUniversalTime(DateTime.Parse("2007-10-28 03:30")));
+            Console.WriteLine(zone.ToUniversalTime(DateTime.Parse("2007-10-28 04:00")));
+
+        //    Console.WriteLine(zone.ToLocalTime(DateTime.SpecifyKind(DateTime.Parse("2007-03-24 23:00"), DateTimeKind.Utc)));
+        //    Console.WriteLine(zone.ToLocalTime(DateTime.SpecifyKind(DateTime.Parse("2007-03-25 01:00"), DateTimeKind.Utc)));
+        //    Console.WriteLine(zone.ToLocalTime(DateTime.SpecifyKind(DateTime.Parse("2007-03-25 01:30"), DateTimeKind.Utc)));
+        //    Console.WriteLine(zone.ToLocalTime(DateTime.SpecifyKind(DateTime.Parse("2007-03-25 02:00"), DateTimeKind.Utc)));
+        //    Console.WriteLine(zone.ToLocalTime(DateTime.SpecifyKind(DateTime.Parse("2007-03-25 02:30"), DateTimeKind.Utc)));
         }
     }
 }

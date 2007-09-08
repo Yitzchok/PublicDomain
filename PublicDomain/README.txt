@@ -12,6 +12,13 @@ Simon Mourier
 
 Version History
 ===============
+V0.2.16.0
+	[kevgrig@gmail.com]
+		* Added INumberGenerator, IRandomNumberGenerator, and IMonotonicNumberGenerator
+		* Added use of CriticalFinalizerObject
+		* BUG: http://www.codeplex.com/publicdomain/WorkItem/View.aspx?WorkItemId=12363
+		* BUG: http://www.codeplex.com/publicdomain/WorkItem/View.aspx?WorkItemId=12480
+		* BUG: http://www.codeplex.com/publicdomain/WorkItem/View.aspx?WorkItemId=12541
 V0.2.15.0
 	[kevgrig@gmail.com]
 		* Added UtcOffset to ILogTimestampProvider and updated ILogFormatter to use it
