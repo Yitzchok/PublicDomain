@@ -12,6 +12,9 @@ Simon Mourier
 
 Version History
 ===============
+V0.2.17.0
+	[kevgrig@gmail.com]
+		* Added IDatabase, DbConnectionScope, and DbTransactionScope
 V0.2.16.0
 	[kevgrig@gmail.com]
 		* Added INumberGenerator, IRandomNumberGenerator, and IMonotonicNumberGenerator

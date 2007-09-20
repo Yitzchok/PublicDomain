@@ -7,6 +7,7 @@ namespace PublicDomain.Logging
     /// <summary>
     /// 
     /// </summary>
+    [Serializable]
     public class LoggingConfig
     {
         /// <summary>
@@ -51,11 +52,11 @@ namespace PublicDomain.Logging
         /// </summary>
         public static bool Enabled = true;
 
-        private bool m_fallbackToNullLogger;
+        private static LoggingConfig s_current = new LoggingConfig();
 
+        private bool m_fallbackToNullLogger;
         private CallbackCreateLogger m_createLogger;
         private CallbackUpdateLogger m_updateLogger;
-
         private string m_value;
 
         /// <summary>
@@ -63,6 +64,7 @@ namespace PublicDomain.Logging
         /// </summary>
         public LoggingConfig()
         {
+            InitializeCurrent();
         }
 
         /// <summary>
@@ -83,6 +85,31 @@ namespace PublicDomain.Logging
         public LoggingConfig(string configString, CallbackCreateLogger createLogger, CallbackUpdateLogger updateLogger)
         {
             Load(configString, createLogger, updateLogger);
+            InitializeCurrent();
+        }
+
+        /// <summary>
+        /// Gets the global LoggingConfig instance.
+        /// </summary>
+        /// <value>The current.</value>
+        public static LoggingConfig Current
+        {
+            get
+            {
+                return s_current;
+            }
+            set
+            {
+                s_current = value;
+            }
+        }
+
+        /// <summary>
+        /// Initializes the current.
+        /// </summary>
+        protected virtual void InitializeCurrent()
+        {
+            s_current = this;
         }
 
         /// <summary>
@@ -91,7 +118,7 @@ namespace PublicDomain.Logging
         /// <value>
         /// 	<c>true</c> if [fallback to null logger]; otherwise, <c>false</c>.
         /// </value>
-        public bool FallbackToNullLogger
+        public virtual bool FallbackToNullLogger
         {
             get
             {
@@ -108,7 +135,7 @@ namespace PublicDomain.Logging
         /// previously loaded.
         /// </summary>
         /// <value>The value.</value>
-        public string Value
+        public virtual string Value
         {
             get
             {
@@ -121,7 +148,7 @@ namespace PublicDomain.Logging
         /// </summary>
         /// <example>Namespace1.Class1=*;Class2=off;Namespace1.Namespace2.Class3=Debug</example>
         /// <param name="configString">The config string.</param>
-        public void Load(string configString)
+        public virtual void Load(string configString)
         {
             Load(configString, null, null);
         }
@@ -133,7 +160,7 @@ namespace PublicDomain.Logging
         /// <param name="configString">The config string.</param>
         /// <param name="createLogger">The create logger.</param>
         /// <param name="updateLogger">The update logger.</param>
-        public void Load(string configString, CallbackCreateLogger createLogger, CallbackUpdateLogger updateLogger)
+        public virtual void Load(string configString, CallbackCreateLogger createLogger, CallbackUpdateLogger updateLogger)
         {
             m_value = configString;
 
@@ -203,7 +230,7 @@ namespace PublicDomain.Logging
         /// <param name="className">Name of the class.</param>
         /// <param name="threshold">The threshold.</param>
         /// <returns></returns>
-        public Logger DefaultCallbackCreateLogger(string className, LoggerSeverity threshold)
+        public virtual Logger DefaultCallbackCreateLogger(string className, LoggerSeverity threshold)
         {
             Logger result = new CompositeLogger(ApplicationLogger.Current);
             result.Threshold = threshold;
@@ -216,12 +243,18 @@ namespace PublicDomain.Logging
         /// </summary>
         /// <param name="logger">The logger.</param>
         /// <param name="threshold">The threshold.</param>
-        public void DefaultCallbackUpdateLogger(Logger logger, LoggerSeverity threshold)
+        public virtual void DefaultCallbackUpdateLogger(Logger logger, LoggerSeverity threshold)
         {
             logger.Threshold = threshold;
         }
 
-        private void PostProcessNewLogger(string key, LoggerSeverity threshold, Logger logger)
+        /// <summary>
+        /// Posts the process new logger.
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <param name="threshold">The threshold.</param>
+        /// <param name="logger">The logger.</param>
+        protected virtual void PostProcessNewLogger(string key, LoggerSeverity threshold, Logger logger)
         {
             if (logger == null)
             {
@@ -232,7 +265,12 @@ namespace PublicDomain.Logging
             m_loggers[key] = logger;
         }
 
-        private void PrepareLogger(LoggerSeverity threshold, Logger logger)
+        /// <summary>
+        /// Prepares the logger.
+        /// </summary>
+        /// <param name="threshold">The threshold.</param>
+        /// <param name="logger">The logger.</param>
+        protected virtual void PrepareLogger(LoggerSeverity threshold, Logger logger)
         {
             logger.Enabled = threshold != OffValue;
         }
@@ -242,7 +280,7 @@ namespace PublicDomain.Logging
         /// </summary>
         /// <param name="logValue">The log value.</param>
         /// <returns></returns>
-        private LoggerSeverity GetLogValue(string logValue)
+        protected virtual LoggerSeverity GetLogValue(string logValue)
         {
             if (logValue == null)
             {
@@ -277,7 +315,7 @@ namespace PublicDomain.Logging
         /// <param name="logClasses">The log classes.</param>
         /// <returns></returns>
         /// <value></value>
-        public Logger CreateLogger(params string[] logClasses)
+        public virtual Logger CreateLogger(params string[] logClasses)
         {
             Logger result = null;
 
@@ -335,7 +373,7 @@ namespace PublicDomain.Logging
         /// <param name="type">The type.</param>
         /// <param name="otherLogClasses">The other log classes.</param>
         /// <returns></returns>
-        public Logger CreateLogger(Type type, params string[] otherLogClasses)
+        public virtual Logger CreateLogger(Type type, params string[] otherLogClasses)
         {
             string[] classes = new string[otherLogClasses.Length + 1];
             Array.Copy(otherLogClasses, classes, otherLogClasses.Length);
@@ -346,7 +384,7 @@ namespace PublicDomain.Logging
         /// <summary>
         /// Enables all loggers.
         /// </summary>
-        public void EnableAllLoggers()
+        public virtual void EnableAllLoggers()
         {
             UpdateAllLoggers(true);
         }
@@ -354,12 +392,16 @@ namespace PublicDomain.Logging
         /// <summary>
         /// Disables all loggers.
         /// </summary>
-        public void DisableAllLoggers()
+        public virtual void DisableAllLoggers()
         {
             UpdateAllLoggers(false);
         }
 
-        private void UpdateAllLoggers(bool enabled)
+        /// <summary>
+        /// Updates all loggers.
+        /// </summary>
+        /// <param name="enabled">if set to <c>true</c> [enabled].</param>
+        protected virtual void UpdateAllLoggers(bool enabled)
         {
             foreach (Logger logger in m_loggers.Values)
             {
