@@ -63,7 +63,7 @@
     <Compile Include="AspRuntimeHost\wwAspRuntimeHost.cs" />
     <Compile Include="AspRuntimeHost\wwAspRuntimeProxy.cs" />
     <Compile Include="AspRuntimeHost\wwWorkerRequest.cs" />
-    <Compile Include="BaseException.cs" />
+    <Compile Include="Exceptions\BaseException.cs" />
     <Compile Include="CachedPropertiesProvider.cs" />
     <Compile Include="CharUtilities.cs" />
     <Compile Include="CodeCount\Countable.cs" />
@@ -100,6 +100,8 @@
     <Compile Include="Dynacode\CodeUtilities.cs" />
     <Compile Include="Dynacode\DotNetCodeRunner.cs" />
     <Compile Include="Dynacode\ICodeRunner.cs" />
+    <Compile Include="Exceptions\TODONotImplementedException.cs" />
+    <Compile Include="Exceptions\WrappedException.cs" />
     <Compile Include="Feeder\AtomFeed.cs" />
     <Compile Include="Feeder\AtomFeedItem.cs" />
     <Compile Include="Feeder\Atom\AtomFeedParser.cs" />

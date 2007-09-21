@@ -645,23 +645,23 @@ namespace PublicDomain.Data
         /// </returns>
         public static bool IsExceptionForeignKeyConstraintError(Exception e)
         {
-            SqlException se = e as SqlException;
-            if (se != null)
+            if (e.Message != null)
             {
-                //se.ErrorCode == -2146232060
-                Regex re = new Regex(@"The \w+ statement conflicted with the FOREIGN KEY constraint ""\w+"". The conflict occurred in database ""\w+"", table ""([\w\.]+)"", column '(\w)+'.", RegexOptions.Compiled);
-                Match m = re.Match(se.Message);
-                if (m.Success)
+                if (e.Message.Contains("statement conflicted with the FOREIGN KEY constraint"))
                 {
-                    string table = RegexUtilities.GetCapture(m, 1);
-                    string column = RegexUtilities.GetCapture(m, 2);
+                    // this is for sql server
                     return true;
                 }
-            }
-            else if (e.Message != null && e.Message.StartsWith("ERROR: 23503"))
-            {
-                // this is for postgre
-                return true;
+                else if (e.Message.StartsWith("ERROR: 23503"))
+                {
+                    // this is for postgre
+                    return true;
+                }
+                else if (e.Message.StartsWith("Cannot add or update a child row: a foreign key constraint fails"))
+                {
+                    // this is for mysql
+                    return true;
+                }
             }
 
             return false;

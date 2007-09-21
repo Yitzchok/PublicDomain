@@ -12,6 +12,9 @@ Simon Mourier
 
 Version History
 ===============
+V0.2.18.0
+	[kevgrig@gmail.com]
+		* Small bug fixes
 V0.2.17.0
 	[kevgrig@gmail.com]
 		* Added IDatabase, DbConnectionScope, and DbTransactionScope

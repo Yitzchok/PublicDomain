@@ -960,5 +960,25 @@ namespace PublicDomain
             }
             return str;
         }
+
+        /// <summary>
+        /// Creates the string.
+        /// </summary>
+        /// <param name="repeat">The repeat.</param>
+        /// <param name="count">The count.</param>
+        /// <returns></returns>
+        public static string CreateString(string repeat, int count)
+        {
+            if (string.IsNullOrEmpty(repeat) || count <= 0)
+            {
+                return repeat;
+            }
+            StringBuilder sb = new StringBuilder(repeat.Length & count);
+            while (count-- > 0)
+            {
+                sb.Append(repeat);
+            }
+            return sb.ToString();
+        }
     }
 }
