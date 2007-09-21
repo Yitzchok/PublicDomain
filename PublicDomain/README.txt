@@ -12,6 +12,9 @@ Simon Mourier
 
 Version History
 ===============
+V0.2.19.0
+	[kevgrig@gmail.com]
+		* BUG: TZ Date time parsing
 V0.2.18.0
 	[kevgrig@gmail.com]
 		* Small bug fixes

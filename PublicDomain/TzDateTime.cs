@@ -1574,6 +1574,8 @@ namespace PublicDomain
             TzDateTime result;
             if (!Iso8601.TryParse(s, timeZone, out result))
             {
+                DateTime? dt = null;
+
                 // If it's not ISO 8601, we use the normal DateTime.Parse
                 // method; however, we also check if there is a time zone
                 // designator on the end
@@ -1587,11 +1589,28 @@ namespace PublicDomain
                         char modifier = s[s.Length - UtcOffsetModifier.Length];
                         string[] pieces = StringUtilities.SplitAroundLastIndexOfAny(s, '+', '-');
                         s = pieces[0];
-                        timeZone = TzTimeZone.GetTimeZoneByOffset(modifier + pieces[1]);
+                        
+                        TzTimeZone offsetTimeZone = TzTimeZone.GetTimeZoneByOffset(modifier + pieces[1]);
+
+                        // If it's UTC, then create a UTC DateTime
+                        if (offsetTimeZone.Equals(TzTimeZone.ZoneUTC))
+                        {
+                            dt = DateTime.SpecifyKind(DateTime.Parse(s), DateTimeKind.Utc);
+                        }
+                        else
+                        {
+                            // Convert it to UTC
+                            dt = offsetTimeZone.ToUniversalTime(DateTime.SpecifyKind(DateTime.Parse(s), DateTimeKind.Local));
+                        }
                     }
                 }
 
-                result = new TzDateTime(DateTime.Parse(s), timeZone);
+                if (dt == null)
+                {
+                    dt = DateTime.Parse(s);
+                }
+
+                result = new TzDateTime(dt.Value, timeZone);
             }
             return result;
         }
