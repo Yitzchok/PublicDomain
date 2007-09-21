@@ -4,6 +4,7 @@ using System.Text;
 using System.Data;
 using System.Data.Common;
 using System.Text.RegularExpressions;
+using PublicDomain.Logging;
 
 namespace PublicDomain.Data
 {
@@ -118,6 +119,8 @@ namespace PublicDomain.Data
     /// </summary>
     public class DatabaseConnectionProvider : IDatabaseConnectionProvider
     {
+        internal static readonly Logger Log = LoggingConfig.Current.CreateLogger(typeof(DatabaseConnectionProvider), GlobalConstants.LogClassDatabase);
+
         private DbProviderFactory m_dbProviderFactory;
         private string m_connectionString;
         private DatabaseType m_databaseType;
@@ -170,12 +173,19 @@ namespace PublicDomain.Data
         /// <returns></returns>
         public virtual IDbConnection GetConnection(bool open, bool bypassCache)
         {
+            if (Log.Enabled) Log.Entry("GetConnection", open, bypassCache, ConnectionString);
+
             IDbConnection result = m_dbProviderFactory.CreateConnection();
             result.ConnectionString = ConnectionString;
             if (open)
             {
+                if (Log.Enabled) Log.LogDebug10("Opening database connection...");
+
                 result.Open();
             }
+
+            if (Log.Enabled) Log.Exit("GetConnection", result);
+
             return result;
         }
 

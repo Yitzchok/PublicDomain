@@ -12,7 +12,7 @@ namespace PublicDomain.Logging
     {
         private string m_className;
         private string m_prefix;
-        internal static readonly int CATEGORY_LENGTH = 10;
+        internal static readonly int DefaultCategoryLength = 15;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SimpleCompositeLogger"/> class.
@@ -41,13 +41,13 @@ namespace PublicDomain.Logging
                 }
 
                 // Pad the prefix to ten characters
-                if (m_prefix.Length > CATEGORY_LENGTH)
+                if (m_prefix.Length > DefaultCategoryLength)
                 {
-                    m_prefix = m_prefix.Substring(0, CATEGORY_LENGTH);
+                    m_prefix = m_prefix.Substring(0, DefaultCategoryLength);
                 }
-                else if (m_prefix.Length < CATEGORY_LENGTH)
+                else if (m_prefix.Length < DefaultCategoryLength)
                 {
-                    m_prefix = string.Format("{0,-" + CATEGORY_LENGTH + "}", m_prefix);
+                    m_prefix = string.Format("{0,-" + DefaultCategoryLength + "}", m_prefix);
                 }
             }
         }

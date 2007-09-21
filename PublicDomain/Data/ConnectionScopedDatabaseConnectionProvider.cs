@@ -11,7 +11,7 @@ namespace PublicDomain.Data
     /// </summary>
     public class ConnectionScopedDatabaseConnectionProvider : DatabaseConnectionProvider
     {
-        internal static readonly Logger Log = LoggingConfig.Current.CreateLogger(typeof(ConnectionScopedDatabaseConnectionProvider));
+        internal static new readonly Logger Log = LoggingConfig.Current.CreateLogger(typeof(ConnectionScopedDatabaseConnectionProvider), GlobalConstants.LogClassDatabase);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConnectionScopedDatabaseConnectionProvider"/> class.
@@ -36,10 +36,14 @@ namespace PublicDomain.Data
             
             if (bypassCache)
             {
+                if (Log.Enabled) Log.LogDebug10("cache bypased, requesting connection");
+
                 result = base.GetConnection(open, bypassCache);
             }
             else
             {
+                if (Log.Enabled) Log.LogDebug10("checking cache for inheritable connection");
+
                 result = DbConnectionScope.Current.Connection;
             }
 

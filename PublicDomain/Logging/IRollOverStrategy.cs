@@ -18,7 +18,8 @@ namespace PublicDomain.Logging
         /// <param name="entry">The entry.</param>
         /// <param name="formatParameters">The format parameters.</param>
         /// <param name="logLine">The log line.</param>
+        /// <param name="artifactSet">The artifact set.</param>
         /// <returns></returns>
-        string GetFileName(string fileName, LoggerSeverity severity, DateTime timestamp, object entry, object[] formatParameters, string logLine);
+        string GetFileName(string fileName, LoggerSeverity severity, DateTime timestamp, object entry, object[] formatParameters, string logLine, LogArtifact[] artifactSet);
     }
 }

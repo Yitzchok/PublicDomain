@@ -21,6 +21,9 @@ namespace PublicDomain.Logging
         private static FinalizableBackgroundThread m_loggerThread = new LoggerBackgroundThread(BackgroundThreadInterval, LoggerThread);
         private static List<LogArtifact> s_artifacts = new List<LogArtifact>();
         private static ILogTimestampProvider s_defaultTimestampProvider = new LocalLogTimestampProvider();
+        private static object s_loggerThreadLock = new object();
+        internal static Logger LoggerSingleton;
+        internal static bool SameLoggers = true;
 
         private LoggerSeverity m_threshold = LoggerSeverity.Warn30;
         private List<ILogFilter> m_filters = new List<ILogFilter>();
@@ -35,29 +38,41 @@ namespace PublicDomain.Logging
         /// <param name="isFinal">if set to <c>true</c> [is final].</param>
         private static void LoggerThread(bool isFinal)
         {
-            int length = s_artifacts.Count;
-
-            if (length > 0)
+            lock (s_loggerThreadLock)
             {
-                for (int i = 0; i < length; i++)
+                int length = s_artifacts.Count;
+
+                if (length > 0)
                 {
-                    LogArtifact artifact = s_artifacts[i];
-                    try
+                    if (SameLoggers)
                     {
-                        artifact.Logger.Write(artifact);
+                        LogArtifact[] artifacts = new LogArtifact[length];
+                        s_artifacts.CopyTo(0, artifacts, 0, length);
+                        artifacts[0].Logger.Write(artifacts);
                     }
-                    catch (Exception ex)
+                    else
                     {
-                        try
+                        for (int i = 0; i < length; i++)
                         {
-                            CriticalLogger.Current.LogException(ex);
-                        }
-                        catch (Exception)
-                        {
+                            LogArtifact artifact = s_artifacts[i];
+                            try
+                            {
+                                artifact.Logger.Write(artifact);
+                            }
+                            catch (Exception ex)
+                            {
+                                try
+                                {
+                                    CriticalLogger.Current.LogException(ex);
+                                }
+                                catch (Exception)
+                                {
+                                }
+                            }
                         }
                     }
+                    s_artifacts.RemoveRange(0, length);
                 }
-                s_artifacts.RemoveRange(0, length);
             }
         }
 
@@ -301,6 +316,18 @@ namespace PublicDomain.Logging
         /// </summary>
         /// <param name="artifact">The artifact.</param>
         public abstract void Write(LogArtifact artifact);
+
+        /// <summary>
+        /// Writes the specified artifacts.
+        /// </summary>
+        /// <param name="artifacts">The artifacts.</param>
+        public virtual void Write(LogArtifact[] artifacts)
+        {
+            foreach (LogArtifact artifact in artifacts)
+            {
+                Write(artifact);
+            }
+        }
 
         /// <summary>
         /// </summary>

@@ -210,6 +210,11 @@ namespace PublicDomain
         /// ==================================================
         /// </summary>
         public const string DividerEquals = "==================================================";
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public const string LogClassDatabase = "Database";
     }
 
     /// <summary>

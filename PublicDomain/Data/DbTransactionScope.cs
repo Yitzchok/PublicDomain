@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Transactions;
+using PublicDomain.Logging;
 
 namespace PublicDomain.Data
 {
@@ -10,6 +11,8 @@ namespace PublicDomain.Data
     /// </summary>
     public class DbTransactionScope : IDisposable
     {
+        internal static readonly Logger Log = LoggingConfig.Current.CreateLogger(typeof(DbTransactionScope), GlobalConstants.LogClassDatabase);
+
         [ThreadStatic]
         private static bool s_isInUse;
 
@@ -19,14 +22,19 @@ namespace PublicDomain.Data
         private bool m_isDisposed;
         private TransactionScope m_scope;
         private DbConnectionScope m_connScope;
+        private Transaction m_transaction;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DbTransactionScope"/> class.
         /// </summary>
         public DbTransactionScope()
         {
+            if (Log.Enabled) Log.Entry("DbTransactionScope", Transaction.Current);
+
             m_scope = new TransactionScope();
             Initialize();
+
+            if (Log.Enabled) Log.Exit("DbTransactionScope", Transaction.Current);
         }
 
         /// <summary>
@@ -38,8 +46,12 @@ namespace PublicDomain.Data
         /// </param>
         public DbTransactionScope(Transaction transactionToUse)
         {
+            if (Log.Enabled) Log.Entry("DbTransactionScope", Transaction.Current);
+
             m_scope = new TransactionScope(transactionToUse);
             Initialize();
+
+            if (Log.Enabled) Log.Exit("DbTransactionScope", Transaction.Current);
         }
 
         /// <summary>
@@ -52,8 +64,12 @@ namespace PublicDomain.Data
         /// </param>
         public DbTransactionScope(TransactionScopeOption scopeOption)
         {
+            if (Log.Enabled) Log.Entry("DbTransactionScope", Transaction.Current);
+
             m_scope = new TransactionScope(scopeOption);
             Initialize();
+
+            if (Log.Enabled) Log.Exit("DbTransactionScope", Transaction.Current);
         }
 
         /// <summary>
@@ -71,8 +87,12 @@ namespace PublicDomain.Data
         /// </param>
         public DbTransactionScope(Transaction transactionToUse, TimeSpan scopeTimeout)
         {
+            if (Log.Enabled) Log.Entry("DbTransactionScope", Transaction.Current);
+
             m_scope = new TransactionScope(transactionToUse, scopeTimeout);
             Initialize();
+
+            if (Log.Enabled) Log.Exit("DbTransactionScope", Transaction.Current);
         }
 
         /// <summary>
@@ -89,8 +109,12 @@ namespace PublicDomain.Data
         /// </param>
         public DbTransactionScope(TransactionScopeOption scopeOption, TimeSpan scopeTimeout)
         {
+            if (Log.Enabled) Log.Entry("DbTransactionScope", Transaction.Current);
+
             m_scope = new TransactionScope(scopeOption, scopeTimeout);
             Initialize();
+
+            if (Log.Enabled) Log.Exit("DbTransactionScope", Transaction.Current);
         }
 
         /// <summary>
@@ -109,8 +133,12 @@ namespace PublicDomain.Data
         /// </param>
         public DbTransactionScope(TransactionScopeOption scopeOption, TransactionOptions transactionOptions)
         {
+            if (Log.Enabled) Log.Entry("DbTransactionScope", Transaction.Current);
+
             m_scope = new TransactionScope(scopeOption, transactionOptions);
             Initialize();
+
+            if (Log.Enabled) Log.Exit("DbTransactionScope", Transaction.Current);
         }
 
         /// <summary>
@@ -132,8 +160,12 @@ namespace PublicDomain.Data
         /// </param>
         public DbTransactionScope(Transaction transactionToUse, TimeSpan scopeTimeout, EnterpriseServicesInteropOption interopOption)
         {
+            if (Log.Enabled) Log.Entry("DbTransactionScope", Transaction.Current);
+
             m_scope = new TransactionScope(transactionToUse, scopeTimeout, interopOption);
             Initialize();
+
+            if (Log.Enabled) Log.Exit("DbTransactionScope", Transaction.Current);
         }
 
         /// <summary>
@@ -158,8 +190,12 @@ namespace PublicDomain.Data
         /// </param>
         public DbTransactionScope(TransactionScopeOption scopeOption, TransactionOptions transactionOptions, EnterpriseServicesInteropOption interopOption)
         {
+            if (Log.Enabled) Log.Entry("DbTransactionScope", Transaction.Current);
+
             m_scope = new TransactionScope(scopeOption, transactionOptions, interopOption);
             Initialize();
+
+            if (Log.Enabled) Log.Exit("DbTransactionScope", Transaction.Current);
         }
 
         /// <summary>
@@ -168,7 +204,11 @@ namespace PublicDomain.Data
         /// <exception cref="System.InvalidOperationException">This method has already been called once.</exception>
         public virtual void Complete()
         {
+            if (Log.Enabled) Log.Entry("Complete", m_scope);
+
             m_scope.Complete();
+
+            if (Log.Enabled) Log.Exit("Complete");
         }
 
         /// <summary>
@@ -190,6 +230,8 @@ namespace PublicDomain.Data
         /// </summary>
         protected virtual void Initialize()
         {
+            if (Log.Enabled) Log.Entry("Initialize");
+
             s_isInUse = true;
 
             // Since a new TransactionScope is created, this is 
@@ -202,17 +244,27 @@ namespace PublicDomain.Data
             // nested transactions; otherwise, we have to keep re-using the same connection.
             if (currentConnScope != null && Database.Current.SupportsFeature(DatabaseFeature.NestedTransactions))
             {
+                if (Log.Enabled) Log.LogDebug10("Nested transactions supported and the currentConnScope is not null");
+
                 currentConnScope.AllowConnectionInheritance = false;
             }
 
             // Create a default DbTransactionScope for this transaction
+            if (Log.Enabled) Log.LogDebug10("Creating DbConnectionScope...");
+
             m_connScope = new DbConnectionScope();
 
             if (s_scopes == null)
             {
+                if (Log.Enabled) Log.LogDebug10("Scopes null, creating new stack");
+
                 s_scopes = new Stack<DbTransactionScope>();
             }
             s_scopes.Push(this);
+
+            m_transaction = Transaction.Current;
+
+            if (Log.Enabled) Log.Exit("Initialize");
         }
 
         /// <summary>
@@ -220,12 +272,17 @@ namespace PublicDomain.Data
         /// </summary>
         public virtual void Dispose()
         {
+            if (Log.Enabled) Log.Entry("Dispose");
+
             if (!IsDisposed)
             {
                 if (!object.ReferenceEquals(s_scopes.Peek(), this))
                 {
                     throw new BaseException("Transaction scopes mismanaged. Was there a missing Dispose?");
                 }
+
+                if (Log.Enabled) Log.LogDebug10("Popping scopes");
+
                 s_scopes.Pop();
 
                 m_isDisposed = true;
@@ -236,6 +293,8 @@ namespace PublicDomain.Data
             {
                 throw new ObjectDisposedException(typeof(DbTransactionScope).FullName);
             }
+
+            if (Log.Enabled) Log.Exit("Dispose");
         }
 
         /// <summary>
@@ -244,15 +303,47 @@ namespace PublicDomain.Data
         /// <returns></returns>
         public static bool AreTransactionsNested()
         {
+            if (Log.Enabled) Log.Entry("AreTransactionsNested", s_scopes);
+
+            bool result = false;
+
             if (s_scopes != null && s_scopes.Count > 1)
             {
-                int uniqueTransactionScopes = s_scopes.Count;
-                //foreach (DbTransactionScope scope in s_scopes)
-                //{
-                //}
-                return uniqueTransactionScopes > 1;
+                int uniqueTransactionScopes = 1;
+                int l = s_scopes.Count;
+
+                if (Log.Enabled) Log.LogDebug10("Transaction scope count = {0}", l);
+
+                DbTransactionScope[] ar = new DbTransactionScope[l];
+                s_scopes.CopyTo(ar, 0);
+                DbTransactionScope x;
+                int j;
+                for (int i = 1; i < l; i++)
+                {
+                    x = ar[i];
+
+                    for (j = 0; j < l; j++)
+                    {
+                        if (i != j && !x.Transaction.Equals(ar[j].Transaction))
+                        {
+                            break;
+                        }
+                    }
+
+                    if (j < l)
+                    {
+                        uniqueTransactionScopes++;
+                    }
+                }
+
+                if (Log.Enabled) Log.LogDebug10("Unique transaction scopes = {0}", uniqueTransactionScopes);
+                
+                result = uniqueTransactionScopes > 1;
             }
-            return false;
+
+            if (Log.Enabled) Log.Exit("AreTransactionsNested", result);
+
+            return result;
         }
 
         /// <summary>
@@ -264,6 +355,18 @@ namespace PublicDomain.Data
             get
             {
                 return s_isInUse;
+            }
+        }
+
+        /// <summary>
+        /// Gets the transaction.
+        /// </summary>
+        /// <value>The transaction.</value>
+        public virtual Transaction Transaction
+        {
+            get
+            {
+                return m_transaction;
             }
         }
     }

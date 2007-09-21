@@ -356,6 +356,10 @@ namespace PublicDomain.Logging
                     LoggerSeverity fallbackThreshold = OffValue;
                     string key = logClasses[0];
 
+                    if (m_createLogger == null)
+                    {
+                        m_createLogger = DefaultCallbackCreateLogger;
+                    }
                     result = m_createLogger(key, fallbackThreshold);
 
                     key = key.ToLower();

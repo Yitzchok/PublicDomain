@@ -10,10 +10,7 @@ namespace PublicDomain.Logging
     [Serializable]
     public class LogArtifact
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        public Logger Logger;
+        private Logger m_logger;
 
         /// <summary>
         /// 
@@ -64,6 +61,36 @@ namespace PublicDomain.Logging
             RawEntry = rawEntry;
             RawFormatParameters = rawFormatParameters;
             FormattedMessage = formattedMessage;
+        }
+
+        /// <summary>
+        /// Gets or sets the logger.
+        /// </summary>
+        /// <value>The logger.</value>
+        public Logger Logger
+        {
+            get
+            {
+                return m_logger;
+            }
+            set
+            {
+                if (value != null)
+                {
+                    if (Logger.SameLoggers && !object.ReferenceEquals(Logger.LoggerSingleton, value))
+                    {
+                        if (Logger.LoggerSingleton == null)
+                        {
+                            Logger.LoggerSingleton = value;
+                        }
+                        else
+                        {
+                            Logger.SameLoggers = false;
+                        }
+                    }
+                }
+                m_logger = value;
+            }
         }
     }
 }

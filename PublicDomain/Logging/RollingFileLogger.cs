@@ -60,14 +60,15 @@ namespace PublicDomain.Logging
         /// <param name="entry"></param>
         /// <param name="formatParameters"></param>
         /// <param name="logLine"></param>
+        /// <param name="artifactSet"></param>
         /// <returns></returns>
-        public override string GetFileName(LoggerSeverity severity, DateTime timestamp, object entry, object[] formatParameters, string logLine)
+        public override string GetFileName(LoggerSeverity severity, DateTime timestamp, object entry, object[] formatParameters, string logLine, LogArtifact[] artifactSet)
         {
-            string fileName = base.GetFileName(severity, timestamp, entry, formatParameters, logLine);
+            string fileName = base.GetFileName(severity, timestamp, entry, formatParameters, logLine, artifactSet);
 
             if (Strategy != null)
             {
-                fileName = Strategy.GetFileName(fileName, severity, timestamp, entry, formatParameters, logLine);
+                fileName = Strategy.GetFileName(fileName, severity, timestamp, entry, formatParameters, logLine, artifactSet);
             }
 
             return fileName;

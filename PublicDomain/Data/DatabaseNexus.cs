@@ -69,17 +69,25 @@ namespace PublicDomain.Data
         /// <returns></returns>
         public static DbProviderFactory GetDbProviderFactory(DatabaseType type, Version version)
         {
+            DbProviderFactory result = null;
+
             switch (type)
             {
                 case DatabaseType.Odbc:
-                    return System.Data.Odbc.OdbcFactory.Instance;
+                    result = System.Data.Odbc.OdbcFactory.Instance;
+                    break;
                 case DatabaseType.OleDb:
-                    return System.Data.OleDb.OleDbFactory.Instance;
+                    result = System.Data.OleDb.OleDbFactory.Instance;
+                    break;
                 case DatabaseType.SqlServer:
-                    return System.Data.SqlClient.SqlClientFactory.Instance;
+                    result = System.Data.SqlClient.SqlClientFactory.Instance;
+                    break;
                 default:
-                    return GetDbProviderFactory(GetDefaultDbProviderFactoryAssemblyName(type, version), GetDefaultDbProviderFactoryTypeName(type));
+                    result = GetDbProviderFactory(GetDefaultDbProviderFactoryAssemblyName(type, version), GetDefaultDbProviderFactoryTypeName(type));
+                    break;
             }
+
+            return result;
         }
 
         /// <summary>

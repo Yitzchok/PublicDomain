@@ -4,6 +4,7 @@ using System.Text;
 using PublicDomain;
 using System.Threading;
 using PublicDomain.Logging;
+using PublicDomain.Data;
 
 namespace PublicDomainConsole
 {

@@ -4,6 +4,8 @@ using System.Text;
 using System.Data.Common;
 using System.Data;
 using System.Transactions;
+using PublicDomain.Logging;
+using System.Threading;
 
 namespace PublicDomain.Data
 {
@@ -16,6 +18,8 @@ namespace PublicDomain.Data
     /// </summary>
     public class DbConnectionScope : IDisposable
     {
+        internal static readonly Logger Log = LoggingConfig.Current.CreateLogger(typeof(DbConnectionScope), GlobalConstants.LogClassDatabase);
+
         [ThreadStatic]
         private static Stack<DbConnectionScope> scopes;
 
@@ -43,16 +47,24 @@ namespace PublicDomain.Data
         /// <param name="inheritConnections">if set to <c>true</c> [inherit connections].</param>
         public DbConnectionScope(bool inheritConnections)
         {
+            if (Log.Enabled) Log.Entry("DbConnectionScope", inheritConnections);
+
             // If the database doesn't support MARS, and there is no transaction or a single transaction,
             // then we will open a new connection each time
             if (!Database.Current.SupportsFeature(DatabaseFeature.MultipleActiveResultSets))
             {
+                if (Log.Enabled) Log.LogDebug10("Database feature {0} not supported", DatabaseFeature.MultipleActiveResultSets);
+
                 if (Transaction.Current == null)
                 {
+                    if (Log.Enabled) Log.LogDebug10("Transaction.Current is null");
+
                     inheritConnections = false;
                 }
                 else if (DbTransactionScope.IsInUse)
                 {
+                    if (Log.Enabled) Log.LogDebug10("DbTransactionScope is inuse");
+
                     // If this thread is using DbTransactionScope, then we check to see
                     // if there is only a single transaction or if they are nested
                     if (DbTransactionScope.AreTransactionsNested())
@@ -63,11 +75,18 @@ namespace PublicDomain.Data
             }
 
             m_inheritConnections = inheritConnections;
+
+            if (Log.Enabled) Log.LogDebug10("InheritConnections = {0}", m_inheritConnections);
+
             if (scopes == null)
             {
+                if (Log.Enabled) Log.LogDebug10("Scopes is null, thread {0}", Thread.CurrentThread);
+
                 scopes = new Stack<DbConnectionScope>();
             }
             scopes.Push(this);
+
+            if (Log.Enabled) Log.Exit("DbConnectionScope");
         }
 
         /// <summary>
@@ -78,11 +97,18 @@ namespace PublicDomain.Data
         {
             get
             {
-                if (scopes == null || scopes.Count == 0)
+                if (Log.Enabled) Log.Entry("Current");
+
+                DbConnectionScope result = null;
+
+                if (scopes != null && scopes.Count != 0)
                 {
-                    return null;
+                    result = scopes.Peek();
                 }
-                return scopes.Peek();
+
+                if (Log.Enabled) Log.Exit("Current", result);
+
+                return result;
             }
         }
 
@@ -94,11 +120,15 @@ namespace PublicDomain.Data
         {
             get
             {
+                if (Log.Enabled) Log.Entry("Connection", m_conn);
+
                 if (m_conn == null)
                 {
                     // See if we can inherit a connection
                     if (InheritConnections)
                     {
+                        if (Log.Enabled) Log.LogDebug10("Attempting to inherit connection");
+
                         // First we find the "previous" scope
                         DbConnectionScope prevScope = null;
                         bool prepped = false;
@@ -115,11 +145,18 @@ namespace PublicDomain.Data
                             }
                         }
 
+                        if (Log.Enabled) Log.LogDebug10("prevScope = {0}", prevScope);
+
                         if (prevScope != null)
                         {
+                            if (Log.Enabled) Log.LogDebug10("AllowConnectionInheritance = {0}", prevScope.AllowConnectionInheritance);
+
                             if (prevScope.AllowConnectionInheritance)
                             {
                                 m_conn = prevScope.Connection;
+
+                                if (Log.Enabled) Log.LogDebug10("prevScope connection = {0}", m_conn);
+
                                 if (m_conn != null)
                                 {
                                     m_isInheritedConnection = true;
@@ -133,15 +170,29 @@ namespace PublicDomain.Data
 
                     if (m_conn == null)
                     {
+                        if (Log.Enabled) Log.LogDebug10("connection not found, requesting new connection");
+
                         m_conn = Database.Current.ConnectionProvider.GetConnection(true, true);
                     }
+                    else
+                    {
+                        if (Log.Enabled) Log.LogDebug10("connection found, re-using");
+                    }
+                }
+                else
+                {
+                    if (Log.Enabled) Log.LogDebug10("connection found, re-using");
                 }
 
                 // If it is closed, re-open it
                 if (m_conn.State == ConnectionState.Closed)
                 {
+                    if (Log.Enabled) Log.LogDebug10("Connection closed, re-opening...");
+
                     m_conn.Open();
                 }
+
+                if (Log.Enabled) Log.Exit("Connection", m_conn);
 
                 return m_conn;
             }
@@ -200,6 +251,8 @@ namespace PublicDomain.Data
         /// </summary>
         public virtual void Dispose()
         {
+            if (Log.Enabled) Log.Entry("Dispose");
+
             if (!IsDisposed)
             {
                 m_isDisposed = true;
@@ -211,6 +264,9 @@ namespace PublicDomain.Data
                     {
                         throw new BaseException("Connection scopes mismanaged. Was there a missing Dispose?");
                     }
+
+                    if (Log.Enabled) Log.LogDebug10("Popping scope");
+
                     scopes.Pop();
                 }
                 finally
@@ -223,6 +279,8 @@ namespace PublicDomain.Data
             {
                 throw new ObjectDisposedException(typeof(DbConnectionScope).FullName);
             }
+
+            if (Log.Enabled) Log.Exit("Dispose");
         }
 
         /// <summary>
@@ -230,14 +288,20 @@ namespace PublicDomain.Data
         /// </summary>
         protected virtual void CloseConnections()
         {
+            if (Log.Enabled) Log.Entry("CloseConnections", m_conn);
+
             if (m_conn != null)
             {
                 if (!m_isInheritedConnection)
                 {
+                    if (Log.Enabled) Log.LogDebug10("Not inherited connection, closing {0}...", m_conn);
+
                     m_conn.Close();
                 }
                 m_conn = null;
             }
+
+            if (Log.Enabled) Log.Exit("CloseConnections");
         }
     }
 }

@@ -10,6 +10,16 @@ namespace PublicDomain.Logging
     /// </summary>
     public class FileLogger : Logger
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        public static bool UseCarriageReturn = true;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public static Encoding Encoding = Encoding.Default;
+
         private string m_fileName;
 
         /// <summary>
@@ -49,24 +59,50 @@ namespace PublicDomain.Logging
         }
 
         /// <summary>
-        /// Writes the specified artifact.
+        /// Writes the internal.
         /// </summary>
-        /// <param name="artifact">The artifact.</param>
-        public override void Write(LogArtifact artifact)
+        /// <param name="artifacts">The artifacts.</param>
+        protected virtual void WriteInternal(params LogArtifact[] artifacts)
         {
-            string fileName = GetFileName(artifact.Severity, artifact.Timestamp, artifact.RawEntry, artifact.RawFormatParameters, artifact.FormattedMessage);
+            LogArtifact first = artifacts[0];
+            string fileName = GetFileName(first.Severity, first.Timestamp, first.RawEntry, first.RawFormatParameters, first.FormattedMessage, artifacts);
 
             if (!string.IsNullOrEmpty(fileName))
             {
                 using (FileStream stream = GetStream(fileName))
                 {
-                    byte[] data = Encoding.Default.GetBytes(artifact.FormattedMessage);
+                    foreach (LogArtifact artifact in artifacts)
+                    {
+                        byte[] data = Encoding.GetBytes(artifact.FormattedMessage);
 
-                    stream.Write(data, 0, data.Length);
-                    stream.WriteByte((byte)'\n');
+                        stream.Write(data, 0, data.Length);
+                        if (UseCarriageReturn)
+                        {
+                            stream.WriteByte((byte)'\r');
+                        }
+                        stream.WriteByte((byte)'\n');
+                    }
                     stream.Flush();
                 }
             }
+        }
+
+        /// <summary>
+        /// Writes the specified artifact.
+        /// </summary>
+        /// <param name="artifact">The artifact.</param>
+        public override void Write(LogArtifact artifact)
+        {
+            WriteInternal(artifact);
+        }
+
+        /// <summary>
+        /// Writes the specified artifacts.
+        /// </summary>
+        /// <param name="artifacts">The artifacts.</param>
+        public override void Write(LogArtifact[] artifacts)
+        {
+            WriteInternal(artifacts);
         }
 
         /// <summary>
@@ -83,7 +119,7 @@ namespace PublicDomain.Logging
         /// Gets the name of the file.
         /// </summary>
         /// <returns></returns>
-        public virtual string GetFileName(LoggerSeverity severity, DateTime timestamp, object entry, object[] formatParameters, string logLine)
+        public virtual string GetFileName(LoggerSeverity severity, DateTime timestamp, object entry, object[] formatParameters, string logLine, LogArtifact[] artifactSet)
         {
             return FileName;
         }

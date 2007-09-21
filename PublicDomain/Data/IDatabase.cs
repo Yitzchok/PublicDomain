@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Data;
 using System.Data.Common;
+using PublicDomain.Logging;
 
 namespace PublicDomain.Data
 {
@@ -63,7 +64,8 @@ namespace PublicDomain.Data
         /// <param name="adapter">The adapter.</param>
         /// <param name="sql">The SQL.</param>
         /// <param name="openConnection">The open connection.</param>
-        void SetSelectCommand(DbDataAdapter adapter, string sql, IDbConnection openConnection);
+        /// <returns></returns>
+        DbCommand SetSelectCommand(DbDataAdapter adapter, string sql, IDbConnection openConnection);
 
         /// <summary>
         /// Gets the value as an Int32. <paramref name="columnIndex"/> is a zero-based
@@ -166,6 +168,8 @@ namespace PublicDomain.Data
     /// </summary>
     public class Database : IDatabase
     {
+        internal static readonly Logger Log = LoggingConfig.Current.CreateLogger(typeof(Database), GlobalConstants.LogClassDatabase);
+
         private static IDatabase s_current = new Database();
 
         private DbProviderFactory m_providerFactory;
@@ -205,6 +209,8 @@ namespace PublicDomain.Data
         /// <param name="connectionString">The connection string.</param>
         public Database(DatabaseType databaseType, string connectionString)
         {
+            if (Log.Enabled) Log.Entry("Database", databaseType, connectionString);
+
             InitializeCurrent();
 
             DatabaseType = databaseType;
@@ -214,6 +220,8 @@ namespace PublicDomain.Data
                 ConnectionProvider = new DatabaseConnectionProvider(connectionString);
                 ConnectionProvider.DbProviderFactory = DbProviderFactory;
             }
+
+            if (Log.Enabled) Log.Exit("Database", DbProviderFactory, ConnectionProvider);
         }
 
         /// <summary>
@@ -221,7 +229,11 @@ namespace PublicDomain.Data
         /// </summary>
         protected virtual void InitializeCurrent()
         {
+            if (Log.Enabled) Log.Entry("InitializeCurrent", this);
+
             s_current = this;
+
+            if (Log.Enabled) Log.Exit("InitializeCurrent");
         }
 
         /// <summary>
@@ -277,10 +289,18 @@ namespace PublicDomain.Data
         /// <returns></returns>
         public virtual int ExecuteNonQuery(string query)
         {
+            if (Log.Enabled) Log.Entry("ExecuteNonQuery", query);
+
+            int result;
+
             using (IDbConnection conn = ConnectionProvider.GetConnection())
             {
-                return ExecuteNonQuery(query, conn);
+                result = ExecuteNonQuery(query, conn);
             }
+
+            if (Log.Enabled) Log.Exit("ExecuteNonQuery", result);
+
+            return result;
         }
 
         /// <summary>
@@ -290,9 +310,14 @@ namespace PublicDomain.Data
         /// <returns></returns>
         public virtual int ExecuteNonQuery(string query, IDbConnection openConnection)
         {
+            if (Log.Enabled) Log.Entry("ExecuteNonQuery", query, openConnection);
+
             IDbCommand cmd = openConnection.CreateCommand();
             cmd.CommandText = query;
             int result = cmd.ExecuteNonQuery();
+
+            if (Log.Enabled) Log.Exit("ExecuteNonQuery", result);
+
             return result;
         }
 
@@ -303,10 +328,18 @@ namespace PublicDomain.Data
         /// <returns></returns>
         public virtual IDataReader ExecuteQueryReader(string query)
         {
+            if (Log.Enabled) Log.Entry("ExecuteQueryReader", query);
+
+            IDataReader result;
+
             using (IDbConnection conn = ConnectionProvider.GetConnection())
             {
-                return ExecuteQueryReader(query, conn);
+                result = ExecuteQueryReader(query, conn);
             }
+
+            if (Log.Enabled) Log.Exit("ExecuteQueryReader", result);
+
+            return result;
         }
 
         /// <summary>
@@ -322,9 +355,14 @@ namespace PublicDomain.Data
         /// <returns></returns>
         public virtual IDataReader ExecuteQueryReader(string query, IDbConnection openConnection)
         {
+            if (Log.Enabled) Log.Entry("ExecuteQueryReader", query, openConnection);
+
             IDbCommand cmd = openConnection.CreateCommand();
             cmd.CommandText = query;
             IDataReader result = cmd.ExecuteReader();
+
+            if (Log.Enabled) Log.Exit("ExecuteQueryReader", result);
+
             return result;
         }
 
@@ -334,12 +372,19 @@ namespace PublicDomain.Data
         /// <param name="adapter">The adapter.</param>
         /// <param name="sql">The SQL.</param>
         /// <param name="openConnection">The open connection.</param>
-        public virtual void SetSelectCommand(DbDataAdapter adapter, string sql, IDbConnection openConnection)
+        /// <returns></returns>
+        public virtual DbCommand SetSelectCommand(DbDataAdapter adapter, string sql, IDbConnection openConnection)
         {
+            if (Log.Enabled) Log.Entry("SetSelectCommand", adapter, sql, openConnection);
+
             DbCommand command = DbProviderFactory.CreateCommand();
             command.Connection = (DbConnection)openConnection;
             command.CommandText = sql;
             ((DbDataAdapter)adapter).SelectCommand = command;
+
+            if (Log.Enabled) Log.Exit("SetSelectCommand", command);
+
+            return command;
         }
 
         /// <summary>
@@ -445,10 +490,18 @@ namespace PublicDomain.Data
         /// <returns></returns>
         public virtual DataSet ExecuteQueryDataSet(string query)
         {
+            if (Log.Enabled) Log.Entry("ExecuteQueryDataSet", query);
+
+            DataSet result;
+
             using (IDbConnection conn = ConnectionProvider.GetConnection())
             {
-                return ExecuteQueryDataSet(query, conn);
+                result = ExecuteQueryDataSet(query, conn);
             }
+
+            if (Log.Enabled) Log.Exit("ExecuteQueryDataSet", result);
+
+            return result;
         }
 
         /// <summary>
@@ -459,11 +512,21 @@ namespace PublicDomain.Data
         /// <returns></returns>
         public virtual DataSet ExecuteQueryDataSet(string query, IDbConnection conn)
         {
-            DbDataAdapter adapter = DbProviderFactory.CreateDataAdapter();
-            SetSelectCommand(adapter, query, conn);
-            DataSet ds = new DataSet();
-            adapter.Fill(ds);
-            return ds;
+            if (Log.Enabled) Log.Entry("ExecuteQueryDataSet", query, conn);
+
+            DataSet result = new DataSet();
+
+            using (DbDataAdapter adapter = DbProviderFactory.CreateDataAdapter())
+            {
+                using (SetSelectCommand(adapter, query, conn))
+                {
+                    adapter.Fill(result);
+                }
+            }
+
+            if (Log.Enabled) Log.Exit("ExecuteQueryDataSet", result);
+
+            return result;
         }
 
         /// <summary>

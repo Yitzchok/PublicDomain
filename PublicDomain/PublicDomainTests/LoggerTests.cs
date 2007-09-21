@@ -69,7 +69,7 @@ namespace PublicDomain
 
             if (fileLogger != null)
             {
-                string fileName = fileLogger.GetFileName(LoggerSeverity.Infinity, DateTime.UtcNow, null, null, null);
+                string fileName = fileLogger.GetFileName(LoggerSeverity.Infinity, DateTime.UtcNow, null, null, null, null);
                 Console.WriteLine(fileName);
             }
         }

@@ -68,8 +68,9 @@ namespace PublicDomain.Logging
         /// <param name="entry">The entry.</param>
         /// <param name="formatParameters">The format parameters.</param>
         /// <param name="logLine">The log line.</param>
+        /// <param name="artifactSet">The artifact set.</param>
         /// <returns></returns>
-        public string GetFileName(string fileName, LoggerSeverity severity, DateTime timestamp, object entry, object[] formatParameters, string logLine)
+        public string GetFileName(string fileName, LoggerSeverity severity, DateTime timestamp, object entry, object[] formatParameters, string logLine, LogArtifact[] artifactSet)
         {
             // First, find the largest numbered file
             string[] pieces = FileSystemUtilities.SplitFileIntoDirectoryAndName(fileName, true);
