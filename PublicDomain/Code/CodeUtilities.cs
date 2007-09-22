@@ -499,7 +499,7 @@ End Namespace
                 case "plain":
                     return Language.PlainText;
                 default:
-                    return (Language)Enum.Parse(typeof(Language), name);
+                    return (Language)Enum.Parse(typeof(Language), name, true);
             }
         }
 
