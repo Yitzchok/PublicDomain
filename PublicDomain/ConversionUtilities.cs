@@ -216,97 +216,208 @@ namespace PublicDomain
         }
 
         /// <summary>
-        /// Parses the int.
+        /// Parses the int. Default 0
         /// </summary>
         /// <param name="str">The STR.</param>
         /// <returns></returns>
         public static int ParseInt(string str)
         {
+            return ParseInt(str, 0);
+        }
+
+        /// <summary>
+        /// Parses the int.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <param name="defaultValue">The default value.</param>
+        /// <returns></returns>
+        public static int ParseInt(string str, int defaultValue)
+        {
             int result;
-            int.TryParse(str, out result);
+            if (!int.TryParse(str, out result))
+            {
+                result = defaultValue;
+            }
             return result;
+        }
+
+        /// <summary>
+        /// Parses the short. Default 0
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns></returns>
+        public static short ParseShort(string str)
+        {
+            return ParseShort(str, 0);
         }
 
         /// <summary>
         /// Parses the short.
         /// </summary>
         /// <param name="str">The STR.</param>
+        /// <param name="defaultValue">The default value.</param>
         /// <returns></returns>
-        public static short ParseShort(string str)
+        public static short ParseShort(string str, short defaultValue)
         {
             short result;
-            short.TryParse(str, out result);
+            if (!short.TryParse(str, out result))
+            {
+                result = defaultValue;
+            }
             return result;
+        }
+
+        /// <summary>
+        /// Parses the long. Default 0
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns></returns>
+        public static long ParseLong(string str)
+        {
+            return ParseLong(str, 0);
         }
 
         /// <summary>
         /// Parses the long.
         /// </summary>
         /// <param name="str">The STR.</param>
+        /// <param name="defaultValue">The default value.</param>
         /// <returns></returns>
-        public static long ParseLong(string str)
+        public static long ParseLong(string str, long defaultValue)
         {
             long result;
-            long.TryParse(str, out result);
+            if (!long.TryParse(str, out result))
+            {
+                result = defaultValue;
+            }
             return result;
+        }
+
+        /// <summary>
+        /// Parses the float. Default 0
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns></returns>
+        public static float ParseFloat(string str)
+        {
+            return ParseFloat(str, 0);
         }
 
         /// <summary>
         /// Parses the float.
         /// </summary>
         /// <param name="str">The STR.</param>
+        /// <param name="defaultValue">The default value.</param>
         /// <returns></returns>
-        public static float ParseFloat(string str)
+        public static float ParseFloat(string str, float defaultValue)
         {
             float result;
-            float.TryParse(str, out result);
+            if (!float.TryParse(str, out result))
+            {
+                result = defaultValue;
+            }
             return result;
+        }
+
+        /// <summary>
+        /// Parses the double. Default 0
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns></returns>
+        public static double ParseDouble(string str)
+        {
+            return ParseDouble(str, 0);
         }
 
         /// <summary>
         /// Parses the double.
         /// </summary>
         /// <param name="str">The STR.</param>
+        /// <param name="defaultValue">The default value.</param>
         /// <returns></returns>
-        public static double ParseDouble(string str)
+        public static double ParseDouble(string str, double defaultValue)
         {
             double result;
-            double.TryParse(str, out result);
+            if (!double.TryParse(str, out result))
+            {
+                result = defaultValue;
+            }
             return result;
+        }
+
+        /// <summary>
+        /// Parses the decimal. Default 0
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns></returns>
+        public static decimal ParseDecimal(string str)
+        {
+            return ParseDecimal(str, 0);
         }
 
         /// <summary>
         /// Parses the decimal.
         /// </summary>
         /// <param name="str">The STR.</param>
+        /// <param name="defaultValue">The default value.</param>
         /// <returns></returns>
-        public static decimal ParseDecimal(string str)
+        public static decimal ParseDecimal(string str, decimal defaultValue)
         {
             decimal result;
-            decimal.TryParse(str, out result);
+            if (!decimal.TryParse(str, out result))
+            {
+                result = defaultValue;
+            }
             return result;
         }
 
         /// <summary>
-        /// Parses the U int.
+        /// Parses the U int. Default 0
         /// </summary>
         /// <param name="str">The STR.</param>
         /// <returns></returns>
         [CLSCompliant(false)]
         public static uint ParseUInt(string str)
         {
+            return ParseUInt(str, 0);
+        }
+
+        /// <summary>
+        /// Parses the U int.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <param name="defaultValue">The default value.</param>
+        /// <returns></returns>
+        [CLSCompliant(false)]
+        public static uint ParseUInt(string str, uint defaultValue)
+        {
             uint result;
-            uint.TryParse(str, out result);
+            if (!uint.TryParse(str, out result))
+            {
+                result = defaultValue;
+            }
             return result;
+        }
+
+        /// <summary>
+        /// Parses the U short. Default 0
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns></returns>
+        [CLSCompliant(false)]
+        public static ushort ParseUShort(string str)
+        {
+            return ParseUShort(str, 0);
         }
 
         /// <summary>
         /// Parses the U short.
         /// </summary>
         /// <param name="str">The STR.</param>
+        /// <param name="defualtValue">The defualt value.</param>
         /// <returns></returns>
         [CLSCompliant(false)]
-        public static ushort ParseUShort(string str)
+        public static ushort ParseUShort(string str, ushort defualtValue)
         {
             ushort result;
             ushort.TryParse(str, out result);
@@ -314,50 +425,135 @@ namespace PublicDomain
         }
 
         /// <summary>
-        /// Parses the U long.
+        /// Parses the U long. Default 0
         /// </summary>
         /// <param name="str">The STR.</param>
         /// <returns></returns>
         [CLSCompliant(false)]
         public static ulong ParseULong(string str)
         {
+            return ParseULong(str, 0);
+        }
+
+        /// <summary>
+        /// Parses the U long.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <param name="defaultValue">The default value.</param>
+        /// <returns></returns>
+        [CLSCompliant(false)]
+        public static ulong ParseULong(string str, ulong defaultValue)
+        {
             ulong result;
-            ulong.TryParse(str, out result);
+            if (!ulong.TryParse(str, out result))
+            {
+                result = defaultValue;
+            }
             return result;
+        }
+
+        /// <summary>
+        /// Parses the bool. Default false
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns></returns>
+        public static bool ParseBool(string str)
+        {
+            return ParseBool(str, false);
+        }
+
+        /// <summary>
+        /// Parses the bool.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <param name="defaultValue">if set to <c>true</c> [default value].</param>
+        /// <returns></returns>
+        public static bool ParseBool(string str, bool defaultValue)
+        {
+            bool result;
+            if (!bool.TryParse(str, out result))
+            {
+                result = defaultValue;
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Parses the byte. Default 0
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns></returns>
+        public static byte ParseByte(string str)
+        {
+            return ParseByte(str, 0);
         }
 
         /// <summary>
         /// Parses the byte.
         /// </summary>
         /// <param name="str">The STR.</param>
+        /// <param name="defaultValue">The default value.</param>
         /// <returns></returns>
-        public static byte ParseByte(string str)
+        public static byte ParseByte(string str, byte defaultValue)
         {
             byte result;
-            byte.TryParse(str, out result);
+            if (!byte.TryParse(str, out result))
+            {
+                result = defaultValue;
+            }
             return result;
+        }
+
+        /// <summary>
+        /// Parses the char. Default 0
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns></returns>
+        public static char ParseChar(string str)
+        {
+            return ParseChar(str, (char)0);
         }
 
         /// <summary>
         /// Parses the char.
         /// </summary>
         /// <param name="str">The STR.</param>
+        /// <param name="defaultValue">The default value.</param>
         /// <returns></returns>
-        public static char ParseChar(string str)
+        public static char ParseChar(string str, char defaultValue)
         {
             char result;
-            char.TryParse(str, out result);
+            if (!char.TryParse(str, out result))
+            {
+                result = defaultValue;
+            }
             return result;
+        }
+
+        /// <summary>
+        /// Parses the URI. Default null
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns></returns>
+        public static Uri ParseUri(string str)
+        {
+            return ParseUri(str, null);
         }
 
         /// <summary>
         /// Parses the URI.
         /// </summary>
         /// <param name="str">The STR.</param>
+        /// <param name="defaultValue">The default value.</param>
         /// <returns></returns>
-        public static Uri ParseUri(string str)
+        public static Uri ParseUri(string str, Uri defaultValue)
         {
-            return new Uri(str);
+            Uri result;
+            if (!Uri.TryCreate(str, UriKind.RelativeOrAbsolute, out result))
+            {
+                result = defaultValue;
+            }
+            return result;
         }
 
         /// <summary>
@@ -381,13 +577,33 @@ namespace PublicDomain
         }
 
         /// <summary>
-        /// Parses the version.
+        /// Parses the version. Default null
         /// </summary>
         /// <param name="str">The STR.</param>
         /// <returns></returns>
         public static Version ParseVersion(string str)
         {
-            return new Version(str);
+            return ParseVersion(str, null);
+        }
+
+        /// <summary>
+        /// Parses the version.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <param name="defaultVersion">The default version.</param>
+        /// <returns></returns>
+        public static Version ParseVersion(string str, Version defaultVersion)
+        {
+            Version result = null;
+            try
+            {
+                result = new Version(str);
+            }
+            catch (ArgumentException)
+            {
+                result = defaultVersion;
+            }
+            return result;
         }
 
         /// <summary>
