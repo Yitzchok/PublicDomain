@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using NUnit.Framework;
 using System.IO;
-using PublicDomain.Dynacode;
+using PublicDomain.Code;
 using System.Text.RegularExpressions;
 
 namespace PublicDomain

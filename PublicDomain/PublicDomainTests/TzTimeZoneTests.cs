@@ -267,5 +267,36 @@ namespace PublicDomain
         //    Console.WriteLine(zone.ToLocalTime(DateTime.SpecifyKind(DateTime.Parse("2007-03-25 02:00"), DateTimeKind.Utc)));
         //    Console.WriteLine(zone.ToLocalTime(DateTime.SpecifyKind(DateTime.Parse("2007-03-25 02:30"), DateTimeKind.Utc)));
         }
+
+        [Test]
+        public void WorkItem12914()
+        {
+            TzTimeZone zone = TzTimeZone.GetTimeZone("Asia/Novosibirsk");
+            Assert.AreEqual(2, zone.ToLocalTime(DateTime.SpecifyKind(DateTime.Parse("2007-10-27 19:00"), DateTimeKind.Utc)).Hour);
+            Assert.AreEqual(2, zone.ToLocalTime(DateTime.SpecifyKind(DateTime.Parse("2007-10-27 19:30"), DateTimeKind.Utc)).Hour);
+            Assert.AreEqual(3, zone.ToLocalTime(DateTime.SpecifyKind(DateTime.Parse("2007-10-27 20:00"), DateTimeKind.Utc)).Hour);
+            Assert.AreEqual(3, zone.ToLocalTime(DateTime.SpecifyKind(DateTime.Parse("2007-10-27 20:30"), DateTimeKind.Utc)).Hour);
+            Assert.AreEqual(3, zone.ToLocalTime(DateTime.SpecifyKind(DateTime.Parse("2007-10-28 21:00"), DateTimeKind.Utc)).Hour);
+            Assert.AreEqual(3, zone.ToLocalTime(DateTime.SpecifyKind(DateTime.Parse("2007-10-28 21:30"), DateTimeKind.Utc)).Hour);
+            Assert.AreEqual(4, zone.ToLocalTime(DateTime.SpecifyKind(DateTime.Parse("2007-10-27 22:00"), DateTimeKind.Utc)).Hour);
+
+            Console.WriteLine(GlobalConstants.DividerEquals);
+
+            zone = TzTimeZone.GetTimeZone("Europe/Moscow");
+            Console.WriteLine(zone.ToLocalTime(DateTime.SpecifyKind(DateTime.Parse("2007-10-27 22:00"), DateTimeKind.Utc)));
+            //: "10/28/2007 2:00:00 AM"
+            Console.WriteLine(zone.ToLocalTime(DateTime.SpecifyKind(DateTime.Parse("2007-10-27 22:30"), DateTimeKind.Utc)));
+            //: "10/28/2007 2:30:00 AM"
+            Console.WriteLine(zone.ToLocalTime(DateTime.SpecifyKind(DateTime.Parse("2007-10-27 23:00"), DateTimeKind.Utc)));
+            //: "10/28/2007 3:00:00 AM" <- I think this should be 2:00 am...
+            Console.WriteLine(zone.ToLocalTime(DateTime.SpecifyKind(DateTime.Parse("2007-10-27 23:30"), DateTimeKind.Utc)));
+            //: "10/28/2007 3:30:00 AM" <- ...and this should be 2:30 am...
+            Console.WriteLine(zone.ToLocalTime(DateTime.SpecifyKind(DateTime.Parse("2007-10-28 00:00"), DateTimeKind.Utc)));
+            //: "10/28/2007 3:00:00 AM" <- ...instead of 4 am becoming 3 am
+            Console.WriteLine(zone.ToLocalTime(DateTime.SpecifyKind(DateTime.Parse("2007-10-28 00:30"), DateTimeKind.Utc)));
+            //: "10/28/2007 3:30:00 AM"
+            Console.WriteLine(zone.ToLocalTime(DateTime.SpecifyKind(DateTime.Parse("2007-10-28 01:00"), DateTimeKind.Utc)));
+            //: "10/28/2007 4:00:00 AM"
+        }
     }
 }

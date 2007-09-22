@@ -1602,6 +1602,11 @@ namespace PublicDomain
                             // Convert it to UTC
                             dt = offsetTimeZone.ToUniversalTime(DateTime.SpecifyKind(DateTime.Parse(s), DateTimeKind.Local));
                         }
+
+                        if (timeZone == null)
+                        {
+                            timeZone = offsetTimeZone;
+                        }
                     }
                 }
 

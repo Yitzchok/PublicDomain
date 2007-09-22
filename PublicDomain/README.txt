@@ -12,6 +12,9 @@ Simon Mourier
 
 Version History
 ===============
+V0.2.20.0
+	[kevgrig@gmail.com
+		* Add Language and LanguageConstants
 V0.2.19.0
 	[kevgrig@gmail.com]
 		* BUG: TZ Date time parsing

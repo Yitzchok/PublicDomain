@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using NUnit.Framework;
-using PublicDomain.Dynacode;
+using PublicDomain.Code;
 
 namespace PublicDomain
 {

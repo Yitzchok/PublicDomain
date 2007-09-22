@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.CodeDom.Compiler;
 
-namespace PublicDomain.Dynacode
+namespace PublicDomain.Code
 {
     /// <summary>
     /// 

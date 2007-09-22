@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace PublicDomain.CodeCount
+namespace PublicDomain.Code.CodeCount
 {
     /// <summary>
     /// Counts a stream depth first

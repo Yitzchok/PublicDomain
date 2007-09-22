@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace PublicDomain.CodeCount
+namespace PublicDomain.Code.CodeCount
 {
     /// <summary>
-    /// Abstract implementation of <see cref="PublicDomain.CodeCount.ICountable"/>
+    /// Abstract implementation of <see cref="PublicDomain.Code.CodeCount.ICountable"/>
     /// </summary>
     public abstract class Countable : ICountable
     {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 
-namespace PublicDomain.CodeCount
+namespace PublicDomain.Code.CodeCount
 {
     /// <summary>
     /// Represents a dountable directory
