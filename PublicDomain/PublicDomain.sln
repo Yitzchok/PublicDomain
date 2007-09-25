@@ -2,12 +2,59 @@
 Microsoft Visual Studio Solution File, Format Version 9.00
 # Visual Studio 2005
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PublicDomain", "PublicDomain.csproj", "{DB173085-8CC4-4C49-8AA4-328442ABC887}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
 EndProject
 Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "PublicDomainSetup", "PublicDomainSetup\PublicDomainSetup.vdproj", "{2D2ED908-635A-407B-A3C1-480CC73768F4}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PublicDomainTests", "PublicDomainTests\PublicDomainTests.csproj", "{FE8D16C2-12E8-4072-BC95-3D533F0FA117}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PublicDomainConsole", "PublicDomainConsole\PublicDomainConsole.csproj", "{FE7D4927-0137-44F0-AACF-7F199B5F00EA}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tzdata", "tzdata", "{7B65FE3F-4EA0-43B0-99FE-C77421D590D1}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+	ProjectSection(SolutionItems) = preProject
+		tzdata\africa = tzdata\africa
+		tzdata\antarctica = tzdata\antarctica
+		tzdata\asia = tzdata\asia
+		tzdata\australasia = tzdata\australasia
+		tzdata\backward = tzdata\backward
+		tzdata\etcetera = tzdata\etcetera
+		tzdata\europe = tzdata\europe
+		tzdata\factory = tzdata\factory
+		tzdata\iso3166.tab = tzdata\iso3166.tab
+		tzdata\leapseconds = tzdata\leapseconds
+		tzdata\northamerica = tzdata\northamerica
+		tzdata\pacificnew = tzdata\pacificnew
+		tzdata\solar87 = tzdata\solar87
+		tzdata\solar88 = tzdata\solar88
+		tzdata\solar89 = tzdata\solar89
+		tzdata\southamerica = tzdata\southamerica
+		tzdata\systemv = tzdata\systemv
+		tzdata\yearistype.sh = tzdata\yearistype.sh
+		tzdata\zone.tab = tzdata\zone.tab
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 3
+		SccNumberOfProjects = 5
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = https://tfs01.codeplex.com/
 		SccLocalPath0 = .
@@ -16,6 +63,12 @@ Global
 		SccProjectUniqueName2 = PublicDomainSetup\\PublicDomainSetup.vdproj
 		SccProjectName2 = PublicDomainSetup
 		SccLocalPath2 = PublicDomainSetup
+		SccProjectUniqueName3 = PublicDomainTests\\PublicDomainTests.csproj
+		SccProjectName3 = PublicDomainTests
+		SccLocalPath3 = PublicDomainTests
+		SccProjectUniqueName4 = PublicDomainConsole\\PublicDomainConsole.csproj
+		SccProjectName4 = PublicDomainConsole
+		SccLocalPath4 = PublicDomainConsole
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,6 +85,18 @@ Global
 		{2D2ED908-635A-407B-A3C1-480CC73768F4}.Debug|Any CPU.ActiveCfg = Debug
 		{2D2ED908-635A-407B-A3C1-480CC73768F4}.Release|Any CPU.ActiveCfg = Release
 		{2D2ED908-635A-407B-A3C1-480CC73768F4}.Test|Any CPU.ActiveCfg = Release
+		{FE8D16C2-12E8-4072-BC95-3D533F0FA117}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FE8D16C2-12E8-4072-BC95-3D533F0FA117}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FE8D16C2-12E8-4072-BC95-3D533F0FA117}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FE8D16C2-12E8-4072-BC95-3D533F0FA117}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FE8D16C2-12E8-4072-BC95-3D533F0FA117}.Test|Any CPU.ActiveCfg = Release|Any CPU
+		{FE8D16C2-12E8-4072-BC95-3D533F0FA117}.Test|Any CPU.Build.0 = Release|Any CPU
+		{FE7D4927-0137-44F0-AACF-7F199B5F00EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FE7D4927-0137-44F0-AACF-7F199B5F00EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FE7D4927-0137-44F0-AACF-7F199B5F00EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FE7D4927-0137-44F0-AACF-7F199B5F00EA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FE7D4927-0137-44F0-AACF-7F199B5F00EA}.Test|Any CPU.ActiveCfg = Release|Any CPU
+		{FE7D4927-0137-44F0-AACF-7F199B5F00EA}.Test|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

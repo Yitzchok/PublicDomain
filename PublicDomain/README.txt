@@ -12,6 +12,10 @@ Simon Mourier
 
 Version History
 ===============
+V0.2.22.0
+	[kevgrig@gmail.com]
+		* Added Web.DnsUtilities and public IP providers
+		* Added base implementation of LenientXmlDocument
 V0.2.21.0
 	[kevgrig@gmail.com]
 		* BUG: Parsing Language from display name

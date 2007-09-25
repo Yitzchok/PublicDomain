@@ -357,11 +357,22 @@ End Namespace
         }
 
         /// <summary>
+        /// Gets the name of the language display.
+        /// </summary>
+        /// <param name="lang">The lang.</param>
+        /// <returns></returns>
+        public static string GetLanguageDisplayName(Language lang)
+        {
+            return GetLanguageDisplayName(lang, false);
+        }
+
+        /// <summary>
         /// Gets the display name of the language.
         /// </summary>
         /// <param name="lang">The language.</param>
+        /// <param name="appendIfDotNetEmulation">if set to <c>true</c> [append if dot net emulation].</param>
         /// <returns></returns>
-        public static string GetLanguageDisplayName(Language lang)
+        public static string GetLanguageDisplayName(Language lang, bool appendIfDotNetEmulation)
         {
             switch (lang)
             {
@@ -372,7 +383,7 @@ End Namespace
                 case Language.Java:
                     return "Java";
                 case Language.JScriptDotNet:
-                    return "JScript.NET";
+                    return appendIfDotNetEmulation ? "JScript.NET" : "JScript";
                 case Language.JSharp:
                     return "J#";
                 case Language.Php:
@@ -386,21 +397,21 @@ End Namespace
                 case Language.Cobol:
                     return "COBOL";
                 case Language.CPlusPlusDotNet:
-                    return "C++.NET";
+                    return appendIfDotNetEmulation ? "C++.NET" : "C++";
                 case Language.JavaDotNet:
-                    return "Java.NET";
+                    return appendIfDotNetEmulation ? "Java.NET" : "Java";
                 case Language.PerlDotNet:
-                    return "Perl.NET";
+                    return appendIfDotNetEmulation ? "Perl.NET" : "Perl";
                 case Language.PhpDotNet:
-                    return "PHP.NET";
+                    return appendIfDotNetEmulation ? "PHP.NET" : "PHP";
                 case Language.PythonDotNet:
-                    return "Python.NET";
+                    return appendIfDotNetEmulation ? "Python.NET" : "Python";
                 case Language.RubyDotNet:
-                    return "Ruby.NET";
+                    return appendIfDotNetEmulation ? "Ruby.NET" : "Ruby";
                 case Language.Sql:
                     return "SQL";
                 case Language.VisualBasicDotNet:
-                    return "Visual Basic.NET";
+                    return appendIfDotNetEmulation ? "Visual Basic.NET" : "Visual Basic";
                 case Language.Html:
                     return "HTML";
                 case Language.Xhtml:

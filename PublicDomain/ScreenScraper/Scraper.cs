@@ -265,6 +265,12 @@ namespace PublicDomain.ScreenScraper
         /// <returns></returns>
         public ScrapedPage Scrape(ScrapeType type, string uri, params string[] keyAndValuePairs)
         {
+            NameValueCollection query = GetNameValueCollectionFromParams(keyAndValuePairs);
+            return Scrape(type, uri, query);
+        }
+
+        private static NameValueCollection GetNameValueCollectionFromParams(string[] keyAndValuePairs)
+        {
             NameValueCollection query = new NameValueCollection();
             if (keyAndValuePairs != null)
             {
@@ -273,7 +279,52 @@ namespace PublicDomain.ScreenScraper
                     query[keyAndValuePairs[i]] = keyAndValuePairs[i + 1];
                 }
             }
-            return Scrape(type, uri, query);
+            return query;
+        }
+
+        /// <summary>
+        /// Simples the scrape.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <param name="uri">The URI.</param>
+        /// <param name="query">The query.</param>
+        /// <returns></returns>
+        public static ScrapedPage SimpleScrape(ScrapeType type, string uri, NameValueCollection query)
+        {
+            return SimpleScrape(type, uri, null, null, query);
+        }
+
+        /// <summary>
+        /// Scrapes the specified type.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <param name="uri">The URI.</param>
+        /// <param name="userName">Name of the user.</param>
+        /// <param name="password">The password.</param>
+        /// <param name="query">The query.</param>
+        /// <returns></returns>
+        public static ScrapedPage SimpleScrape(ScrapeType type, string uri, string userName, string password, NameValueCollection query)
+        {
+            Scraper scraper = new Scraper();
+            if (!string.IsNullOrEmpty(userName))
+            {
+                scraper.UseCredentials = true;
+                scraper.SetNetworkCredentials(userName, password);
+            }
+            return scraper.Scrape(type, uri, query);
+        }
+
+        /// <summary>
+        /// Scrapes the specified type.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <param name="uri">The URI.</param>
+        /// <param name="keyAndValuePairs">The key and value pairs.</param>
+        /// <returns></returns>
+        public static ScrapedPage SimpleScrape(ScrapeType type, string uri, params string[] keyAndValuePairs)
+        {
+            NameValueCollection query = GetNameValueCollectionFromParams(keyAndValuePairs);
+            return SimpleScrape(type, uri, query);
         }
 
         /// <summary>

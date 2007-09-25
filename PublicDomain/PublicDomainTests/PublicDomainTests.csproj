@@ -46,6 +46,7 @@
     <Compile Include="FileSystemUtilitiesTests.cs" />
     <Compile Include="GeneralTests.cs" />
     <Compile Include="Iso8601Tests.cs" />
+    <Compile Include="LenientXmlTests.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RegexTests.cs" />
@@ -55,6 +56,7 @@
     <Compile Include="TzDatabaseTests.cs" />
     <Compile Include="TzDateTimeTests.cs" />
     <Compile Include="TzTimeZoneTests.cs" />
+    <Compile Include="WebTests.cs" />
     <Compile Include="Win32Tests.cs" />
     <Compile Include="XmlUtilitiesTests.cs" />
   </ItemGroup>
