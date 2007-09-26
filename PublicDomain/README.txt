@@ -6,12 +6,15 @@ assembly from the installation directory (default is C:\Program Files\Public Dom
 
 Contributing Authors
 ====================
-William M. Leszczuk (billl@eden.rutgers.edu)
+William M. Leszczuk
 Pierre Vachon (pierrevachon@gmail.com)
 Simon Mourier
 
 Version History
 ===============
+V0.2.23.0
+	[kevgrig@gmail.com]
+		* First pass at LenientXmlParser
 V0.2.22.0
 	[kevgrig@gmail.com]
 		* Added Web.DnsUtilities and public IP providers

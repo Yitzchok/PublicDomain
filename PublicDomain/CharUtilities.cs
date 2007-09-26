@@ -55,5 +55,17 @@ namespace PublicDomain
             }
             return false;
         }
+
+        /// <summary>
+        /// Determines whether [is quote character] [the specified c].
+        /// </summary>
+        /// <param name="c">The c.</param>
+        /// <returns>
+        /// 	<c>true</c> if [is quote character] [the specified c]; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool IsQuoteCharacter(char c)
+        {
+            return c == '\"' || c == '\'' || c == '“' || c == '”';
+        }
     }
 }
