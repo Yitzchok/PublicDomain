@@ -57,5 +57,19 @@ namespace PublicDomain.LenientXml
             //}
             return base.PrepareEntityName(token);
         }
+
+        /// <summary>
+        /// Adds the new element to parent.
+        /// </summary>
+        /// <param name="el">The el.</param>
+        /// <returns></returns>
+        protected override bool AddNewElementToParent(XmlElement el)
+        {
+            if (m_current != null && m_current.Name.ToLower() == "option" && el.Name.ToLower() == "option")
+            {
+                return true;
+            }
+            return base.AddNewElementToParent(el);
+        }
     }
 }

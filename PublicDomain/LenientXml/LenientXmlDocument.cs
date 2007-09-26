@@ -21,18 +21,60 @@ namespace PublicDomain.LenientXml
         /// </summary>
         public const string DefaultEmptyXml = "<" + DefaultRootElementName + " />";
 
-        private string m_defaultRootElementName;
-        private bool m_ignoreDtd;
+        /// <summary>
+        /// 
+        /// </summary>
+        protected XmlNode m_current;
 
-        private State state = State.None;
-        private StringBuilder sb;
-        private XmlNode current;
-        private bool isAllWhitespace;
-        private XmlAttribute attribute;
-        private char attributeValueMatch;
-        private XmlComment comment;
-        private XmlCDataSection cdata;
-        private State preEntityState;
+        /// <summary>
+        /// 
+        /// </summary>
+        protected StringBuilder m_sb;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        protected bool m_isAllWhitespace;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        protected State m_state = State.None;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        protected string m_defaultRootElementName;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        protected bool m_ignoreDtd;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        protected XmlAttribute m_attribute;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        protected char m_attributeValueMatch;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        protected XmlComment m_comment;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        protected XmlCDataSection m_cdata;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        protected State m_preEntityState;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LenientXmlDocument"/> class.
@@ -102,18 +144,18 @@ namespace PublicDomain.LenientXml
             RemoveAll();
             int l = xml.Length;
             char c;
-            sb = new StringBuilder(100);
-            current = this;
-            state = State.None;
-            isAllWhitespace = true;
-            attribute = null;
-            attributeValueMatch = '\0';
+            m_sb = new StringBuilder(100);
+            m_current = this;
+            m_state = State.None;
+            m_isAllWhitespace = true;
+            m_attribute = null;
+            m_attributeValueMatch = '\0';
 
             for (int i = 0; i < l; i++)
             {
                 c = xml[i];
 
-                switch (state)
+                switch (m_state)
                 {
                     case State.EndElementImmediate:
 
@@ -128,7 +170,7 @@ namespace PublicDomain.LenientXml
                             // We've already hit the end slash, and
                             // now we've hit the final >, so we just
                             // reset to a base state
-                            state = State.None;
+                            m_state = State.None;
                         }
                         else if (c == '<')
                         {
@@ -137,9 +179,9 @@ namespace PublicDomain.LenientXml
                         }
                         else
                         {
-                            state = State.None;
-                            isAllWhitespace = false;
-                            sb.Append(c);
+                            m_state = State.None;
+                            m_isAllWhitespace = false;
+                            m_sb.Append(c);
                         }
 
                         continue;
@@ -156,15 +198,15 @@ namespace PublicDomain.LenientXml
                         }
                         else if (CharUtilities.IsQuoteCharacter(c))
                         {
-                            attributeValueMatch = c;
+                            m_attributeValueMatch = c;
                             ContextSwitch(State.StartAttributeValue);
                             continue;
                         }
                         else if (!IsWhitespace(c))
                         {
-                            attributeValueMatch = '\0';
+                            m_attributeValueMatch = '\0';
                             ContextSwitch(State.StartAttributeValue);
-                            sb.Append(c);
+                            m_sb.Append(c);
                             continue;
                         }
 
@@ -181,18 +223,18 @@ namespace PublicDomain.LenientXml
                             ContextSwitch(State.EndElement);
                             continue;
                         }
-                        else if (c == attributeValueMatch)
+                        else if (c == m_attributeValueMatch)
                         {
                             ContextSwitch(State.EndAttributeValue);
                             continue;
                         }
-                        else if (attributeValueMatch == '\0' && IsWhitespace(c))
+                        else if (m_attributeValueMatch == '\0' && IsWhitespace(c))
                         {
                             ContextSwitch(State.EndAttributeValue);
                             continue;
                         }
 
-                        sb.Append(c);
+                        m_sb.Append(c);
 
                         continue;
 
@@ -209,7 +251,7 @@ namespace PublicDomain.LenientXml
                         }
                         else if (IsValidNameCharacter(c))
                         {
-                            sb.Append(c);
+                            m_sb.Append(c);
                         }
                         else if (IsWhitespace(c) || c == '=')
                         {
@@ -238,7 +280,7 @@ namespace PublicDomain.LenientXml
                         else if (IsValidFirstNameCharacter(c))
                         {
                             ContextSwitch(State.StartAttribute);
-                            sb.Append(c);
+                            m_sb.Append(c);
                             continue;
                         }
 
@@ -252,12 +294,12 @@ namespace PublicDomain.LenientXml
                         else if (c == '>')
                         {
                             ContextSwitch(State.EndCloseElement);
-                            state = State.None;
+                            m_state = State.None;
                             continue;
                         }
 
-                        isAllWhitespace = false;
-                        sb.Append(c);
+                        m_isAllWhitespace = false;
+                        m_sb.Append(c);
 
                         continue;
 
@@ -270,12 +312,12 @@ namespace PublicDomain.LenientXml
                             continue;
                         }
 
-                        if (sb.Length == 0 && c == '-')
+                        if (m_sb.Length == 0 && c == '-')
                         {
                             continue;
                         }
 
-                        sb.Append(c);
+                        m_sb.Append(c);
 
                         continue;
 
@@ -288,7 +330,7 @@ namespace PublicDomain.LenientXml
                             continue;
                         }
 
-                        sb.Append(c);
+                        m_sb.Append(c);
                         continue;
 
                     case State.StartComment1:
@@ -303,7 +345,7 @@ namespace PublicDomain.LenientXml
                             continue;
                         }
 
-                        state = State.Element;
+                        m_state = State.Element;
                         i--;
 
                         continue;
@@ -315,7 +357,7 @@ namespace PublicDomain.LenientXml
                         }
                         else if (char.IsWhiteSpace(c))
                         {
-                            if (sb.Length > 0)
+                            if (m_sb.Length > 0)
                             {
                                 ContextSwitch(State.InElement);
                             }
@@ -348,7 +390,7 @@ namespace PublicDomain.LenientXml
                         //}
                         else if (c == '/')
                         {
-                            if (sb.Length == 0)
+                            if (m_sb.Length == 0)
                             {
                                 ContextSwitch(State.CloseElement);
                             }
@@ -359,31 +401,31 @@ namespace PublicDomain.LenientXml
                             continue;
                         }
 
-                        isAllWhitespace = false;
-                        sb.Append(c);
+                        m_isAllWhitespace = false;
+                        m_sb.Append(c);
                         continue;
 
                     case State.StartEntity:
 
-                        if (sb.Length == 0 && IsValidEntityFirstCharacter(c))
+                        if (m_sb.Length == 0 && IsValidEntityFirstCharacter(c))
                         {
-                            sb.Append(c);
+                            m_sb.Append(c);
                             continue;
                         }
-                        else if (sb.Length > 0 && IsValidEntityCharacter(c))
+                        else if (m_sb.Length > 0 && IsValidEntityCharacter(c))
                         {
-                            sb.Append(c);
+                            m_sb.Append(c);
                             continue;
                         }
-                        else if (c == ';' && sb.Length > 0)
+                        else if (c == ';' && m_sb.Length > 0)
                         {
-                            ContextSwitch(preEntityState);
+                            ContextSwitch(m_preEntityState);
                             continue;
                         }
                         else
                         {
-                            sb.Append("amp");
-                            ContextSwitch(preEntityState);
+                            m_sb.Append("amp");
+                            ContextSwitch(m_preEntityState);
                             i--;
                             continue;
                         }
@@ -400,17 +442,17 @@ namespace PublicDomain.LenientXml
                         }
                         else if (c == '&')
                         {
-                            preEntityState = state;
+                            m_preEntityState = m_state;
                             ContextSwitch(State.StartEntity);
                             continue;
                         }
 
-                        if (isAllWhitespace && !IsWhitespace(c))
+                        if (m_isAllWhitespace && !IsWhitespace(c))
                         {
-                            isAllWhitespace = false;
+                            m_isAllWhitespace = false;
                         }
 
-                        sb.Append(c);
+                        m_sb.Append(c);
                         continue;
                 }
             }
@@ -440,18 +482,18 @@ namespace PublicDomain.LenientXml
         protected virtual void ContextSwitch(State newState)
         {
             // Process the old state
-            if (sb.Length > 0)
+            if (m_sb.Length > 0)
             {
-                string token = sb.ToString();
+                string token = m_sb.ToString();
 
                 // this is the LAST state
-                switch (state)
+                switch (m_state)
                 {
                     case State.CloseElement:
                         token = PrepareElementName(token);
-                        if (token != null && current.Name.Equals(token, StringComparison.InvariantCultureIgnoreCase))
+                        if (token != null && m_current.Name.Equals(token, StringComparison.InvariantCultureIgnoreCase))
                         {
-                            current = current.ParentNode;
+                            m_current = m_current.ParentNode;
                         }
                         break;
 
@@ -475,23 +517,40 @@ namespace PublicDomain.LenientXml
                             XmlElement el;
 
                             int colIndex = token.IndexOf(':');
+                            string ns = null;
                             if (colIndex > 0)
                             {
                                 string prefix = token.Substring(0, colIndex);
-                                string ns = null;
-                                if (DocumentElement != null)
+                                ns = FindNamespaceByPrefix(prefix);
+                            }
+
+                            if (ns == null)
+                            {
+                                // There was no namespace specified, but see
+                                // if the implemenation wants to set a namespace
+                                string prefix;
+                                if (TryChangeNamespace(token, out ns, out prefix) && !string.IsNullOrEmpty(prefix))
                                 {
-                                    ns = DocumentElement.GetNamespaceOfPrefix(prefix);
+                                    token = prefix + ":" + token;
+                                    if (ns == null)
+                                    {
+                                        ns = FindNamespaceByPrefix(prefix);
+                                    }
                                 }
-                                if (string.IsNullOrEmpty(ns))
-                                {
-                                    ns = "urn:" + prefix;
-                                }
-                                el = CreateElement(token, ns);
+                            }
+
+                            if (ns == null)
+                            {
+                                el = CreateElement(token);
                             }
                             else
                             {
-                                el = CreateElement(token);
+                                el = CreateElement(token, ns);
+                            }
+
+                            if (AddNewElementToParent(el))
+                            {
+                                m_current = m_current.ParentNode;
                             }
 
                             InternalAppendChild(el, !FinishNewElement(el));
@@ -499,20 +558,21 @@ namespace PublicDomain.LenientXml
                         break;
 
                     case State.StartAttribute:
-                        attribute = CreateAttribute(token);
-                        current.Attributes.Append(attribute);
+                        m_attribute = CreateAttribute(token);
+                        m_current.Attributes.Append(m_attribute);
 
                         break;
 
                     case State.StartAttributeValue:
-                        attribute.Value = token;
+                        m_attribute.Value = token;
+                        PostProcessSetAttributeValue(m_attribute);
                         break;
 
                     case State.None:
                     case State.EndElement:
                     case State.EndComment:
                     case State.EndCDATA:
-                        if (isAllWhitespace)
+                        if (m_isAllWhitespace)
                         {
                             InternalAppendChild(CreateWhitespace(token), false);
                         }
@@ -523,11 +583,13 @@ namespace PublicDomain.LenientXml
                         break;
 
                     case State.InComment:
-                        comment.Data = token;
+                        m_comment.Data = token;
+                        PostProcessSetCommentData(m_comment);
                         break;
 
                     case State.InCDATA:
-                        cdata.Data = token;
+                        m_cdata.Data = token;
+                        PostProcessSetCData(m_cdata);
                         break;
 
                     default:
@@ -541,31 +603,107 @@ namespace PublicDomain.LenientXml
                 case State.Finished:
                     if (FirstChild == null)
                     {
-                        current.AppendChild(GetDefaultDocumentNode());
+                        m_current.AppendChild(GetDefaultDocumentNode());
                     }
                     break;
                 case State.EndElementImmediate:
-                    current = current.ParentNode;
+                    m_current = m_current.ParentNode;
                     break;
                 case State.StartAttribute:
-                    attributeValueMatch = '\0';
+                    m_attributeValueMatch = '\0';
                     break;
                 case State.StartComment1:
 
-                    comment = CreateComment(null);
-                    InternalAppendChild(comment, false);
+                    m_comment = CreateComment(null);
+                    InternalAppendChild(m_comment, false);
 
                     break;
 
                 case State.InCDATA:
-                    cdata = CreateCDataSection(null);
-                    InternalAppendChild(cdata, false);
+                    m_cdata = CreateCDataSection(null);
+                    InternalAppendChild(m_cdata, false);
                     break;
             }
 
             ResetAfterContextSwitch();
 
-            state = newState;
+            m_state = newState;
+        }
+
+        /// <summary>
+        /// Posts the process set C data.
+        /// </summary>
+        /// <param name="m_cdata">The m_cdata.</param>
+        protected virtual void PostProcessSetCData(XmlCDataSection m_cdata)
+        {
+        }
+
+        /// <summary>
+        /// Posts the process set comment data.
+        /// </summary>
+        /// <param name="m_comment">The m_comment.</param>
+        protected virtual void PostProcessSetCommentData(XmlComment m_comment)
+        {
+        }
+
+        /// <summary>
+        /// Posts the process set attribute value.
+        /// </summary>
+        /// <param name="attribute">The attribute.</param>
+        protected virtual void PostProcessSetAttributeValue(XmlAttribute attribute)
+        {
+        }
+
+        /// <summary>
+        /// Finds the namespace by prefix.
+        /// </summary>
+        /// <param name="prefix">The prefix.</param>
+        /// <returns></returns>
+        protected virtual string FindNamespaceByPrefix(string prefix)
+        {
+            string ns = null;
+            if (DocumentElement != null)
+            {
+                ns = DocumentElement.GetNamespaceOfPrefix(prefix);
+            }
+            if (string.IsNullOrEmpty(ns))
+            {
+                ns = GetDefaultNamespaceUriForPrefix(prefix);
+            }
+            return ns;
+        }
+
+        /// <summary>
+        /// Tries the change namespace.
+        /// </summary>
+        /// <param name="token">The token.</param>
+        /// <param name="ns">The ns.</param>
+        /// <param name="prefix">The prefix.</param>
+        /// <returns></returns>
+        protected virtual bool TryChangeNamespace(string token, out string ns, out string prefix)
+        {
+            ns = prefix = null;
+            return false;
+        }
+
+        /// <summary>
+        /// Gets the default namespace URI for prefix.
+        /// </summary>
+        /// <param name="prefix">The prefix.</param>
+        /// <returns></returns>
+        protected virtual string GetDefaultNamespaceUriForPrefix(string prefix)
+        {
+            return "urn:" + prefix;
+        }
+
+        /// <summary>
+        /// Adds the new element to parent.
+        /// </summary>
+        /// <param name="el">The el.</param>
+        /// <returns></returns>
+        protected virtual bool AddNewElementToParent(XmlElement el)
+        {
+            return false;
         }
 
         /// <summary>
@@ -685,20 +823,20 @@ namespace PublicDomain.LenientXml
             if (root == null && child.NodeType != XmlNodeType.Element)
             {
                 AppendChild(GetDefaultDocumentNode());
-                current = FirstChild;
+                m_current = FirstChild;
             }
-            else if (current == this && root != null)
+            else if (m_current == this && root != null)
             {
                 RemoveChild(root);
-                current.AppendChild(GetDefaultDocumentNode());
-                current = FirstChild;
-                current.AppendChild(root);
+                m_current.AppendChild(GetDefaultDocumentNode());
+                m_current = FirstChild;
+                m_current.AppendChild(root);
             }
 
-            current.AppendChild(child);
+            m_current.AppendChild(child);
             if (CanNodeContainSubNodes(child) && mayHaveChildren)
             {
-                current = child;
+                m_current = child;
             }
         }
 
@@ -707,10 +845,13 @@ namespace PublicDomain.LenientXml
             return child.NodeType == XmlNodeType.Element;
         }
 
-        private void ResetAfterContextSwitch()
+        /// <summary>
+        /// Resets the after context switch.
+        /// </summary>
+        protected void ResetAfterContextSwitch()
         {
-            sb.Length = 0;
-            isAllWhitespace = true;
+            m_sb.Length = 0;
+            m_isAllWhitespace = true;
         }
 
         /// <summary>
