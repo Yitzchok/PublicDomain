@@ -152,6 +152,7 @@
     <Compile Include="INumberGenerator.cs" />
     <Compile Include="IRandomNumberGenerator.cs" />
     <Compile Include="LenientXml\LenientHtmlDocument.cs" />
+    <Compile Include="LenientXml\LenientXmlDocument.cs" />
     <Compile Include="Logging\ApplicationLogger.cs" />
     <Compile Include="Logging\CompositeLogger.cs" />
     <Compile Include="Logging\ConsoleLogger.cs" />
