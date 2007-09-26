@@ -76,7 +76,7 @@ This is a <b>simple</b> test.
             cmp[@"<table border=0 cellspacing='1' cellpadding=""2"" style=""width:100%;"">
 <tr rowspan=2><td valign='top'>   blah</td></tr></table>"] = @"<table border=""0"" cellspacing=""1"" cellpadding=""2"" style=""width:100%;"">
 <tr rowspan=""2""><td valign=""top"">   blah</td></tr></table>";
-            //cmp[@"<table border=0 cellspacing='1' cellpadding=""2"" style=""width:100%;""><tr rowspan=2><td valign='top'>&nbsp;</td></tr></table>"] = @"<table border=""0"" cellspacing=""1"" cellpadding=""2"" style=""width:100%;""><tr rowspan=""2""><td valign=""top"">&nbsp;</td></tr></table>";
+            cmp[@"<table border=0 cellspacing='1' cellpadding=""2"" style=""width:100%;""><tr rowspan=2><td valign='top'>&nbsp;</td></tr></table>"] = @"<table border=""0"" cellspacing=""1"" cellpadding=""2"" style=""width:100%;""><tr rowspan=""2""><td valign=""top"">&nbsp;</td></tr></table>";
             cmp[@"<script language=javascript>
 <!--
 function test()
@@ -128,6 +128,12 @@ function test()
             cmp["<![CDATA[<<!----->>]]><p>"] = start + "<![CDATA[<<!----->>]]><p />" + end;
             cmp["<html xmlns:dorp=\"urn:test\"><dorp:test></html>"] = "<html xmlns:dorp=\"urn:test\"><dorp:test /></html>";
             cmp["&gt;"] = start + "&gt;" + end;
+            cmp["&gt;&nbsp; &nbsp;"] = start + "&gt;&nbsp; &nbsp;" + end;
+            cmp["<p>&gt;&nbsp; &nbsp;</p>"] = "<p>&gt;&nbsp; &nbsp;</p>";
+            cmp["<dorp:map location=\"new york\"><dorp:point location=\"coffee shop\"/><dorp:point location=\"central park\"/></dorp:map>"] = "<dorp:map location=\"new york\" xmlns:dorp=\"urn:dorp\"><dorp:point location=\"coffee shop\" /><dorp:point location=\"central park\" /></dorp:map>";
+            cmp["&blah;"] = start + "&blah;" + end;
+            cmp["& blah;"] = start + "&amp; blah;" + end;
+            cmp["<div onclick='if(this.style && this.style.visibility==\"hidden\"'>"] = "<div onclick=\"if(this.style &amp;&amp; this.style.visibility==&quot;hidden&quot;\" />";
 
             LenientHtmlDocument doc = new LenientHtmlDocument();
             foreach (string x in cmp.Keys)

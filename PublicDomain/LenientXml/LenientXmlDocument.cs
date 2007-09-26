@@ -26,14 +26,13 @@ namespace PublicDomain.LenientXml
 
         private State state = State.None;
         private StringBuilder sb;
-        private StringBuilder entity;
         private XmlNode current;
         private bool isAllWhitespace;
         private XmlAttribute attribute;
         private char attributeValueMatch;
         private XmlComment comment;
         private XmlCDataSection cdata;
-        private State entitySaveState;
+        private State preEntityState;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LenientXmlDocument"/> class.
@@ -104,7 +103,6 @@ namespace PublicDomain.LenientXml
             int l = xml.Length;
             char c;
             sb = new StringBuilder(100);
-            entity = new StringBuilder(20);
             current = this;
             state = State.None;
             isAllWhitespace = true;
@@ -367,35 +365,26 @@ namespace PublicDomain.LenientXml
 
                     case State.StartEntity:
 
-                        if (entity.Length == 0 && IsValidEntityFirstCharacter(c))
+                        if (sb.Length == 0 && IsValidEntityFirstCharacter(c))
                         {
-                            entity.Append(c);
+                            sb.Append(c);
                             continue;
                         }
-                        else if (entity.Length > 0 && IsValidEntityCharacter(c))
+                        else if (sb.Length > 0 && IsValidEntityCharacter(c))
                         {
-                            entity.Append(c);
+                            sb.Append(c);
                             continue;
                         }
-                        else if (c == ';' && entity.Length > 0)
+                        else if (c == ';' && sb.Length > 0)
                         {
-                            state = entitySaveState;
-                            string entityName = entity.ToString();
-                            sb.Append(ProcessEntity(entityName));
-                            isAllWhitespace = false;
+                            ContextSwitch(preEntityState);
                             continue;
                         }
                         else
                         {
-                            state = entitySaveState;
-                            sb.Append("&amp;");
-                            isAllWhitespace = false;
+                            sb.Append("amp");
+                            ContextSwitch(preEntityState);
                             i--;
-
-                            if (entity.Length > 0)
-                            {
-                                sb.Append(entity.ToString());
-                            }
                             continue;
                         }
 
@@ -411,9 +400,8 @@ namespace PublicDomain.LenientXml
                         }
                         else if (c == '&')
                         {
-                            entitySaveState = state;
-                            entity.Length = 0;
-                            state = State.StartEntity;
+                            preEntityState = state;
+                            ContextSwitch(State.StartEntity);
                             continue;
                         }
 
@@ -428,16 +416,6 @@ namespace PublicDomain.LenientXml
             }
 
             ContextSwitch(State.Finished);
-        }
-
-        /// <summary>
-        /// Processes the entity.
-        /// </summary>
-        /// <param name="entityName">Name of the entity.</param>
-        /// <returns></returns>
-        protected virtual string ProcessEntity(string entityName)
-        {
-            return "&" + entityName + ";";
         }
 
         private bool IsWhitespace(char c)
@@ -477,6 +455,18 @@ namespace PublicDomain.LenientXml
                         }
                         break;
 
+                    case State.StartEntity:
+
+                        token = PrepareEntityName(token);
+
+                        if (token != null)
+                        {
+                            XmlEntityReference entity = CreateEntityReference(token);
+                            InternalAppendChild(entity, false);
+                        }
+
+                        break;
+
                     case State.Element:
                     case State.InElement:
                         token = PrepareElementName(token);
@@ -495,7 +485,7 @@ namespace PublicDomain.LenientXml
                                 }
                                 if (string.IsNullOrEmpty(ns))
                                 {
-                                    ns = "urn:unknown";
+                                    ns = "urn:" + prefix;
                                 }
                                 el = CreateElement(token, ns);
                             }
@@ -576,6 +566,16 @@ namespace PublicDomain.LenientXml
             ResetAfterContextSwitch();
 
             state = newState;
+        }
+
+        /// <summary>
+        /// Prepares the name of the entity.
+        /// </summary>
+        /// <param name="token">The token.</param>
+        /// <returns></returns>
+        protected virtual string PrepareEntityName(string token)
+        {
+            return token.ToLower();
         }
 
         /// <summary>
@@ -670,7 +670,12 @@ namespace PublicDomain.LenientXml
             return false;
         }
 
-        private void InternalAppendChild(XmlNode child, bool mayHaveChildren)
+        /// <summary>
+        /// Internals the append child.
+        /// </summary>
+        /// <param name="child">The child.</param>
+        /// <param name="mayHaveChildren">if set to <c>true</c> [may have children].</param>
+        protected virtual void InternalAppendChild(XmlNode child, bool mayHaveChildren)
         {
             XmlNode root = FirstChild;
 

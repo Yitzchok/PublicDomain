@@ -43,18 +43,19 @@ namespace PublicDomain.LenientXml
         }
 
         /// <summary>
-        /// Processes the entity.
+        /// Prepares the name of the entity.
         /// </summary>
-        /// <param name="entityName">Name of the entity.</param>
+        /// <param name="token">The token.</param>
         /// <returns></returns>
-        protected override string ProcessEntity(string entityName)
+        protected override string PrepareEntityName(string token)
         {
-            entityName = entityName.ToLower();
-            if (entityName == "nbsp")
-            {
-                return "&nbsp;";
-            }
-            return base.ProcessEntity(entityName);
+            // How to place a value instead of an entity:
+            //if (token == "token")
+            //{
+            //    InternalAppendChild(CreateTextNode("text"), false);
+            //    return null;
+            //}
+            return base.PrepareEntityName(token);
         }
     }
 }
