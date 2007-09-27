@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using NUnit.Framework;
-using PublicDomain.LenientXml;
 using PublicDomain.Xml;
 
 namespace PublicDomain
@@ -209,7 +208,7 @@ td.catHead,td.catSides,td.catLeft,td.catRight,td.catBottom { background-image: u
         private void Test(string convert, string compare)
         {
             LenientHtmlDocument doc = new LenientHtmlDocument();
-            doc.CreateDefaultDocumentElement();
+            doc.CreateDefaultDocumentElement = true;
             doc.LoadXml(convert);
             Console.WriteLine(doc.DocumentElement.InnerXml);
         }

@@ -4,7 +4,7 @@ using System.Text;
 using System.Xml;
 using PublicDomain.Exceptions;
 
-namespace PublicDomain.LenientXml
+namespace PublicDomain.Xml
 {
     /// <summary>
     /// 
@@ -29,6 +29,11 @@ namespace PublicDomain.LenientXml
         /// <summary>
         /// 
         /// </summary>
+        protected XmlElement m_lastElement;
+
+        /// <summary>
+        /// 
+        /// </summary>
         protected XmlNode m_attributeTarget;
 
         /// <summary>
@@ -40,6 +45,11 @@ namespace PublicDomain.LenientXml
         /// 
         /// </summary>
         protected StringBuilder m_exclamationInstruction;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        protected bool m_createDefaultDocumentElement;
 
         /// <summary>
         /// 
@@ -161,6 +171,12 @@ namespace PublicDomain.LenientXml
             m_isAllWhitespace = true;
             m_attribute = null;
             m_attributeValueMatch = '\0';
+            m_lastElement = null;
+
+            if (CreateDefaultDocumentElement)
+            {
+                m_current = AppendChild(GetDefaultDocumentNode());
+            }
 
             for (int i = 0; i < l; i++)
             {
@@ -552,9 +568,14 @@ namespace PublicDomain.LenientXml
                 {
                     case State.CloseElement:
                         token = PrepareElementName(token);
-                        if (token != null && m_current.Name.Equals(token, StringComparison.InvariantCultureIgnoreCase))
+                        if (token != null)
                         {
-                            m_current = m_current.ParentNode;
+                            string ns = TryApplyPrefixAndNamespace(ref token);
+
+                            if (m_current.Name.Equals(token, StringComparison.InvariantCultureIgnoreCase))
+                            {
+                                m_current = m_current.ParentNode;
+                            }
                         }
                         break;
 
@@ -564,10 +585,10 @@ namespace PublicDomain.LenientXml
 
                         if (token != null)
                         {
-                            string numericalCharRefVal = GetNumericalCharacterReferenceValue(token);
-                            if (numericalCharRefVal != null)
+                            string entityValue = ConvertEntityToValue(token);
+                            if (entityValue != null)
                             {
-                                InternalAppendChild(CreateTextNode(numericalCharRefVal), false);
+                                InternalAppendChild(CreateTextNode(entityValue), false);
                             }
                             else
                             {
@@ -584,27 +605,11 @@ namespace PublicDomain.LenientXml
                         {
                             XmlElement el;
 
-                            int colIndex = token.IndexOf(':');
-                            string ns = null;
-                            if (colIndex > 0)
-                            {
-                                string prefix = token.Substring(0, colIndex);
-                                ns = FindNamespaceByPrefix(prefix);
-                            }
+                            string ns = TryApplyPrefixAndNamespace(ref token);
 
-                            if (ns == null)
+                            if (m_lastElement != null)
                             {
-                                // There was no namespace specified, but see
-                                // if the implemenation wants to set a namespace
-                                string prefix;
-                                if (TryChangeNamespace(token, out ns, out prefix) && !string.IsNullOrEmpty(prefix))
-                                {
-                                    token = prefix + ":" + token;
-                                    if (ns == null)
-                                    {
-                                        ns = FindNamespaceByPrefix(prefix);
-                                    }
-                                }
+                                PostProcessElement(m_lastElement);
                             }
 
                             if (ns == null)
@@ -615,6 +620,8 @@ namespace PublicDomain.LenientXml
                             {
                                 el = CreateElement(token, ns);
                             }
+
+                            m_lastElement = el;
 
                             if (AddNewElementToParent(el))
                             {
@@ -630,11 +637,11 @@ namespace PublicDomain.LenientXml
 
                         if (m_attributeTarget != null)
                         {
-                            m_attributeTarget.Attributes.Append(m_attribute);
+                            m_attributeTarget.Attributes.SetNamedItem(m_attribute);
                         }
                         else
                         {
-                            m_current.Attributes.Append(m_attribute);
+                            m_current.Attributes.SetNamedItem(m_attribute);
                         }
 
                         break;
@@ -677,13 +684,20 @@ namespace PublicDomain.LenientXml
             switch (newState)
             {
                 case State.Finished:
+                    if (m_lastElement != null)
+                    {
+                        PostProcessElement(m_lastElement);
+                    }
                     if (DocumentElement == null)
                     {
                         m_current.AppendChild(GetDefaultDocumentNode());
                     }
                     break;
                 case State.EndElementImmediate:
-                    m_current = m_current.ParentNode;
+                    if (m_lastElement == null || !FinishNewElement(m_lastElement))
+                    {
+                        m_current = m_current.ParentNode;
+                    }
                     break;
                 case State.StartAttribute:
                     m_attributeValueMatch = '\0';
@@ -704,6 +718,58 @@ namespace PublicDomain.LenientXml
             ResetAfterContextSwitch();
 
             m_state = newState;
+        }
+
+        private string TryApplyPrefixAndNamespace(ref string token)
+        {
+            int colIndex = token.IndexOf(':');
+            string ns = null;
+            if (colIndex > 0)
+            {
+                string prefix = token.Substring(0, colIndex);
+                ns = FindNamespaceByPrefix(prefix);
+            }
+
+            if (ns == null)
+            {
+                // There was no namespace specified, but see
+                // if the implemenation wants to set a namespace
+                string prefix;
+                if (TryChangeNamespace(token, out ns, out prefix) && !string.IsNullOrEmpty(prefix))
+                {
+                    token = prefix + ":" + token;
+                    if (ns == null)
+                    {
+                        ns = FindNamespaceByPrefix(prefix);
+                    }
+                }
+            }
+            return ns;
+        }
+
+        /// <summary>
+        /// Posts the process element.
+        /// </summary>
+        /// <param name="lastElement">The last element.</param>
+        protected virtual void PostProcessElement(XmlElement lastElement)
+        {
+        }
+
+        /// <summary>
+        /// Converts the entity to value.
+        /// </summary>
+        /// <param name="token">The token.</param>
+        /// <returns></returns>
+        protected virtual string ConvertEntityToValue(string token)
+        {
+            string result = null;
+
+            if (token[0] == '#')
+            {
+                result = GetNumericalCharacterReferenceValue(token);
+            }
+
+            return result;
         }
 
         /// <summary>
@@ -983,9 +1049,16 @@ namespace PublicDomain.LenientXml
         /// <summary>
         /// Creates the default document element.
         /// </summary>
-        public void CreateDefaultDocumentElement()
+        public virtual bool CreateDefaultDocumentElement
         {
-            AppendChild(GetDefaultDocumentNode());
+            get
+            {
+                return m_createDefaultDocumentElement;
+            }
+            set
+            {
+                m_createDefaultDocumentElement = value;
+            }
         }
 
         /// <summary>

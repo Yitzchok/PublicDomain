@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using NUnit.Framework;
-using PublicDomain.LenientXml;
 using System.Xml;
 using PublicDomain.Xml;
 
@@ -140,6 +139,9 @@ function test()
 
             cmp[@"<meta http-equiv=""Content-Style-Type"" content=""text/css"">"] = @"<meta http-equiv=""Content-Style-Type"" content=""text/css"" />";
             cmp[@"<!DOCTYPE HTML PUBLIC ""-//W3C//DTD HTML 4.01 Transitional//EN"">"] = full;
+            cmp["&#160;"] = start + "&nbsp;" + end;
+            cmp[@"<a><b><c>y</c><br />z</b></a>"] = @"<a><b><c>y</c><br />z</b></a>";
+            cmp[@"<td width=""200""><span class=""class""><span style=""font-size: larger"">Welcome to $BLANK!</span><br />Population: {4}</span></td>"] = @"<td width=""200""><span class=""class""><span style=""font-size: larger"">Welcome to $BLANK!</span><br />Population: {4}</span></td>";
 
             LenientHtmlDocument doc = new LenientHtmlDocument();
             DoCompare(cmp, doc);
@@ -262,6 +264,24 @@ function test()
             cmp["<select id=blah><option>1<option value=\"2a\">2"] = start + "12" + end;
 
             DoCompare(cmp, new LenientHtmlToTextDocument());
+        }
+
+        [Test]
+        public void TestSubclass()
+        {
+            LenientHtmlSubclassTestDocument doc = new LenientHtmlSubclassTestDocument();
+            doc.LoadXml(@"
+<dorp:response nomenu=""true"" nofocusonclick=""true"" />
+<img>
+<![CDATA[
+function collapse(obj)
+{
+}
+]]>
+</img>
+<div style=""width: 100%; height: 67px;"" id=""spuibar"">
+");
+            Console.WriteLine(doc.DocumentElement.OuterXml);
         }
     }
 }

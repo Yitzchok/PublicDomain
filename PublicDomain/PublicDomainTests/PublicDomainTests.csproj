@@ -46,6 +46,7 @@
     <Compile Include="FileSystemUtilitiesTests.cs" />
     <Compile Include="GeneralTests.cs" />
     <Compile Include="Iso8601Tests.cs" />
+    <Compile Include="LenientHtmlSubclassTestDocument.cs" />
     <Compile Include="LenientXmlTests.cs" />
     <Compile Include="LenientXmlTests2.cs" />
     <Compile Include="Program.cs" />

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Xml;
 
-namespace PublicDomain.LenientXml
+namespace PublicDomain.Xml
 {
     /// <summary>
     /// 
@@ -50,6 +50,10 @@ namespace PublicDomain.LenientXml
         /// <returns></returns>
         protected override string PrepareEntityName(string token)
         {
+            if (token == "#160")
+            {
+                return "nbsp";
+            }
             // How to place a value instead of an entity:
             //if (token == "token")
             //{
