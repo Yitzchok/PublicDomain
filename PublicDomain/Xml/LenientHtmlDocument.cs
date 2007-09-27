@@ -76,5 +76,42 @@ namespace PublicDomain.Xml
             }
             return base.AddNewElementToParent(el);
         }
+
+        /// <summary>
+        /// Internals the append child.
+        /// </summary>
+        /// <param name="child">The child.</param>
+        /// <param name="mayHaveChildren">if set to <c>true</c> [may have children].</param>
+        protected override void InternalAppendChild(XmlNode child, bool mayHaveChildren)
+        {
+            if (m_current != null)
+            {
+                // wrap <SCRIPT> innards with a comment if they're not already wrapped by a comment or CDATA section
+                if (m_current.NodeType == XmlNodeType.Element && m_current.Name.ToLower() == "script" && child.NodeType != XmlNodeType.CDATA && child.NodeType != XmlNodeType.Comment && child.NodeType != XmlNodeType.Whitespace && child.NodeType != XmlNodeType.SignificantWhitespace)
+                {
+                    m_current = m_current.AppendChild(CreateComment(null));
+                    XmlCharacterData charData = child as XmlCharacterData;
+                    if (charData != null)
+                    {
+                        ((XmlComment)m_current).Value += charData.Value;
+                        return;
+                    }
+                }
+                else if (m_current.NodeType == XmlNodeType.Comment)
+                {
+                    XmlCharacterData charData = child as XmlCharacterData;
+                    if (charData != null)
+                    {
+                        ((XmlComment)m_current).Value += charData.Value;
+                        return;
+                    }
+                    else
+                    {
+                        m_current = m_current.ParentNode;
+                    }
+                }
+            }
+            base.InternalAppendChild(child, mayHaveChildren);
+        }
     }
 }

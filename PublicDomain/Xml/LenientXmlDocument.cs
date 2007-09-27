@@ -501,8 +501,13 @@ namespace PublicDomain.Xml
                         }
                         else
                         {
-                            m_sb.Append("amp");
+                            m_sb.Insert(0, "&");
+                            // TODO why not switch to m_preEntityState?
+                            m_state = State.None;
+                            m_isAllWhitespace = false;
                             ContextSwitch(m_preEntityState);
+
+                            // redo this character
                             i--;
                             continue;
                         }
@@ -539,7 +544,7 @@ namespace PublicDomain.Xml
 
         private bool IsWhitespace(char c)
         {
-            return (c == 0x9 || c == 0x10 || c == 0x13 || c == 0x20);
+            return (c == 9 || c == 10 || c == 13 || c == 32);
         }
 
         private static bool IsValidEntityCharacter(char p)

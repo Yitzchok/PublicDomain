@@ -10,6 +10,28 @@ namespace PublicDomain
     public static class GlobalConstants
     {
         /// <summary>
+        /// 
+        /// </summary>
+        public const string PublicDomainMainVersion = "0.2.24";
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public const string PublicDomainBuildVersion = "0";
+
+        /// <summary>
+        /// Current version of this code, in string form. In a standalone build,
+        /// this is the assembly version.
+        /// </summary>
+        public const string PublicDomainVersion = PublicDomainMainVersion + ".0";
+
+        /// <summary>
+        /// Current version of this code, in string form. In a standalone build,
+        /// this is the file version.
+        /// </summary>
+        public const string PublicDomainFileVersion = PublicDomainMainVersion + "." + PublicDomainBuildVersion;
+
+        /// <summary>
         /// Static Initializer
         /// </summary>
         static GlobalConstants()
@@ -27,12 +49,6 @@ namespace PublicDomain
             BitsInAPetabyte = BitsInAByte * BytesInAPetabyte;
             KilometersInAStatuteMile = ((FeetInAStatuteMile) * (InchesInAFoot) * (CentimetersInAnInch)) / (Math.Pow(10, 5));
         }
-
-        /// <summary>
-        /// Current version of this code, in string form. In a standalone build,
-        /// this is the assembly version and file version of the assembly.
-        /// </summary>
-        public const string PublicDomainVersion = "0.2.23.0";
 
         /// <summary>
         /// The name of the PublicDomain assembly, if this is a standalone build. If

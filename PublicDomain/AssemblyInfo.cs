@@ -35,6 +35,6 @@ using System.Security;
 // by using the '*' as shown below:
 
 [assembly: AssemblyVersion(PublicDomain.GlobalConstants.PublicDomainVersion)]
-[assembly: AssemblyFileVersion(PublicDomain.GlobalConstants.PublicDomainVersion)]
+[assembly: AssemblyFileVersion(PublicDomain.GlobalConstants.PublicDomainFileVersion)]
 [assembly: CLSCompliant(true)]
 [assembly: AllowPartiallyTrustedCallers]

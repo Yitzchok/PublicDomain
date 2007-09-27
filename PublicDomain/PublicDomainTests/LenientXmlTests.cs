@@ -142,6 +142,12 @@ function test()
             cmp["&#160;"] = start + "&nbsp;" + end;
             cmp[@"<a><b><c>y</c><br />z</b></a>"] = @"<a><b><c>y</c><br />z</b></a>";
             cmp[@"<td width=""200""><span class=""class""><span style=""font-size: larger"">Welcome to $BLANK!</span><br />Population: {4}</span></td>"] = @"<td width=""200""><span class=""class""><span style=""font-size: larger"">Welcome to $BLANK!</span><br />Population: {4}</span></td>";
+            cmp[@"<test at=""&lt;"" />"] = "<test at=\"&amp;lt;\" />";
+            cmp[@"<script>
+    var query = 'query=execute&namingContainer=' + dorp.escape(tab.contentid) + '&resourceUri=' + dorp.escape(resourceUri) + '&action=' + dorp.escape(action);
+</script>"] = @"<script><!--
+    var query = 'query=execute&namingContainer=' + dorp.escape(tab.contentid) + '&resourceUri=' + dorp.escape(resourceUri) + '&action=' + dorp.escape(action);
+--></script>";
 
             LenientHtmlDocument doc = new LenientHtmlDocument();
             DoCompare(cmp, doc);
