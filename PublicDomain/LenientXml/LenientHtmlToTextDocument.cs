@@ -47,7 +47,7 @@ namespace PublicDomain.LenientXml
         /// <param name="newState">The new state.</param>
         protected override void ContextSwitch(LenientXmlDocument.State newState)
         {
-            if (FirstChild == null)
+            if (DocumentElement == null)
             {
                 m_current = AppendChild(GetDefaultDocumentNode());
             }
@@ -134,20 +134,113 @@ namespace PublicDomain.LenientXml
         /// <returns></returns>
         protected virtual string ConvertEntityToValue(string token)
         {
+            // http://en.wikipedia.org/wiki/List_of_XML_and_HTML_character_entity_references
             token = token.ToLower();
-            switch (token)
+
+            if (token[0] == '#')
             {
-                case "nbsp":
-                    return " ";
-                case "gt":
-                    return ">";
-                case "lt":
-                    return "<";
-                case "amp":
-                    return "&";
-                case "quot":
-                    return "\"";
             }
+            else
+            {
+                switch (token)
+                {
+                    case "nbsp":
+                        return " ";
+                    case "gt":
+                        return ">";
+                    case "lt":
+                        return "<";
+                    case "amp":
+                        return "&";
+                    case "quot":
+                        return "\"";
+                    case "iexcl":
+                        return "¡";
+                    case "cent":
+                        return "¢";
+                    case "pound":
+                        return "£";
+                    case "curren":
+                        return "¤";
+                    case "yen":
+                        return "¥";
+                    case "brvbar":
+                        return "¦";
+                    case "sect":
+                        return "§";
+                    case "uml":
+                        return "¨";
+                    case "copy":
+                        return "©";
+                    case "ordf":
+                        return "ª";
+                    case "laquo":
+                        return "«";
+                    case "not":
+                        return "¬";
+                    case "shy":
+                        return "-";
+                    case "&reg":
+                        return "®";
+                    case "macr":
+                        return "¯";
+                    case "deg":
+                        return "°";
+                    case "plusmn":
+                        return "±";
+                    case "sup2":
+                        return "²";
+                    case "sup3":
+                        return "³";
+                    case "acute":
+                        return "´";
+                    case "micro":
+                        return "µ";
+                    case "para":
+                        return "¶";
+                    case "middot":
+                        return "·";
+                    case "cedil":
+                        return "¸";
+                    case "sup1":
+                        return "¹";
+                    case "ordm":
+                        return "º";
+                    case "raquo":
+                        return "»";
+                    case "frac14":
+                        return "¼";
+                    case "frac12":
+                        return "½";
+                    case "frac34":
+                        return "¾";
+                    case "iquest":
+                        return "¿";
+                    case "times":
+                        return "×";
+                    case "divide":
+                        return "÷";
+                    case "eth":
+                        return "ð";
+                    case "thorn":
+                        return "Þ";
+                    case "aelig":
+                        return "æ";
+                    case "oelig":
+                        return "œ";
+                    case "aring":
+                        return "Å";
+                    case "oslash":
+                        return "Ø";
+                    case "ccedil":
+                        return "ç";
+                    case "szlig":
+                        return "ß";
+                    case "ntilde":
+                        return "ñ";
+                }
+            }
+
             return null;
         }
     }

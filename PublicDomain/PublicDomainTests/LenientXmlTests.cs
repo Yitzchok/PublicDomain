@@ -4,6 +4,7 @@ using System.Text;
 using NUnit.Framework;
 using PublicDomain.LenientXml;
 using System.Xml;
+using PublicDomain.Xml;
 
 namespace PublicDomain
 {
@@ -136,6 +137,9 @@ function test()
             cmp["<div onclick='if(this.style && this.style.visibility==\"hidden\"'>"] = "<div onclick=\"if(this.style &amp;&amp; this.style.visibility==&quot;hidden&quot;\" />";
             cmp["<select id=blah><option>1</option><option value=\"2a\">2</option>"] = "<select id=\"blah\"><option>1</option><option value=\"2a\">2</option></select>";
             cmp["<select id=blah><option>1<option value=\"2a\">2"] = "<select id=\"blah\"><option>1</option><option value=\"2a\">2</option></select>";
+
+            cmp[@"<meta http-equiv=""Content-Style-Type"" content=""text/css"">"] = @"<meta http-equiv=""Content-Style-Type"" content=""text/css"" />";
+            cmp[@"<!DOCTYPE HTML PUBLIC ""-//W3C//DTD HTML 4.01 Transitional//EN"">"] = full;
 
             LenientHtmlDocument doc = new LenientHtmlDocument();
             DoCompare(cmp, doc);

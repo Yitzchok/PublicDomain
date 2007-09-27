@@ -39,7 +39,8 @@ namespace PublicDomain.LenientXml
         /// <returns></returns>
         protected override bool FinishNewElement(XmlElement el)
         {
-            return el.LocalName.ToLower() == "br";
+            string name = el.LocalName.ToLower();
+            return name == "br" || name == "meta" || name == "link";
         }
 
         /// <summary>

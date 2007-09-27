@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Globalization;
 
 namespace PublicDomain
 {
@@ -238,6 +239,50 @@ namespace PublicDomain
             {
                 result = defaultValue;
             }
+            return result;
+        }
+
+        /// <summary>
+        /// Parses the hex.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns></returns>
+        public static int ParseHex(string str)
+        {
+            return ParseHex(str, 0);
+        }
+
+        /// <summary>
+        /// Parses the hex.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <param name="defaultValue">The default value.</param>
+        /// <returns></returns>
+        public static int ParseHex(string str, int defaultValue)
+        {
+            int result;
+
+            if (str != null && str.Length > 0)
+            {
+                if (str[0] == 'x' || str[0] == 'X')
+                {
+                    str = str.Substring(1);
+                }
+                else if (str.Length > 1 && str[0] == '0' && (str[1] == 'x' || str[1] == 'X'))
+                {
+                    str = str.Substring(2);
+                }
+            }
+
+            try
+            {
+                result = int.Parse(str, NumberStyles.HexNumber);
+            }
+            catch (Exception)
+            {
+                result = defaultValue;
+            }
+
             return result;
         }
 

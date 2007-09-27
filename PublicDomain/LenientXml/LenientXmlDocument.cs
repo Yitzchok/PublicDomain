@@ -29,7 +29,17 @@ namespace PublicDomain.LenientXml
         /// <summary>
         /// 
         /// </summary>
+        protected XmlNode m_attributeTarget;
+
+        /// <summary>
+        /// 
+        /// </summary>
         protected StringBuilder m_sb;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        protected StringBuilder m_exclamationInstruction;
 
         /// <summary>
         /// 
@@ -145,6 +155,7 @@ namespace PublicDomain.LenientXml
             int l = xml.Length;
             char c;
             m_sb = new StringBuilder(100);
+            m_exclamationInstruction = new StringBuilder(50);
             m_current = this;
             m_state = State.None;
             m_isAllWhitespace = true;
@@ -213,7 +224,7 @@ namespace PublicDomain.LenientXml
                         continue;
 
                     case State.StartAttributeValue:
-                        if (c == '/')
+                        if (c == '\0' && c == '/')
                         {
                             ContextSwitch(State.EndElementImmediate);
                             continue;
@@ -333,7 +344,25 @@ namespace PublicDomain.LenientXml
                         m_sb.Append(c);
                         continue;
 
-                    case State.StartComment1:
+                    case State.StartDoctype:
+
+                        if (c == '>')
+                        {
+                            ContextSwitch(State.None);
+                            continue;
+                        }
+                        else if (c == '<')
+                        {
+                            ContextSwitch(State.None);
+                            i--;
+                            continue;
+                        }
+
+                        m_exclamationInstruction.Append(c);
+
+                        continue;
+
+                    case State.StartExclamationPoint:
 
                         if (c == '-')
                         {
@@ -349,6 +378,23 @@ namespace PublicDomain.LenientXml
                         i--;
 
                         continue;
+
+                    case State.StartProcessingInstruction:
+                        if (c == '>')
+                        {
+                            ContextSwitch(State.None);
+                            continue;
+                        }
+                        else if (c == '<')
+                        {
+                            ContextSwitch(State.None);
+                            i--;
+                            continue;
+                        }
+
+                        //.Append(c);
+                        continue;
+
                     case State.Element:
                         if (c == '>')
                         {
@@ -367,27 +413,42 @@ namespace PublicDomain.LenientXml
                         {
                             if (i + 7 < l &&
                                 xml[i + 1] == '[' &&
-                                xml[i + 2] == 'C' &&
-                                xml[i + 3] == 'D' &&
-                                xml[i + 4] == 'A' &&
-                                xml[i + 5] == 'T' &&
-                                xml[i + 6] == 'A' &&
+                                (xml[i + 2] == 'C' || xml[i + 2] == 'c') &&
+                                (xml[i + 3] == 'D' || xml[i + 3] == 'd') &&
+                                (xml[i + 4] == 'A' || xml[i + 4] == 'a') &&
+                                (xml[i + 5] == 'T' || xml[i + 5] == 't') &&
+                                (xml[i + 6] == 'A' || xml[i + 6] == 'a') &&
                                 xml[i + 7] == '[')
                             {
                                 ContextSwitch(State.InCDATA);
                                 i += 7;
                                 continue;
                             }
+                            else if (i + 7 < l &&
+                                (xml[i + 1] == 'D' || xml[i + 1] == 'd') &&
+                                (xml[i + 2] == 'O' || xml[i + 2] == 'o') &&
+                                (xml[i + 3] == 'C' || xml[i + 3] == 'c') &&
+                                (xml[i + 4] == 'T' || xml[i + 4] == 't') &&
+                                (xml[i + 5] == 'Y' || xml[i + 5] == 'y') &&
+                                (xml[i + 6] == 'P' || xml[i + 6] == 'p') &&
+                                (xml[i + 7] == 'E' || xml[i + 7] == 'e'))
+                            {
+                                m_exclamationInstruction.Length = 0;
+                                ContextSwitch(State.StartDoctype);
+                                i += 7;
+                                continue;
+                            }
                             else
                             {
-                                ContextSwitch(State.StartComment1);
+                                ContextSwitch(State.StartExclamationPoint);
                                 continue;
                             }
                         }
-                        //else if (c == '?')
-                        //{
-                        //    continue;
-                        //}
+                        else if (c == '?')
+                        {
+                            ContextSwitch(State.StartProcessingInstruction);
+                            continue;
+                        }
                         else if (c == '/')
                         {
                             if (m_sb.Length == 0)
@@ -503,8 +564,15 @@ namespace PublicDomain.LenientXml
 
                         if (token != null)
                         {
-                            XmlEntityReference entity = CreateEntityReference(token);
-                            InternalAppendChild(entity, false);
+                            string numericalCharRefVal = GetNumericalCharacterReferenceValue(token);
+                            if (numericalCharRefVal != null)
+                            {
+                                InternalAppendChild(CreateTextNode(numericalCharRefVal), false);
+                            }
+                            else
+                            {
+                                InternalAppendChild(CreateEntityReference(token), false);
+                            }
                         }
 
                         break;
@@ -559,7 +627,15 @@ namespace PublicDomain.LenientXml
 
                     case State.StartAttribute:
                         m_attribute = CreateAttribute(token);
-                        m_current.Attributes.Append(m_attribute);
+
+                        if (m_attributeTarget != null)
+                        {
+                            m_attributeTarget.Attributes.Append(m_attribute);
+                        }
+                        else
+                        {
+                            m_current.Attributes.Append(m_attribute);
+                        }
 
                         break;
 
@@ -601,7 +677,7 @@ namespace PublicDomain.LenientXml
             switch (newState)
             {
                 case State.Finished:
-                    if (FirstChild == null)
+                    if (DocumentElement == null)
                     {
                         m_current.AppendChild(GetDefaultDocumentNode());
                     }
@@ -612,7 +688,7 @@ namespace PublicDomain.LenientXml
                 case State.StartAttribute:
                     m_attributeValueMatch = '\0';
                     break;
-                case State.StartComment1:
+                case State.StartExclamationPoint:
 
                     m_comment = CreateComment(null);
                     InternalAppendChild(m_comment, false);
@@ -628,6 +704,36 @@ namespace PublicDomain.LenientXml
             ResetAfterContextSwitch();
 
             m_state = newState;
+        }
+
+        /// <summary>
+        /// Gets the numerical character reference value.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns></returns>
+        protected string GetNumericalCharacterReferenceValue(string str)
+        {
+            if (str != null && str.Length > 1)
+            {
+                if (str[0] == '#')
+                {
+                    int val;
+                    if (str[1] == 'x' || str[1] == 'X')
+                    {
+                        val = ConversionUtilities.ParseHex(str.Substring(2));
+                    }
+                    else
+                    {
+                        val = ConversionUtilities.ParseInt(str.Substring(1));
+                    }
+
+                    if (val > 0)
+                    {
+                        return ((char)val).ToString();
+                    }
+                }
+            }
+            return null;
         }
 
         /// <summary>
@@ -795,7 +901,7 @@ namespace PublicDomain.LenientXml
         /// </returns>
         protected virtual bool IsValidNameCharacter(char c)
         {
-            return char.IsLetterOrDigit(c) || c == '_' || c == ':';
+            return char.IsLetterOrDigit(c) || c == '_' || c == ':' || c == '-';
         }
 
         /// <summary>
@@ -815,7 +921,7 @@ namespace PublicDomain.LenientXml
         /// <param name="mayHaveChildren">if set to <c>true</c> [may have children].</param>
         protected virtual void InternalAppendChild(XmlNode child, bool mayHaveChildren)
         {
-            XmlNode root = FirstChild;
+            XmlNode root = DocumentElement;
 
             // There's already a root but we may be trying to
             // add another element causing multiple roots, which
@@ -823,20 +929,31 @@ namespace PublicDomain.LenientXml
             if (root == null && child.NodeType != XmlNodeType.Element)
             {
                 AppendChild(GetDefaultDocumentNode());
-                m_current = FirstChild;
+                m_current = DocumentElement;
             }
             else if (m_current == this && root != null)
             {
                 RemoveChild(root);
                 m_current.AppendChild(GetDefaultDocumentNode());
-                m_current = FirstChild;
+                m_current = DocumentElement;
                 m_current.AppendChild(root);
             }
 
             m_current.AppendChild(child);
-            if (CanNodeContainSubNodes(child) && mayHaveChildren)
+            if (mayHaveChildren)
             {
-                m_current = child;
+                if (CanNodeContainSubNodes(child))
+                {
+                    m_current = child;
+                }
+
+                m_attributeTarget = null;
+            }
+            else
+            {
+                // save off this ended element in case we find attributes, we 
+                // wouldn't want to add them to the wrong element
+                m_attributeTarget = child;
             }
         }
 
@@ -861,6 +978,14 @@ namespace PublicDomain.LenientXml
         protected virtual XmlNode GetDefaultDocumentNode()
         {
             return CreateElement(m_defaultRootElementName);
+        }
+
+        /// <summary>
+        /// Creates the default document element.
+        /// </summary>
+        public void CreateDefaultDocumentElement()
+        {
+            AppendChild(GetDefaultDocumentNode());
         }
 
         /// <summary>
@@ -932,7 +1057,7 @@ namespace PublicDomain.LenientXml
             /// <summary>
             /// 
             /// </summary>
-            StartComment1,
+            StartExclamationPoint,
 
             /// <summary>
             /// 
@@ -957,7 +1082,17 @@ namespace PublicDomain.LenientXml
             /// <summary>
             /// 
             /// </summary>
-            StartEntity
+            StartEntity,
+
+            /// <summary>
+            /// 
+            /// </summary>
+            StartDoctype,
+
+            /// <summary>
+            /// 
+            /// </summary>
+            StartProcessingInstruction
         }
     }
 }

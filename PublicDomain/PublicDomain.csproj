@@ -245,7 +245,9 @@
     <Compile Include="Web\WebIpProvider.cs" />
     <Compile Include="Web\WebUtilities.cs" />
     <Compile Include="Win32.cs" />
-    <Compile Include="XmlUtilities.cs" />
+    <Compile Include="Xml\NonEntityResolvingXmlTextReader.cs" />
+    <Compile Include="Xml\SimpleXmlResolver.cs" />
+    <Compile Include="Xml\XmlUtilities.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="doc\Documentation.chm" />
