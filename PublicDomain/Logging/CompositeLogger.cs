@@ -21,11 +21,14 @@ namespace PublicDomain.Logging
         /// <param name="loggers">The loggers.</param>
         public CompositeLogger(params Logger[] loggers)
         {
-            foreach (Logger logger in loggers)
+            if (loggers != null)
             {
-                if (logger != null)
+                foreach (Logger logger in loggers)
                 {
-                    AddLogger(logger);
+                    if (logger != null)
+                    {
+                        AddLogger(logger);
+                    }
                 }
             }
         }

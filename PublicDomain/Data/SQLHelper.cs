@@ -208,46 +208,49 @@ namespace PublicDomain.Data
                     throw new NotImplementedException();
             }
             bool first = true;
-            foreach (string s in toConcat)
+            if (toConcat != null)
             {
-                if (first) first = false;
-                else
+                foreach (string s in toConcat)
                 {
+                    if (first) first = false;
+                    else
+                    {
+                        switch (targetDB)
+                        {
+                            case DatabaseType.MySql:
+                                builder.Append(", ");
+                                break;
+                            case DatabaseType.SqlServer:
+                                builder.Append(" + ");
+                                break;
+                            case DatabaseType.PostgreSql:
+                                builder.Append(" || ");
+                                break;
+                            default:
+                                throw new NotImplementedException();
+                        }
+                    }
                     switch (targetDB)
                     {
                         case DatabaseType.MySql:
-                            builder.Append(", ");
+                        case DatabaseType.PostgreSql:
+                            builder.Append(s);
                             break;
                         case DatabaseType.SqlServer:
-                            builder.Append(" + ");
-                            break;
-                        case DatabaseType.PostgreSql:
-                            builder.Append(" || ");
+                            if (!s.StartsWith("\'") && !skipFirst)
+                            {
+                                builder.Append("CAST(");
+                                builder.Append(s);
+                                builder.Append(" as varchar(255))");
+                            }
+                            else
+                            {
+                                builder.Append(s);
+                            }
                             break;
                         default:
                             throw new NotImplementedException();
                     }
-                }
-                switch (targetDB)
-                {
-                    case DatabaseType.MySql:
-                    case DatabaseType.PostgreSql:
-                        builder.Append(s);
-                        break;
-                    case DatabaseType.SqlServer:
-                        if (!s.StartsWith("\'") && !skipFirst)
-                        {
-                            builder.Append("CAST(");
-                            builder.Append(s);
-                            builder.Append(" as varchar(255))");
-                        }
-                        else
-                        {
-                            builder.Append(s);
-                        }
-                        break;
-                    default:
-                        throw new NotImplementedException();
                 }
             }
             builder.Append(")");
@@ -455,12 +458,15 @@ namespace PublicDomain.Data
         /// <param name="columnNames">The column names.</param>
         public static void AddPrimaryKeyConstraint(DataTable table, params string[] columnNames)
         {
-            DataColumn[] cols = new DataColumn[columnNames.Length];
-            for (int i = 0; i < columnNames.Length; i++)
+            if (columnNames != null)
             {
-                cols[i] = table.Columns[columnNames[i]];
+                DataColumn[] cols = new DataColumn[columnNames.Length];
+                for (int i = 0; i < columnNames.Length; i++)
+                {
+                    cols[i] = table.Columns[columnNames[i]];
+                }
+                table.Constraints.Add(GetIdentifier("pk_" + table.TableName), cols, true);
             }
-            table.Constraints.Add(GetIdentifier("pk_" + table.TableName), cols, true);
         }
 
         /// <summary>

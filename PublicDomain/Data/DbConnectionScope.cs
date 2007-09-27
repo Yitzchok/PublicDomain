@@ -61,7 +61,7 @@ namespace PublicDomain.Data
 
                     inheritConnections = false;
                 }
-                else if (DbTransactionScope.IsInUse)
+                else if (Database.Current.SupportsFeature(DatabaseFeature.MultipleOpenConnectionsWithinSingleTransaction) && DbTransactionScope.IsInUse)
                 {
                     if (Log.Enabled) Log.LogDebug10("DbTransactionScope is inuse");
 

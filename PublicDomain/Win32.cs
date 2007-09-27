@@ -1945,9 +1945,12 @@ namespace PublicDomain
             {
                 Job job = new Job(StringUtilities.RandomString(10, true));
                 job.SetLimitWorkingSetSize(minWorkingSetSize, maxWorkingSetSize);
-                foreach (Process p in processesToLimit)
+                if (processesToLimit != null)
                 {
-                    job.AssignProcess(p);
+                    foreach (Process p in processesToLimit)
+                    {
+                        job.AssignProcess(p);
+                    }
                 }
                 return job;
             }

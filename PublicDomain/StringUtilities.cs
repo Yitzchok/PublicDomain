@@ -323,7 +323,7 @@ namespace PublicDomain
                 throw new ArgumentNullException("pieces");
             }
 
-            if (indices.Length == 0)
+            if (indices != null && indices.Length == 0)
             {
                 indices = new int[pieces.Length];
                 for (int k = 0; k < indices.Length; k++)
@@ -336,15 +336,18 @@ namespace PublicDomain
             Array.Sort(indices);
 
             int offset = 0;
-            foreach (int index in indices)
+            if (indices != null)
             {
-                if (index + offset < pieces.Length)
+                foreach (int index in indices)
                 {
-                    string[] subPieces = pieces[index + offset].Split(splitChar);
-                    if (subPieces.Length > 1)
+                    if (index + offset < pieces.Length)
                     {
-                        pieces = ArrayUtilities.InsertReplace<string>(pieces, index + offset, subPieces);
-                        offset += subPieces.Length - 1;
+                        string[] subPieces = pieces[index + offset].Split(splitChar);
+                        if (subPieces.Length > 1)
+                        {
+                            pieces = ArrayUtilities.InsertReplace<string>(pieces, index + offset, subPieces);
+                            offset += subPieces.Length - 1;
+                        }
                     }
                 }
             }
@@ -377,7 +380,7 @@ namespace PublicDomain
             List<string> result = new List<string>();
             if (line != null)
             {
-                if (dividerChars.Length == 0)
+                if (dividerChars == null || dividerChars.Length == 0)
                 {
                     // no divider chars specified, use the default
                     dividerChars = DefaultQuoteSensitiveChars;
@@ -644,12 +647,15 @@ namespace PublicDomain
         public static int LastIndexOfAny(string str, params string[] searches)
         {
             int result = -1;
-            foreach (string search in searches)
+            if (searches != null)
             {
-                int index = str.LastIndexOf(search);
-                if (index > result)
+                foreach (string search in searches)
                 {
-                    result = index;
+                    int index = str.LastIndexOf(search);
+                    if (index > result)
+                    {
+                        result = index;
+                    }
                 }
             }
             return result;

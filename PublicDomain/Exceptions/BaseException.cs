@@ -32,7 +32,7 @@ namespace PublicDomain
         /// <param name="message">The message.</param>
         /// <param name="formatParameters">The format parameters.</param>
         public BaseException(string message, params object[] formatParameters)
-            : base(formatParameters.Length > 0 ? string.Format(message, formatParameters) : message)
+            : base(formatParameters != null && formatParameters.Length > 0 ? string.Format(message, formatParameters) : message)
         {
         }
 
@@ -43,7 +43,7 @@ namespace PublicDomain
         /// <param name="message">The message.</param>
         /// <param name="formatParameters">The format parameters.</param>
         public BaseException(Exception inner, string message, params object[] formatParameters)
-            : base(formatParameters.Length > 0 ? string.Format(message, formatParameters) : message, inner)
+            : base(formatParameters != null && formatParameters.Length > 0 ? string.Format(message, formatParameters) : message, inner)
         {
         }
 

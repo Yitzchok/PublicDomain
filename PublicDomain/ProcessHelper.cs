@@ -179,28 +179,6 @@ namespace PublicDomain
             }
         }
 
-        /*public void AddUnmangledArguments(params string[] args)
-        {
-            if (args != null)
-            {
-                StringBuilder sb = new StringBuilder();
-                for (int i = 0; i < args.Length; i++)
-                {
-                    if (i > 0)
-                    {
-                        sb.Append(' ');
-                    }
-                    sb.Append(args[i]);
-                }
-                if (!string.IsNullOrEmpty(Arguments))
-                {
-                    sb.Insert(0, ' ');
-                    sb.Insert(0, Arguments);
-                }
-                Arguments = sb.ToString();
-            }
-        }*/
-
         /// <summary>
         /// Handles the OutputDataReceived event of the process control.
         /// </summary>

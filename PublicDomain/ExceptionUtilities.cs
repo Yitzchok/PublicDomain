@@ -28,9 +28,12 @@ namespace PublicDomain
         /// <param name="exceptions">The exceptions.</param>
         public static void WriteExceptions(TextWriter writer, params Exception[] exceptions)
         {
-            foreach (Exception ex in exceptions)
+            if (exceptions != null)
             {
-                writer.WriteLine(GetExceptionDetailsAsString(ex));
+                foreach (Exception ex in exceptions)
+                {
+                    writer.WriteLine(GetExceptionDetailsAsString(ex));
+                }
             }
         }
 

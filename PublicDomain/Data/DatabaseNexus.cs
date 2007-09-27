@@ -356,7 +356,7 @@ namespace PublicDomain.Data
                 GetConnectionStringPart(type, sb, separator, divider, ConnectionParameterName.Port, port.ToString());
             }
 
-            if (otherParameters.Length > 0)
+            if (otherParameters != null && otherParameters.Length > 0)
             {
                 if ((otherParameters.Length % 2) != 0)
                 {

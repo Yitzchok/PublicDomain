@@ -563,6 +563,7 @@ namespace PublicDomain.Data
                     {
                         case DatabaseFeature.NestedTransactions:
                         case DatabaseFeature.MultipleActiveResultSets:
+                        case DatabaseFeature.MultipleOpenConnectionsWithinSingleTransaction:
                             return false;
                     }
                     break;

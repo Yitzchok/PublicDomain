@@ -46,11 +46,14 @@ namespace PublicDomain
         /// </returns>
         public static bool IsCharacterOneOf(char c, params char[] compare)
         {
-            for (int i = 0; i < compare.Length; i++)
+            if (compare != null)
             {
-                if (c == compare[i])
+                for (int i = 0; i < compare.Length; i++)
                 {
-                    return true;
+                    if (c == compare[i])
+                    {
+                        return true;
+                    }
                 }
             }
             return false;

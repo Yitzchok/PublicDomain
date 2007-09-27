@@ -143,13 +143,16 @@ namespace PublicDomain
         public static int MatchAny(string input, out Match successfulMatch, params Regex[] regexs)
         {
             successfulMatch = null;
-            for (int i = 0; i < regexs.Length; i++)
+            if (regexs != null)
             {
-                Match m = regexs[i].Match(input);
-                if (m.Success)
+                for (int i = 0; i < regexs.Length; i++)
                 {
-                    successfulMatch = m;
-                    return i;
+                    Match m = regexs[i].Match(input);
+                    if (m.Success)
+                    {
+                        successfulMatch = m;
+                        return i;
+                    }
                 }
             }
             return -1;

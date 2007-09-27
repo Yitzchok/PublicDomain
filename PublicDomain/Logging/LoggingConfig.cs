@@ -323,13 +323,16 @@ namespace PublicDomain.Logging
             string testClass;
 
             // First try the specific classes
-            foreach (string logClass in logClasses)
+            if (logClasses != null)
             {
-                testClass = logClass.ToLower().Trim();
-                if (m_loggers.TryGetValue(testClass, out test))
+                foreach (string logClass in logClasses)
                 {
-                    result = test;
-                    break;
+                    testClass = logClass.ToLower().Trim();
+                    if (m_loggers.TryGetValue(testClass, out test))
+                    {
+                        result = test;
+                        break;
+                    }
                 }
             }
 
@@ -375,10 +378,57 @@ namespace PublicDomain.Logging
         /// Creates the logger.
         /// </summary>
         /// <param name="type">The type.</param>
+        /// <param name="threshold">The threshold.</param>
+        /// <returns></returns>
+        public virtual Logger CreateLogger(Type type, LoggerSeverity threshold)
+        {
+            return CreateLogger(type.FullName, threshold);
+        }
+
+        /// <summary>
+        /// Creates the logger.
+        /// </summary>
+        /// <param name="className">Name of the class.</param>
+        /// <param name="threshold">The threshold.</param>
+        /// <returns></returns>
+        public virtual Logger CreateLogger(string className, LoggerSeverity threshold)
+        {
+            Logger logger = CreateLogger(className);
+            if (logger != null)
+            {
+                logger.Threshold = threshold;
+            }
+            return logger;
+        }
+
+        /// <summary>
+        /// Gets the working logger.
+        /// </summary>
+        /// <returns></returns>
+        public virtual Logger GetWorkingLogger()
+        {
+            return GetWorkingLogger(LoggerSeverity.None0);
+        }
+
+        /// <summary>
+        /// Gets the working logger.
+        /// </summary>
+        /// <param name="threshold">The threshold.</param>
+        /// <returns></returns>
+        public virtual Logger GetWorkingLogger(LoggerSeverity threshold)
+        {
+            return CreateLogger(typeof(Logger), threshold);
+        }
+
+        /// <summary>
+        /// Creates the logger.
+        /// </summary>
+        /// <param name="type">The type.</param>
         /// <param name="otherLogClasses">The other log classes.</param>
         /// <returns></returns>
         public virtual Logger CreateLogger(Type type, params string[] otherLogClasses)
         {
+            if (otherLogClasses == null) return null;
             string[] classes = new string[otherLogClasses.Length + 1];
             Array.Copy(otherLogClasses, classes, otherLogClasses.Length);
             classes[classes.Length - 1] = type.ToString();

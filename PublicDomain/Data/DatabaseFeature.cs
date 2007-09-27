@@ -17,6 +17,11 @@ namespace PublicDomain.Data
         /// <summary>
         /// 
         /// </summary>
-        NestedTransactions
+        NestedTransactions,
+
+        /// <summary>
+        /// 
+        /// </summary>
+        MultipleOpenConnectionsWithinSingleTransaction
     }
 }

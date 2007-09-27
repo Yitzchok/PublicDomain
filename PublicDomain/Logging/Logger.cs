@@ -445,7 +445,7 @@ namespace PublicDomain.Logging
                 sb.Append("< ");
             }
             sb.Append(methodName);
-            if (args.Length > 0)
+            if (args != null && args.Length > 0)
             {
                 sb.Append(": ");
                 BuildArgList(sb, args);
