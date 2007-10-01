@@ -86,7 +86,7 @@ namespace PublicDomain
 			0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d 
 		};
 
-        static private uint Update(byte octet, uint crc)
+        private static uint Update(byte octet, uint crc)
         {
             return (Crc32Array[((crc) ^ ((byte)octet)) & 0xFF] ^ ((crc) >> 8));
         }
@@ -142,7 +142,9 @@ namespace PublicDomain
         public static uint Compute(Stream stream)
         {
             if (stream == null)
+            {
                 throw new ArgumentNullException("stream");
+            }
 
             uint oldCrc32 = 0xFFFFFFFF;
             int b;
@@ -167,7 +169,9 @@ namespace PublicDomain
         public static uint ComputeFile(string filePath)
         {
             if (filePath == null)
+            {
                 throw new ArgumentNullException("filePath");
+            }
 
             using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
@@ -184,7 +188,9 @@ namespace PublicDomain
         public static uint Compute(string text)
         {
             if (text == null)
+            {
                 throw new ArgumentNullException("text");
+            }
 
             uint oldCrc32 = 0xFFFFFFFF;
             int len = text.Length;
@@ -216,7 +222,9 @@ namespace PublicDomain
         public static uint Compute(byte[] bytes)
         {
             if (bytes == null)
+            {
                 throw new ArgumentNullException("bytes");
+            }
 
             uint oldCrc32 = 0xFFFFFFFF;
             int len = bytes.Length;

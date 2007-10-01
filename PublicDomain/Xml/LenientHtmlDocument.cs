@@ -72,7 +72,7 @@ namespace PublicDomain.Xml
         {
             if (m_current != null && m_current.Name.ToLower() == "option" && el.Name.ToLower() == "option")
             {
-                return true;
+                //return true;
             }
             return base.AddNewElementToParent(el);
         }
@@ -86,9 +86,34 @@ namespace PublicDomain.Xml
         {
             if (m_current != null)
             {
-                // wrap <SCRIPT> innards with a comment if they're not already wrapped by a comment or CDATA section
-                if (m_current.NodeType == XmlNodeType.Element && m_current.Name.ToLower() == "script" && child.NodeType != XmlNodeType.CDATA && child.NodeType != XmlNodeType.Comment && child.NodeType != XmlNodeType.Whitespace && child.NodeType != XmlNodeType.SignificantWhitespace)
+                if (child.NodeType == XmlNodeType.Element && child.Name.ToLower() == "option")
                 {
+                    // try to find the parent SELECT
+                    if (m_current.NodeType != XmlNodeType.Element || m_current.Name.ToLower() != "select")
+                    {
+                        bool found = false;
+                        XmlNode cur = m_current;
+                        while (cur != null && cur != this)
+                        {
+                            if (cur.NodeType == XmlNodeType.Element && cur.Name.ToLower() == "select")
+                            {
+                                found = true;
+                                break;
+                            }
+
+                            cur = cur.ParentNode;
+                        }
+
+                        if (found)
+                        {
+                            m_current = cur;
+                        }
+                    }
+                }
+                else if (m_current.NodeType == XmlNodeType.Element && m_current.Name.ToLower() == "script" && child.NodeType != XmlNodeType.CDATA && child.NodeType != XmlNodeType.Comment && child.NodeType != XmlNodeType.Whitespace && child.NodeType != XmlNodeType.SignificantWhitespace)
+                {
+                    // wrap <SCRIPT> innards with a comment if they're not already wrapped by a comment or CDATA section
+
                     m_current = m_current.AppendChild(CreateComment(null));
                     XmlCharacterData charData = child as XmlCharacterData;
                     if (charData != null)

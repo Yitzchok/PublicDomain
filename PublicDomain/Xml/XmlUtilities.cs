@@ -12,6 +12,26 @@ namespace PublicDomain
     public static class XmlUtilities
     {
         /// <summary>
+        /// 
+        /// </summary>
+        public const string CDataStart = "<![CDATA[";
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public const string CDataEnd = "]]>";
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public const string CommentStart = "<!--";
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public const string CommentEnd = "-->";
+
+        /// <summary>
         /// Formats the XML.
         /// </summary>
         /// <param name="xml">The XML.</param>

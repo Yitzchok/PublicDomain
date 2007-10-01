@@ -27,6 +27,24 @@ namespace PublicDomain
         }
 
         /// <summary>
+        /// Determines whether [is string null or empty with trim] [the specified STR].
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns>
+        /// 	<c>true</c> if [is string null or empty with trim] [the specified STR]; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool IsStringNullOrEmptyWithTrim(string str)
+        {
+            if (str == null)
+            {
+                return true;
+            }
+
+            str = str.Trim();
+            return str.Length == 0;
+        }
+
+        /// <summary>
         /// Gets the bytes from string.
         /// </summary>
         /// <param name="str">The STR.</param>

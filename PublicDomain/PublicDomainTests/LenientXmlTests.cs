@@ -148,6 +148,9 @@ function test()
 </script>"] = @"<script><!--
     var query = 'query=execute&namingContainer=' + dorp.escape(tab.contentid) + '&resourceUri=' + dorp.escape(resourceUri) + '&action=' + dorp.escape(action);
 --></script>";
+            cmp[@"<select><option>a<option>b<option>c</select>"] = @"<select><option>a</option><option>b</option><option>c</option></select>";
+            cmp[@"<select><option><br/><option><br/><option><br/></select>"] = @"<select><option><br /></option><option><br /></option><option><br /></option></select>";
+            cmp[@"<select><option><title a=""test""/><option><title/><option><title/></select>"] = @"<select><option><title a=""test"" /></option><option><title /></option><option><title /></option></select>";
 
             LenientHtmlDocument doc = new LenientHtmlDocument();
             DoCompare(cmp, doc);

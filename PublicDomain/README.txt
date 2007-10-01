@@ -12,6 +12,9 @@ Simon Mourier
 
 Version History
 ===============
+V0.2.26.0
+	[kevgrig@gmail.com]
+		* LenientXmlDocument updates
 V0.2.24.0
 	[kevgrig@gmail.com]
 		* Added automatic commenting of the inside of a SCRIPT tag in the LenientHtmlDocument

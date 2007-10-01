@@ -79,7 +79,6 @@
     <Compile Include="ConsoleRerouter.cs" />
     <Compile Include="ConversionUtilities.cs" />
     <Compile Include="Crc32.cs" />
-    <Compile Include="Cryptography.cs" />
     <Compile Include="CryptographyUtilities.cs" />
     <Compile Include="CultureConstants.cs" />
     <Compile Include="CurrentDirectoryRerouter.cs" />
@@ -193,7 +192,6 @@
     <Compile Include="ScreenScraper\ScrapeSession.cs" />
     <Compile Include="ScreenScraper\ScrapeType.cs" />
     <Compile Include="ScreenScraper\ScreenScraperTag.cs" />
-    <Compile Include="SecurityUtilities.cs" />
     <Compile Include="TransactionCombinationLogic.cs" />
     <Compile Include="TzConstants.cs" />
     <Compile Include="TzDatabase.cs" />
@@ -201,7 +199,6 @@
     <Compile Include="Web\AuthenticatedWebIpProvider.cs" />
     <Compile Include="Web\Cursors.cs" />
     <Compile Include="DateTimeUtlities.cs" />
-    <Compile Include="DefaultCryptographer.cs" />
     <Compile Include="DisposableReaderWriter.cs" />
     <Compile Include="DistanceType.cs" />
     <Compile Include="ExceptionUtilities.cs" />
@@ -210,7 +207,6 @@
     <Compile Include="GenericUtilities.cs" />
     <Compile Include="GlobalConstants.cs" />
     <Compile Include="ICachedPropertiesProvider.cs" />
-    <Compile Include="ICryptographer.cs" />
     <Compile Include="IExposesReaderWriterLock.cs" />
     <Compile Include="IInitializable.cs" />
     <Compile Include="InvariantCultureContext.cs" />
