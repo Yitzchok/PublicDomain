@@ -12,6 +12,10 @@ Simon Mourier
 
 Version History
 ===============
+V0.2.27.0
+	[kevgrig@gmail.com]
+		* Changed TzTimeZone from static initialization to lazyily loading time zones
+		* BUG: http://www.codeplex.com/publicdomain/WorkItem/View.aspx?WorkItemId=12958
 V0.2.26.0
 	[kevgrig@gmail.com]
 		* LenientXmlDocument updates

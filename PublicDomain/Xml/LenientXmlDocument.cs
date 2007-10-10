@@ -186,7 +186,7 @@ namespace PublicDomain.Xml
                 {
                     case State.EndElementImmediate:
 
-                        if (IsWhitespace(c) || c == '/')
+                        if (IsXmlWhitespace(c) || c == '/')
                         {
                             // kill as much white space as we can
                             // while we're in the end of the element
@@ -229,7 +229,7 @@ namespace PublicDomain.Xml
                             ContextSwitch(State.StartAttributeValue);
                             continue;
                         }
-                        else if (!IsWhitespace(c))
+                        else if (!IsXmlWhitespace(c))
                         {
                             m_attributeValueMatch = '\0';
                             ContextSwitch(State.StartAttributeValue);
@@ -255,7 +255,7 @@ namespace PublicDomain.Xml
                             ContextSwitch(State.EndAttributeValue);
                             continue;
                         }
-                        else if (m_attributeValueMatch == '\0' && IsWhitespace(c))
+                        else if (m_attributeValueMatch == '\0' && IsXmlWhitespace(c))
                         {
                             ContextSwitch(State.EndAttributeValue);
                             continue;
@@ -280,7 +280,7 @@ namespace PublicDomain.Xml
                         {
                             m_sb.Append(c);
                         }
-                        else if (IsWhitespace(c) || c == '=')
+                        else if (IsXmlWhitespace(c) || c == '=')
                         {
                             ContextSwitch(State.EndAttribute);
                             continue;
@@ -300,7 +300,7 @@ namespace PublicDomain.Xml
                             ContextSwitch(State.EndElement);
                             continue;
                         }
-                        else if (IsWhitespace(c))
+                        else if (IsXmlWhitespace(c))
                         {
                             continue;
                         }
@@ -385,7 +385,7 @@ namespace PublicDomain.Xml
                             ContextSwitch(State.InComment);
                             continue;
                         }
-                        else if (IsWhitespace(c))
+                        else if (IsXmlWhitespace(c))
                         {
                             continue;
                         }
@@ -529,7 +529,7 @@ namespace PublicDomain.Xml
                             continue;
                         }
 
-                        if (m_isAllWhitespace && !IsWhitespace(c))
+                        if (m_isAllWhitespace && !IsXmlWhitespace(c))
                         {
                             m_isAllWhitespace = false;
                         }
@@ -542,17 +542,38 @@ namespace PublicDomain.Xml
             ContextSwitch(State.Finished);
         }
 
-        private bool IsWhitespace(char c)
+        /// <summary>
+        /// Determines whether [is XML whitespace] [the specified c].
+        /// </summary>
+        /// <param name="c">The c.</param>
+        /// <returns>
+        /// 	<c>true</c> if [is XML whitespace] [the specified c]; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool IsXmlWhitespace(char c)
         {
             return (c == 9 || c == 10 || c == 13 || c == 32);
         }
 
-        private static bool IsValidEntityCharacter(char p)
+        /// <summary>
+        /// Determines whether [is valid entity character] [the specified p].
+        /// </summary>
+        /// <param name="p">The p.</param>
+        /// <returns>
+        /// 	<c>true</c> if [is valid entity character] [the specified p]; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool IsValidEntityCharacter(char p)
         {
             return char.IsLetterOrDigit(p) || p == '.' || p == '-' || p == '_' || p == ':';
         }
 
-        private static bool IsValidEntityFirstCharacter(char p)
+        /// <summary>
+        /// Determines whether [is valid entity first character] [the specified p].
+        /// </summary>
+        /// <param name="p">The p.</param>
+        /// <returns>
+        /// 	<c>true</c> if [is valid entity first character] [the specified p]; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool IsValidEntityFirstCharacter(char p)
         {
             return char.IsLetter(p) || p == '_' || p == ':' || p == '#';
         }

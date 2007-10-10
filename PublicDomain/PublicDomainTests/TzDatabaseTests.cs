@@ -1,3 +1,5 @@
+//#define STATIC_INITIALIZATION
+
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -15,6 +17,9 @@ namespace PublicDomain
     public class TzDatabaseTests
     {
         public const string RegionStart = "#region Generated Time Zones";
+        public const string RegionStart1 = "#region Time Zone lookup";
+        public const string RegionStart2 = "#region Time Zone initializations";
+        public const string RegionStart3 = "#region All time zones";
         public const string RegionEnd = "#endregion";
 
         /// <summary>
@@ -162,6 +167,7 @@ namespace PublicDomain
 
         private void CreateTzCode(bool generateList, List<PublicDomain.TzTimeZone.TzZoneInfo> tzzones, int numberOfTabs)
         {
+#if STATIC_INITIALIZATION
             string tabs = new string('\t', numberOfTabs);
             string tabs1 = new string('\t', numberOfTabs - 1);
             Console.WriteLine(@"
@@ -240,6 +246,109 @@ namespace PublicDomain
 
             Console.WriteLine(@"
 {1}{2}", tabs, tabs1, RegionEnd);
+#else
+
+            List<int> hashes = new List<int>();
+            string tabs = new string('\t', numberOfTabs);
+            string tabs1 = new string('\t', numberOfTabs - 1);
+            Console.WriteLine(@"{1}{2}
+", tabs, tabs1, RegionStart1);
+
+            StringBuilder sb = new StringBuilder();
+            StringBuilder sb2 = new StringBuilder();
+            TextWriter sbwriter = new StringWriter(sb), writer;
+
+            TzTimeZone.TzZoneInfo zone;
+            for (int i = 0; i < tzzones.Count; i++)
+            {
+                zone = tzzones[i];
+
+                string rulesArray = "", zonesArray = "";
+
+                PublicDomain.TzDatabase.TzZone[] zones = ArrayUtilities.ConvertToArray<PublicDomain.TzDatabase.TzZone>(zone.Zones);
+                PublicDomain.TzDatabase.TzRule[] rules = ArrayUtilities.ConvertToArray<PublicDomain.TzDatabase.TzRule>(zone.Rules);
+
+                // Remove rule duplicates and sort both lists
+
+                zonesArray = SortZones(zonesArray, zones);
+
+                rulesArray = SortRules(rulesArray, rules);
+
+                if (NeedsFunction(i))
+                {
+                    writer = sbwriter;
+
+                    int hash = zone.ZoneName.GetHashCode();
+                    if (hashes.Contains(hash))
+                    {
+                        throw new BaseException("Hash code collission {0}", hash);
+                    }
+                    hashes.Add(hash);
+
+                    string funcName = CodeUtilities.StripNonIdentifierCharacters(Language.CSharp, zone.ZoneName) + '_' + i;
+                    Console.WriteLine(@"{2}case {3}:
+{0}zoneInfo = InitializeZones{1}(); break;", tabs, funcName, tabs1, hash);
+                    writer.WriteLine(@"{1}private static PublicDomain.TzTimeZone.TzZoneInfo InitializeZones{0}()
+{1}{{", funcName, tabs1);
+                }
+                else
+                {
+                    writer = Console.Out;
+                }
+
+                writer.WriteLine(@"{3}return new PublicDomain.TzTimeZone.TzZoneInfo(""{0}"", {1}, {2});", zone.ZoneName, zonesArray, rulesArray, tabs);
+
+                if (sb2.Length > 0)
+                {
+                    sb2.Append(",");
+                }
+                sb2.AppendFormat("\"{0}\"", zone.ZoneName);
+
+                //if (generateList)
+                //{
+                //    writer.WriteLine(@"{3}zoneList.Add(zone);", zone.ZoneName, zonesArray, rulesArray, tabs);
+                //}
+
+                if (NeedsFunction(i))
+                {
+                    writer.WriteLine(@"{0}}}
+", tabs1);
+                }
+                else
+                {
+                    writer.WriteLine();
+                }
+            }
+
+            Console.WriteLine(@"
+{0}
+", RegionEnd);
+
+            if (sb2.Length > 0)
+            {
+                Console.WriteLine();
+                Console.WriteLine(RegionStart3);
+                Console.WriteLine(@"
+{1}private static void InitializeAllZones()
+{1}{{
+{1}    string[] allZones = new string[] {{{0}}};
+{1}    foreach (string zone in allZones)
+{1}    {{
+{1}        GetTimeZone(zone);
+{1}    }}
+{1}}}
+", sb2.ToString(), tabs);
+                Console.WriteLine(RegionEnd);
+                Console.WriteLine();
+            }
+
+            if (sb.Length > 0)
+            {
+                Console.WriteLine(RegionStart2);
+                Console.Write(sb);
+                Console.WriteLine(RegionEnd);
+            }
+#endif
         }
 
         private static string SortZones(string zonesArray, PublicDomain.TzDatabase.TzZone[] zones)

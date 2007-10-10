@@ -16,7 +16,7 @@ namespace PublicDomain
         /// Serializes the object to binary stream.
         /// </summary>
         /// <param name="o">The o.</param>
-        /// <returns></returns>
+        /// <returns>A closed MemoryStream</returns>
         public static MemoryStream SerializeObjectToBinaryStream(object o)
         {
             using (MemoryStream ms = new MemoryStream())
@@ -34,7 +34,7 @@ namespace PublicDomain
         /// <returns></returns>
         public static byte[] SerializeObjectToBinary(object o)
         {
-            return SerializeObjectToBinaryStream(o).GetBuffer();
+            return SerializeObjectToBinaryStream(o).ToArray();
         }
 
         /// <summary>

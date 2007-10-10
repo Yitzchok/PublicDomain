@@ -298,5 +298,17 @@ namespace PublicDomain
             Console.WriteLine(zone.ToLocalTime(DateTime.SpecifyKind(DateTime.Parse("2007-10-28 01:00"), DateTimeKind.Utc)));
             //: "10/28/2007 4:00:00 AM"
         }
+
+        [Test]
+        public void TestInitializationTime()
+        {
+            long start = DateTime.Now.Ticks;
+
+            Console.WriteLine(TzTimeZone.ZoneUsEastern.GetAbbreviation());
+            Console.WriteLine(TzTimeZone.GetTimeZone(TzConstants.TimezoneAmericaNewYork).GetAbbreviation());
+
+            long end = DateTime.Now.Ticks;
+            Console.WriteLine(end - start);
+        }
     }
 }

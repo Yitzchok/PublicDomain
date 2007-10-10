@@ -744,6 +744,10 @@ namespace PublicDomain
                     {
                         result = result.Replace("%s", modifier);
                     }
+                    else
+                    {
+                        result = result.Replace("%s", string.Empty);
+                    }
                 }
                 return result;
             }

@@ -280,6 +280,20 @@ namespace PublicDomain
         }
 
         /// <summary>
+        /// Saves the text reader to file.
+        /// </summary>
+        /// <param name="stream">The stream.</param>
+        /// <param name="newFile">The new file.</param>
+        public static void SaveTextReaderToFile(TextReader stream, string newFile)
+        {
+            // Now, write out the file
+            using (StreamWriter fs = new StreamWriter(newFile))
+            {
+                fs.Write(stream.ReadToEnd());
+            }
+        }
+
+        /// <summary>
         /// Combines the trackbacks in path.
         /// </summary>
         /// <param name="uri">The URI.</param>

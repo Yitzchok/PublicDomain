@@ -45,6 +45,32 @@ namespace PublicDomain
         }
 
         /// <summary>
+        /// Joins.
+        /// </summary>
+        /// <param name="separator">The separator.</param>
+        /// <param name="chars">The chars.</param>
+        /// <returns></returns>
+        public static string Join(string separator, params char[] chars)
+        {
+            string result = null;
+
+            if (chars != null)
+            {
+                int l = chars.Length;
+                for (int i = 0; i < l; i++)
+                {
+                    if (i > 0)
+                    {
+                        result += separator;
+                    }
+                    result += chars[i];
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
         /// Gets the bytes from string.
         /// </summary>
         /// <param name="str">The STR.</param>

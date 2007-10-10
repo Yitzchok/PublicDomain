@@ -40,7 +40,17 @@ namespace PublicDomain.Xml
         protected override bool FinishNewElement(XmlElement el)
         {
             string name = el.LocalName.ToLower();
-            return name == "br" || name == "meta" || name == "link";
+            return name == "br" ||
+                name == "meta" ||
+                name == "link" ||
+                name == "base" ||
+                name == "col" ||
+                name == "frame" ||
+                name == "area" ||
+                name == "img" ||
+                name == "hr" ||
+                name == "param" ||
+                name == "input";
         }
 
         /// <summary>
@@ -70,7 +80,7 @@ namespace PublicDomain.Xml
         /// <returns></returns>
         protected override bool AddNewElementToParent(XmlElement el)
         {
-            if (m_current != null && m_current.Name.ToLower() == "option" && el.Name.ToLower() == "option")
+            if (m_current != null && m_current.Name.ToLower() == "input" && el.Name.ToLower() == "input")
             {
                 //return true;
             }
