@@ -12,6 +12,9 @@ Simon Mourier
 
 Version History
 ===============
+V0.2.28.0
+	[kevgrig@gmail.com]
+		* Added ReaderWriterLock to TzTimeZone.GetTimeZone
 V0.2.27.0
 	[kevgrig@gmail.com]
 		* Changed TzTimeZone from static initialization to lazyily loading time zones

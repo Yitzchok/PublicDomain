@@ -14,7 +14,7 @@ namespace PublicDomain
         /// <summary>
         /// / and \
         /// </summary>
-        public static readonly char[] TrackbackChars = new char[] { '\\', '/' };
+        public static readonly char[] TrackbackChars = new char[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar };
 
         /// <summary>
         /// file:///
@@ -27,14 +27,28 @@ namespace PublicDomain
         }
 
         /// <summary>
-        /// Ensures the directory ending.
+        /// Ensures the directory ending ref.
         /// </summary>
         /// <param name="directory">The directory.</param>
         public static void EnsureDirectoryEndingRef(ref string directory)
         {
-            if (directory != null && directory[directory.Length - 1] != '\\')
+            EnsureDirectoryEndingRef(ref directory, Path.DirectorySeparatorChar);
+        }
+
+        /// <summary>
+        /// Ensures the directory ending.
+        /// </summary>
+        /// <param name="directory">The directory.</param>
+        /// <param name="appendChar">The append char.</param>
+        public static void EnsureDirectoryEndingRef(ref string directory, char appendChar)
+        {
+            if (directory != null)
             {
-                directory += '\\';
+                char lastChar = directory[directory.Length - 1];
+                if (lastChar != Path.DirectorySeparatorChar && lastChar != Path.AltDirectorySeparatorChar)
+                {
+                    directory += appendChar;
+                }
             }
         }
 
@@ -46,6 +60,18 @@ namespace PublicDomain
         public static string EnsureDirectoryEnding(string directory)
         {
             EnsureDirectoryEndingRef(ref directory);
+            return directory;
+        }
+
+        /// <summary>
+        /// Ensures the directory ending.
+        /// </summary>
+        /// <param name="directory">The directory.</param>
+        /// <param name="appendChar">The append char.</param>
+        /// <returns></returns>
+        public static string EnsureDirectoryEnding(string directory, char appendChar)
+        {
+            EnsureDirectoryEndingRef(ref directory, appendChar);
             return directory;
         }
 
@@ -62,7 +88,7 @@ namespace PublicDomain
                 return path1;
             }
 
-            if (path2[0] == '\\' || path2[0] == '/')
+            if (path2[0] == Path.DirectorySeparatorChar || path2[0] == Path.AltDirectorySeparatorChar)
             {
                 path2 = path2.Substring(1);
             }
@@ -189,7 +215,7 @@ namespace PublicDomain
             string tempFile = Path.GetTempFileName();
 
             // Find the last slash
-            int lastSlash = tempFile.LastIndexOf('\\');
+            int lastSlash = tempFile.LastIndexOf(Path.DirectorySeparatorChar);
 
             string filePart = tempFile.Substring(lastSlash + 1);
 

@@ -12,7 +12,7 @@ namespace PublicDomain
         /// <summary>
         /// 
         /// </summary>
-        public const string PublicDomainMainVersion = "0.2.27";
+        public const string PublicDomainMainVersion = "0.2.28";
 
         /// <summary>
         /// 
