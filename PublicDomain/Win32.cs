@@ -17,6 +17,8 @@ namespace PublicDomain
     /// </summary>
     public static class Win32
     {
+        private static List<PublicDomain.Win32.Win32Structures.TIME_ZONE_INFORMATION> s_systemTimeZones;
+
         /// <summary>
         /// Gets the free disk space of the main system volume.
         /// </summary>
@@ -1898,6 +1900,34 @@ namespace PublicDomain
                 IntPtr hJob,
                 IntPtr hProcess
             );
+
+            /// <summary>
+            /// Gets the system time.
+            /// </summary>
+            /// <param name="st">The st.</param>
+            [DllImport("kernel32.dll", SetLastError = true)]
+            public static extern bool GetSystemTime(
+                out PublicDomain.Win32.Win32Structures.SYSTEMTIME st
+            );
+
+            /// <summary>
+            /// Gets the local time.
+            /// </summary>
+            /// <param name="st">The st.</param>
+            [DllImport("kernel32.dll", SetLastError = true)]
+            public static extern bool GetLocalTime(
+                out PublicDomain.Win32.Win32Structures.SYSTEMTIME st
+            );
+
+            /// <summary>
+            /// Sets the time zone information.
+            /// </summary>
+            /// <param name="lpTimeZoneInformation">The lp time zone information.</param>
+            /// <returns></returns>
+            [DllImport("kernel32.dll")]
+            public static extern bool SetTimeZoneInformation(
+                [In] ref PublicDomain.Win32.Win32Structures.TIME_ZONE_INFORMATION lpTimeZoneInformation
+            );
         }
 
         /// <summary>
@@ -2776,6 +2806,112 @@ namespace PublicDomain
                 /// </summary>
                 public int SchedulingClass;
             }
+
+            /// <summary>
+            /// 
+            /// </summary>
+            [StructLayout(LayoutKind.Sequential)]
+            public struct SYSTEMTIME
+            {
+                /// <summary>
+                /// 
+                /// </summary>
+                [MarshalAs(UnmanagedType.U2)]
+                public short wYear;
+
+                /// <summary>
+                /// 
+                /// </summary>
+                [MarshalAs(UnmanagedType.U2)]
+                public short wMonth;
+
+                /// <summary>
+                /// 
+                /// </summary>
+                [MarshalAs(UnmanagedType.U2)]
+                public short wDayOfWeek;
+
+                /// <summary>
+                /// 
+                /// </summary>
+                [MarshalAs(UnmanagedType.U2)]
+                public short wDay;
+
+                /// <summary>
+                /// 
+                /// </summary>
+                [MarshalAs(UnmanagedType.U2)]
+                public short wHour;
+
+                /// <summary>
+                /// 
+                /// </summary>
+                [MarshalAs(UnmanagedType.U2)]
+                public short wMinute;
+
+                /// <summary>
+                /// 
+                /// </summary>
+                [MarshalAs(UnmanagedType.U2)]
+                public short wSecond;
+
+                /// <summary>
+                /// 
+                /// </summary>
+                [MarshalAs(UnmanagedType.U2)]
+                public short wMilliseconds;
+            }
+
+            /// <summary>
+            /// The TimeZoneInformation structure specifies information specific to the time zone.
+            /// </summary>
+            [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+            public struct TIME_ZONE_INFORMATION
+            {
+                /// <summary>
+                /// Current bias for local time translation on this computer, in minutes. The bias is the difference, in minutes, between Coordinated Universal Time (UTC) and local time. All translations between UTC and local time are based on the following formula:
+                /// <para>UTC = local time + bias</para>
+                /// <para>This member is required.</para>
+                /// </summary>
+                public int bias;
+
+                /// <summary>
+                /// Pointer to a null-terminated string associated with standard time. For example, "EST" could indicate Eastern Standard Time. The string will be returned unchanged by the GetTimeZoneInformation function. This string can be empty.
+                /// </summary>
+                [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
+                public string standardName;
+
+                /// <summary>
+                /// A SystemTime structure that contains a date and local time when the transition from daylight saving time to standard time occurs on this operating system. If the time zone does not support daylight saving time or if the caller needs to disable daylight saving time, the wMonth member in the SystemTime structure must be zero. If this date is specified, the DaylightDate value in the TimeZoneInformation structure must also be specified. Otherwise, the system assumes the time zone data is invalid and no changes will be applied.
+                /// <para>To select the correct day in the month, set the wYear member to zero, the wHour and wMinute members to the transition time, the wDayOfWeek member to the appropriate weekday, and the wDay member to indicate the occurence of the day of the week within the month (first through fifth).</para>
+                /// <para>Using this notation, specify the 2:00a.m. on the first Sunday in April as follows: wHour = 2, wMonth = 4, wDayOfWeek = 0, wDay = 1. Specify 2:00a.m. on the last Thursday in October as follows: wHour = 2, wMonth = 10, wDayOfWeek = 4, wDay = 5.</para>
+                /// </summary>
+                public SYSTEMTIME standardDate;
+
+                /// <summary>
+                /// Bias value to be used during local time translations that occur during standard time. This member is ignored if a value for the StandardDate member is not supplied.
+                /// <para>This value is added to the value of the Bias member to form the bias used during standard time. In most time zones, the value of this member is zero.</para>
+                /// </summary>
+                public int standardBias;
+
+                /// <summary>
+                /// Pointer to a null-terminated string associated with daylight saving time. For example, "PDT" could indicate Pacific Daylight Time. The string will be returned unchanged by the GetTimeZoneInformation function. This string can be empty.
+                /// </summary>
+                [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
+                public string daylightName;
+
+                /// <summary>
+                /// A SystemTime structure that contains a date and local time when the transition from standard time to daylight saving time occurs on this operating system. If the time zone does not support daylight saving time or if the caller needs to disable daylight saving time, the wMonth member in the SystemTime structure must be zero. If this date is specified, the StandardDate value in the TimeZoneInformation structure must also be specified. Otherwise, the system assumes the time zone data is invalid and no changes will be applied.
+                /// <para>To select the correct day in the month, set the wYear member to zero, the wHour and wMinute members to the transition time, the wDayOfWeek member to the appropriate weekday, and the wDay member to indicate the occurence of the day of the week within the month (first through fifth).</para>
+                /// </summary>
+                public SYSTEMTIME daylightDate;
+
+                /// <summary>
+                /// Bias value to be used during local time translations that occur during daylight saving time. This member is ignored if a value for the DaylightDate member is not supplied.
+                /// <para>This value is added to the value of the Bias member to form the bias used during daylight saving time. In most time zones, the value of this member is –60.</para>
+                /// </summary>
+                public int daylightBias;
+            }
         }
 
         /// <summary>
@@ -3025,6 +3161,104 @@ namespace PublicDomain
         public static void GetLastErrorThrow()
         {
             throw new Win32Exception(GetLastError());
+        }
+
+        /// <summary>
+        /// Gets the local time.
+        /// </summary>
+        /// <returns></returns>
+        public static DateTime GetLocalTime()
+        {
+            PublicDomain.Win32.Win32Structures.SYSTEMTIME result;
+            if (ExternalMethods.GetLocalTime(out result))
+            {
+                return new DateTime(result.wYear, result.wMonth, result.wDay, result.wHour, result.wMinute, result.wSecond, result.wMilliseconds, DateTimeKind.Local);
+            }
+            else
+            {
+                GetLastErrorThrow();
+            }
+            return DateTime.MinValue;
+        }
+
+        /// <summary>
+        /// Gets the system time.
+        /// </summary>
+        /// <returns></returns>
+        public static DateTime GetSystemTime()
+        {
+            PublicDomain.Win32.Win32Structures.SYSTEMTIME result;
+            if (ExternalMethods.GetSystemTime(out result))
+            {
+                return new DateTime(result.wYear, result.wMonth, result.wDay, result.wHour, result.wMinute, result.wSecond, result.wMilliseconds, DateTimeKind.Utc);
+            }
+            else
+            {
+                GetLastErrorThrow();
+            }
+            return DateTime.MinValue;
+        }
+
+        /// <summary>
+        /// Gets the local time tz.
+        /// </summary>
+        /// <returns></returns>
+        public static TzDateTime GetLocalTimeTz()
+        {
+            DateTime dt = GetLocalTime();
+            return new TzDateTime(dt, TzTimeZone.CurrentTimeZone);
+        }
+
+        /// <summary>
+        /// Gets the system time tz.
+        /// </summary>
+        /// <returns></returns>
+        public static TzDateTime GetSystemTimeTz()
+        {
+            DateTime dt = GetSystemTime();
+            return new TzDateTime(dt, TzTimeZone.ZoneUTC);
+        }
+
+        /// <summary>
+        /// Sets the system time zone.
+        /// </summary>
+        /// <param name="tzInfo">The tz info.</param>
+        public static void SetSystemTimeZone(PublicDomain.Win32.Win32Structures.TIME_ZONE_INFORMATION tzInfo)
+        {
+            // TODO as per support article, report warning that DateTime.Now shouldn't be used?
+            // http://support.microsoft.com/kb/555035
+
+            if (!ExternalMethods.SetTimeZoneInformation(ref tzInfo))
+            {
+                GetLastErrorThrow();
+            }
+        }
+
+        /// <summary>
+        /// Gets the system time zones.
+        /// </summary>
+        /// <returns></returns>
+        public static List<PublicDomain.Win32.Win32Structures.TIME_ZONE_INFORMATION> GetSystemTimeZones()
+        {
+            if (s_systemTimeZones == null)
+            {
+                s_systemTimeZones = new List<Win32Structures.TIME_ZONE_INFORMATION>();
+                using (RegistryKey keys = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Time Zones"))
+                {
+                    foreach (string key in keys.GetSubKeyNames())
+                    {
+                        using (RegistryKey zone = keys.OpenSubKey(key))
+                        {
+                            PublicDomain.Win32.Win32Structures.TIME_ZONE_INFORMATION tzInfo = new PublicDomain.Win32.Win32Structures.TIME_ZONE_INFORMATION();
+                            tzInfo.standardName = (string)zone.GetValue("Dlt");
+                            tzInfo.daylightName = (string)zone.GetValue("Display");
+                            tzInfo.bias = BitConverter.ToInt32((byte[])zone.GetValue("TZI"), 0);
+                            s_systemTimeZones.Add(tzInfo);
+                        }
+                    }
+                }
+            }
+            return s_systemTimeZones;
         }
     }
 }

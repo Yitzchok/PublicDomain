@@ -101,17 +101,17 @@ namespace PublicDomain
             s_mainTimeZones[DateTimeUtlities.ConvertTimeSpanToDouble("13:00")] = TzConstants.TimezonePacificEnderbury;
             s_mainTimeZones[DateTimeUtlities.ConvertTimeSpanToDouble("14:00")] = TzConstants.TimezonePacificKiritimati;
 
-            // Get the current time zone
-            TimeZone cur = TimeZone.CurrentTimeZone;
-            TimeSpan utcOffset = cur.GetUtcOffset(DateTime.MinValue);
-            s_currentTimeZone = GetTimeZoneByOffset(utcOffset);
-
             // Initialize "common" time zones
             ZoneUTC = TzTimeZone.GetTimeZone(TzConstants.TimezoneUtc);
             ZoneUsEastern = TzTimeZone.GetTimeZone(TzConstants.TimezoneUsEastern);
             ZoneUsCentral = TzTimeZone.GetTimeZone(TzConstants.TimezoneUsCentral);
             ZoneUsMountain = TzTimeZone.GetTimeZone(TzConstants.TimezoneUsMountain);
             ZoneUsPacific = TzTimeZone.GetTimeZone(TzConstants.TimezoneUsPacific);
+
+            // Get the current time zone
+            TimeZone cur = TimeZone.CurrentTimeZone;
+            TimeSpan utcOffset = cur.GetUtcOffset(DateTime.MinValue);
+            s_currentTimeZone = GetTimeZoneByOffset(utcOffset);
         }
 
         /// <summary>

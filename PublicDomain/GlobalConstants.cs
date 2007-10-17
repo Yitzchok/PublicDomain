@@ -12,7 +12,7 @@ namespace PublicDomain
         /// <summary>
         /// 
         /// </summary>
-        public const string PublicDomainMainVersion = "0.2.28";
+        public const string PublicDomainMainVersion = "0.2.29";
 
         /// <summary>
         /// 
@@ -68,6 +68,12 @@ namespace PublicDomain
         /// Always ends in a trailing slash.
         /// </summary>
         public const string PublicDomainNamespace = "http://www.codeplex.com/PublicDomain/";
+
+        /// <summary>
+        /// Always ends in a trailing slash.
+        /// C:\WINDOWS\Microsoft.NET\Framework\v2.0.50727\
+        /// </summary>
+        public const string DotNetFrameworkLocation20 = @"C:\WINDOWS\Microsoft.NET\Framework\v2.0.50727\";
 
         /// <summary>
         /// The number of bits in 1 Byte (8)

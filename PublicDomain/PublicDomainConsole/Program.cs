@@ -12,7 +12,10 @@ namespace PublicDomainConsole
     {
         public static void Main(string[] args)
         {
-            Console.WriteLine(PublicDomain.TzTimeZone.GetTimeZone("America/Phoenix").GetAbbreviation());
+            Console.WriteLine(Win32.GetSystemTime());
+            Console.WriteLine(Win32.GetSystemTimeTz().ToString());
+            Console.WriteLine(Win32.GetLocalTime());
+            Console.WriteLine(Win32.GetLocalTimeTz().ToStringLocal());
             Console.ReadKey(true);
         }
     }

@@ -63,6 +63,7 @@
     <Compile Include="AspRuntimeHost\wwAspRuntimeHost.cs" />
     <Compile Include="AspRuntimeHost\wwAspRuntimeProxy.cs" />
     <Compile Include="AspRuntimeHost\wwWorkerRequest.cs" />
+    <Compile Include="DisposableCallback.cs" />
     <Compile Include="Exceptions\BaseException.cs" />
     <Compile Include="CachedPropertiesProvider.cs" />
     <Compile Include="CharUtilities.cs" />
@@ -150,6 +151,7 @@
     <Compile Include="IMonotonicNumberGenerator.cs" />
     <Compile Include="INumberGenerator.cs" />
     <Compile Include="IRandomNumberGenerator.cs" />
+    <Compile Include="Util\StringContainer.cs" />
     <Compile Include="Xml\LenientHtmlDocument.cs" />
     <Compile Include="Xml\LenientHtmlToTextDocument.cs" />
     <Compile Include="Xml\LenientXmlDocument.cs" />

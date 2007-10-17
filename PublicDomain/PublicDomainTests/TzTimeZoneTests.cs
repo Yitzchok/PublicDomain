@@ -310,5 +310,19 @@ namespace PublicDomain
             long end = DateTime.Now.Ticks;
             Console.WriteLine(end - start);
         }
+
+        [Test]
+        public void TestBug13252()
+        {
+            foreach (string key in new string[] { "Pacific/Auckland", "Australia/Adelaide", "America/Sao_Paulo" })
+            {
+                TzTimeZone zone = TzTimeZone.GetTimeZone(key);
+                DaylightTime daylightTime = zone.GetDaylightChanges(DateTime.Now.Year);
+                Console.WriteLine(zone.StandardName);
+                Console.WriteLine("Start: {0}", daylightTime.Start);
+                Console.WriteLine("End: {0}", daylightTime.End);
+                Console.WriteLine();
+            }
+        }
     }
 }

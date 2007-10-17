@@ -4,6 +4,7 @@ using System.Text;
 using NUnit.Framework;
 using System.Diagnostics;
 using System.IO;
+using PublicDomain.Util;
 
 namespace PublicDomain
 {
@@ -42,6 +43,25 @@ namespace PublicDomain
             }
 
             p.Kill();
+        }
+
+        /// <summary>
+        /// Tests the dispoable callback.
+        /// </summary>
+        [Test]
+        public void TestDispoableCallback()
+        {
+            bool hit = false;
+            using (new DisposableCallback(delegate() { hit = true; }))
+            {
+            }
+            Assert.IsTrue(hit);
+
+            StringContainer obj = new StringContainer(bool.FalseString);
+            using (new DisposableCallback(delegate(object rock) { ((StringContainer)rock).UnderlyingString = bool.TrueString; }, obj))
+            {
+            }
+            Assert.IsTrue(obj.UnderlyingString == bool.TrueString);
         }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using NUnit.Framework;
 using System.Runtime.InteropServices;
+using Microsoft.Win32;
 
 namespace PublicDomain
 {
@@ -124,6 +125,19 @@ namespace PublicDomain
             {
                 Console.WriteLine("Uninstalling " + program.DisplayName);
                 program.Uninstall();
+            }
+        }
+
+        [Test]
+        public void TestGetTimes()
+        {
+            Console.WriteLine(Win32.GetLocalTime());
+            Console.WriteLine(Win32.GetSystemTime());
+
+            List<PublicDomain.Win32.Win32Structures.TIME_ZONE_INFORMATION> zones = Win32.GetSystemTimeZones();
+            foreach (PublicDomain.Win32.Win32Structures.TIME_ZONE_INFORMATION zone in zones)
+            {
+                Console.WriteLine(zone.standardName);
             }
         }
     }

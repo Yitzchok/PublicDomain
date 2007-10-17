@@ -12,6 +12,11 @@ Simon Mourier
 
 Version History
 ===============
+V0.2.29.0
+	[kevgrig@gmail.com]
+		* Fixed BUG http://www.codeplex.com/publicdomain/WorkItem/View.aspx?WorkItemId=13336
+		* Added Win32.GetLocalTime and Win32.GetSystemTime
+		* Added DisposableCallback
 V0.2.28.0
 	[kevgrig@gmail.com]
 		* Added ReaderWriterLock to TzTimeZone.GetTimeZone
