@@ -335,10 +335,12 @@ namespace PublicDomain
                 slashIndex = uri.LastIndexOfAny(TrackbackChars, trackbackIndex - 2);
                 if (slashIndex == -1)
                 {
-                    break;
+                    uri = uri.Remove(0, trackbackIndex + 2);
                 }
-
-                uri = uri.Remove(slashIndex, trackbackIndex - slashIndex + 2);
+                else
+                {
+                    uri = uri.Remove(slashIndex, trackbackIndex - slashIndex + 2);
+                }
 
                 trackbackIndex = GetTrackbackIndex(uri);
             }

@@ -12,6 +12,9 @@ Simon Mourier
 
 Version History
 ===============
+V0.2.30.0
+	[kevgrig@gmail.com]
+		* Fixed bug in FileSystemUtilities.CombineTrackbacksInPath
 V0.2.29.0
 	[kevgrig@gmail.com]
 		* Fixed BUG http://www.codeplex.com/publicdomain/WorkItem/View.aspx?WorkItemId=13336

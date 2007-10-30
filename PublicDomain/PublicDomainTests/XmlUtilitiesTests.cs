@@ -19,6 +19,7 @@ namespace PublicDomain
         public void play()
         {
             Console.WriteLine(XmlUtilities.FormatXml(@"<html><head><title>Hello World</title></head><body><h1>Hello World</h1></body></html>"));
+            Console.WriteLine(XmlUtilities.CDataStart + XmlUtilities.CDataStart);
         }
     }
 }

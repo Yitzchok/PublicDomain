@@ -228,6 +228,38 @@ namespace PublicDomain.Config
         }
 
         /// <summary>
+        /// Gets the bool.
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <returns></returns>
+        public bool GetBool(string key)
+        {
+            return GetBool(key, false);
+        }
+
+        /// <summary>
+        /// Gets the bool.
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <param name="defaultValue">if set to <c>true</c> [default value].</param>
+        /// <returns></returns>
+        public bool GetBool(string key, bool defaultValue)
+        {
+            return ConversionUtilities.ParseBool(this[key], defaultValue);
+        }
+
+        /// <summary>
+        /// Gets the enum.
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <param name="defaultValue">The default value.</param>
+        /// <returns></returns>
+        public T GetEnum<T>(string key, T defaultValue)
+        {
+            return General.TryParseEnum<T>(this[key], defaultValue);
+        }
+
+        /// <summary>
         /// Gets the int.
         /// </summary>
         /// <param name="key">The key.</param>

@@ -27,6 +27,7 @@ namespace PublicDomain
         /// Initializes a new instance of the <see cref="DisposableCallback"/> class.
         /// </summary>
         /// <param name="callback">The callback.</param>
+        /// <param name="rock">The rock.</param>
         public DisposableCallback(CallbackWithRock callback, object rock)
         {
             m_callback2 = callback;

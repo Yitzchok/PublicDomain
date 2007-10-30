@@ -12,24 +12,29 @@ namespace PublicDomain
     public static class XmlUtilities
     {
         /// <summary>
-        /// 
+        /// &lt;![CDATA[
         /// </summary>
         public const string CDataStart = "<![CDATA[";
 
         /// <summary>
-        /// 
+        /// ]]&gt;
         /// </summary>
         public const string CDataEnd = "]]>";
 
         /// <summary>
-        /// 
+        /// &lt;!--
         /// </summary>
         public const string CommentStart = "<!--";
 
         /// <summary>
-        /// 
+        /// --&gt;
         /// </summary>
         public const string CommentEnd = "-->";
+
+        /// <summary>
+        /// &lt;?xml version="1.0" encoding="utf-8"?&gt;
+        /// </summary>
+        public const string DefaultXmlProlog = @"<?xml version=""1.0"" encoding=""utf-8""?>";
 
         /// <summary>
         /// Formats the XML.

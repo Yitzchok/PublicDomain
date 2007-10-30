@@ -34,5 +34,40 @@ namespace PublicDomain
         {
             return (x & flag) == 0;
         }
+
+        /// <summary>
+        /// Parses the enum.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <returns></returns>
+        [PendingPublicDomain]
+        public static T ParseEnum<T>(string str)
+        {
+            return (T)Enum.Parse(typeof(T), str, true);
+        }
+
+        /// <summary>
+        /// Tries the parse enum.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <param name="defaultValue">The default value.</param>
+        /// <returns></returns>
+        [PendingPublicDomain]
+        public static T TryParseEnum<T>(string str, T defaultValue)
+        {
+            if (!string.IsNullOrEmpty(str))
+            {
+                str = str.Trim();
+                string[] names = Enum.GetNames(typeof(T));
+                foreach (string name in names)
+                {
+                    if (name.Equals(str, StringComparison.CurrentCultureIgnoreCase))
+                    {
+                        return ParseEnum<T>(name);
+                    }
+                }
+            }
+            return defaultValue;
+        }
     }
 }
