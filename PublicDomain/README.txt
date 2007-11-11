@@ -12,6 +12,10 @@ Simon Mourier
 
 Version History
 ===============
+V0.2.31.0
+	[kevgrig@gmail.com]
+		* Fixed entity replacement within an attribute in LenientXmlDocument
+		* Fixed BUG http://www.codeplex.com/publicdomain/WorkItem/View.aspx?WorkItemId=13637
 V0.2.30.0
 	[kevgrig@gmail.com]
 		* Fixed bug in FileSystemUtilities.CombineTrackbacksInPath

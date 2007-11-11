@@ -76,13 +76,16 @@ namespace PublicDomain.Xml
                     case State.EndComment:
                     case State.EndCDATA:
                     case State.InCDATA:
-                        if (m_isAllWhitespace && m_state != State.InCDATA)
+                        if (m_preEntityState != State.StartAttributeValue)
                         {
-                            m_current.AppendChild(CreateWhitespace(token));
-                        }
-                        else
-                        {
-                            m_current.AppendChild(CreateTextNode(token));
+                            if (m_isAllWhitespace && m_state != State.InCDATA)
+                            {
+                                m_current.AppendChild(CreateWhitespace(token));
+                            }
+                            else
+                            {
+                                m_current.AppendChild(CreateTextNode(token));
+                            }
                         }
                         break;
                     case State.StartEntity:

@@ -240,7 +240,7 @@ namespace PublicDomain.Xml
                         continue;
 
                     case State.StartAttributeValue:
-                        if (c == '\0' && c == '/')
+                        if (m_attributeValueMatch == '\0' && c == '/')
                         {
                             ContextSwitch(State.EndElementImmediate);
                             continue;
@@ -258,6 +258,12 @@ namespace PublicDomain.Xml
                         else if (m_attributeValueMatch == '\0' && IsXmlWhitespace(c))
                         {
                             ContextSwitch(State.EndAttributeValue);
+                            continue;
+                        }
+                        else if (c == '&')
+                        {
+                            m_preEntityState = m_state;
+                            ContextSwitch(State.StartEntity);
                             continue;
                         }
 
@@ -497,15 +503,16 @@ namespace PublicDomain.Xml
                         else if (c == ';' && m_sb.Length > 0)
                         {
                             ContextSwitch(m_preEntityState);
+                            m_preEntityState = State.None;
                             continue;
                         }
                         else
                         {
                             m_sb.Insert(0, "&");
-                            // TODO why not switch to m_preEntityState?
                             m_state = State.None;
                             m_isAllWhitespace = false;
                             ContextSwitch(m_preEntityState);
+                            m_preEntityState = State.None;
 
                             // redo this character
                             i--;
@@ -614,11 +621,25 @@ namespace PublicDomain.Xml
                             string entityValue = ConvertEntityToValue(token);
                             if (entityValue != null)
                             {
-                                InternalAppendChild(CreateTextNode(entityValue), false);
+                                if (m_attribute != null)
+                                {
+                                    m_attribute.Value += entityValue;
+                                }
+                                else
+                                {
+                                    InternalAppendChild(CreateTextNode(entityValue), false);
+                                }
                             }
                             else
                             {
-                                InternalAppendChild(CreateEntityReference(token), false);
+                                if (m_attribute != null)
+                                {
+                                    m_attribute.Value += "&" + token + ";";
+                                }
+                                else
+                                {
+                                    InternalAppendChild(CreateEntityReference(token), false);
+                                }
                             }
                         }
 
@@ -673,7 +694,7 @@ namespace PublicDomain.Xml
                         break;
 
                     case State.StartAttributeValue:
-                        m_attribute.Value = token;
+                        m_attribute.Value += token;
                         PostProcessSetAttributeValue(m_attribute);
                         break;
 
@@ -681,13 +702,20 @@ namespace PublicDomain.Xml
                     case State.EndElement:
                     case State.EndComment:
                     case State.EndCDATA:
-                        if (m_isAllWhitespace)
+                        if (newState == State.StartAttributeValue)
                         {
-                            InternalAppendChild(CreateWhitespace(token), false);
+                            m_attribute.Value += token;
                         }
                         else
                         {
-                            InternalAppendChild(CreateTextNode(token), false);
+                            if (m_isAllWhitespace)
+                            {
+                                InternalAppendChild(CreateWhitespace(token), false);
+                            }
+                            else
+                            {
+                                InternalAppendChild(CreateTextNode(token), false);
+                            }
                         }
                         break;
 
@@ -704,6 +732,11 @@ namespace PublicDomain.Xml
                     default:
                         break;
                 }
+            }
+
+            if (newState == State.EndElement || newState == State.EndElementImmediate)
+            {
+                m_attribute = null;
             }
 
             // now check the NEW state

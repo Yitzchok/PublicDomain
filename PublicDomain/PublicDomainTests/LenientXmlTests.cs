@@ -151,8 +151,9 @@ function test()
             cmp[@"<select><option>a<option>b<option>c</select>"] = @"<select><option>a</option><option>b</option><option>c</option></select>";
             cmp[@"<select><option><br/><option><br/><option><br/></select>"] = @"<select><option><br /></option><option><br /></option><option><br /></option></select>";
             cmp[@"<select><option><title a=""test""/><option><title/><option><title/></select>"] = @"<select><option><title a=""test"" /></option><option><title /></option><option><title /></option></select>";
+            cmp[@"<div width=""&test;"">"] = @"<div width=""blah"" />";
 
-            LenientHtmlDocument doc = new LenientHtmlDocument();
+            LenientHtmlDocument doc = new TestLenientHtmlDocument();
             DoCompare(cmp, doc);
         }
 

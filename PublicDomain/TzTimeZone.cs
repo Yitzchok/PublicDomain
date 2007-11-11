@@ -789,1172 +789,1170 @@ namespace PublicDomain
             TzTimeZone result = null;
             TzZoneInfo zoneInfo;
 
-            if (string.IsNullOrEmpty(tzName))
+            if (!string.IsNullOrEmpty(tzName))
             {
-                throw new ArgumentNullException("tzName");
-            }
+                s_zonesLock.AcquireReaderLock(-1);
 
-            s_zonesLock.AcquireReaderLock(-1);
-
-            try
-            {
-                if (Zones.TryGetValue(tzName, out zoneInfo))
+                try
                 {
-                    result = new TzTimeZone(zoneInfo);
-                }
-                else
-                {
-                    LockCookie writerCookie = s_zonesLock.UpgradeToWriterLock(-1);
-
-                    try
+                    if (Zones.TryGetValue(tzName, out zoneInfo))
                     {
-                        if (Zones.TryGetValue(tzName, out zoneInfo))
+                        result = new TzTimeZone(zoneInfo);
+                    }
+                    else
+                    {
+                        LockCookie writerCookie = s_zonesLock.UpgradeToWriterLock(-1);
+
+                        try
                         {
-                            result = new TzTimeZone(zoneInfo);
-                        }
-                        else
-                        {
-                            // No zone found in the cache, lazily load it
-                            int hash = tzName.GetHashCode();
-                            switch (hash)
+                            if (Zones.TryGetValue(tzName, out zoneInfo))
                             {
-                                #region Time Zone lookup
-
-                                case 1699809948:
-                                    zoneInfo = InitializeZonesAfricaAbidjan_0(); break;
-                                case 98298846:
-                                    zoneInfo = InitializeZonesAfricaAccra_1(); break;
-                                case 1924659262:
-                                    zoneInfo = InitializeZonesAfricaAddis_Ababa_2(); break;
-                                case -271144050:
-                                    zoneInfo = InitializeZonesAfricaAlgiers_3(); break;
-                                case -2143529902:
-                                    zoneInfo = InitializeZonesAfricaAsmara_4(); break;
-                                case -174161434:
-                                    zoneInfo = InitializeZonesAfricaAsmera_5(); break;
-                                case -181251634:
-                                    zoneInfo = InitializeZonesAfricaBamako_6(); break;
-                                case -816933338:
-                                    zoneInfo = InitializeZonesAfricaBangui_7(); break;
-                                case -1576448220:
-                                    zoneInfo = InitializeZonesAfricaBanjul_8(); break;
-                                case 1773318470:
-                                    zoneInfo = InitializeZonesAfricaBissau_9(); break;
-                                case -1863228086:
-                                    zoneInfo = InitializeZonesAfricaBlantyre_10(); break;
-                                case -710904934:
-                                    zoneInfo = InitializeZonesAfricaBrazzaville_11(); break;
-                                case -74562994:
-                                    zoneInfo = InitializeZonesAfricaBujumbura_12(); break;
-                                case -322049060:
-                                    zoneInfo = InitializeZonesAfricaCairo_13(); break;
-                                case -1117939039:
-                                    zoneInfo = InitializeZonesAfricaCasablanca_14(); break;
-                                case 1663369890:
-                                    zoneInfo = InitializeZonesAfricaCeuta_15(); break;
-                                case -321957883:
-                                    zoneInfo = InitializeZonesAfricaConakry_16(); break;
-                                case 2067070973:
-                                    zoneInfo = InitializeZonesAfricaDakar_17(); break;
-                                case -380154334:
-                                    zoneInfo = InitializeZonesAfricaDar_es_Salaam_18(); break;
-                                case -1813688820:
-                                    zoneInfo = InitializeZonesAfricaDjibouti_19(); break;
-                                case 1767067638:
-                                    zoneInfo = InitializeZonesAfricaDouala_20(); break;
-                                case 1454171596:
-                                    zoneInfo = InitializeZonesAfricaEl_Aaiun_21(); break;
-                                case -313710440:
-                                    zoneInfo = InitializeZonesAfricaFreetown_22(); break;
-                                case 66948164:
-                                    zoneInfo = InitializeZonesAfricaGaborone_23(); break;
-                                case -980135484:
-                                    zoneInfo = InitializeZonesAfricaHarare_24(); break;
-                                case -512105597:
-                                    zoneInfo = InitializeZonesAfricaJohannesburg_25(); break;
-                                case -1013176606:
-                                    zoneInfo = InitializeZonesAfricaKampala_26(); break;
-                                case -1630939976:
-                                    zoneInfo = InitializeZonesAfricaKhartoum_27(); break;
-                                case 637685936:
-                                    zoneInfo = InitializeZonesAfricaKigali_28(); break;
-                                case 419344718:
-                                    zoneInfo = InitializeZonesAfricaKinshasa_29(); break;
-                                case 1579392899:
-                                    zoneInfo = InitializeZonesAfricaLagos_30(); break;
-                                case -1407666932:
-                                    zoneInfo = InitializeZonesAfricaLibreville_31(); break;
-                                case -883479161:
-                                    zoneInfo = InitializeZonesAfricaLome_32(); break;
-                                case -79200713:
-                                    zoneInfo = InitializeZonesAfricaLuanda_33(); break;
-                                case 1631941302:
-                                    zoneInfo = InitializeZonesAfricaLubumbashi_34(); break;
-                                case 1802654540:
-                                    zoneInfo = InitializeZonesAfricaLusaka_35(); break;
-                                case 381768142:
-                                    zoneInfo = InitializeZonesAfricaMalabo_36(); break;
-                                case -351483630:
-                                    zoneInfo = InitializeZonesAfricaMaputo_37(); break;
-                                case -688095416:
-                                    zoneInfo = InitializeZonesAfricaMaseru_38(); break;
-                                case -793250853:
-                                    zoneInfo = InitializeZonesAfricaMbabane_39(); break;
-                                case -919985257:
-                                    zoneInfo = InitializeZonesAfricaMogadishu_40(); break;
-                                case -1336849626:
-                                    zoneInfo = InitializeZonesAfricaMonrovia_41(); break;
-                                case -1880736350:
-                                    zoneInfo = InitializeZonesAfricaNairobi_42(); break;
-                                case 945747125:
-                                    zoneInfo = InitializeZonesAfricaNdjamena_43(); break;
-                                case -259335812:
-                                    zoneInfo = InitializeZonesAfricaNiamey_44(); break;
-                                case -1163472296:
-                                    zoneInfo = InitializeZonesAfricaNouakchott_45(); break;
-                                case -1207550306:
-                                    zoneInfo = InitializeZonesAfricaOuagadougou_46(); break;
-                                case 178476176:
-                                    zoneInfo = InitializeZonesAfricaPortoNovo_47(); break;
-                                case 1610569940:
-                                    zoneInfo = InitializeZonesAfricaSao_Tome_48(); break;
-                                case -1380854069:
-                                    zoneInfo = InitializeZonesAfricaTimbuktu_49(); break;
-                                case -820565869:
-                                    zoneInfo = InitializeZonesAfricaTripoli_50(); break;
-                                case -297706703:
-                                    zoneInfo = InitializeZonesAfricaTunis_51(); break;
-                                case 86930643:
-                                    zoneInfo = InitializeZonesAfricaWindhoek_52(); break;
-                                case -672279199:
-                                    zoneInfo = InitializeZonesAmericaAdak_53(); break;
-                                case -268275662:
-                                    zoneInfo = InitializeZonesAmericaAnchorage_54(); break;
-                                case 624675216:
-                                    zoneInfo = InitializeZonesAmericaAnguilla_55(); break;
-                                case 577773012:
-                                    zoneInfo = InitializeZonesAmericaAntigua_56(); break;
-                                case 1856506878:
-                                    zoneInfo = InitializeZonesAmericaAraguaina_57(); break;
-                                case 551556156:
-                                    zoneInfo = InitializeZonesAmericaArgentinaBuenos_Aires_58(); break;
-                                case 1372226152:
-                                    zoneInfo = InitializeZonesAmericaArgentinaCatamarca_59(); break;
-                                case 616354372:
-                                    zoneInfo = InitializeZonesAmericaArgentinaComodRivadavia_60(); break;
-                                case -2077184481:
-                                    zoneInfo = InitializeZonesAmericaArgentinaCordoba_61(); break;
-                                case 904310493:
-                                    zoneInfo = InitializeZonesAmericaArgentinaJujuy_62(); break;
-                                case 721123464:
-                                    zoneInfo = InitializeZonesAmericaArgentinaLa_Rioja_63(); break;
-                                case 1815488101:
-                                    zoneInfo = InitializeZonesAmericaArgentinaMendoza_64(); break;
-                                case -1062774753:
-                                    zoneInfo = InitializeZonesAmericaArgentinaRio_Gallegos_65(); break;
-                                case -1775565078:
-                                    zoneInfo = InitializeZonesAmericaArgentinaSan_Juan_66(); break;
-                                case -1385453932:
-                                    zoneInfo = InitializeZonesAmericaArgentinaTucuman_67(); break;
-                                case -454638599:
-                                    zoneInfo = InitializeZonesAmericaArgentinaUshuaia_68(); break;
-                                case 1687788134:
-                                    zoneInfo = InitializeZonesAmericaAruba_69(); break;
-                                case 1753490127:
-                                    zoneInfo = InitializeZonesAmericaAsuncion_70(); break;
-                                case -1068127747:
-                                    zoneInfo = InitializeZonesAmericaAtikokan_71(); break;
-                                case -1778443841:
-                                    zoneInfo = InitializeZonesAmericaAtka_72(); break;
-                                case 125302678:
-                                    zoneInfo = InitializeZonesAmericaBahia_73(); break;
-                                case 410361629:
-                                    zoneInfo = InitializeZonesAmericaBarbados_74(); break;
-                                case 1694878206:
-                                    zoneInfo = InitializeZonesAmericaBelem_75(); break;
-                                case -1832990201:
-                                    zoneInfo = InitializeZonesAmericaBelize_76(); break;
-                                case 744194341:
-                                    zoneInfo = InitializeZonesAmericaBlancSablon_77(); break;
-                                case 836424640:
-                                    zoneInfo = InitializeZonesAmericaBoa_Vista_78(); break;
-                                case -720057154:
-                                    zoneInfo = InitializeZonesAmericaBogota_79(); break;
-                                case -1321243595:
-                                    zoneInfo = InitializeZonesAmericaBoise_80(); break;
-                                case 394047540:
-                                    zoneInfo = InitializeZonesAmericaBuenos_Aires_81(); break;
-                                case -531568626:
-                                    zoneInfo = InitializeZonesAmericaCambridge_Bay_82(); break;
-                                case 1420755954:
-                                    zoneInfo = InitializeZonesAmericaCampo_Grande_83(); break;
-                                case -1826835413:
-                                    zoneInfo = InitializeZonesAmericaCancun_84(); break;
-                                case 1437673654:
-                                    zoneInfo = InitializeZonesAmericaCaracas_85(); break;
-                                case -16116250:
-                                    zoneInfo = InitializeZonesAmericaCatamarca_86(); break;
-                                case -530177092:
-                                    zoneInfo = InitializeZonesAmericaCayenne_87(); break;
-                                case -1387125920:
-                                    zoneInfo = InitializeZonesAmericaCayman_88(); break;
-                                case 463211199:
-                                    zoneInfo = InitializeZonesAmericaChicago_89(); break;
-                                case 2068878199:
-                                    zoneInfo = InitializeZonesAmericaChihuahua_90(); break;
-                                case -1858698550:
-                                    zoneInfo = InitializeZonesAmericaCoral_Harbour_91(); break;
-                                case -1629791336:
-                                    zoneInfo = InitializeZonesAmericaCordoba_92(); break;
-                                case 1489686373:
-                                    zoneInfo = InitializeZonesAmericaCosta_Rica_93(); break;
-                                case 1301048591:
-                                    zoneInfo = InitializeZonesAmericaCuiaba_94(); break;
-                                case -201416710:
-                                    zoneInfo = InitializeZonesAmericaCuracao_95(); break;
-                                case 1970044409:
-                                    zoneInfo = InitializeZonesAmericaDanmarkshavn_96(); break;
-                                case 1782088783:
-                                    zoneInfo = InitializeZonesAmericaDawson_97(); break;
-                                case -1790293189:
-                                    zoneInfo = InitializeZonesAmericaDawson_Creek_98(); break;
-                                case -1773816702:
-                                    zoneInfo = InitializeZonesAmericaDenver_99(); break;
-                                case 1903660498:
-                                    zoneInfo = InitializeZonesAmericaDetroit_100(); break;
-                                case 1876734939:
-                                    zoneInfo = InitializeZonesAmericaDominica_101(); break;
-                                case -1983019480:
-                                    zoneInfo = InitializeZonesAmericaEdmonton_102(); break;
-                                case -868639320:
-                                    zoneInfo = InitializeZonesAmericaEirunepe_103(); break;
-                                case -1127947085:
-                                    zoneInfo = InitializeZonesAmericaEl_Salvador_104(); break;
-                                case 573217535:
-                                    zoneInfo = InitializeZonesAmericaEnsenada_105(); break;
-                                case 700588393:
-                                    zoneInfo = InitializeZonesAmericaFort_Wayne_106(); break;
-                                case 1404759864:
-                                    zoneInfo = InitializeZonesAmericaFortaleza_107(); break;
-                                case 560183601:
-                                    zoneInfo = InitializeZonesAmericaGlace_Bay_108(); break;
-                                case -744519908:
-                                    zoneInfo = InitializeZonesAmericaGodthab_109(); break;
-                                case -821262001:
-                                    zoneInfo = InitializeZonesAmericaGoose_Bay_110(); break;
-                                case -737940495:
-                                    zoneInfo = InitializeZonesAmericaGrand_Turk_111(); break;
-                                case 1721895565:
-                                    zoneInfo = InitializeZonesAmericaGrenada_112(); break;
-                                case 1582816961:
-                                    zoneInfo = InitializeZonesAmericaGuadeloupe_113(); break;
-                                case 170510344:
-                                    zoneInfo = InitializeZonesAmericaGuatemala_114(); break;
-                                case 2044912803:
-                                    zoneInfo = InitializeZonesAmericaGuayaquil_115(); break;
-                                case 588587991:
-                                    zoneInfo = InitializeZonesAmericaGuyana_116(); break;
-                                case 2019839233:
-                                    zoneInfo = InitializeZonesAmericaHalifax_117(); break;
-                                case 1730285615:
-                                    zoneInfo = InitializeZonesAmericaHavana_118(); break;
-                                case -132996347:
-                                    zoneInfo = InitializeZonesAmericaHermosillo_119(); break;
-                                case -678048283:
-                                    zoneInfo = InitializeZonesAmericaIndianaIndianapolis_120(); break;
-                                case -1841841880:
-                                    zoneInfo = InitializeZonesAmericaIndianaKnox_121(); break;
-                                case 151792952:
-                                    zoneInfo = InitializeZonesAmericaIndianaMarengo_122(); break;
-                                case 1930304701:
-                                    zoneInfo = InitializeZonesAmericaIndianaPetersburg_123(); break;
-                                case -353828462:
-                                    zoneInfo = InitializeZonesAmericaIndianaTell_City_124(); break;
-                                case -1342992594:
-                                    zoneInfo = InitializeZonesAmericaIndianaVevay_125(); break;
-                                case -727082855:
-                                    zoneInfo = InitializeZonesAmericaIndianaVincennes_126(); break;
-                                case 750470149:
-                                    zoneInfo = InitializeZonesAmericaIndianaWinamac_127(); break;
-                                case 1103262886:
-                                    zoneInfo = InitializeZonesAmericaIndianapolis_128(); break;
-                                case -548234378:
-                                    zoneInfo = InitializeZonesAmericaInuvik_129(); break;
-                                case -266830966:
-                                    zoneInfo = InitializeZonesAmericaIqaluit_130(); break;
-                                case 597477986:
-                                    zoneInfo = InitializeZonesAmericaJamaica_131(); break;
-                                case 1733747148:
-                                    zoneInfo = InitializeZonesAmericaJujuy_132(); break;
-                                case -1468419008:
-                                    zoneInfo = InitializeZonesAmericaJuneau_133(); break;
-                                case -2071691064:
-                                    zoneInfo = InitializeZonesAmericaKentuckyLouisville_134(); break;
-                                case -382285320:
-                                    zoneInfo = InitializeZonesAmericaKentuckyMonticello_135(); break;
-                                case 890339002:
-                                    zoneInfo = InitializeZonesAmericaKnox_IN_136(); break;
-                                case -1308986415:
-                                    zoneInfo = InitializeZonesAmericaLa_Paz_137(); break;
-                                case -614268160:
-                                    zoneInfo = InitializeZonesAmericaLima_138(); break;
-                                case -483817034:
-                                    zoneInfo = InitializeZonesAmericaLos_Angeles_139(); break;
-                                case -533330128:
-                                    zoneInfo = InitializeZonesAmericaLouisville_140(); break;
-                                case -684917660:
-                                    zoneInfo = InitializeZonesAmericaMaceio_141(); break;
-                                case -1230072330:
-                                    zoneInfo = InitializeZonesAmericaManagua_142(); break;
-                                case 2087695705:
-                                    zoneInfo = InitializeZonesAmericaManaus_143(); break;
-                                case 1097051691:
-                                    zoneInfo = InitializeZonesAmericaMartinique_144(); break;
-                                case 121117961:
-                                    zoneInfo = InitializeZonesAmericaMazatlan_145(); break;
-                                case -1892117010:
-                                    zoneInfo = InitializeZonesAmericaMendoza_146(); break;
-                                case 295108910:
-                                    zoneInfo = InitializeZonesAmericaMenominee_147(); break;
-                                case 942685734:
-                                    zoneInfo = InitializeZonesAmericaMerida_148(); break;
-                                case 1004579704:
-                                    zoneInfo = InitializeZonesAmericaMexico_City_149(); break;
-                                case -247092919:
-                                    zoneInfo = InitializeZonesAmericaMiquelon_150(); break;
-                                case 1251740288:
-                                    zoneInfo = InitializeZonesAmericaMoncton_151(); break;
-                                case 725121366:
-                                    zoneInfo = InitializeZonesAmericaMonterrey_152(); break;
-                                case -1976618445:
-                                    zoneInfo = InitializeZonesAmericaMontevideo_153(); break;
-                                case 671716835:
-                                    zoneInfo = InitializeZonesAmericaMontreal_154(); break;
-                                case 1502508716:
-                                    zoneInfo = InitializeZonesAmericaMontserrat_155(); break;
-                                case -542002661:
-                                    zoneInfo = InitializeZonesAmericaNassau_156(); break;
-                                case 77968905:
-                                    zoneInfo = InitializeZonesAmericaNew_York_157(); break;
-                                case 1540399358:
-                                    zoneInfo = InitializeZonesAmericaNipigon_158(); break;
-                                case 150799102:
-                                    zoneInfo = InitializeZonesAmericaNome_159(); break;
-                                case 1459772492:
-                                    zoneInfo = InitializeZonesAmericaNoronha_160(); break;
-                                case -1695847122:
-                                    zoneInfo = InitializeZonesAmericaNorth_DakotaCenter_161(); break;
-                                case 858330975:
-                                    zoneInfo = InitializeZonesAmericaNorth_DakotaNew_Salem_162(); break;
-                                case 2086516222:
-                                    zoneInfo = InitializeZonesAmericaPanama_163(); break;
-                                case -28362281:
-                                    zoneInfo = InitializeZonesAmericaPangnirtung_164(); break;
-                                case 485081036:
-                                    zoneInfo = InitializeZonesAmericaParamaribo_165(); break;
-                                case -2102922830:
-                                    zoneInfo = InitializeZonesAmericaPhoenix_166(); break;
-                                case -52385135:
-                                    zoneInfo = InitializeZonesAmericaPort_of_Spain_167(); break;
-                                case 443779890:
-                                    zoneInfo = InitializeZonesAmericaPortauPrince_168(); break;
-                                case 961084259:
-                                    zoneInfo = InitializeZonesAmericaPorto_Acre_169(); break;
-                                case 1665593983:
-                                    zoneInfo = InitializeZonesAmericaPorto_Velho_170(); break;
-                                case -1967435897:
-                                    zoneInfo = InitializeZonesAmericaPuerto_Rico_171(); break;
-                                case 1044015867:
-                                    zoneInfo = InitializeZonesAmericaRainy_River_172(); break;
-                                case 1642065376:
-                                    zoneInfo = InitializeZonesAmericaRankin_Inlet_173(); break;
-                                case 89324624:
-                                    zoneInfo = InitializeZonesAmericaRecife_174(); break;
-                                case -1880305996:
-                                    zoneInfo = InitializeZonesAmericaRegina_175(); break;
-                                case -1379511770:
-                                    zoneInfo = InitializeZonesAmericaResolute_176(); break;
-                                case 1884194014:
-                                    zoneInfo = InitializeZonesAmericaRio_Branco_177(); break;
-                                case -12936929:
-                                    zoneInfo = InitializeZonesAmericaRosario_178(); break;
-                                case -500180216:
-                                    zoneInfo = InitializeZonesAmericaSantiago_179(); break;
-                                case 723925369:
-                                    zoneInfo = InitializeZonesAmericaSanto_Domingo_180(); break;
-                                case 108662619:
-                                    zoneInfo = InitializeZonesAmericaSao_Paulo_181(); break;
-                                case 41604449:
-                                    zoneInfo = InitializeZonesAmericaScoresbysund_182(); break;
-                                case 803378554:
-                                    zoneInfo = InitializeZonesAmericaShiprock_183(); break;
-                                case -639275982:
-                                    zoneInfo = InitializeZonesAmericaSt_Johns_184(); break;
-                                case -679844130:
-                                    zoneInfo = InitializeZonesAmericaSt_Kitts_185(); break;
-                                case -1651264717:
-                                    zoneInfo = InitializeZonesAmericaSt_Lucia_186(); break;
-                                case -927731961:
-                                    zoneInfo = InitializeZonesAmericaSt_Thomas_187(); break;
-                                case -921029751:
-                                    zoneInfo = InitializeZonesAmericaSt_Vincent_188(); break;
-                                case -258833286:
-                                    zoneInfo = InitializeZonesAmericaSwift_Current_189(); break;
-                                case -1384070515:
-                                    zoneInfo = InitializeZonesAmericaTegucigalpa_190(); break;
-                                case -647914273:
-                                    zoneInfo = InitializeZonesAmericaThule_191(); break;
-                                case 709718199:
-                                    zoneInfo = InitializeZonesAmericaThunder_Bay_192(); break;
-                                case 958101229:
-                                    zoneInfo = InitializeZonesAmericaTijuana_193(); break;
-                                case -2028887488:
-                                    zoneInfo = InitializeZonesAmericaToronto_194(); break;
-                                case 512318947:
-                                    zoneInfo = InitializeZonesAmericaTortola_195(); break;
-                                case -198266380:
-                                    zoneInfo = InitializeZonesAmericaVancouver_196(); break;
-                                case 569327232:
-                                    zoneInfo = InitializeZonesAmericaVirgin_197(); break;
-                                case -2053559156:
-                                    zoneInfo = InitializeZonesAmericaWhitehorse_198(); break;
-                                case -87309118:
-                                    zoneInfo = InitializeZonesAmericaWinnipeg_199(); break;
-                                case -1741357031:
-                                    zoneInfo = InitializeZonesAmericaYakutat_200(); break;
-                                case -2020825572:
-                                    zoneInfo = InitializeZonesAmericaYellowknife_201(); break;
-                                case 847710201:
-                                    zoneInfo = InitializeZonesAntarcticaCasey_202(); break;
-                                case -975644059:
-                                    zoneInfo = InitializeZonesAntarcticaDavis_203(); break;
-                                case -1764039337:
-                                    zoneInfo = InitializeZonesAntarcticaDumontDUrville_204(); break;
-                                case -118864541:
-                                    zoneInfo = InitializeZonesAntarcticaMawson_205(); break;
-                                case -1787220507:
-                                    zoneInfo = InitializeZonesAntarcticaMcMurdo_206(); break;
-                                case 1189616925:
-                                    zoneInfo = InitializeZonesAntarcticaPalmer_207(); break;
-                                case -1075789582:
-                                    zoneInfo = InitializeZonesAntarcticaRothera_208(); break;
-                                case 766030211:
-                                    zoneInfo = InitializeZonesAntarcticaSouth_Pole_209(); break;
-                                case -1266505833:
-                                    zoneInfo = InitializeZonesAntarcticaSyowa_210(); break;
-                                case 10724559:
-                                    zoneInfo = InitializeZonesAntarcticaVostok_211(); break;
-                                case -1056823757:
-                                    zoneInfo = InitializeZonesArcticLongyearbyen_212(); break;
-                                case -147092305:
-                                    zoneInfo = InitializeZonesAsiaAden_213(); break;
-                                case 645767292:
-                                    zoneInfo = InitializeZonesAsiaAlmaty_214(); break;
-                                case -473009363:
-                                    zoneInfo = InitializeZonesAsiaAmman_215(); break;
-                                case 1001086078:
-                                    zoneInfo = InitializeZonesAsiaAnadyr_216(); break;
-                                case 1948842985:
-                                    zoneInfo = InitializeZonesAsiaAqtau_217(); break;
-                                case -1830319407:
-                                    zoneInfo = InitializeZonesAsiaAqtobe_218(); break;
-                                case 68898622:
-                                    zoneInfo = InitializeZonesAsiaAshgabat_219(); break;
-                                case 442025074:
-                                    zoneInfo = InitializeZonesAsiaAshkhabad_220(); break;
-                                case 644527656:
-                                    zoneInfo = InitializeZonesAsiaBaghdad_221(); break;
-                                case 1454838106:
-                                    zoneInfo = InitializeZonesAsiaBahrain_222(); break;
-                                case -1291106899:
-                                    zoneInfo = InitializeZonesAsiaBaku_223(); break;
-                                case -478205929:
-                                    zoneInfo = InitializeZonesAsiaBangkok_224(); break;
-                                case 1986909045:
-                                    zoneInfo = InitializeZonesAsiaBeirut_225(); break;
-                                case 832349156:
-                                    zoneInfo = InitializeZonesAsiaBishkek_226(); break;
-                                case 133349473:
-                                    zoneInfo = InitializeZonesAsiaBrunei_227(); break;
-                                case -95434065:
-                                    zoneInfo = InitializeZonesAsiaCalcutta_228(); break;
-                                case 939017808:
-                                    zoneInfo = InitializeZonesAsiaChoibalsan_229(); break;
-                                case 1916358523:
-                                    zoneInfo = InitializeZonesAsiaChongqing_230(); break;
-                                case -1908620947:
-                                    zoneInfo = InitializeZonesAsiaChungking_231(); break;
-                                case -1409982672:
-                                    zoneInfo = InitializeZonesAsiaColombo_232(); break;
-                                case 257443227:
-                                    zoneInfo = InitializeZonesAsiaDacca_233(); break;
-                                case 726189906:
-                                    zoneInfo = InitializeZonesAsiaDamascus_234(); break;
-                                case -2047208090:
-                                    zoneInfo = InitializeZonesAsiaDhaka_235(); break;
-                                case -442720055:
-                                    zoneInfo = InitializeZonesAsiaDili_236(); break;
-                                case -86258091:
-                                    zoneInfo = InitializeZonesAsiaDubai_237(); break;
-                                case 105796674:
-                                    zoneInfo = InitializeZonesAsiaDushanbe_238(); break;
-                                case -2004662887:
-                                    zoneInfo = InitializeZonesAsiaGaza_239(); break;
-                                case 86088879:
-                                    zoneInfo = InitializeZonesAsiaHarbin_240(); break;
-                                case -1338815495:
-                                    zoneInfo = InitializeZonesAsiaHong_Kong_241(); break;
-                                case -452883972:
-                                    zoneInfo = InitializeZonesAsiaHovd_242(); break;
-                                case 1473578180:
-                                    zoneInfo = InitializeZonesAsiaIrkutsk_243(); break;
-                                case 954224128:
-                                    zoneInfo = InitializeZonesAsiaIstanbul_244(); break;
-                                case -441277954:
-                                    zoneInfo = InitializeZonesAsiaJakarta_245(); break;
-                                case 686642514:
-                                    zoneInfo = InitializeZonesAsiaJayapura_246(); break;
-                                case 750846034:
-                                    zoneInfo = InitializeZonesAsiaJerusalem_247(); break;
-                                case -1736227411:
-                                    zoneInfo = InitializeZonesAsiaKabul_248(); break;
-                                case 332127962:
-                                    zoneInfo = InitializeZonesAsiaKamchatka_249(); break;
-                                case -157776414:
-                                    zoneInfo = InitializeZonesAsiaKarachi_250(); break;
-                                case -1855277528:
-                                    zoneInfo = InitializeZonesAsiaKashgar_251(); break;
-                                case -694172133:
-                                    zoneInfo = InitializeZonesAsiaKatmandu_252(); break;
-                                case 979035487:
-                                    zoneInfo = InitializeZonesAsiaKrasnoyarsk_253(); break;
-                                case -770786687:
-                                    zoneInfo = InitializeZonesAsiaKuala_Lumpur_254(); break;
-                                case 962669433:
-                                    zoneInfo = InitializeZonesAsiaKuching_255(); break;
-                                case -1594956014:
-                                    zoneInfo = InitializeZonesAsiaKuwait_256(); break;
-                                case 225920409:
-                                    zoneInfo = InitializeZonesAsiaMacao_257(); break;
-                                case 224216473:
-                                    zoneInfo = InitializeZonesAsiaMacau_258(); break;
-                                case -513165793:
-                                    zoneInfo = InitializeZonesAsiaMagadan_259(); break;
-                                case -1539632895:
-                                    zoneInfo = InitializeZonesAsiaMakassar_260(); break;
-                                case -1665616345:
-                                    zoneInfo = InitializeZonesAsiaManila_261(); break;
-                                case -2125404396:
-                                    zoneInfo = InitializeZonesAsiaMuscat_262(); break;
-                                case -1136125139:
-                                    zoneInfo = InitializeZonesAsiaNicosia_263(); break;
-                                case 1876739490:
-                                    zoneInfo = InitializeZonesAsiaNovosibirsk_264(); break;
-                                case -861899977:
-                                    zoneInfo = InitializeZonesAsiaOmsk_265(); break;
-                                case 698713947:
-                                    zoneInfo = InitializeZonesAsiaOral_266(); break;
-                                case 614607548:
-                                    zoneInfo = InitializeZonesAsiaPhnom_Penh_267(); break;
-                                case 2007957215:
-                                    zoneInfo = InitializeZonesAsiaPontianak_268(); break;
-                                case 523346578:
-                                    zoneInfo = InitializeZonesAsiaPyongyang_269(); break;
-                                case -1584577127:
-                                    zoneInfo = InitializeZonesAsiaQatar_270(); break;
-                                case 865338299:
-                                    zoneInfo = InitializeZonesAsiaQyzylorda_271(); break;
-                                case -1639700457:
-                                    zoneInfo = InitializeZonesAsiaRangoon_272(); break;
-                                case 302747578:
-                                    zoneInfo = InitializeZonesAsiaRiyadh_273(); break;
-                                case 717010931:
-                                    zoneInfo = InitializeZonesAsiaRiyadh87_274(); break;
-                                case 717010928:
-                                    zoneInfo = InitializeZonesAsiaRiyadh88_275(); break;
-                                case 717010929:
-                                    zoneInfo = InitializeZonesAsiaRiyadh89_276(); break;
-                                case -546595662:
-                                    zoneInfo = InitializeZonesAsiaSaigon_277(); break;
-                                case -385164209:
-                                    zoneInfo = InitializeZonesAsiaSakhalin_278(); break;
-                                case 324215389:
-                                    zoneInfo = InitializeZonesAsiaSamarkand_279(); break;
-                                case 300423193:
-                                    zoneInfo = InitializeZonesAsiaSeoul_280(); break;
-                                case -45271543:
-                                    zoneInfo = InitializeZonesAsiaShanghai_281(); break;
-                                case 1662344632:
-                                    zoneInfo = InitializeZonesAsiaSingapore_282(); break;
-                                case -2093870760:
-                                    zoneInfo = InitializeZonesAsiaTaipei_283(); break;
-                                case 1094126719:
-                                    zoneInfo = InitializeZonesAsiaTashkent_284(); break;
-                                case 741536013:
-                                    zoneInfo = InitializeZonesAsiaTbilisi_285(); break;
-                                case -157373645:
-                                    zoneInfo = InitializeZonesAsiaTehran_286(); break;
-                                case 1139010707:
-                                    zoneInfo = InitializeZonesAsiaTel_Aviv_287(); break;
-                                case -1239788792:
-                                    zoneInfo = InitializeZonesAsiaThimbu_288(); break;
-                                case 1040976897:
-                                    zoneInfo = InitializeZonesAsiaThimphu_289(); break;
-                                case -435582449:
-                                    zoneInfo = InitializeZonesAsiaTokyo_290(); break;
-                                case 886233038:
-                                    zoneInfo = InitializeZonesAsiaUjung_Pandang_291(); break;
-                                case -49410061:
-                                    zoneInfo = InitializeZonesAsiaUlaanbaatar_292(); break;
-                                case -251299036:
-                                    zoneInfo = InitializeZonesAsiaUlan_Bator_293(); break;
-                                case 188596318:
-                                    zoneInfo = InitializeZonesAsiaUrumqi_294(); break;
-                                case -1777908430:
-                                    zoneInfo = InitializeZonesAsiaVientiane_295(); break;
-                                case -512511441:
-                                    zoneInfo = InitializeZonesAsiaVladivostok_296(); break;
-                                case -2019497703:
-                                    zoneInfo = InitializeZonesAsiaYakutsk_297(); break;
-                                case 362507569:
-                                    zoneInfo = InitializeZonesAsiaYekaterinburg_298(); break;
-                                case -1094134257:
-                                    zoneInfo = InitializeZonesAsiaYerevan_299(); break;
-                                case 2014992483:
-                                    zoneInfo = InitializeZonesAtlanticAzores_300(); break;
-                                case 1077917924:
-                                    zoneInfo = InitializeZonesAtlanticBermuda_301(); break;
-                                case -206123373:
-                                    zoneInfo = InitializeZonesAtlanticCanary_302(); break;
-                                case 220950923:
-                                    zoneInfo = InitializeZonesAtlanticCape_Verde_303(); break;
-                                case 106213988:
-                                    zoneInfo = InitializeZonesAtlanticFaeroe_304(); break;
-                                case 580847541:
-                                    zoneInfo = InitializeZonesAtlanticFaroe_305(); break;
-                                case 1794031680:
-                                    zoneInfo = InitializeZonesAtlanticJan_Mayen_306(); break;
-                                case -1514877978:
-                                    zoneInfo = InitializeZonesAtlanticMadeira_307(); break;
-                                case 1009182308:
-                                    zoneInfo = InitializeZonesAtlanticReykjavik_308(); break;
-                                case -93773725:
-                                    zoneInfo = InitializeZonesAtlanticSouth_Georgia_309(); break;
-                                case -1088299354:
-                                    zoneInfo = InitializeZonesAtlanticSt_Helena_310(); break;
-                                case -1516969285:
-                                    zoneInfo = InitializeZonesAtlanticStanley_311(); break;
-                                case -464371903:
-                                    zoneInfo = InitializeZonesAustraliaACT_312(); break;
-                                case 1816655716:
-                                    zoneInfo = InitializeZonesAustraliaAdelaide_313(); break;
-                                case -429581102:
-                                    zoneInfo = InitializeZonesAustraliaBrisbane_314(); break;
-                                case -776202715:
-                                    zoneInfo = InitializeZonesAustraliaBroken_Hill_315(); break;
-                                case 1953852453:
-                                    zoneInfo = InitializeZonesAustraliaCanberra_316(); break;
-                                case -1996728198:
-                                    zoneInfo = InitializeZonesAustraliaCurrie_317(); break;
-                                case -1849102127:
-                                    zoneInfo = InitializeZonesAustraliaDarwin_318(); break;
-                                case -1184345115:
-                                    zoneInfo = InitializeZonesAustraliaEucla_319(); break;
-                                case -625531130:
-                                    zoneInfo = InitializeZonesAustraliaHobart_320(); break;
-                                case -870391459:
-                                    zoneInfo = InitializeZonesAustraliaLHI_321(); break;
-                                case -1662279227:
-                                    zoneInfo = InitializeZonesAustraliaLindeman_322(); break;
-                                case 352658546:
-                                    zoneInfo = InitializeZonesAustraliaLord_Howe_323(); break;
-                                case 197367794:
-                                    zoneInfo = InitializeZonesAustraliaMelbourne_324(); break;
-                                case 1415966430:
-                                    zoneInfo = InitializeZonesAustraliaNorth_325(); break;
-                                case 12384317:
-                                    zoneInfo = InitializeZonesAustraliaNSW_326(); break;
-                                case 1786674048:
-                                    zoneInfo = InitializeZonesAustraliaPerth_327(); break;
-                                case 1007278695:
-                                    zoneInfo = InitializeZonesAustraliaQueensland_328(); break;
-                                case -1978581814:
-                                    zoneInfo = InitializeZonesAustraliaSouth_329(); break;
-                                case 1338845336:
-                                    zoneInfo = InitializeZonesAustraliaSydney_330(); break;
-                                case 302410600:
-                                    zoneInfo = InitializeZonesAustraliaTasmania_331(); break;
-                                case 422004328:
-                                    zoneInfo = InitializeZonesAustraliaVictoria_332(); break;
-                                case -678006194:
-                                    zoneInfo = InitializeZonesAustraliaWest_333(); break;
-                                case -1823623498:
-                                    zoneInfo = InitializeZonesAustraliaYancowinna_334(); break;
-                                case -394061641:
-                                    zoneInfo = InitializeZonesBrazilAcre_335(); break;
-                                case -914753456:
-                                    zoneInfo = InitializeZonesBrazilDeNoronha_336(); break;
-                                case 995187306:
-                                    zoneInfo = InitializeZonesBrazilEast_337(); break;
-                                case -1425319314:
-                                    zoneInfo = InitializeZonesBrazilWest_338(); break;
-                                case 1688635322:
-                                    zoneInfo = InitializeZonesCanadaAtlantic_339(); break;
-                                case 2087361891:
-                                    zoneInfo = InitializeZonesCanadaCentral_340(); break;
-                                case -1915577138:
-                                    zoneInfo = InitializeZonesCanadaEastern_341(); break;
-                                case -1534173844:
-                                    zoneInfo = InitializeZonesCanadaEastSaskatchewan_342(); break;
-                                case 903748646:
-                                    zoneInfo = InitializeZonesCanadaMountain_343(); break;
-                                case -2096950413:
-                                    zoneInfo = InitializeZonesCanadaNewfoundland_344(); break;
-                                case -1622828482:
-                                    zoneInfo = InitializeZonesCanadaPacific_345(); break;
-                                case -1556780531:
-                                    zoneInfo = InitializeZonesCanadaSaskatchewan_346(); break;
-                                case -2089863656:
-                                    zoneInfo = InitializeZonesCanadaYukon_347(); break;
-                                case 1130393539:
-                                    zoneInfo = InitializeZonesCET_348(); break;
-                                case -328153824:
-                                    zoneInfo = InitializeZonesChileContinental_349(); break;
-                                case 1190645283:
-                                    zoneInfo = InitializeZonesChileEasterIsland_350(); break;
-                                case -1326907254:
-                                    zoneInfo = InitializeZonesCST6CDT_351(); break;
-                                case 1587700637:
-                                    zoneInfo = InitializeZonesCuba_352(); break;
-                                case 1130393537:
-                                    zoneInfo = InitializeZonesEET_353(); break;
-                                case 1979825410:
-                                    zoneInfo = InitializeZonesEgypt_354(); break;
-                                case 110303723:
-                                    zoneInfo = InitializeZonesEire_355(); break;
-                                case 1131573185:
-                                    zoneInfo = InitializeZonesEST_356(); break;
-                                case -1460797234:
-                                    zoneInfo = InitializeZonesEST5EDT_357(); break;
-                                case 1773387205:
-                                    zoneInfo = InitializeZonesEtcGMT_358(); break;
-                                case -638907933:
-                                    zoneInfo = InitializeZonesEtcGMT0_359(); break;
-                                case -638907934:
-                                    zoneInfo = InitializeZonesEtcGMT1_360(); break;
-                                case -642053662:
-                                    zoneInfo = InitializeZonesEtcGMT10_361(); break;
-                                case -642119198:
-                                    zoneInfo = InitializeZonesEtcGMT11_362(); break;
-                                case -641922590:
-                                    zoneInfo = InitializeZonesEtcGMT12_363(); break;
-                                case -638907931:
-                                    zoneInfo = InitializeZonesEtcGMT2_364(); break;
-                                case -638907932:
-                                    zoneInfo = InitializeZonesEtcGMT3_365(); break;
-                                case -638907937:
-                                    zoneInfo = InitializeZonesEtcGMT4_366(); break;
-                                case -638907938:
-                                    zoneInfo = InitializeZonesEtcGMT5_367(); break;
-                                case -638907935:
-                                    zoneInfo = InitializeZonesEtcGMT6_368(); break;
-                                case -638907936:
-                                    zoneInfo = InitializeZonesEtcGMT7_369(); break;
-                                case -638907941:
-                                    zoneInfo = InitializeZonesEtcGMT8_370(); break;
-                                case -638907942:
-                                    zoneInfo = InitializeZonesEtcGMT9_371(); break;
-                                case 537116101:
-                                    zoneInfo = InitializeZonesEtcGMT0_372(); break;
-                                case -1021244957:
-                                    zoneInfo = InitializeZonesEtcGMT0_373(); break;
-                                case -1021244958:
-                                    zoneInfo = InitializeZonesEtcGMT1_374(); break;
-                                case -1024390686:
-                                    zoneInfo = InitializeZonesEtcGMT10_375(); break;
-                                case -1024456222:
-                                    zoneInfo = InitializeZonesEtcGMT11_376(); break;
-                                case -1024259614:
-                                    zoneInfo = InitializeZonesEtcGMT12_377(); break;
-                                case -1024325150:
-                                    zoneInfo = InitializeZonesEtcGMT13_378(); break;
-                                case -1024652830:
-                                    zoneInfo = InitializeZonesEtcGMT14_379(); break;
-                                case -1021244955:
-                                    zoneInfo = InitializeZonesEtcGMT2_380(); break;
-                                case -1021244956:
-                                    zoneInfo = InitializeZonesEtcGMT3_381(); break;
-                                case -1021244961:
-                                    zoneInfo = InitializeZonesEtcGMT4_382(); break;
-                                case -1021244962:
-                                    zoneInfo = InitializeZonesEtcGMT5_383(); break;
-                                case -1021244959:
-                                    zoneInfo = InitializeZonesEtcGMT6_384(); break;
-                                case -1021244960:
-                                    zoneInfo = InitializeZonesEtcGMT7_385(); break;
-                                case -1021244965:
-                                    zoneInfo = InitializeZonesEtcGMT8_386(); break;
-                                case -1021244966:
-                                    zoneInfo = InitializeZonesEtcGMT9_387(); break;
-                                case -625481629:
-                                    zoneInfo = InitializeZonesEtcGreenwich_388(); break;
-                                case 1773518259:
-                                    zoneInfo = InitializeZonesEtcUCT_389(); break;
-                                case -495756420:
-                                    zoneInfo = InitializeZonesEtcUniversal_390(); break;
-                                case 1821948682:
-                                    zoneInfo = InitializeZonesEtcUTC_391(); break;
-                                case -2143966160:
-                                    zoneInfo = InitializeZonesEtcZulu_392(); break;
-                                case 1980578132:
-                                    zoneInfo = InitializeZonesEuropeAmsterdam_393(); break;
-                                case -623087797:
-                                    zoneInfo = InitializeZonesEuropeAndorra_394(); break;
-                                case -194119130:
-                                    zoneInfo = InitializeZonesEuropeAthens_395(); break;
-                                case -718299356:
-                                    zoneInfo = InitializeZonesEuropeBelfast_396(); break;
-                                case -1389969270:
-                                    zoneInfo = InitializeZonesEuropeBelgrade_397(); break;
-                                case -1478433923:
-                                    zoneInfo = InitializeZonesEuropeBerlin_398(); break;
-                                case 1528115731:
-                                    zoneInfo = InitializeZonesEuropeBratislava_399(); break;
-                                case -1678431405:
-                                    zoneInfo = InitializeZonesEuropeBrussels_400(); break;
-                                case -1173190246:
-                                    zoneInfo = InitializeZonesEuropeBucharest_401(); break;
-                                case -807880301:
-                                    zoneInfo = InitializeZonesEuropeBudapest_402(); break;
-                                case 1958638142:
-                                    zoneInfo = InitializeZonesEuropeChisinau_403(); break;
-                                case -872620446:
-                                    zoneInfo = InitializeZonesEuropeCopenhagen_404(); break;
-                                case 1818681517:
-                                    zoneInfo = InitializeZonesEuropeDublin_405(); break;
-                                case -144114636:
-                                    zoneInfo = InitializeZonesEuropeGibraltar_406(); break;
-                                case 1004163835:
-                                    zoneInfo = InitializeZonesEuropeGuernsey_407(); break;
-                                case -168349029:
-                                    zoneInfo = InitializeZonesEuropeHelsinki_408(); break;
-                                case 751890015:
-                                    zoneInfo = InitializeZonesEuropeIsle_of_Man_409(); break;
-                                case 985011578:
-                                    zoneInfo = InitializeZonesEuropeIstanbul_410(); break;
-                                case -1742852123:
-                                    zoneInfo = InitializeZonesEuropeJersey_411(); break;
-                                case -18986489:
-                                    zoneInfo = InitializeZonesEuropeKaliningrad_412(); break;
-                                case 138675714:
-                                    zoneInfo = InitializeZonesEuropeKiev_413(); break;
-                                case -7834881:
-                                    zoneInfo = InitializeZonesEuropeLisbon_414(); break;
-                                case -1435712790:
-                                    zoneInfo = InitializeZonesEuropeLjubljana_415(); break;
-                                case -1146845041:
-                                    zoneInfo = InitializeZonesEuropeLondon_416(); break;
-                                case 1936960559:
-                                    zoneInfo = InitializeZonesEuropeLuxembourg_417(); break;
-                                case 2069609393:
-                                    zoneInfo = InitializeZonesEuropeMadrid_418(); break;
-                                case -1559957712:
-                                    zoneInfo = InitializeZonesEuropeMalta_419(); break;
-                                case 802635951:
-                                    zoneInfo = InitializeZonesEuropeMariehamn_420(); break;
-                                case -51688183:
-                                    zoneInfo = InitializeZonesEuropeMinsk_421(); break;
-                                case -214773865:
-                                    zoneInfo = InitializeZonesEuropeMonaco_422(); break;
-                                case 892659321:
-                                    zoneInfo = InitializeZonesEuropeMoscow_423(); break;
-                                case -837062563:
-                                    zoneInfo = InitializeZonesEuropeNicosia_424(); break;
-                                case -1961128965:
-                                    zoneInfo = InitializeZonesEuropeOslo_425(); break;
-                                case -232110161:
-                                    zoneInfo = InitializeZonesEuropeParis_426(); break;
-                                case -991635541:
-                                    zoneInfo = InitializeZonesEuropePodgorica_427(); break;
-                                case 715526596:
-                                    zoneInfo = InitializeZonesEuropePrague_428(); break;
-                                case -2009338737:
-                                    zoneInfo = InitializeZonesEuropeRiga_429(); break;
-                                case -40363491:
-                                    zoneInfo = InitializeZonesEuropeRome_430(); break;
-                                case 1072615383:
-                                    zoneInfo = InitializeZonesEuropeSamara_431(); break;
-                                case -892752083:
-                                    zoneInfo = InitializeZonesEuropeSan_Marino_432(); break;
-                                case 511752758:
-                                    zoneInfo = InitializeZonesEuropeSarajevo_433(); break;
-                                case 2143396073:
-                                    zoneInfo = InitializeZonesEuropeSimferopol_434(); break;
-                                case 581215534:
-                                    zoneInfo = InitializeZonesEuropeSkopje_435(); break;
-                                case 1279215537:
-                                    zoneInfo = InitializeZonesEuropeSofia_436(); break;
-                                case -451456409:
-                                    zoneInfo = InitializeZonesEuropeStockholm_437(); break;
-                                case 1617355769:
-                                    zoneInfo = InitializeZonesEuropeTallinn_438(); break;
-                                case 1888145627:
-                                    zoneInfo = InitializeZonesEuropeTirane_439(); break;
-                                case -1084364571:
-                                    zoneInfo = InitializeZonesEuropeTiraspol_440(); break;
-                                case -177821498:
-                                    zoneInfo = InitializeZonesEuropeUzhgorod_441(); break;
-                                case 1118856139:
-                                    zoneInfo = InitializeZonesEuropeVaduz_442(); break;
-                                case -1819792641:
-                                    zoneInfo = InitializeZonesEuropeVatican_443(); break;
-                                case -608437302:
-                                    zoneInfo = InitializeZonesEuropeVienna_444(); break;
-                                case -1812268074:
-                                    zoneInfo = InitializeZonesEuropeVilnius_445(); break;
-                                case -1825027013:
-                                    zoneInfo = InitializeZonesEuropeVolgograd_446(); break;
-                                case -1684852645:
-                                    zoneInfo = InitializeZonesEuropeWarsaw_447(); break;
-                                case 1360772019:
-                                    zoneInfo = InitializeZonesEuropeZagreb_448(); break;
-                                case 561761180:
-                                    zoneInfo = InitializeZonesEuropeZaporozhye_449(); break;
-                                case -1303631950:
-                                    zoneInfo = InitializeZonesEuropeZurich_450(); break;
-                                case -838289447:
-                                    zoneInfo = InitializeZonesGB_451(); break;
-                                case -402159656:
-                                    zoneInfo = InitializeZonesGBEire_452(); break;
-                                case 1130917823:
-                                    zoneInfo = InitializeZonesGMT_453(); break;
-                                case 1293429701:
-                                    zoneInfo = InitializeZonesGMT0_454(); break;
-                                case -1927778369:
-                                    zoneInfo = InitializeZonesGMT0_455(); break;
-                                case 911092677:
-                                    zoneInfo = InitializeZonesGMT0_456(); break;
-                                case -150168093:
-                                    zoneInfo = InitializeZonesGreenwich_457(); break;
-                                case -616678781:
-                                    zoneInfo = InitializeZonesHongkong_458(); break;
-                                case 1131573198:
-                                    zoneInfo = InitializeZonesHST_459(); break;
-                                case -1097963951:
-                                    zoneInfo = InitializeZonesIceland_460(); break;
-                                case 980497891:
-                                    zoneInfo = InitializeZonesIndianAntananarivo_461(); break;
-                                case -1342911606:
-                                    zoneInfo = InitializeZonesIndianChagos_462(); break;
-                                case 350953343:
-                                    zoneInfo = InitializeZonesIndianChristmas_463(); break;
-                                case 186229689:
-                                    zoneInfo = InitializeZonesIndianCocos_464(); break;
-                                case 702818115:
-                                    zoneInfo = InitializeZonesIndianComoro_465(); break;
-                                case 215599819:
-                                    zoneInfo = InitializeZonesIndianKerguelen_466(); break;
-                                case 1921408849:
-                                    zoneInfo = InitializeZonesIndianMahe_467(); break;
-                                case -703540117:
-                                    zoneInfo = InitializeZonesIndianMaldives_468(); break;
-                                case 769585857:
-                                    zoneInfo = InitializeZonesIndianMauritius_469(); break;
-                                case 568796582:
-                                    zoneInfo = InitializeZonesIndianMayotte_470(); break;
-                                case -1145785746:
-                                    zoneInfo = InitializeZonesIndianReunion_471(); break;
-                                case 1580003084:
-                                    zoneInfo = InitializeZonesIran_472(); break;
-                                case -295708726:
-                                    zoneInfo = InitializeZonesIsrael_473(); break;
-                                case 351080495:
-                                    zoneInfo = InitializeZonesJamaica_474(); break;
-                                case -1482232128:
-                                    zoneInfo = InitializeZonesJapan_475(); break;
-                                case 1644549627:
-                                    zoneInfo = InitializeZonesKwajalein_476(); break;
-                                case 703406297:
-                                    zoneInfo = InitializeZonesLibya_477(); break;
-                                case 1130393545:
-                                    zoneInfo = InitializeZonesMET_478(); break;
-                                case 637172474:
-                                    zoneInfo = InitializeZonesMexicoBajaNorte_479(); break;
-                                case 201064555:
-                                    zoneInfo = InitializeZonesMexicoBajaSur_480(); break;
-                                case -1892166809:
-                                    zoneInfo = InitializeZonesMexicoGeneral_481(); break;
-                                case 476734658:
-                                    zoneInfo = InitializeZonesMideastRiyadh87_482(); break;
-                                case 1286038722:
-                                    zoneInfo = InitializeZonesMideastRiyadh88_483(); break;
-                                case -670276414:
-                                    zoneInfo = InitializeZonesMideastRiyadh89_484(); break;
-                                case 1131573193:
-                                    zoneInfo = InitializeZonesMST_485(); break;
-                                case -1193016866:
-                                    zoneInfo = InitializeZonesMST7MDT_486(); break;
-                                case 2011736330:
-                                    zoneInfo = InitializeZonesNavajo_487(); break;
-                                case -836716574:
-                                    zoneInfo = InitializeZonesNZ_488(); break;
-                                case -1472772325:
-                                    zoneInfo = InitializeZonesNZCHAT_489(); break;
-                                case -962352476:
-                                    zoneInfo = InitializeZonesPacificApia_490(); break;
-                                case 1728036233:
-                                    zoneInfo = InitializeZonesPacificAuckland_491(); break;
-                                case 1984190626:
-                                    zoneInfo = InitializeZonesPacificChatham_492(); break;
-                                case -1628161268:
-                                    zoneInfo = InitializeZonesPacificEaster_493(); break;
-                                case -2075026554:
-                                    zoneInfo = InitializeZonesPacificEfate_494(); break;
-                                case -622903437:
-                                    zoneInfo = InitializeZonesPacificEnderbury_495(); break;
-                                case -779666346:
-                                    zoneInfo = InitializeZonesPacificFakaofo_496(); break;
-                                case 1399392378:
-                                    zoneInfo = InitializeZonesPacificFiji_497(); break;
-                                case 357930689:
-                                    zoneInfo = InitializeZonesPacificFunafuti_498(); break;
-                                case -725079233:
-                                    zoneInfo = InitializeZonesPacificGalapagos_499(); break;
-                                case -1807520070:
-                                    zoneInfo = InitializeZonesPacificGambier_500(); break;
-                                case 1427700579:
-                                    zoneInfo = InitializeZonesPacificGuadalcanal_501(); break;
-                                case -1370599550:
-                                    zoneInfo = InitializeZonesPacificGuam_502(); break;
-                                case 815965741:
-                                    zoneInfo = InitializeZonesPacificHonolulu_503(); break;
-                                case 705708785:
-                                    zoneInfo = InitializeZonesPacificJohnston_504(); break;
-                                case -1439477186:
-                                    zoneInfo = InitializeZonesPacificKiritimati_505(); break;
-                                case -1998505594:
-                                    zoneInfo = InitializeZonesPacificKosrae_506(); break;
-                                case -1287153698:
-                                    zoneInfo = InitializeZonesPacificKwajalein_507(); break;
-                                case -499690840:
-                                    zoneInfo = InitializeZonesPacificMajuro_508(); break;
-                                case -112619906:
-                                    zoneInfo = InitializeZonesPacificMarquesas_509(); break;
-                                case 1418846409:
-                                    zoneInfo = InitializeZonesPacificMidway_510(); break;
-                                case -850713783:
-                                    zoneInfo = InitializeZonesPacificNauru_511(); break;
-                                case 1771100213:
-                                    zoneInfo = InitializeZonesPacificNiue_512(); break;
-                                case 1680167:
-                                    zoneInfo = InitializeZonesPacificNorfolk_513(); break;
-                                case -880073895:
-                                    zoneInfo = InitializeZonesPacificNoumea_514(); break;
-                                case 313921852:
-                                    zoneInfo = InitializeZonesPacificPago_Pago_515(); break;
-                                case -1340523914:
-                                    zoneInfo = InitializeZonesPacificPalau_516(); break;
-                                case -52490964:
-                                    zoneInfo = InitializeZonesPacificPitcairn_517(); break;
-                                case -162716759:
-                                    zoneInfo = InitializeZonesPacificPonape_518(); break;
-                                case 1386472197:
-                                    zoneInfo = InitializeZonesPacificPort_Moresby_519(); break;
-                                case 633127055:
-                                    zoneInfo = InitializeZonesPacificRarotonga_520(); break;
-                                case 1095300128:
-                                    zoneInfo = InitializeZonesPacificSaipan_521(); break;
-                                case -156776820:
-                                    zoneInfo = InitializeZonesPacificSamoa_522(); break;
-                                case -897947513:
-                                    zoneInfo = InitializeZonesPacificTahiti_523(); break;
-                                case 1437445350:
-                                    zoneInfo = InitializeZonesPacificTarawa_524(); break;
-                                case 1903917577:
-                                    zoneInfo = InitializeZonesPacificTongatapu_525(); break;
-                                case -140126165:
-                                    zoneInfo = InitializeZonesPacificTruk_526(); break;
-                                case 964006864:
-                                    zoneInfo = InitializeZonesPacificWake_527(); break;
-                                case -145933405:
-                                    zoneInfo = InitializeZonesPacificWallis_528(); break;
-                                case 892959311:
-                                    zoneInfo = InitializeZonesPacificYap_529(); break;
-                                case 1201563322:
-                                    zoneInfo = InitializeZonesPoland_530(); break;
-                                case -1305995606:
-                                    zoneInfo = InitializeZonesPortugal_531(); break;
-                                case -884783893:
-                                    zoneInfo = InitializeZonesPRC_532(); break;
-                                case 1093600014:
-                                    zoneInfo = InitializeZonesPST8PDT_533(); break;
-                                case -885635863:
-                                    zoneInfo = InitializeZonesROC_534(); break;
-                                case -1241866223:
-                                    zoneInfo = InitializeZonesROK_535(); break;
-                                case 2086809741:
-                                    zoneInfo = InitializeZonesSingapore_536(); break;
-                                case 856086581:
-                                    zoneInfo = InitializeZonesTurkey_537(); break;
-                                case 1130524625:
-                                    zoneInfo = InitializeZonesUCT_538(); break;
-                                case 789399305:
-                                    zoneInfo = InitializeZonesUniversal_539(); break;
-                                case -1750053164:
-                                    zoneInfo = InitializeZonesUSAlaska_540(); break;
-                                case -48437810:
-                                    zoneInfo = InitializeZonesUSAleutian_541(); break;
-                                case 555248474:
-                                    zoneInfo = InitializeZonesUSArizona_542(); break;
-                                case -544428660:
-                                    zoneInfo = InitializeZonesUSCentral_543(); break;
-                                case 330607863:
-                                    zoneInfo = InitializeZonesUSEastern_544(); break;
-                                case 1784811424:
-                                    zoneInfo = InitializeZonesUSEastIndiana_545(); break;
-                                case -432464807:
-                                    zoneInfo = InitializeZonesUSHawaii_546(); break;
-                                case -1107334397:
-                                    zoneInfo = InitializeZonesUSIndianaStarke_547(); break;
-                                case 1292101754:
-                                    zoneInfo = InitializeZonesUSMichigan_548(); break;
-                                case 1834271108:
-                                    zoneInfo = InitializeZonesUSMountain_549(); break;
-                                case -1917009615:
-                                    zoneInfo = InitializeZonesUSPacific_550(); break;
-                                case 1085445453:
-                                    zoneInfo = InitializeZonesUSPacificNew_551(); break;
-                                case 497284094:
-                                    zoneInfo = InitializeZonesUSSamoa_552(); break;
-                                case -884914970:
-                                    zoneInfo = InitializeZonesUTC_553(); break;
-                                case 1130393551:
-                                    zoneInfo = InitializeZonesWET_554(); break;
-                                case 1995963188:
-                                    zoneInfo = InitializeZonesWSU_555(); break;
-                                case 393324564:
-                                    zoneInfo = InitializeZonesZulu_556(); break;
-
-                                #endregion
-                            }
-
-                            if (zoneInfo != null)
-                            {
-                                // Found the time zone
                                 result = new TzTimeZone(zoneInfo);
-                                s_zones[tzName] = zoneInfo;
+                            }
+                            else
+                            {
+                                // No zone found in the cache, lazily load it
+                                int hash = tzName.GetHashCode();
+                                switch (hash)
+                                {
+                                    #region Time Zone lookup
+
+                                    case 1699809948:
+                                        zoneInfo = InitializeZonesAfricaAbidjan_0(); break;
+                                    case 98298846:
+                                        zoneInfo = InitializeZonesAfricaAccra_1(); break;
+                                    case 1924659262:
+                                        zoneInfo = InitializeZonesAfricaAddis_Ababa_2(); break;
+                                    case -271144050:
+                                        zoneInfo = InitializeZonesAfricaAlgiers_3(); break;
+                                    case -2143529902:
+                                        zoneInfo = InitializeZonesAfricaAsmara_4(); break;
+                                    case -174161434:
+                                        zoneInfo = InitializeZonesAfricaAsmera_5(); break;
+                                    case -181251634:
+                                        zoneInfo = InitializeZonesAfricaBamako_6(); break;
+                                    case -816933338:
+                                        zoneInfo = InitializeZonesAfricaBangui_7(); break;
+                                    case -1576448220:
+                                        zoneInfo = InitializeZonesAfricaBanjul_8(); break;
+                                    case 1773318470:
+                                        zoneInfo = InitializeZonesAfricaBissau_9(); break;
+                                    case -1863228086:
+                                        zoneInfo = InitializeZonesAfricaBlantyre_10(); break;
+                                    case -710904934:
+                                        zoneInfo = InitializeZonesAfricaBrazzaville_11(); break;
+                                    case -74562994:
+                                        zoneInfo = InitializeZonesAfricaBujumbura_12(); break;
+                                    case -322049060:
+                                        zoneInfo = InitializeZonesAfricaCairo_13(); break;
+                                    case -1117939039:
+                                        zoneInfo = InitializeZonesAfricaCasablanca_14(); break;
+                                    case 1663369890:
+                                        zoneInfo = InitializeZonesAfricaCeuta_15(); break;
+                                    case -321957883:
+                                        zoneInfo = InitializeZonesAfricaConakry_16(); break;
+                                    case 2067070973:
+                                        zoneInfo = InitializeZonesAfricaDakar_17(); break;
+                                    case -380154334:
+                                        zoneInfo = InitializeZonesAfricaDar_es_Salaam_18(); break;
+                                    case -1813688820:
+                                        zoneInfo = InitializeZonesAfricaDjibouti_19(); break;
+                                    case 1767067638:
+                                        zoneInfo = InitializeZonesAfricaDouala_20(); break;
+                                    case 1454171596:
+                                        zoneInfo = InitializeZonesAfricaEl_Aaiun_21(); break;
+                                    case -313710440:
+                                        zoneInfo = InitializeZonesAfricaFreetown_22(); break;
+                                    case 66948164:
+                                        zoneInfo = InitializeZonesAfricaGaborone_23(); break;
+                                    case -980135484:
+                                        zoneInfo = InitializeZonesAfricaHarare_24(); break;
+                                    case -512105597:
+                                        zoneInfo = InitializeZonesAfricaJohannesburg_25(); break;
+                                    case -1013176606:
+                                        zoneInfo = InitializeZonesAfricaKampala_26(); break;
+                                    case -1630939976:
+                                        zoneInfo = InitializeZonesAfricaKhartoum_27(); break;
+                                    case 637685936:
+                                        zoneInfo = InitializeZonesAfricaKigali_28(); break;
+                                    case 419344718:
+                                        zoneInfo = InitializeZonesAfricaKinshasa_29(); break;
+                                    case 1579392899:
+                                        zoneInfo = InitializeZonesAfricaLagos_30(); break;
+                                    case -1407666932:
+                                        zoneInfo = InitializeZonesAfricaLibreville_31(); break;
+                                    case -883479161:
+                                        zoneInfo = InitializeZonesAfricaLome_32(); break;
+                                    case -79200713:
+                                        zoneInfo = InitializeZonesAfricaLuanda_33(); break;
+                                    case 1631941302:
+                                        zoneInfo = InitializeZonesAfricaLubumbashi_34(); break;
+                                    case 1802654540:
+                                        zoneInfo = InitializeZonesAfricaLusaka_35(); break;
+                                    case 381768142:
+                                        zoneInfo = InitializeZonesAfricaMalabo_36(); break;
+                                    case -351483630:
+                                        zoneInfo = InitializeZonesAfricaMaputo_37(); break;
+                                    case -688095416:
+                                        zoneInfo = InitializeZonesAfricaMaseru_38(); break;
+                                    case -793250853:
+                                        zoneInfo = InitializeZonesAfricaMbabane_39(); break;
+                                    case -919985257:
+                                        zoneInfo = InitializeZonesAfricaMogadishu_40(); break;
+                                    case -1336849626:
+                                        zoneInfo = InitializeZonesAfricaMonrovia_41(); break;
+                                    case -1880736350:
+                                        zoneInfo = InitializeZonesAfricaNairobi_42(); break;
+                                    case 945747125:
+                                        zoneInfo = InitializeZonesAfricaNdjamena_43(); break;
+                                    case -259335812:
+                                        zoneInfo = InitializeZonesAfricaNiamey_44(); break;
+                                    case -1163472296:
+                                        zoneInfo = InitializeZonesAfricaNouakchott_45(); break;
+                                    case -1207550306:
+                                        zoneInfo = InitializeZonesAfricaOuagadougou_46(); break;
+                                    case 178476176:
+                                        zoneInfo = InitializeZonesAfricaPortoNovo_47(); break;
+                                    case 1610569940:
+                                        zoneInfo = InitializeZonesAfricaSao_Tome_48(); break;
+                                    case -1380854069:
+                                        zoneInfo = InitializeZonesAfricaTimbuktu_49(); break;
+                                    case -820565869:
+                                        zoneInfo = InitializeZonesAfricaTripoli_50(); break;
+                                    case -297706703:
+                                        zoneInfo = InitializeZonesAfricaTunis_51(); break;
+                                    case 86930643:
+                                        zoneInfo = InitializeZonesAfricaWindhoek_52(); break;
+                                    case -672279199:
+                                        zoneInfo = InitializeZonesAmericaAdak_53(); break;
+                                    case -268275662:
+                                        zoneInfo = InitializeZonesAmericaAnchorage_54(); break;
+                                    case 624675216:
+                                        zoneInfo = InitializeZonesAmericaAnguilla_55(); break;
+                                    case 577773012:
+                                        zoneInfo = InitializeZonesAmericaAntigua_56(); break;
+                                    case 1856506878:
+                                        zoneInfo = InitializeZonesAmericaAraguaina_57(); break;
+                                    case 551556156:
+                                        zoneInfo = InitializeZonesAmericaArgentinaBuenos_Aires_58(); break;
+                                    case 1372226152:
+                                        zoneInfo = InitializeZonesAmericaArgentinaCatamarca_59(); break;
+                                    case 616354372:
+                                        zoneInfo = InitializeZonesAmericaArgentinaComodRivadavia_60(); break;
+                                    case -2077184481:
+                                        zoneInfo = InitializeZonesAmericaArgentinaCordoba_61(); break;
+                                    case 904310493:
+                                        zoneInfo = InitializeZonesAmericaArgentinaJujuy_62(); break;
+                                    case 721123464:
+                                        zoneInfo = InitializeZonesAmericaArgentinaLa_Rioja_63(); break;
+                                    case 1815488101:
+                                        zoneInfo = InitializeZonesAmericaArgentinaMendoza_64(); break;
+                                    case -1062774753:
+                                        zoneInfo = InitializeZonesAmericaArgentinaRio_Gallegos_65(); break;
+                                    case -1775565078:
+                                        zoneInfo = InitializeZonesAmericaArgentinaSan_Juan_66(); break;
+                                    case -1385453932:
+                                        zoneInfo = InitializeZonesAmericaArgentinaTucuman_67(); break;
+                                    case -454638599:
+                                        zoneInfo = InitializeZonesAmericaArgentinaUshuaia_68(); break;
+                                    case 1687788134:
+                                        zoneInfo = InitializeZonesAmericaAruba_69(); break;
+                                    case 1753490127:
+                                        zoneInfo = InitializeZonesAmericaAsuncion_70(); break;
+                                    case -1068127747:
+                                        zoneInfo = InitializeZonesAmericaAtikokan_71(); break;
+                                    case -1778443841:
+                                        zoneInfo = InitializeZonesAmericaAtka_72(); break;
+                                    case 125302678:
+                                        zoneInfo = InitializeZonesAmericaBahia_73(); break;
+                                    case 410361629:
+                                        zoneInfo = InitializeZonesAmericaBarbados_74(); break;
+                                    case 1694878206:
+                                        zoneInfo = InitializeZonesAmericaBelem_75(); break;
+                                    case -1832990201:
+                                        zoneInfo = InitializeZonesAmericaBelize_76(); break;
+                                    case 744194341:
+                                        zoneInfo = InitializeZonesAmericaBlancSablon_77(); break;
+                                    case 836424640:
+                                        zoneInfo = InitializeZonesAmericaBoa_Vista_78(); break;
+                                    case -720057154:
+                                        zoneInfo = InitializeZonesAmericaBogota_79(); break;
+                                    case -1321243595:
+                                        zoneInfo = InitializeZonesAmericaBoise_80(); break;
+                                    case 394047540:
+                                        zoneInfo = InitializeZonesAmericaBuenos_Aires_81(); break;
+                                    case -531568626:
+                                        zoneInfo = InitializeZonesAmericaCambridge_Bay_82(); break;
+                                    case 1420755954:
+                                        zoneInfo = InitializeZonesAmericaCampo_Grande_83(); break;
+                                    case -1826835413:
+                                        zoneInfo = InitializeZonesAmericaCancun_84(); break;
+                                    case 1437673654:
+                                        zoneInfo = InitializeZonesAmericaCaracas_85(); break;
+                                    case -16116250:
+                                        zoneInfo = InitializeZonesAmericaCatamarca_86(); break;
+                                    case -530177092:
+                                        zoneInfo = InitializeZonesAmericaCayenne_87(); break;
+                                    case -1387125920:
+                                        zoneInfo = InitializeZonesAmericaCayman_88(); break;
+                                    case 463211199:
+                                        zoneInfo = InitializeZonesAmericaChicago_89(); break;
+                                    case 2068878199:
+                                        zoneInfo = InitializeZonesAmericaChihuahua_90(); break;
+                                    case -1858698550:
+                                        zoneInfo = InitializeZonesAmericaCoral_Harbour_91(); break;
+                                    case -1629791336:
+                                        zoneInfo = InitializeZonesAmericaCordoba_92(); break;
+                                    case 1489686373:
+                                        zoneInfo = InitializeZonesAmericaCosta_Rica_93(); break;
+                                    case 1301048591:
+                                        zoneInfo = InitializeZonesAmericaCuiaba_94(); break;
+                                    case -201416710:
+                                        zoneInfo = InitializeZonesAmericaCuracao_95(); break;
+                                    case 1970044409:
+                                        zoneInfo = InitializeZonesAmericaDanmarkshavn_96(); break;
+                                    case 1782088783:
+                                        zoneInfo = InitializeZonesAmericaDawson_97(); break;
+                                    case -1790293189:
+                                        zoneInfo = InitializeZonesAmericaDawson_Creek_98(); break;
+                                    case -1773816702:
+                                        zoneInfo = InitializeZonesAmericaDenver_99(); break;
+                                    case 1903660498:
+                                        zoneInfo = InitializeZonesAmericaDetroit_100(); break;
+                                    case 1876734939:
+                                        zoneInfo = InitializeZonesAmericaDominica_101(); break;
+                                    case -1983019480:
+                                        zoneInfo = InitializeZonesAmericaEdmonton_102(); break;
+                                    case -868639320:
+                                        zoneInfo = InitializeZonesAmericaEirunepe_103(); break;
+                                    case -1127947085:
+                                        zoneInfo = InitializeZonesAmericaEl_Salvador_104(); break;
+                                    case 573217535:
+                                        zoneInfo = InitializeZonesAmericaEnsenada_105(); break;
+                                    case 700588393:
+                                        zoneInfo = InitializeZonesAmericaFort_Wayne_106(); break;
+                                    case 1404759864:
+                                        zoneInfo = InitializeZonesAmericaFortaleza_107(); break;
+                                    case 560183601:
+                                        zoneInfo = InitializeZonesAmericaGlace_Bay_108(); break;
+                                    case -744519908:
+                                        zoneInfo = InitializeZonesAmericaGodthab_109(); break;
+                                    case -821262001:
+                                        zoneInfo = InitializeZonesAmericaGoose_Bay_110(); break;
+                                    case -737940495:
+                                        zoneInfo = InitializeZonesAmericaGrand_Turk_111(); break;
+                                    case 1721895565:
+                                        zoneInfo = InitializeZonesAmericaGrenada_112(); break;
+                                    case 1582816961:
+                                        zoneInfo = InitializeZonesAmericaGuadeloupe_113(); break;
+                                    case 170510344:
+                                        zoneInfo = InitializeZonesAmericaGuatemala_114(); break;
+                                    case 2044912803:
+                                        zoneInfo = InitializeZonesAmericaGuayaquil_115(); break;
+                                    case 588587991:
+                                        zoneInfo = InitializeZonesAmericaGuyana_116(); break;
+                                    case 2019839233:
+                                        zoneInfo = InitializeZonesAmericaHalifax_117(); break;
+                                    case 1730285615:
+                                        zoneInfo = InitializeZonesAmericaHavana_118(); break;
+                                    case -132996347:
+                                        zoneInfo = InitializeZonesAmericaHermosillo_119(); break;
+                                    case -678048283:
+                                        zoneInfo = InitializeZonesAmericaIndianaIndianapolis_120(); break;
+                                    case -1841841880:
+                                        zoneInfo = InitializeZonesAmericaIndianaKnox_121(); break;
+                                    case 151792952:
+                                        zoneInfo = InitializeZonesAmericaIndianaMarengo_122(); break;
+                                    case 1930304701:
+                                        zoneInfo = InitializeZonesAmericaIndianaPetersburg_123(); break;
+                                    case -353828462:
+                                        zoneInfo = InitializeZonesAmericaIndianaTell_City_124(); break;
+                                    case -1342992594:
+                                        zoneInfo = InitializeZonesAmericaIndianaVevay_125(); break;
+                                    case -727082855:
+                                        zoneInfo = InitializeZonesAmericaIndianaVincennes_126(); break;
+                                    case 750470149:
+                                        zoneInfo = InitializeZonesAmericaIndianaWinamac_127(); break;
+                                    case 1103262886:
+                                        zoneInfo = InitializeZonesAmericaIndianapolis_128(); break;
+                                    case -548234378:
+                                        zoneInfo = InitializeZonesAmericaInuvik_129(); break;
+                                    case -266830966:
+                                        zoneInfo = InitializeZonesAmericaIqaluit_130(); break;
+                                    case 597477986:
+                                        zoneInfo = InitializeZonesAmericaJamaica_131(); break;
+                                    case 1733747148:
+                                        zoneInfo = InitializeZonesAmericaJujuy_132(); break;
+                                    case -1468419008:
+                                        zoneInfo = InitializeZonesAmericaJuneau_133(); break;
+                                    case -2071691064:
+                                        zoneInfo = InitializeZonesAmericaKentuckyLouisville_134(); break;
+                                    case -382285320:
+                                        zoneInfo = InitializeZonesAmericaKentuckyMonticello_135(); break;
+                                    case 890339002:
+                                        zoneInfo = InitializeZonesAmericaKnox_IN_136(); break;
+                                    case -1308986415:
+                                        zoneInfo = InitializeZonesAmericaLa_Paz_137(); break;
+                                    case -614268160:
+                                        zoneInfo = InitializeZonesAmericaLima_138(); break;
+                                    case -483817034:
+                                        zoneInfo = InitializeZonesAmericaLos_Angeles_139(); break;
+                                    case -533330128:
+                                        zoneInfo = InitializeZonesAmericaLouisville_140(); break;
+                                    case -684917660:
+                                        zoneInfo = InitializeZonesAmericaMaceio_141(); break;
+                                    case -1230072330:
+                                        zoneInfo = InitializeZonesAmericaManagua_142(); break;
+                                    case 2087695705:
+                                        zoneInfo = InitializeZonesAmericaManaus_143(); break;
+                                    case 1097051691:
+                                        zoneInfo = InitializeZonesAmericaMartinique_144(); break;
+                                    case 121117961:
+                                        zoneInfo = InitializeZonesAmericaMazatlan_145(); break;
+                                    case -1892117010:
+                                        zoneInfo = InitializeZonesAmericaMendoza_146(); break;
+                                    case 295108910:
+                                        zoneInfo = InitializeZonesAmericaMenominee_147(); break;
+                                    case 942685734:
+                                        zoneInfo = InitializeZonesAmericaMerida_148(); break;
+                                    case 1004579704:
+                                        zoneInfo = InitializeZonesAmericaMexico_City_149(); break;
+                                    case -247092919:
+                                        zoneInfo = InitializeZonesAmericaMiquelon_150(); break;
+                                    case 1251740288:
+                                        zoneInfo = InitializeZonesAmericaMoncton_151(); break;
+                                    case 725121366:
+                                        zoneInfo = InitializeZonesAmericaMonterrey_152(); break;
+                                    case -1976618445:
+                                        zoneInfo = InitializeZonesAmericaMontevideo_153(); break;
+                                    case 671716835:
+                                        zoneInfo = InitializeZonesAmericaMontreal_154(); break;
+                                    case 1502508716:
+                                        zoneInfo = InitializeZonesAmericaMontserrat_155(); break;
+                                    case -542002661:
+                                        zoneInfo = InitializeZonesAmericaNassau_156(); break;
+                                    case 77968905:
+                                        zoneInfo = InitializeZonesAmericaNew_York_157(); break;
+                                    case 1540399358:
+                                        zoneInfo = InitializeZonesAmericaNipigon_158(); break;
+                                    case 150799102:
+                                        zoneInfo = InitializeZonesAmericaNome_159(); break;
+                                    case 1459772492:
+                                        zoneInfo = InitializeZonesAmericaNoronha_160(); break;
+                                    case -1695847122:
+                                        zoneInfo = InitializeZonesAmericaNorth_DakotaCenter_161(); break;
+                                    case 858330975:
+                                        zoneInfo = InitializeZonesAmericaNorth_DakotaNew_Salem_162(); break;
+                                    case 2086516222:
+                                        zoneInfo = InitializeZonesAmericaPanama_163(); break;
+                                    case -28362281:
+                                        zoneInfo = InitializeZonesAmericaPangnirtung_164(); break;
+                                    case 485081036:
+                                        zoneInfo = InitializeZonesAmericaParamaribo_165(); break;
+                                    case -2102922830:
+                                        zoneInfo = InitializeZonesAmericaPhoenix_166(); break;
+                                    case -52385135:
+                                        zoneInfo = InitializeZonesAmericaPort_of_Spain_167(); break;
+                                    case 443779890:
+                                        zoneInfo = InitializeZonesAmericaPortauPrince_168(); break;
+                                    case 961084259:
+                                        zoneInfo = InitializeZonesAmericaPorto_Acre_169(); break;
+                                    case 1665593983:
+                                        zoneInfo = InitializeZonesAmericaPorto_Velho_170(); break;
+                                    case -1967435897:
+                                        zoneInfo = InitializeZonesAmericaPuerto_Rico_171(); break;
+                                    case 1044015867:
+                                        zoneInfo = InitializeZonesAmericaRainy_River_172(); break;
+                                    case 1642065376:
+                                        zoneInfo = InitializeZonesAmericaRankin_Inlet_173(); break;
+                                    case 89324624:
+                                        zoneInfo = InitializeZonesAmericaRecife_174(); break;
+                                    case -1880305996:
+                                        zoneInfo = InitializeZonesAmericaRegina_175(); break;
+                                    case -1379511770:
+                                        zoneInfo = InitializeZonesAmericaResolute_176(); break;
+                                    case 1884194014:
+                                        zoneInfo = InitializeZonesAmericaRio_Branco_177(); break;
+                                    case -12936929:
+                                        zoneInfo = InitializeZonesAmericaRosario_178(); break;
+                                    case -500180216:
+                                        zoneInfo = InitializeZonesAmericaSantiago_179(); break;
+                                    case 723925369:
+                                        zoneInfo = InitializeZonesAmericaSanto_Domingo_180(); break;
+                                    case 108662619:
+                                        zoneInfo = InitializeZonesAmericaSao_Paulo_181(); break;
+                                    case 41604449:
+                                        zoneInfo = InitializeZonesAmericaScoresbysund_182(); break;
+                                    case 803378554:
+                                        zoneInfo = InitializeZonesAmericaShiprock_183(); break;
+                                    case -639275982:
+                                        zoneInfo = InitializeZonesAmericaSt_Johns_184(); break;
+                                    case -679844130:
+                                        zoneInfo = InitializeZonesAmericaSt_Kitts_185(); break;
+                                    case -1651264717:
+                                        zoneInfo = InitializeZonesAmericaSt_Lucia_186(); break;
+                                    case -927731961:
+                                        zoneInfo = InitializeZonesAmericaSt_Thomas_187(); break;
+                                    case -921029751:
+                                        zoneInfo = InitializeZonesAmericaSt_Vincent_188(); break;
+                                    case -258833286:
+                                        zoneInfo = InitializeZonesAmericaSwift_Current_189(); break;
+                                    case -1384070515:
+                                        zoneInfo = InitializeZonesAmericaTegucigalpa_190(); break;
+                                    case -647914273:
+                                        zoneInfo = InitializeZonesAmericaThule_191(); break;
+                                    case 709718199:
+                                        zoneInfo = InitializeZonesAmericaThunder_Bay_192(); break;
+                                    case 958101229:
+                                        zoneInfo = InitializeZonesAmericaTijuana_193(); break;
+                                    case -2028887488:
+                                        zoneInfo = InitializeZonesAmericaToronto_194(); break;
+                                    case 512318947:
+                                        zoneInfo = InitializeZonesAmericaTortola_195(); break;
+                                    case -198266380:
+                                        zoneInfo = InitializeZonesAmericaVancouver_196(); break;
+                                    case 569327232:
+                                        zoneInfo = InitializeZonesAmericaVirgin_197(); break;
+                                    case -2053559156:
+                                        zoneInfo = InitializeZonesAmericaWhitehorse_198(); break;
+                                    case -87309118:
+                                        zoneInfo = InitializeZonesAmericaWinnipeg_199(); break;
+                                    case -1741357031:
+                                        zoneInfo = InitializeZonesAmericaYakutat_200(); break;
+                                    case -2020825572:
+                                        zoneInfo = InitializeZonesAmericaYellowknife_201(); break;
+                                    case 847710201:
+                                        zoneInfo = InitializeZonesAntarcticaCasey_202(); break;
+                                    case -975644059:
+                                        zoneInfo = InitializeZonesAntarcticaDavis_203(); break;
+                                    case -1764039337:
+                                        zoneInfo = InitializeZonesAntarcticaDumontDUrville_204(); break;
+                                    case -118864541:
+                                        zoneInfo = InitializeZonesAntarcticaMawson_205(); break;
+                                    case -1787220507:
+                                        zoneInfo = InitializeZonesAntarcticaMcMurdo_206(); break;
+                                    case 1189616925:
+                                        zoneInfo = InitializeZonesAntarcticaPalmer_207(); break;
+                                    case -1075789582:
+                                        zoneInfo = InitializeZonesAntarcticaRothera_208(); break;
+                                    case 766030211:
+                                        zoneInfo = InitializeZonesAntarcticaSouth_Pole_209(); break;
+                                    case -1266505833:
+                                        zoneInfo = InitializeZonesAntarcticaSyowa_210(); break;
+                                    case 10724559:
+                                        zoneInfo = InitializeZonesAntarcticaVostok_211(); break;
+                                    case -1056823757:
+                                        zoneInfo = InitializeZonesArcticLongyearbyen_212(); break;
+                                    case -147092305:
+                                        zoneInfo = InitializeZonesAsiaAden_213(); break;
+                                    case 645767292:
+                                        zoneInfo = InitializeZonesAsiaAlmaty_214(); break;
+                                    case -473009363:
+                                        zoneInfo = InitializeZonesAsiaAmman_215(); break;
+                                    case 1001086078:
+                                        zoneInfo = InitializeZonesAsiaAnadyr_216(); break;
+                                    case 1948842985:
+                                        zoneInfo = InitializeZonesAsiaAqtau_217(); break;
+                                    case -1830319407:
+                                        zoneInfo = InitializeZonesAsiaAqtobe_218(); break;
+                                    case 68898622:
+                                        zoneInfo = InitializeZonesAsiaAshgabat_219(); break;
+                                    case 442025074:
+                                        zoneInfo = InitializeZonesAsiaAshkhabad_220(); break;
+                                    case 644527656:
+                                        zoneInfo = InitializeZonesAsiaBaghdad_221(); break;
+                                    case 1454838106:
+                                        zoneInfo = InitializeZonesAsiaBahrain_222(); break;
+                                    case -1291106899:
+                                        zoneInfo = InitializeZonesAsiaBaku_223(); break;
+                                    case -478205929:
+                                        zoneInfo = InitializeZonesAsiaBangkok_224(); break;
+                                    case 1986909045:
+                                        zoneInfo = InitializeZonesAsiaBeirut_225(); break;
+                                    case 832349156:
+                                        zoneInfo = InitializeZonesAsiaBishkek_226(); break;
+                                    case 133349473:
+                                        zoneInfo = InitializeZonesAsiaBrunei_227(); break;
+                                    case -95434065:
+                                        zoneInfo = InitializeZonesAsiaCalcutta_228(); break;
+                                    case 939017808:
+                                        zoneInfo = InitializeZonesAsiaChoibalsan_229(); break;
+                                    case 1916358523:
+                                        zoneInfo = InitializeZonesAsiaChongqing_230(); break;
+                                    case -1908620947:
+                                        zoneInfo = InitializeZonesAsiaChungking_231(); break;
+                                    case -1409982672:
+                                        zoneInfo = InitializeZonesAsiaColombo_232(); break;
+                                    case 257443227:
+                                        zoneInfo = InitializeZonesAsiaDacca_233(); break;
+                                    case 726189906:
+                                        zoneInfo = InitializeZonesAsiaDamascus_234(); break;
+                                    case -2047208090:
+                                        zoneInfo = InitializeZonesAsiaDhaka_235(); break;
+                                    case -442720055:
+                                        zoneInfo = InitializeZonesAsiaDili_236(); break;
+                                    case -86258091:
+                                        zoneInfo = InitializeZonesAsiaDubai_237(); break;
+                                    case 105796674:
+                                        zoneInfo = InitializeZonesAsiaDushanbe_238(); break;
+                                    case -2004662887:
+                                        zoneInfo = InitializeZonesAsiaGaza_239(); break;
+                                    case 86088879:
+                                        zoneInfo = InitializeZonesAsiaHarbin_240(); break;
+                                    case -1338815495:
+                                        zoneInfo = InitializeZonesAsiaHong_Kong_241(); break;
+                                    case -452883972:
+                                        zoneInfo = InitializeZonesAsiaHovd_242(); break;
+                                    case 1473578180:
+                                        zoneInfo = InitializeZonesAsiaIrkutsk_243(); break;
+                                    case 954224128:
+                                        zoneInfo = InitializeZonesAsiaIstanbul_244(); break;
+                                    case -441277954:
+                                        zoneInfo = InitializeZonesAsiaJakarta_245(); break;
+                                    case 686642514:
+                                        zoneInfo = InitializeZonesAsiaJayapura_246(); break;
+                                    case 750846034:
+                                        zoneInfo = InitializeZonesAsiaJerusalem_247(); break;
+                                    case -1736227411:
+                                        zoneInfo = InitializeZonesAsiaKabul_248(); break;
+                                    case 332127962:
+                                        zoneInfo = InitializeZonesAsiaKamchatka_249(); break;
+                                    case -157776414:
+                                        zoneInfo = InitializeZonesAsiaKarachi_250(); break;
+                                    case -1855277528:
+                                        zoneInfo = InitializeZonesAsiaKashgar_251(); break;
+                                    case -694172133:
+                                        zoneInfo = InitializeZonesAsiaKatmandu_252(); break;
+                                    case 979035487:
+                                        zoneInfo = InitializeZonesAsiaKrasnoyarsk_253(); break;
+                                    case -770786687:
+                                        zoneInfo = InitializeZonesAsiaKuala_Lumpur_254(); break;
+                                    case 962669433:
+                                        zoneInfo = InitializeZonesAsiaKuching_255(); break;
+                                    case -1594956014:
+                                        zoneInfo = InitializeZonesAsiaKuwait_256(); break;
+                                    case 225920409:
+                                        zoneInfo = InitializeZonesAsiaMacao_257(); break;
+                                    case 224216473:
+                                        zoneInfo = InitializeZonesAsiaMacau_258(); break;
+                                    case -513165793:
+                                        zoneInfo = InitializeZonesAsiaMagadan_259(); break;
+                                    case -1539632895:
+                                        zoneInfo = InitializeZonesAsiaMakassar_260(); break;
+                                    case -1665616345:
+                                        zoneInfo = InitializeZonesAsiaManila_261(); break;
+                                    case -2125404396:
+                                        zoneInfo = InitializeZonesAsiaMuscat_262(); break;
+                                    case -1136125139:
+                                        zoneInfo = InitializeZonesAsiaNicosia_263(); break;
+                                    case 1876739490:
+                                        zoneInfo = InitializeZonesAsiaNovosibirsk_264(); break;
+                                    case -861899977:
+                                        zoneInfo = InitializeZonesAsiaOmsk_265(); break;
+                                    case 698713947:
+                                        zoneInfo = InitializeZonesAsiaOral_266(); break;
+                                    case 614607548:
+                                        zoneInfo = InitializeZonesAsiaPhnom_Penh_267(); break;
+                                    case 2007957215:
+                                        zoneInfo = InitializeZonesAsiaPontianak_268(); break;
+                                    case 523346578:
+                                        zoneInfo = InitializeZonesAsiaPyongyang_269(); break;
+                                    case -1584577127:
+                                        zoneInfo = InitializeZonesAsiaQatar_270(); break;
+                                    case 865338299:
+                                        zoneInfo = InitializeZonesAsiaQyzylorda_271(); break;
+                                    case -1639700457:
+                                        zoneInfo = InitializeZonesAsiaRangoon_272(); break;
+                                    case 302747578:
+                                        zoneInfo = InitializeZonesAsiaRiyadh_273(); break;
+                                    case 717010931:
+                                        zoneInfo = InitializeZonesAsiaRiyadh87_274(); break;
+                                    case 717010928:
+                                        zoneInfo = InitializeZonesAsiaRiyadh88_275(); break;
+                                    case 717010929:
+                                        zoneInfo = InitializeZonesAsiaRiyadh89_276(); break;
+                                    case -546595662:
+                                        zoneInfo = InitializeZonesAsiaSaigon_277(); break;
+                                    case -385164209:
+                                        zoneInfo = InitializeZonesAsiaSakhalin_278(); break;
+                                    case 324215389:
+                                        zoneInfo = InitializeZonesAsiaSamarkand_279(); break;
+                                    case 300423193:
+                                        zoneInfo = InitializeZonesAsiaSeoul_280(); break;
+                                    case -45271543:
+                                        zoneInfo = InitializeZonesAsiaShanghai_281(); break;
+                                    case 1662344632:
+                                        zoneInfo = InitializeZonesAsiaSingapore_282(); break;
+                                    case -2093870760:
+                                        zoneInfo = InitializeZonesAsiaTaipei_283(); break;
+                                    case 1094126719:
+                                        zoneInfo = InitializeZonesAsiaTashkent_284(); break;
+                                    case 741536013:
+                                        zoneInfo = InitializeZonesAsiaTbilisi_285(); break;
+                                    case -157373645:
+                                        zoneInfo = InitializeZonesAsiaTehran_286(); break;
+                                    case 1139010707:
+                                        zoneInfo = InitializeZonesAsiaTel_Aviv_287(); break;
+                                    case -1239788792:
+                                        zoneInfo = InitializeZonesAsiaThimbu_288(); break;
+                                    case 1040976897:
+                                        zoneInfo = InitializeZonesAsiaThimphu_289(); break;
+                                    case -435582449:
+                                        zoneInfo = InitializeZonesAsiaTokyo_290(); break;
+                                    case 886233038:
+                                        zoneInfo = InitializeZonesAsiaUjung_Pandang_291(); break;
+                                    case -49410061:
+                                        zoneInfo = InitializeZonesAsiaUlaanbaatar_292(); break;
+                                    case -251299036:
+                                        zoneInfo = InitializeZonesAsiaUlan_Bator_293(); break;
+                                    case 188596318:
+                                        zoneInfo = InitializeZonesAsiaUrumqi_294(); break;
+                                    case -1777908430:
+                                        zoneInfo = InitializeZonesAsiaVientiane_295(); break;
+                                    case -512511441:
+                                        zoneInfo = InitializeZonesAsiaVladivostok_296(); break;
+                                    case -2019497703:
+                                        zoneInfo = InitializeZonesAsiaYakutsk_297(); break;
+                                    case 362507569:
+                                        zoneInfo = InitializeZonesAsiaYekaterinburg_298(); break;
+                                    case -1094134257:
+                                        zoneInfo = InitializeZonesAsiaYerevan_299(); break;
+                                    case 2014992483:
+                                        zoneInfo = InitializeZonesAtlanticAzores_300(); break;
+                                    case 1077917924:
+                                        zoneInfo = InitializeZonesAtlanticBermuda_301(); break;
+                                    case -206123373:
+                                        zoneInfo = InitializeZonesAtlanticCanary_302(); break;
+                                    case 220950923:
+                                        zoneInfo = InitializeZonesAtlanticCape_Verde_303(); break;
+                                    case 106213988:
+                                        zoneInfo = InitializeZonesAtlanticFaeroe_304(); break;
+                                    case 580847541:
+                                        zoneInfo = InitializeZonesAtlanticFaroe_305(); break;
+                                    case 1794031680:
+                                        zoneInfo = InitializeZonesAtlanticJan_Mayen_306(); break;
+                                    case -1514877978:
+                                        zoneInfo = InitializeZonesAtlanticMadeira_307(); break;
+                                    case 1009182308:
+                                        zoneInfo = InitializeZonesAtlanticReykjavik_308(); break;
+                                    case -93773725:
+                                        zoneInfo = InitializeZonesAtlanticSouth_Georgia_309(); break;
+                                    case -1088299354:
+                                        zoneInfo = InitializeZonesAtlanticSt_Helena_310(); break;
+                                    case -1516969285:
+                                        zoneInfo = InitializeZonesAtlanticStanley_311(); break;
+                                    case -464371903:
+                                        zoneInfo = InitializeZonesAustraliaACT_312(); break;
+                                    case 1816655716:
+                                        zoneInfo = InitializeZonesAustraliaAdelaide_313(); break;
+                                    case -429581102:
+                                        zoneInfo = InitializeZonesAustraliaBrisbane_314(); break;
+                                    case -776202715:
+                                        zoneInfo = InitializeZonesAustraliaBroken_Hill_315(); break;
+                                    case 1953852453:
+                                        zoneInfo = InitializeZonesAustraliaCanberra_316(); break;
+                                    case -1996728198:
+                                        zoneInfo = InitializeZonesAustraliaCurrie_317(); break;
+                                    case -1849102127:
+                                        zoneInfo = InitializeZonesAustraliaDarwin_318(); break;
+                                    case -1184345115:
+                                        zoneInfo = InitializeZonesAustraliaEucla_319(); break;
+                                    case -625531130:
+                                        zoneInfo = InitializeZonesAustraliaHobart_320(); break;
+                                    case -870391459:
+                                        zoneInfo = InitializeZonesAustraliaLHI_321(); break;
+                                    case -1662279227:
+                                        zoneInfo = InitializeZonesAustraliaLindeman_322(); break;
+                                    case 352658546:
+                                        zoneInfo = InitializeZonesAustraliaLord_Howe_323(); break;
+                                    case 197367794:
+                                        zoneInfo = InitializeZonesAustraliaMelbourne_324(); break;
+                                    case 1415966430:
+                                        zoneInfo = InitializeZonesAustraliaNorth_325(); break;
+                                    case 12384317:
+                                        zoneInfo = InitializeZonesAustraliaNSW_326(); break;
+                                    case 1786674048:
+                                        zoneInfo = InitializeZonesAustraliaPerth_327(); break;
+                                    case 1007278695:
+                                        zoneInfo = InitializeZonesAustraliaQueensland_328(); break;
+                                    case -1978581814:
+                                        zoneInfo = InitializeZonesAustraliaSouth_329(); break;
+                                    case 1338845336:
+                                        zoneInfo = InitializeZonesAustraliaSydney_330(); break;
+                                    case 302410600:
+                                        zoneInfo = InitializeZonesAustraliaTasmania_331(); break;
+                                    case 422004328:
+                                        zoneInfo = InitializeZonesAustraliaVictoria_332(); break;
+                                    case -678006194:
+                                        zoneInfo = InitializeZonesAustraliaWest_333(); break;
+                                    case -1823623498:
+                                        zoneInfo = InitializeZonesAustraliaYancowinna_334(); break;
+                                    case -394061641:
+                                        zoneInfo = InitializeZonesBrazilAcre_335(); break;
+                                    case -914753456:
+                                        zoneInfo = InitializeZonesBrazilDeNoronha_336(); break;
+                                    case 995187306:
+                                        zoneInfo = InitializeZonesBrazilEast_337(); break;
+                                    case -1425319314:
+                                        zoneInfo = InitializeZonesBrazilWest_338(); break;
+                                    case 1688635322:
+                                        zoneInfo = InitializeZonesCanadaAtlantic_339(); break;
+                                    case 2087361891:
+                                        zoneInfo = InitializeZonesCanadaCentral_340(); break;
+                                    case -1915577138:
+                                        zoneInfo = InitializeZonesCanadaEastern_341(); break;
+                                    case -1534173844:
+                                        zoneInfo = InitializeZonesCanadaEastSaskatchewan_342(); break;
+                                    case 903748646:
+                                        zoneInfo = InitializeZonesCanadaMountain_343(); break;
+                                    case -2096950413:
+                                        zoneInfo = InitializeZonesCanadaNewfoundland_344(); break;
+                                    case -1622828482:
+                                        zoneInfo = InitializeZonesCanadaPacific_345(); break;
+                                    case -1556780531:
+                                        zoneInfo = InitializeZonesCanadaSaskatchewan_346(); break;
+                                    case -2089863656:
+                                        zoneInfo = InitializeZonesCanadaYukon_347(); break;
+                                    case 1130393539:
+                                        zoneInfo = InitializeZonesCET_348(); break;
+                                    case -328153824:
+                                        zoneInfo = InitializeZonesChileContinental_349(); break;
+                                    case 1190645283:
+                                        zoneInfo = InitializeZonesChileEasterIsland_350(); break;
+                                    case -1326907254:
+                                        zoneInfo = InitializeZonesCST6CDT_351(); break;
+                                    case 1587700637:
+                                        zoneInfo = InitializeZonesCuba_352(); break;
+                                    case 1130393537:
+                                        zoneInfo = InitializeZonesEET_353(); break;
+                                    case 1979825410:
+                                        zoneInfo = InitializeZonesEgypt_354(); break;
+                                    case 110303723:
+                                        zoneInfo = InitializeZonesEire_355(); break;
+                                    case 1131573185:
+                                        zoneInfo = InitializeZonesEST_356(); break;
+                                    case -1460797234:
+                                        zoneInfo = InitializeZonesEST5EDT_357(); break;
+                                    case 1773387205:
+                                        zoneInfo = InitializeZonesEtcGMT_358(); break;
+                                    case -638907933:
+                                        zoneInfo = InitializeZonesEtcGMT0_359(); break;
+                                    case -638907934:
+                                        zoneInfo = InitializeZonesEtcGMT1_360(); break;
+                                    case -642053662:
+                                        zoneInfo = InitializeZonesEtcGMT10_361(); break;
+                                    case -642119198:
+                                        zoneInfo = InitializeZonesEtcGMT11_362(); break;
+                                    case -641922590:
+                                        zoneInfo = InitializeZonesEtcGMT12_363(); break;
+                                    case -638907931:
+                                        zoneInfo = InitializeZonesEtcGMT2_364(); break;
+                                    case -638907932:
+                                        zoneInfo = InitializeZonesEtcGMT3_365(); break;
+                                    case -638907937:
+                                        zoneInfo = InitializeZonesEtcGMT4_366(); break;
+                                    case -638907938:
+                                        zoneInfo = InitializeZonesEtcGMT5_367(); break;
+                                    case -638907935:
+                                        zoneInfo = InitializeZonesEtcGMT6_368(); break;
+                                    case -638907936:
+                                        zoneInfo = InitializeZonesEtcGMT7_369(); break;
+                                    case -638907941:
+                                        zoneInfo = InitializeZonesEtcGMT8_370(); break;
+                                    case -638907942:
+                                        zoneInfo = InitializeZonesEtcGMT9_371(); break;
+                                    case 537116101:
+                                        zoneInfo = InitializeZonesEtcGMT0_372(); break;
+                                    case -1021244957:
+                                        zoneInfo = InitializeZonesEtcGMT0_373(); break;
+                                    case -1021244958:
+                                        zoneInfo = InitializeZonesEtcGMT1_374(); break;
+                                    case -1024390686:
+                                        zoneInfo = InitializeZonesEtcGMT10_375(); break;
+                                    case -1024456222:
+                                        zoneInfo = InitializeZonesEtcGMT11_376(); break;
+                                    case -1024259614:
+                                        zoneInfo = InitializeZonesEtcGMT12_377(); break;
+                                    case -1024325150:
+                                        zoneInfo = InitializeZonesEtcGMT13_378(); break;
+                                    case -1024652830:
+                                        zoneInfo = InitializeZonesEtcGMT14_379(); break;
+                                    case -1021244955:
+                                        zoneInfo = InitializeZonesEtcGMT2_380(); break;
+                                    case -1021244956:
+                                        zoneInfo = InitializeZonesEtcGMT3_381(); break;
+                                    case -1021244961:
+                                        zoneInfo = InitializeZonesEtcGMT4_382(); break;
+                                    case -1021244962:
+                                        zoneInfo = InitializeZonesEtcGMT5_383(); break;
+                                    case -1021244959:
+                                        zoneInfo = InitializeZonesEtcGMT6_384(); break;
+                                    case -1021244960:
+                                        zoneInfo = InitializeZonesEtcGMT7_385(); break;
+                                    case -1021244965:
+                                        zoneInfo = InitializeZonesEtcGMT8_386(); break;
+                                    case -1021244966:
+                                        zoneInfo = InitializeZonesEtcGMT9_387(); break;
+                                    case -625481629:
+                                        zoneInfo = InitializeZonesEtcGreenwich_388(); break;
+                                    case 1773518259:
+                                        zoneInfo = InitializeZonesEtcUCT_389(); break;
+                                    case -495756420:
+                                        zoneInfo = InitializeZonesEtcUniversal_390(); break;
+                                    case 1821948682:
+                                        zoneInfo = InitializeZonesEtcUTC_391(); break;
+                                    case -2143966160:
+                                        zoneInfo = InitializeZonesEtcZulu_392(); break;
+                                    case 1980578132:
+                                        zoneInfo = InitializeZonesEuropeAmsterdam_393(); break;
+                                    case -623087797:
+                                        zoneInfo = InitializeZonesEuropeAndorra_394(); break;
+                                    case -194119130:
+                                        zoneInfo = InitializeZonesEuropeAthens_395(); break;
+                                    case -718299356:
+                                        zoneInfo = InitializeZonesEuropeBelfast_396(); break;
+                                    case -1389969270:
+                                        zoneInfo = InitializeZonesEuropeBelgrade_397(); break;
+                                    case -1478433923:
+                                        zoneInfo = InitializeZonesEuropeBerlin_398(); break;
+                                    case 1528115731:
+                                        zoneInfo = InitializeZonesEuropeBratislava_399(); break;
+                                    case -1678431405:
+                                        zoneInfo = InitializeZonesEuropeBrussels_400(); break;
+                                    case -1173190246:
+                                        zoneInfo = InitializeZonesEuropeBucharest_401(); break;
+                                    case -807880301:
+                                        zoneInfo = InitializeZonesEuropeBudapest_402(); break;
+                                    case 1958638142:
+                                        zoneInfo = InitializeZonesEuropeChisinau_403(); break;
+                                    case -872620446:
+                                        zoneInfo = InitializeZonesEuropeCopenhagen_404(); break;
+                                    case 1818681517:
+                                        zoneInfo = InitializeZonesEuropeDublin_405(); break;
+                                    case -144114636:
+                                        zoneInfo = InitializeZonesEuropeGibraltar_406(); break;
+                                    case 1004163835:
+                                        zoneInfo = InitializeZonesEuropeGuernsey_407(); break;
+                                    case -168349029:
+                                        zoneInfo = InitializeZonesEuropeHelsinki_408(); break;
+                                    case 751890015:
+                                        zoneInfo = InitializeZonesEuropeIsle_of_Man_409(); break;
+                                    case 985011578:
+                                        zoneInfo = InitializeZonesEuropeIstanbul_410(); break;
+                                    case -1742852123:
+                                        zoneInfo = InitializeZonesEuropeJersey_411(); break;
+                                    case -18986489:
+                                        zoneInfo = InitializeZonesEuropeKaliningrad_412(); break;
+                                    case 138675714:
+                                        zoneInfo = InitializeZonesEuropeKiev_413(); break;
+                                    case -7834881:
+                                        zoneInfo = InitializeZonesEuropeLisbon_414(); break;
+                                    case -1435712790:
+                                        zoneInfo = InitializeZonesEuropeLjubljana_415(); break;
+                                    case -1146845041:
+                                        zoneInfo = InitializeZonesEuropeLondon_416(); break;
+                                    case 1936960559:
+                                        zoneInfo = InitializeZonesEuropeLuxembourg_417(); break;
+                                    case 2069609393:
+                                        zoneInfo = InitializeZonesEuropeMadrid_418(); break;
+                                    case -1559957712:
+                                        zoneInfo = InitializeZonesEuropeMalta_419(); break;
+                                    case 802635951:
+                                        zoneInfo = InitializeZonesEuropeMariehamn_420(); break;
+                                    case -51688183:
+                                        zoneInfo = InitializeZonesEuropeMinsk_421(); break;
+                                    case -214773865:
+                                        zoneInfo = InitializeZonesEuropeMonaco_422(); break;
+                                    case 892659321:
+                                        zoneInfo = InitializeZonesEuropeMoscow_423(); break;
+                                    case -837062563:
+                                        zoneInfo = InitializeZonesEuropeNicosia_424(); break;
+                                    case -1961128965:
+                                        zoneInfo = InitializeZonesEuropeOslo_425(); break;
+                                    case -232110161:
+                                        zoneInfo = InitializeZonesEuropeParis_426(); break;
+                                    case -991635541:
+                                        zoneInfo = InitializeZonesEuropePodgorica_427(); break;
+                                    case 715526596:
+                                        zoneInfo = InitializeZonesEuropePrague_428(); break;
+                                    case -2009338737:
+                                        zoneInfo = InitializeZonesEuropeRiga_429(); break;
+                                    case -40363491:
+                                        zoneInfo = InitializeZonesEuropeRome_430(); break;
+                                    case 1072615383:
+                                        zoneInfo = InitializeZonesEuropeSamara_431(); break;
+                                    case -892752083:
+                                        zoneInfo = InitializeZonesEuropeSan_Marino_432(); break;
+                                    case 511752758:
+                                        zoneInfo = InitializeZonesEuropeSarajevo_433(); break;
+                                    case 2143396073:
+                                        zoneInfo = InitializeZonesEuropeSimferopol_434(); break;
+                                    case 581215534:
+                                        zoneInfo = InitializeZonesEuropeSkopje_435(); break;
+                                    case 1279215537:
+                                        zoneInfo = InitializeZonesEuropeSofia_436(); break;
+                                    case -451456409:
+                                        zoneInfo = InitializeZonesEuropeStockholm_437(); break;
+                                    case 1617355769:
+                                        zoneInfo = InitializeZonesEuropeTallinn_438(); break;
+                                    case 1888145627:
+                                        zoneInfo = InitializeZonesEuropeTirane_439(); break;
+                                    case -1084364571:
+                                        zoneInfo = InitializeZonesEuropeTiraspol_440(); break;
+                                    case -177821498:
+                                        zoneInfo = InitializeZonesEuropeUzhgorod_441(); break;
+                                    case 1118856139:
+                                        zoneInfo = InitializeZonesEuropeVaduz_442(); break;
+                                    case -1819792641:
+                                        zoneInfo = InitializeZonesEuropeVatican_443(); break;
+                                    case -608437302:
+                                        zoneInfo = InitializeZonesEuropeVienna_444(); break;
+                                    case -1812268074:
+                                        zoneInfo = InitializeZonesEuropeVilnius_445(); break;
+                                    case -1825027013:
+                                        zoneInfo = InitializeZonesEuropeVolgograd_446(); break;
+                                    case -1684852645:
+                                        zoneInfo = InitializeZonesEuropeWarsaw_447(); break;
+                                    case 1360772019:
+                                        zoneInfo = InitializeZonesEuropeZagreb_448(); break;
+                                    case 561761180:
+                                        zoneInfo = InitializeZonesEuropeZaporozhye_449(); break;
+                                    case -1303631950:
+                                        zoneInfo = InitializeZonesEuropeZurich_450(); break;
+                                    case -838289447:
+                                        zoneInfo = InitializeZonesGB_451(); break;
+                                    case -402159656:
+                                        zoneInfo = InitializeZonesGBEire_452(); break;
+                                    case 1130917823:
+                                        zoneInfo = InitializeZonesGMT_453(); break;
+                                    case 1293429701:
+                                        zoneInfo = InitializeZonesGMT0_454(); break;
+                                    case -1927778369:
+                                        zoneInfo = InitializeZonesGMT0_455(); break;
+                                    case 911092677:
+                                        zoneInfo = InitializeZonesGMT0_456(); break;
+                                    case -150168093:
+                                        zoneInfo = InitializeZonesGreenwich_457(); break;
+                                    case -616678781:
+                                        zoneInfo = InitializeZonesHongkong_458(); break;
+                                    case 1131573198:
+                                        zoneInfo = InitializeZonesHST_459(); break;
+                                    case -1097963951:
+                                        zoneInfo = InitializeZonesIceland_460(); break;
+                                    case 980497891:
+                                        zoneInfo = InitializeZonesIndianAntananarivo_461(); break;
+                                    case -1342911606:
+                                        zoneInfo = InitializeZonesIndianChagos_462(); break;
+                                    case 350953343:
+                                        zoneInfo = InitializeZonesIndianChristmas_463(); break;
+                                    case 186229689:
+                                        zoneInfo = InitializeZonesIndianCocos_464(); break;
+                                    case 702818115:
+                                        zoneInfo = InitializeZonesIndianComoro_465(); break;
+                                    case 215599819:
+                                        zoneInfo = InitializeZonesIndianKerguelen_466(); break;
+                                    case 1921408849:
+                                        zoneInfo = InitializeZonesIndianMahe_467(); break;
+                                    case -703540117:
+                                        zoneInfo = InitializeZonesIndianMaldives_468(); break;
+                                    case 769585857:
+                                        zoneInfo = InitializeZonesIndianMauritius_469(); break;
+                                    case 568796582:
+                                        zoneInfo = InitializeZonesIndianMayotte_470(); break;
+                                    case -1145785746:
+                                        zoneInfo = InitializeZonesIndianReunion_471(); break;
+                                    case 1580003084:
+                                        zoneInfo = InitializeZonesIran_472(); break;
+                                    case -295708726:
+                                        zoneInfo = InitializeZonesIsrael_473(); break;
+                                    case 351080495:
+                                        zoneInfo = InitializeZonesJamaica_474(); break;
+                                    case -1482232128:
+                                        zoneInfo = InitializeZonesJapan_475(); break;
+                                    case 1644549627:
+                                        zoneInfo = InitializeZonesKwajalein_476(); break;
+                                    case 703406297:
+                                        zoneInfo = InitializeZonesLibya_477(); break;
+                                    case 1130393545:
+                                        zoneInfo = InitializeZonesMET_478(); break;
+                                    case 637172474:
+                                        zoneInfo = InitializeZonesMexicoBajaNorte_479(); break;
+                                    case 201064555:
+                                        zoneInfo = InitializeZonesMexicoBajaSur_480(); break;
+                                    case -1892166809:
+                                        zoneInfo = InitializeZonesMexicoGeneral_481(); break;
+                                    case 476734658:
+                                        zoneInfo = InitializeZonesMideastRiyadh87_482(); break;
+                                    case 1286038722:
+                                        zoneInfo = InitializeZonesMideastRiyadh88_483(); break;
+                                    case -670276414:
+                                        zoneInfo = InitializeZonesMideastRiyadh89_484(); break;
+                                    case 1131573193:
+                                        zoneInfo = InitializeZonesMST_485(); break;
+                                    case -1193016866:
+                                        zoneInfo = InitializeZonesMST7MDT_486(); break;
+                                    case 2011736330:
+                                        zoneInfo = InitializeZonesNavajo_487(); break;
+                                    case -836716574:
+                                        zoneInfo = InitializeZonesNZ_488(); break;
+                                    case -1472772325:
+                                        zoneInfo = InitializeZonesNZCHAT_489(); break;
+                                    case -962352476:
+                                        zoneInfo = InitializeZonesPacificApia_490(); break;
+                                    case 1728036233:
+                                        zoneInfo = InitializeZonesPacificAuckland_491(); break;
+                                    case 1984190626:
+                                        zoneInfo = InitializeZonesPacificChatham_492(); break;
+                                    case -1628161268:
+                                        zoneInfo = InitializeZonesPacificEaster_493(); break;
+                                    case -2075026554:
+                                        zoneInfo = InitializeZonesPacificEfate_494(); break;
+                                    case -622903437:
+                                        zoneInfo = InitializeZonesPacificEnderbury_495(); break;
+                                    case -779666346:
+                                        zoneInfo = InitializeZonesPacificFakaofo_496(); break;
+                                    case 1399392378:
+                                        zoneInfo = InitializeZonesPacificFiji_497(); break;
+                                    case 357930689:
+                                        zoneInfo = InitializeZonesPacificFunafuti_498(); break;
+                                    case -725079233:
+                                        zoneInfo = InitializeZonesPacificGalapagos_499(); break;
+                                    case -1807520070:
+                                        zoneInfo = InitializeZonesPacificGambier_500(); break;
+                                    case 1427700579:
+                                        zoneInfo = InitializeZonesPacificGuadalcanal_501(); break;
+                                    case -1370599550:
+                                        zoneInfo = InitializeZonesPacificGuam_502(); break;
+                                    case 815965741:
+                                        zoneInfo = InitializeZonesPacificHonolulu_503(); break;
+                                    case 705708785:
+                                        zoneInfo = InitializeZonesPacificJohnston_504(); break;
+                                    case -1439477186:
+                                        zoneInfo = InitializeZonesPacificKiritimati_505(); break;
+                                    case -1998505594:
+                                        zoneInfo = InitializeZonesPacificKosrae_506(); break;
+                                    case -1287153698:
+                                        zoneInfo = InitializeZonesPacificKwajalein_507(); break;
+                                    case -499690840:
+                                        zoneInfo = InitializeZonesPacificMajuro_508(); break;
+                                    case -112619906:
+                                        zoneInfo = InitializeZonesPacificMarquesas_509(); break;
+                                    case 1418846409:
+                                        zoneInfo = InitializeZonesPacificMidway_510(); break;
+                                    case -850713783:
+                                        zoneInfo = InitializeZonesPacificNauru_511(); break;
+                                    case 1771100213:
+                                        zoneInfo = InitializeZonesPacificNiue_512(); break;
+                                    case 1680167:
+                                        zoneInfo = InitializeZonesPacificNorfolk_513(); break;
+                                    case -880073895:
+                                        zoneInfo = InitializeZonesPacificNoumea_514(); break;
+                                    case 313921852:
+                                        zoneInfo = InitializeZonesPacificPago_Pago_515(); break;
+                                    case -1340523914:
+                                        zoneInfo = InitializeZonesPacificPalau_516(); break;
+                                    case -52490964:
+                                        zoneInfo = InitializeZonesPacificPitcairn_517(); break;
+                                    case -162716759:
+                                        zoneInfo = InitializeZonesPacificPonape_518(); break;
+                                    case 1386472197:
+                                        zoneInfo = InitializeZonesPacificPort_Moresby_519(); break;
+                                    case 633127055:
+                                        zoneInfo = InitializeZonesPacificRarotonga_520(); break;
+                                    case 1095300128:
+                                        zoneInfo = InitializeZonesPacificSaipan_521(); break;
+                                    case -156776820:
+                                        zoneInfo = InitializeZonesPacificSamoa_522(); break;
+                                    case -897947513:
+                                        zoneInfo = InitializeZonesPacificTahiti_523(); break;
+                                    case 1437445350:
+                                        zoneInfo = InitializeZonesPacificTarawa_524(); break;
+                                    case 1903917577:
+                                        zoneInfo = InitializeZonesPacificTongatapu_525(); break;
+                                    case -140126165:
+                                        zoneInfo = InitializeZonesPacificTruk_526(); break;
+                                    case 964006864:
+                                        zoneInfo = InitializeZonesPacificWake_527(); break;
+                                    case -145933405:
+                                        zoneInfo = InitializeZonesPacificWallis_528(); break;
+                                    case 892959311:
+                                        zoneInfo = InitializeZonesPacificYap_529(); break;
+                                    case 1201563322:
+                                        zoneInfo = InitializeZonesPoland_530(); break;
+                                    case -1305995606:
+                                        zoneInfo = InitializeZonesPortugal_531(); break;
+                                    case -884783893:
+                                        zoneInfo = InitializeZonesPRC_532(); break;
+                                    case 1093600014:
+                                        zoneInfo = InitializeZonesPST8PDT_533(); break;
+                                    case -885635863:
+                                        zoneInfo = InitializeZonesROC_534(); break;
+                                    case -1241866223:
+                                        zoneInfo = InitializeZonesROK_535(); break;
+                                    case 2086809741:
+                                        zoneInfo = InitializeZonesSingapore_536(); break;
+                                    case 856086581:
+                                        zoneInfo = InitializeZonesTurkey_537(); break;
+                                    case 1130524625:
+                                        zoneInfo = InitializeZonesUCT_538(); break;
+                                    case 789399305:
+                                        zoneInfo = InitializeZonesUniversal_539(); break;
+                                    case -1750053164:
+                                        zoneInfo = InitializeZonesUSAlaska_540(); break;
+                                    case -48437810:
+                                        zoneInfo = InitializeZonesUSAleutian_541(); break;
+                                    case 555248474:
+                                        zoneInfo = InitializeZonesUSArizona_542(); break;
+                                    case -544428660:
+                                        zoneInfo = InitializeZonesUSCentral_543(); break;
+                                    case 330607863:
+                                        zoneInfo = InitializeZonesUSEastern_544(); break;
+                                    case 1784811424:
+                                        zoneInfo = InitializeZonesUSEastIndiana_545(); break;
+                                    case -432464807:
+                                        zoneInfo = InitializeZonesUSHawaii_546(); break;
+                                    case -1107334397:
+                                        zoneInfo = InitializeZonesUSIndianaStarke_547(); break;
+                                    case 1292101754:
+                                        zoneInfo = InitializeZonesUSMichigan_548(); break;
+                                    case 1834271108:
+                                        zoneInfo = InitializeZonesUSMountain_549(); break;
+                                    case -1917009615:
+                                        zoneInfo = InitializeZonesUSPacific_550(); break;
+                                    case 1085445453:
+                                        zoneInfo = InitializeZonesUSPacificNew_551(); break;
+                                    case 497284094:
+                                        zoneInfo = InitializeZonesUSSamoa_552(); break;
+                                    case -884914970:
+                                        zoneInfo = InitializeZonesUTC_553(); break;
+                                    case 1130393551:
+                                        zoneInfo = InitializeZonesWET_554(); break;
+                                    case 1995963188:
+                                        zoneInfo = InitializeZonesWSU_555(); break;
+                                    case 393324564:
+                                        zoneInfo = InitializeZonesZulu_556(); break;
+
+                                    #endregion
+                                }
+
+                                if (zoneInfo != null)
+                                {
+                                    // Found the time zone
+                                    result = new TzTimeZone(zoneInfo);
+                                    s_zones[tzName] = zoneInfo;
+                                }
                             }
                         }
-                    }
-                    finally
-                    {
-                        s_zonesLock.DowngradeFromWriterLock(ref writerCookie);
+                        finally
+                        {
+                            s_zonesLock.DowngradeFromWriterLock(ref writerCookie);
+                        }
                     }
                 }
-            }
-            finally
-            {
-                s_zonesLock.ReleaseReaderLock();
+                finally
+                {
+                    s_zonesLock.ReleaseReaderLock();
+                }
             }
 
             return result;

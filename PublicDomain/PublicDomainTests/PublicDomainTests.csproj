@@ -54,6 +54,7 @@
     <Compile Include="RegexTests.cs" />
     <Compile Include="ScraperTests.cs" />
     <Compile Include="StringUtilitiesTests.cs" />
+    <Compile Include="TestLenientHtmlDocument.cs" />
     <Compile Include="ThreadingUtilitiesTests.cs" />
     <Compile Include="TzDatabaseTests.cs" />
     <Compile Include="TzDateTimeTests.cs" />
