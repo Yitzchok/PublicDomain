@@ -7,10 +7,10 @@
 "LanguageId" = "3:1033"
 "CodePage" = "3:1252"
 "UILanguageId" = "3:1033"
-"SccProjectName" = "8:SAK"
-"SccLocalPath" = "8:SAK"
-"SccAuxPath" = "8:SAK"
-"SccProvider" = "8:SAK"
+"SccProjectName" = "8:"
+"SccLocalPath" = "8:"
+"SccAuxPath" = "8:"
+"SccProvider" = "8:"
     "Hierarchy"
     {
         "Entry"
@@ -769,7 +769,7 @@
             }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_1FE9E50360BD4DC1BC1EA01BC51E20B5"
             {
-            "SourcePath" = "8:..\\obj\\Release\\PublicDomain.dll"
+            "SourcePath" = "8:..\\obj\\Debug\\PublicDomain.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_48F8C3159A924E25A2720F96F297D8E9"
@@ -825,7 +825,7 @@
             }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_B21D45BC4AA2435F967D1784128F5EF3"
             {
-            "SourcePath" = "8:..\\bin\\Release\\PublicDomain.XML"
+            "SourcePath" = "8:..\\bin\\Debug\\PublicDomain.XML"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_48F8C3159A924E25A2720F96F297D8E9"
@@ -881,7 +881,7 @@
             }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_E27421C21B39478A9342BBAC30335B30"
             {
-            "SourcePath" = "8:..\\obj\\Release\\PublicDomain.dll"
+            "SourcePath" = "8:..\\obj\\Debug\\PublicDomain.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_284936D8164F4861B97F61E2CC2B5159"
