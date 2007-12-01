@@ -120,6 +120,17 @@ namespace PublicDomain
         }
 
         /// <summary>
+        /// Adds the item.
+        /// </summary>
+        /// <param name="list">The list.</param>
+        /// <param name="val">The val.</param>
+        public static void AddItem<T>(ref T[] list, T val)
+        {
+            Array.Resize<T>(ref list, list.Length + 1);
+            list[list.Length - 1] = val;
+        }
+
+        /// <summary>
         /// Removes the duplicates.
         /// </summary>
         /// <param name="list">The list.</param>

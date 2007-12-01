@@ -187,5 +187,26 @@ namespace PublicDomain
               StreamingContext context)
                 : base(info, context) { }
         }
+
+        /// <summary>
+        /// Gets the super types.
+        /// </summary>
+        /// <param name="exceptionType">Type of the exception.</param>
+        /// <returns></returns>
+        public static List<Type> GetSuperTypes(Type exceptionType)
+        {
+            List<Type> result = new List<Type>();
+
+            exceptionType = exceptionType.BaseType;
+
+            while (!exceptionType.Equals(typeof(System.Object)))
+            {
+                result.Add(exceptionType);
+
+                exceptionType = exceptionType.BaseType;
+            }
+
+            return result;
+        }
     }
 }

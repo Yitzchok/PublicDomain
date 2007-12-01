@@ -1030,5 +1030,32 @@ namespace PublicDomain
             }
             return sb.ToString();
         }
+
+        /// <summary>
+        /// Joins the specified integers.
+        /// </summary>
+        /// <param name="ids">The ids.</param>
+        /// <returns></returns>
+        public static string Join(params int[] ids)
+        {
+            if (ids != null)
+            {
+                if (ids.Length > 0)
+                {
+                    StringBuilder result = new StringBuilder(ids.Length * 3);
+                    foreach (int id in ids)
+                    {
+                        if (result.Length > 0)
+                        {
+                            result.Append(',');
+                        }
+                        result.Append(id);
+                    }
+                    return result.ToString();
+                }
+                return string.Empty;
+            }
+            return null;
+        }
     }
 }

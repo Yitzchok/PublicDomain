@@ -586,12 +586,40 @@ namespace PublicDomain
         /// <param name="path">The path.</param>
         /// <param name="newExtension">The new extension.</param>
         /// <returns></returns>
-        [PendingPublicDomain]
         public static string ReplaceExtension(string path, string newExtension)
         {
             string existingExtension = GetExtension(path, false, true);
             path = path.Substring(0, path.Length - existingExtension.Length) + newExtension;
             return path;
+        }
+
+        /// <summary>
+        /// Gets the relative location.
+        /// </summary>
+        /// <param name="fromPath">From path.</param>
+        /// <param name="toPath">To path.</param>
+        /// <returns></returns>
+        public static string GetRelativeLocation(string fromPath, string toPath)
+        {
+            if (System.IO.File.Exists(fromPath))
+            {
+                fromPath = new FileInfo(fromPath).DirectoryName;
+            }
+            if (Directory.Exists(fromPath))
+            {
+                fromPath = FileSystemUtilities.EnsureDirectoryEnding(fromPath);
+            }
+            if (Directory.Exists(toPath))
+            {
+                toPath = FileSystemUtilities.EnsureDirectoryEnding(toPath);
+            }
+
+            if (toPath.StartsWith(fromPath))
+            {
+                return toPath.Substring(fromPath.Length);
+            }
+
+            throw new NotImplementedException();
         }
     }
 }

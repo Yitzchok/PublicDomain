@@ -368,6 +368,11 @@ namespace PublicDomain.Logging
                     key = key.ToLower();
 
                     PostProcessNewLogger(key, fallbackThreshold, result);
+
+                    for (int i = 1; i < logClasses.Length; i++)
+                    {
+                        m_loggers[logClasses[i]] = result;
+                    }
                 }
             }
 

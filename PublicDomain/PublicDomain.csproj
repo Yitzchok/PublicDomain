@@ -67,6 +67,7 @@
     <Compile Include="AspRuntimeHost\wwAspRuntimeHost.cs" />
     <Compile Include="AspRuntimeHost\wwAspRuntimeProxy.cs" />
     <Compile Include="AspRuntimeHost\wwWorkerRequest.cs" />
+    <Compile Include="Country.cs" />
     <Compile Include="DisposableCallback.cs" />
     <Compile Include="EcmaScript\EcmaScriptAssignmentStatement.cs" />
     <Compile Include="EcmaScript\EcmaScriptBlock.cs" />
