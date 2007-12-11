@@ -720,7 +720,7 @@ namespace PublicDomain.Xml
                         break;
 
                     case State.InComment:
-                        m_comment.Data = token;
+                        SetCommentData(m_comment, token);
                         PostProcessSetCommentData(m_comment);
                         break;
 
@@ -777,6 +777,46 @@ namespace PublicDomain.Xml
             ResetAfterContextSwitch();
 
             m_state = newState;
+        }
+
+        /// <summary>
+        /// Sets the comment data.
+        /// </summary>
+        /// <param name="comment">The comment.</param>
+        /// <param name="token">The token.</param>
+        protected virtual void SetCommentData(XmlComment comment, string token)
+        {
+            if (!string.IsNullOrEmpty(token))
+            {
+                token = token.Replace("--", "");
+
+                int l = token.Length;
+                int i;
+
+                for (i = l - 1; i >= 0; i--)
+                {
+                    if (token[i] != '-')
+                    {
+                        break;
+                    }
+                }
+
+                if (i != l - 1)
+                {
+                    token = token.Substring(0, i + 1);
+                }
+            }
+            comment.Data = token;
+        }
+
+        /// <summary>
+        /// Adds the comment data.
+        /// </summary>
+        /// <param name="comment">The comment.</param>
+        /// <param name="moreData">The more data.</param>
+        protected virtual void AddCommentData(XmlComment comment, string moreData)
+        {
+            SetCommentData(comment, comment.Value + moreData);
         }
 
         private string TryApplyPrefixAndNamespace(ref string token)
@@ -978,6 +1018,7 @@ namespace PublicDomain.Xml
             else if (i > 0)
             {
                 token = token.Substring(i);
+                l = token.Length;
             }
 
             for (i = 1; i < l; i++)
@@ -1064,6 +1105,11 @@ namespace PublicDomain.Xml
                 m_current.AppendChild(root);
             }
 
+            if (m_current.NodeType == XmlNodeType.Comment)
+            {
+                // Comments can only have text underneath them
+                m_current = m_current.ParentNode;
+            }
             m_current.AppendChild(child);
             if (mayHaveChildren)
             {

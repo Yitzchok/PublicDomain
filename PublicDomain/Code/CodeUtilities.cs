@@ -753,5 +753,64 @@ End Namespace
               System.Runtime.Serialization.StreamingContext context)
                 : base(info, context) { }
         }
+
+        /// <summary>
+        /// Gets the primary language file extension.
+        /// </summary>
+        /// <param name="language">The language.</param>
+        /// <returns></returns>
+        public static string GetPrimaryLanguageFileExtension(Language language)
+        {
+            switch (language)
+            {
+                case Language.Unknown:
+                    return "txt";
+
+                case Language.CSharp:
+                    return "cs";
+
+                case Language.JSharp:
+                    return "jsl";
+
+                case Language.CPlusPlusDotNet:
+                case Language.CPlusPlus:
+                    return "cpp";
+
+                case Language.JScriptDotNet:
+                    return "js";
+
+                case Language.VisualBasicDotNet:
+                case Language.VisualBasic:
+                    return "vb";
+
+                case Language.JavaDotNet:
+                    return "java";
+
+                case Language.Ruby:
+                case Language.RubyDotNet:
+                    return "rb";
+
+                case Language.PhpDotNet:
+                    return "php";
+
+                case Language.Python:
+                case Language.PythonDotNet:
+                    return "py";
+
+                case Language.Perl:
+                case Language.PerlDotNet:
+                    return "pl";
+
+                case Language.FSharp:
+                    return "fs";
+
+                case Language.Xhtml:
+                    return "xhtml";
+
+                case Language.PlainText:
+                    return "txt";
+            }
+            return language.ToString().ToLower();
+        }
     }
 }

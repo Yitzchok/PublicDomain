@@ -128,7 +128,7 @@ namespace PublicDomain.Xml
                     XmlCharacterData charData = child as XmlCharacterData;
                     if (charData != null)
                     {
-                        ((XmlComment)m_current).Value += charData.Value;
+                        AddCommentData(((XmlComment)m_current), charData.Value);
                         return;
                     }
                 }
@@ -137,7 +137,7 @@ namespace PublicDomain.Xml
                     XmlCharacterData charData = child as XmlCharacterData;
                     if (charData != null)
                     {
-                        ((XmlComment)m_current).Value += charData.Value;
+                        AddCommentData(((XmlComment)m_current), charData.Value);
                         return;
                     }
                     else

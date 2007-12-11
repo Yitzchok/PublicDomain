@@ -89,7 +89,11 @@ namespace PublicDomain.Logging
         }
 
         /// <summary>
-        /// Gets the global LoggingConfig instance.
+        /// Gets the global LoggingConfig instance. The constructor
+        /// of LoggingConfig sets the new instance to the global Current
+        /// when called, so unless otherwise set, the Current value
+        /// is the last instantiated instance of LoggingConfig or a default
+        /// LogginConfig.
         /// </summary>
         /// <value>The current.</value>
         public static LoggingConfig Current
@@ -164,17 +168,24 @@ namespace PublicDomain.Logging
         {
             m_value = configString;
 
-            if (createLogger == null)
+            if (createLogger == null && m_createLogger == null)
             {
                 createLogger = DefaultCallbackCreateLogger;
             }
-            if (updateLogger == null)
+            if (updateLogger == null && m_updateLogger == null)
             {
                 updateLogger = DefaultCallbackUpdateLogger;
             }
 
-            m_createLogger = createLogger;
-            m_updateLogger = updateLogger;
+            if (m_createLogger == null)
+            {
+                m_createLogger = createLogger;
+            }
+
+            if (m_updateLogger == null)
+            {
+                m_updateLogger = updateLogger;
+            }
 
             DisableAllLoggers();
 
@@ -371,7 +382,7 @@ namespace PublicDomain.Logging
 
                     for (int i = 1; i < logClasses.Length; i++)
                     {
-                        m_loggers[logClasses[i]] = result;
+                        m_loggers[logClasses[i].ToLower()] = result;
                     }
                 }
             }

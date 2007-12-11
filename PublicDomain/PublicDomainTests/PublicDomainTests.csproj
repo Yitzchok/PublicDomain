@@ -47,6 +47,7 @@
   <ItemGroup>
     <Compile Include="CharUtilitiesTests.cs" />
     <Compile Include="CodeUtilityTests.cs" />
+    <Compile Include="EcmaScriptTests.cs" />
     <Compile Include="FileSystemUtilitiesTests.cs" />
     <Compile Include="GeneralTests.cs" />
     <Compile Include="Iso8601Tests.cs" />

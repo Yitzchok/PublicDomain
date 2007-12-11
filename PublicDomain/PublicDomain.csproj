@@ -186,9 +186,15 @@
     <Compile Include="Feeder\Rss\RssFeedParser.cs" />
     <Compile Include="Feeder\Serializer.cs" />
     <Compile Include="Feeder\SerializeType.cs" />
+    <Compile Include="Geography\Country.cs" />
+    <Compile Include="Geography\CountryOptions.cs" />
+    <Compile Include="Geography\Region.cs" />
+    <Compile Include="Geography\RegionType.cs" />
     <Compile Include="IMonotonicNumberGenerator.cs" />
     <Compile Include="INumberGenerator.cs" />
     <Compile Include="IRandomNumberGenerator.cs" />
+    <Compile Include="MathUtilities.cs" />
+    <Compile Include="RemotingUtilities.cs" />
     <Compile Include="Util\StringContainer.cs" />
     <Compile Include="Web\Doctype.cs" />
     <Compile Include="Web\LiteralControlOnRender.cs" />
