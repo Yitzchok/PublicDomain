@@ -16,11 +16,11 @@ namespace PublicDomain.Logging
         /// <summary>
         /// In milliseconds
         /// </summary>
-        private static int BackgroundThreadInterval = 1000 * 5;
+        private static int BackgroundThreadInterval = 5000;
         private static Dictionary<int, int> m_stack = new Dictionary<int, int>();
         private static FinalizableBackgroundThread m_loggerThread = new LoggerBackgroundThread(BackgroundThreadInterval, LoggerThread);
         private static List<LogArtifact> s_artifacts = new List<LogArtifact>();
-        private static ILogTimestampProvider s_defaultTimestampProvider = new LocalLogTimestampProvider();
+        private static ILogTimestampProvider s_defaultTimestampProvider = new TzSensitiveTimestampProvider();
         private static object s_loggerThreadLock = new object();
         internal static Logger LoggerSingleton;
         internal static bool SameLoggers = true;
@@ -93,6 +93,11 @@ namespace PublicDomain.Logging
             {
                 AddLogFilter(logFilter);
             }
+
+            if (m_formatter != null)
+            {
+                m_formatter.UtcOffset = m_timestampProvider.UtcOffset;
+            }
         }
 
         internal static int LogStackCount
@@ -159,6 +164,10 @@ namespace PublicDomain.Logging
             set
             {
                 m_formatter = value;
+                if (value != null)
+                {
+                    m_formatter.UtcOffset = m_timestampProvider.UtcOffset;
+                }
             }
         }
 
@@ -175,6 +184,11 @@ namespace PublicDomain.Logging
             set
             {
                 m_timestampProvider = value;
+
+                if (value != null)
+                {
+                    m_formatter.UtcOffset = m_timestampProvider.UtcOffset;
+                }
             }
         }
 
@@ -254,7 +268,6 @@ namespace PublicDomain.Logging
             {
                 // Get the current timestamp
                 DateTime timestamp = m_timestampProvider.Now;
-                TimeSpan? utcOffset = m_timestampProvider.UtcOffset;
 
                 // Check all the filters
                 if (m_filters != null)
@@ -279,7 +292,7 @@ namespace PublicDomain.Logging
                 }
                 else
                 {
-                    logLine = Formatter.FormatEntry(severity, timestamp, utcOffset, entry, formatParameters, m_category, m_data);
+                    logLine = Formatter.FormatEntry(severity, timestamp, entry, formatParameters, m_category, m_data);
                 }
 
                 DoLog(severity, timestamp, entry, formatParameters, logLine);

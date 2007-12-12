@@ -15,6 +15,14 @@ namespace PublicDomain.Logging
         /// <summary>
         /// Initializes a new instance of the <see cref="TzSensitiveTimestampProvider"/> class.
         /// </summary>
+        public TzSensitiveTimestampProvider()
+            : this(TzTimeZone.CurrentTimeZone)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TzSensitiveTimestampProvider"/> class.
+        /// </summary>
         /// <param name="timeZone">The time zone.</param>
         public TzSensitiveTimestampProvider(TzTimeZone timeZone)
         {

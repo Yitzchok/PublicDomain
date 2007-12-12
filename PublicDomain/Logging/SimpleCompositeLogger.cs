@@ -12,7 +12,7 @@ namespace PublicDomain.Logging
     {
         private string m_className;
         private string m_prefix;
-        internal static readonly int DefaultCategoryLength = 15;
+        internal static readonly int DefaultCategoryLength = 20;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SimpleCompositeLogger"/> class.
@@ -33,7 +33,7 @@ namespace PublicDomain.Logging
                 int lastPeriod = m_className.LastIndexOf('.');
                 if (lastPeriod != -1)
                 {
-                    m_prefix = m_className.Substring(lastPeriod + 1);
+                    m_prefix = m_className.Substring(lastPeriod + 1) + "(" + m_className.Substring(0, lastPeriod) + ")";
                 }
                 else
                 {
@@ -82,10 +82,19 @@ namespace PublicDomain.Logging
             Category = m_prefix;
             if (severity == LoggerSeverity.Fatal50)
             {
-                // TODO call a notification interface, which could do something like
-                // send an email
+                HandleFatalLog(severity, entry, formatParameters);
             }
             base.Log(severity, entry, formatParameters);
+        }
+
+        /// <summary>
+        /// Handles the fatal log.
+        /// </summary>
+        /// <param name="severity">The severity.</param>
+        /// <param name="entry">The entry.</param>
+        /// <param name="formatParameters">The format parameters.</param>
+        protected virtual void HandleFatalLog(LoggerSeverity severity, object entry, object[] formatParameters)
+        {
         }
 
         /// <summary>

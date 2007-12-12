@@ -274,9 +274,24 @@ namespace PublicDomain
         /// <returns></returns>
         public static string TrimTimeSpan(string span)
         {
+            return TrimTimeSpan(span, true);
+        }
+
+        /// <summary>
+        /// Trims the time span.
+        /// </summary>
+        /// <param name="span">The span.</param>
+        /// <param name="trimZeroMinutes">if set to <c>true</c> [trim zero minutes].</param>
+        /// <returns></returns>
+        public static string TrimTimeSpan(string span, bool trimZeroMinutes)
+        {
             if (span != null)
             {
                 if (span.EndsWith(":00"))
+                {
+                    span = span.Substring(0, span.Length - 3);
+                }
+                if (trimZeroMinutes && span.EndsWith(":00"))
                 {
                     span = span.Substring(0, span.Length - 3);
                 }

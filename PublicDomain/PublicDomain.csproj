@@ -228,7 +228,6 @@
     <Compile Include="Logging\RollingFileLogger.cs" />
     <Compile Include="Logging\SevereLogFilter.cs" />
     <Compile Include="Logging\SimpleCompositeLogger.cs" />
-    <Compile Include="Logging\SimpleLogFormatter.cs" />
     <Compile Include="Logging\StringLogger.cs" />
     <Compile Include="Logging\TextWriterLogger.cs" />
     <Compile Include="Logging\TzSensitiveTimestampProvider.cs" />

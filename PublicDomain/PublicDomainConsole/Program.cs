@@ -14,7 +14,7 @@ namespace PublicDomainConsole
         {
             new LoggingConfig("", new LoggingConfig.CallbackCreateLogger(delegate(string category, LoggerSeverity threshold)
             {
-                Logger result = new ConsoleLogger();
+                Logger result = new SimpleCompositeLogger(new ConsoleLogger(), typeof(Program).FullName);
                 result.Threshold = threshold;
                 result.Category = category;
                 return result;
