@@ -209,21 +209,46 @@ namespace PublicDomain
         }
 
         /// <summary>
-        /// Parses the time span. TimeSpan.Parse does not accept
-        /// a plus (+) designator, only minus (-). This parse method
-        /// accepts both. Does not throw any exceptions, but returns
-        /// false on failure. Return true on success.
+        /// Tries the parse time span.
         /// </summary>
         /// <param name="timeSpan">The time span.</param>
         /// <param name="result">The result.</param>
         /// <returns></returns>
         public static bool TryParseTimeSpan(string timeSpan, out TimeSpan result)
         {
+            return TryParseTimeSpan(timeSpan, TimeSpanAssumption.None, out result);
+        }
+
+        /// <summary>
+        /// Parses the time span. TimeSpan.Parse does not accept
+        /// a plus (+) designator, only minus (-). This parse method
+        /// accepts both. Does not throw any exceptions, but returns
+        /// false on failure. Return true on success.
+        /// </summary>
+        /// <param name="timeSpan">The time span.</param>
+        /// <param name="noColonAssumption">The no colon assumption.</param>
+        /// <param name="result">The result.</param>
+        /// <returns></returns>
+        public static bool TryParseTimeSpan(string timeSpan, TimeSpanAssumption noColonAssumption, out TimeSpan result)
+        {
             if (timeSpan != null && timeSpan[0] == '+')
             {
                 timeSpan = timeSpan.Substring(1);
             }
+            
+            timeSpan = ParseTimeSpanAssumptions(timeSpan, noColonAssumption);
+
             return TimeSpan.TryParse(timeSpan, out result);
+        }
+
+        /// <summary>
+        /// Parses the time span.
+        /// </summary>
+        /// <param name="timeSpan">The time span.</param>
+        /// <returns></returns>
+        public static TimeSpan ParseTimeSpan(string timeSpan)
+        {
+            return ParseTimeSpan(timeSpan, TimeSpanAssumption.None);
         }
 
         /// <summary>
@@ -232,14 +257,42 @@ namespace PublicDomain
         /// accepts both.
         /// </summary>
         /// <param name="timeSpan">The time span.</param>
+        /// <param name="noColonAssumption">The no colon assumption.</param>
         /// <returns></returns>
-        public static TimeSpan ParseTimeSpan(string timeSpan)
+        public static TimeSpan ParseTimeSpan(string timeSpan, TimeSpanAssumption noColonAssumption)
         {
             if (timeSpan != null && timeSpan[0] == '+')
             {
                 timeSpan = timeSpan.Substring(1);
             }
+
+            timeSpan = ParseTimeSpanAssumptions(timeSpan, noColonAssumption);
+
             return TimeSpan.Parse(timeSpan);
+        }
+
+        private static string ParseTimeSpanAssumptions(string timeSpan, TimeSpanAssumption noColonAssumption)
+        {
+            if (timeSpan != null && noColonAssumption != TimeSpanAssumption.None && timeSpan.IndexOf(':') == -1)
+            {
+                switch (noColonAssumption)
+                {
+                    case TimeSpanAssumption.Seconds:
+                        timeSpan = "00:00:" + timeSpan;
+                        break;
+                    case TimeSpanAssumption.Minutes:
+                        timeSpan += ":00";
+                        break;
+                    case TimeSpanAssumption.Hours:
+                        timeSpan += ":00:00";
+                        break;
+                    case TimeSpanAssumption.Days:
+                        timeSpan += ".0:00:00:00";
+                        break;
+                }
+            }
+
+            return timeSpan;
         }
 
         /// <summary>
@@ -297,6 +350,37 @@ namespace PublicDomain
                 }
             }
             return span;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public enum TimeSpanAssumption
+        {
+            /// <summary>
+            /// 
+            /// </summary>
+            None,
+
+            /// <summary>
+            /// 
+            /// </summary>
+            Days,
+
+            /// <summary>
+            /// 
+            /// </summary>
+            Hours,
+
+            /// <summary>
+            /// 
+            /// </summary>
+            Minutes,
+
+            /// <summary>
+            /// 
+            /// </summary>
+            Seconds
         }
     }
 }

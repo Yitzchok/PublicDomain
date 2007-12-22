@@ -7,11 +7,20 @@ assembly from the installation directory (default is C:\Program Files\Public Dom
 Contributing Authors
 ====================
 William M. Leszczuk
-Pierre Vachon (pierrevachon@gmail.com)
+Pierre Vachon
 Simon Mourier
+Brad Culberson
 
 Version History
 ===============
+V0.2.35.0
+	[kevgrig@gmail.com]
+		* Updated to tzdata2007j
+		* Changed TzTimeZone to look up by a string based switch instead of by precomputed hash code
+		  to avoid issues across framework version
+		* BUG 14464: Etc time zone hour offset instead of day offset
+	[bradculberson@gmail.com]
+		* BUG 13252: Corrected flipped dates for DST calculations for southern hemisphere
 V0.2.31.0
 	[kevgrig@gmail.com]
 		* Fixed entity replacement within an attribute in LenientXmlDocument

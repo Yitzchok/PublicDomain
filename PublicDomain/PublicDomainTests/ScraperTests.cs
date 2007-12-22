@@ -28,10 +28,16 @@ namespace PublicDomain
                 "http://www.citicard.com/"
             })
             {
-                Scraper scraper = new Scraper();
-                ScrapedPage page = scraper.Scrape(ScrapeType.GET, url);
-                doc.LoadXml(page.RawStream);
-                Console.WriteLine(doc.InnerXml);
+                try
+                {
+                    Scraper scraper = new Scraper();
+                    ScrapedPage page = scraper.Scrape(ScrapeType.GET, url);
+                    doc.LoadXml(page.RawStream);
+                    Console.WriteLine(doc.InnerXml);
+                }
+                catch (System.Net.WebException)
+                {
+                }
             }
         }
     }

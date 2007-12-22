@@ -90,5 +90,55 @@ namespace PublicDomain
         {
             return Math.Sqrt(GetVariance(data, avg));
         }
+
+        /// <summary>
+        /// Gets the median.
+        /// </summary>
+        /// <param name="data">The data.</param>
+        /// <returns></returns>
+        public static double GetMedian(double[] data)
+        {
+            return GetMedian(data, false);
+        }
+
+        /// <summary>
+        /// Gets the median.
+        /// </summary>
+        /// <param name="data">The data.</param>
+        /// <param name="isArraySorted">if set to <c>true</c> [is array sorted].</param>
+        /// <returns></returns>
+        public static double GetMedian(double[] data, bool isArraySorted)
+        {
+            double median = 0;
+
+            if (data != null && data.Length > 0)
+            {
+                if (data.Length == 1)
+                {
+                    median = data[0];
+                }
+                else
+                {
+                    if (!isArraySorted)
+                    {
+                        Array.Sort<double>(data);
+                    }
+
+                    if ((data.Length % 2) == 0)
+                    {
+                        int mid = data.Length / 2;
+                        double x = data[mid];
+                        double y = data[mid + 1];
+                        median = (x + y) / (double)2;
+                    }
+                    else
+                    {
+                        median = data[(int)Math.Ceiling((double)data.Length / (double)2)];
+                    }
+                }
+            }
+
+            return median;
+        }
     }
 }

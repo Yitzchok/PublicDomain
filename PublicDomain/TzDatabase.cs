@@ -957,7 +957,7 @@ namespace PublicDomain
             public bool HasRules()
             {
                 TimeSpan trash;
-                return !string.IsNullOrEmpty(RuleName) && !RuleName.Trim().Equals(NotApplicableValue) && !DateTimeUtlities.TryParseTimeSpan(RuleName, out trash);
+                return !string.IsNullOrEmpty(RuleName) && !RuleName.Trim().Equals(NotApplicableValue) && !DateTimeUtlities.TryParseTimeSpan(RuleName, DateTimeUtlities.TimeSpanAssumption.Hours, out trash);
             }
 
             /// <summary>
@@ -1163,7 +1163,7 @@ namespace PublicDomain
                 timeModifier = ParseTimeModifier(saveTime[saveTime.Length - 1].ToString());
                 saveTime = saveTime.Substring(0, saveTime.Length - 1);
             }
-            return DateTimeUtlities.ParseTimeSpan(saveTime);
+            return DateTimeUtlities.ParseTimeSpan(saveTime, DateTimeUtlities.TimeSpanAssumption.Hours);
         }
 
         /// <summary>
@@ -1209,7 +1209,7 @@ namespace PublicDomain
 
             TimeModifier startTimeModifier;
             TimeSpan startTime = TzDatabase.GetTzDataTime(pieces[7], out startTimeModifier);
-            TimeSpan saveTime = DateTimeUtlities.ParseTimeSpan(pieces[8]);
+            TimeSpan saveTime = DateTimeUtlities.ParseTimeSpan(pieces[8], DateTimeUtlities.TimeSpanAssumption.Hours);
             string modifier = pieces[9];
             string comment = null;
             if (pieces.Length == 11)
@@ -1260,7 +1260,7 @@ namespace PublicDomain
 
             if (z.ZoneName != FactoryZoneName)
             {
-                z.SetUtcOffset(DateTimeUtlities.ParseTimeSpan(pieces[2]));
+                z.SetUtcOffset(DateTimeUtlities.ParseTimeSpan(pieces[2], DateTimeUtlities.TimeSpanAssumption.Hours));
                 z.SetRuleName(pieces[3]);
                 z.SetFormat(pieces[4]);
 

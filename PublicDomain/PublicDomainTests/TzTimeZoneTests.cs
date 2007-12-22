@@ -12,6 +12,9 @@ namespace PublicDomain
     [TestFixture]
     public class TzTimeZoneTests
     {
+        private static DateTime startYear = new DateTime(2007, 1, 1);
+        private static DateTime middleYear = new DateTime(2007, 6, 1);
+
         /// <summary>
         /// Prints the time zones.
         /// </summary>
@@ -322,6 +325,93 @@ namespace PublicDomain
                 Console.WriteLine("Start: {0}", daylightTime.Start);
                 Console.WriteLine("End: {0}", daylightTime.End);
                 Console.WriteLine();
+            }
+        }
+
+        [Test]
+        public void Bug13252a()
+        {
+            //wrong daylight savings time for adelaide
+            TzTimeZone adelaide = TzTimeZone.GetTimeZone("Australia/Adelaide");
+            DaylightTime dtAdelaide = adelaide.GetDaylightChanges(2007);
+            Assert.AreEqual(10, dtAdelaide.Start.Hour);
+            Assert.AreEqual(28, dtAdelaide.Start.Hour);
+            Assert.AreEqual(3, dtAdelaide.End.Hour);
+            Assert.AreEqual(25, dtAdelaide.End.Hour);
+
+            TzTimeZone perth = TzTimeZone.GetTimeZone("Australia/Perth");
+            DaylightTime dtPerth = adelaide.GetDaylightChanges(2007);
+            Assert.AreEqual(10, dtPerth.Start.Hour);
+            Assert.AreEqual(28, dtPerth.Start.Hour);
+            Assert.AreEqual(3, dtPerth.End.Hour);
+            Assert.AreEqual(25, dtPerth.End.Hour);
+
+            TzTimeZone eucla = TzTimeZone.GetTimeZone("Australia/Eucla");
+            DaylightTime dtEucla = adelaide.GetDaylightChanges(2007);
+            Assert.AreEqual(false, eucla.IsDaylightSavingTime(middleYear));
+            Assert.AreEqual(true, eucla.IsDaylightSavingTime(startYear));
+
+            TzTimeZone west = TzTimeZone.GetTimeZone("Australia/West");
+            DaylightTime dtWest = adelaide.GetDaylightChanges(2007);
+            Assert.AreEqual(false, west.IsDaylightSavingTime(middleYear));
+            Assert.AreEqual(true, west.IsDaylightSavingTime(startYear));
+        }
+
+        [Test]
+        public void Bug13252b()
+        {
+            //wrong daylight savings time for auckland
+            TzTimeZone auckland = TzTimeZone.GetTimeZone("Pacific/Auckland");
+            DaylightTime dt = auckland.GetDaylightChanges(2007);
+            Assert.AreEqual(3, dt.End.Month);
+            Assert.AreEqual(18, dt.End.Day);
+            Assert.AreEqual(9, dt.Start.Month);
+            Assert.AreEqual(30, dt.Start.Day);
+
+            //auckland should be in DST at end of the year
+            Assert.AreEqual(false, auckland.IsDaylightSavingTime(middleYear));
+            Assert.AreEqual(true, auckland.IsDaylightSavingTime(startYear));
+        }
+
+        [Test]
+        public void Bug14464()
+        {
+            TzDateTime cmp = TzTimeZone.ZoneUTC.Now;
+            DateTime cmpLocal = cmp.DateTimeLocal;
+
+            Console.WriteLine(cmpLocal);
+
+            foreach (string zuluName in new string[] {
+                "Etc/GMT",
+                "Etc/UTC",
+                "Etc/UCT",
+                "GMT",
+                "Etc/Universal",
+                "Etc/Zulu",
+                "Etc/Greenwich",
+                "Etc/GMT-0",
+                "Etc/GMT+0",
+                "Etc/GMT0"
+            })
+            {
+                TzTimeZone zone = TzTimeZone.GetTimeZone(zuluName);
+                Console.WriteLine(zone.Now.DateTimeUtc.ToString());
+                DateTime local = zone.Now.DateTimeLocal;
+                Assert.AreEqual(cmpLocal.Hour, local.Hour);
+                Assert.AreEqual(cmpLocal.Date, local.Date);
+            }
+
+            cmpLocal = cmpLocal.AddHours(+14);
+            for (int i = -14; i < 13; i++)
+            {
+                if (i != 0)
+                {
+                    string name = "Etc/GMT" + (i < 0 ? "" : "+") + i;
+                    TzTimeZone zone = TzTimeZone.GetTimeZone(name);
+                    Console.WriteLine("{1}={0}", zone.Now.DateTimeLocal, name);
+                    Assert.AreEqual(cmpLocal.Hour, zone.Now.DateTimeLocal.Hour);
+                }
+                cmpLocal = cmpLocal.AddHours(-1);
             }
         }
     }

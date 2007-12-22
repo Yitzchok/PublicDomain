@@ -42,11 +42,12 @@ namespace PublicDomain
         }
 
         /// <summary>
-        /// Appends the list.
+        /// Appends the contents of <paramref name="list"/> to the end of
+        /// <paramref name="destination"/> and returns <paramref name="destination"/>
         /// </summary>
         /// <param name="destination">The destination.</param>
         /// <param name="list">The list.</param>
-        public static void AppendList<T>(IList<T> destination, IList<T> list)
+        public static IList<T> AppendList<T>(IList<T> destination, IList<T> list)
         {
             List<T> shortcut = destination as List<T>;
             if (shortcut != null)
@@ -60,6 +61,8 @@ namespace PublicDomain
                     destination.Add(t);
                 }
             }
+
+            return destination;
         }
 
         /// <summary>
@@ -98,7 +101,7 @@ namespace PublicDomain
         /// <param name="array">The array.</param>
         /// <param name="index">The index.</param>
         /// <returns></returns>
-        public static T[] Remove<T>(ref T[] array, int index)
+        public static T[] Remove<T>(T[] array, int index)
         {
             if (array == null)
             {
@@ -124,10 +127,11 @@ namespace PublicDomain
         /// </summary>
         /// <param name="list">The list.</param>
         /// <param name="val">The val.</param>
-        public static void AddItem<T>(ref T[] list, T val)
+        public static T[] AddItem<T>(T[] list, T val)
         {
             Array.Resize<T>(ref list, list.Length + 1);
             list[list.Length - 1] = val;
+            return list;
         }
 
         /// <summary>

@@ -109,7 +109,7 @@ namespace PublicDomain
                         }
                         else if (ConversionUtilities.IsStringATimeSpan(dataZone.RuleName))
                         {
-                            TimeSpan timedRule = DateTimeUtlities.ParseTimeSpan(dataZone.RuleName);
+                            TimeSpan timedRule = DateTimeUtlities.ParseTimeSpan(dataZone.RuleName, DateTimeUtlities.TimeSpanAssumption.Hours);
                             dataRules.Add(
                                 new PublicDomain.TzDatabase.TzRule(
                                     dataZone.RuleName,
@@ -129,7 +129,19 @@ namespace PublicDomain
                     }
                 }
 
-                zoneList[zoneKey] = new TzTimeZone.TzZoneInfo(zoneKey, dataZones, dataRules);
+                //get the lat of this zone for DST usage
+                bool isLatitudeNorth = true;
+
+                foreach (PublicDomain.TzTimeZone.TzZoneDescription item in items)
+                {
+                    if (item.ZoneName == zoneKey)
+                    {
+                        isLatitudeNorth = item.Location.IsLatitudeNorth;
+                        break;
+                    }
+                }
+
+                zoneList[zoneKey] = new TzTimeZone.TzZoneInfo(zoneKey, dataZones, dataRules, isLatitudeNorth);
             }
 
             // Finally, clone the links
@@ -286,8 +298,8 @@ namespace PublicDomain
                     hashes.Add(hash);
 
                     string funcName = CodeUtilities.StripNonIdentifierCharacters(Language.CSharp, zone.ZoneName) + '_' + i;
-                    Console.WriteLine(@"{2}case {3}:
-{0}zoneInfo = InitializeZones{1}(); break;", tabs, funcName, tabs1, hash);
+                    Console.WriteLine(@"{2}case ""{4}"":
+{0}zoneInfo = InitializeZones{1}(); break;", tabs, funcName, tabs1, hash, zone.ZoneName.Replace("\"", "\\\""));
                     writer.WriteLine(@"{1}private static PublicDomain.TzTimeZone.TzZoneInfo InitializeZones{0}()
 {1}{{", funcName, tabs1);
                 }
@@ -296,7 +308,7 @@ namespace PublicDomain
                     writer = Console.Out;
                 }
 
-                writer.WriteLine(@"{3}return new PublicDomain.TzTimeZone.TzZoneInfo(""{0}"", {1}, {2});", zone.ZoneName, zonesArray, rulesArray, tabs);
+                writer.WriteLine(@"{3}return new PublicDomain.TzTimeZone.TzZoneInfo(""{0}"", {1}, {2}, {4});", zone.ZoneName, zonesArray, rulesArray, tabs, zone.IsLatitudeNorth.ToString().ToLower());
 
                 if (sb2.Length > 0)
                 {

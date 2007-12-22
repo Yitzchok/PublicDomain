@@ -580,7 +580,7 @@ namespace PublicDomain
             int index = IndexOfEmptyPiece(array);
             while (index != -1)
             {
-                ArrayUtilities.Remove<string>(ref array, index);
+                array = ArrayUtilities.Remove<string>(array, index);
                 index = IndexOfEmptyPiece(array, index);
             }
             return array;
