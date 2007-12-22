@@ -303,6 +303,7 @@ namespace PublicDomain.Data
                     ret.Append(m_params[x++]);
                 }
             }
+
             return ret.ToString();
         }
 

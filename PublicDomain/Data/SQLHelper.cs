@@ -21,14 +21,25 @@ namespace PublicDomain.Data
         /// <returns></returns>
         public static string Normalize(DatabaseType type, string str)
         {
-            if (type == DatabaseType.MySql)
+            switch (type)
             {
-                return str.Replace("\\", "\\\\").Replace("\'", "\\\'").Replace("\"", "\\\"").Replace("\x1a", "\\\x1a");
+                case DatabaseType.SqlServer:
+                    str = str.Replace("\'", "\'\'");
+                    str = str.Replace("´", "\'´");
+                    str = str.Replace("’", "\'’");
+                    break;
+                default:
+                    str = str.Replace("\\", "\\\\");
+                    str = str.Replace("\'", "\\\'");
+                    str = str.Replace("\"", "\\\"");
+                    str = str.Replace("`", "\\`");
+                    str = str.Replace("´", "\\´");
+                    str = str.Replace("’", "\\’");
+                    str = str.Replace("‘", "\\‘");
+                    str = str.Replace("\x1a", "\\\x1a");
+                    break;
             }
-            else
-            {
-                return str.Replace("\'", "\'\'");
-            }
+            return str;
         }
 
         /// <summary>
@@ -131,6 +142,7 @@ namespace PublicDomain.Data
                     case DbType.AnsiStringFixedLength:
                         if (databaseType == DatabaseType.SqlServer)
                         {
+                            // TODO only if unicode?
                             valStr = "N";
                         }
                         valStr += "'" + Normalize(databaseType, (string)val) + "'";

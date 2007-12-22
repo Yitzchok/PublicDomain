@@ -13,6 +13,9 @@ Brad Culberson
 
 Version History
 ===============
+V0.2.36.0
+	[kevgrig@gmail.com]
+		* Fixed some SQL escape characters
 V0.2.35.0
 	[kevgrig@gmail.com]
 		* Updated to tzdata2007j
