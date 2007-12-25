@@ -38,40 +38,47 @@ namespace PublicDomain.Logging
         /// <param name="isFinal">if set to <c>true</c> [is final].</param>
         private static void LoggerThread(bool isFinal)
         {
+            List<LogArtifact> artifactsCopy = null;
+
             lock (s_loggerThreadLock)
             {
                 int length = s_artifacts.Count;
 
                 if (length > 0)
                 {
-                    if (SameLoggers)
+                    // Copy out the part of the array and then release the lock
+                    artifactsCopy = s_artifacts.GetRange(0, length);
+                    s_artifacts.RemoveRange(0, length);
+                }
+            }
+
+            if (artifactsCopy != null)
+            {
+                if (SameLoggers)
+                {
+                    artifactsCopy[0].Logger.Write(artifactsCopy.ToArray());
+                }
+                else
+                {
+                    int length = artifactsCopy.Count;
+                    for (int i = 0; i < length; i++)
                     {
-                        LogArtifact[] artifacts = new LogArtifact[length];
-                        s_artifacts.CopyTo(0, artifacts, 0, length);
-                        artifacts[0].Logger.Write(artifacts);
-                    }
-                    else
-                    {
-                        for (int i = 0; i < length; i++)
+                        LogArtifact artifact = artifactsCopy[i];
+                        try
                         {
-                            LogArtifact artifact = s_artifacts[i];
+                            artifact.Logger.Write(artifact);
+                        }
+                        catch (Exception ex)
+                        {
                             try
                             {
-                                artifact.Logger.Write(artifact);
+                                CriticalLogger.Current.LogException(ex);
                             }
-                            catch (Exception ex)
+                            catch (Exception)
                             {
-                                try
-                                {
-                                    CriticalLogger.Current.LogException(ex);
-                                }
-                                catch (Exception)
-                                {
-                                }
                             }
                         }
                     }
-                    s_artifacts.RemoveRange(0, length);
                 }
             }
         }
@@ -124,7 +131,10 @@ namespace PublicDomain.Logging
         /// <param name="artifact">The artifact.</param>
         public static void PushArtifact(LogArtifact artifact)
         {
-            s_artifacts.Add(artifact);
+            lock (s_loggerThreadLock)
+            {
+                s_artifacts.Add(artifact);
+            }
         }
 
         /// <summary>

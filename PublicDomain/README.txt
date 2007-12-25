@@ -13,6 +13,9 @@ Brad Culberson
 
 Version History
 ===============
+V0.2.37.0
+	[kevgrig@gmail.com]
+		* Fixed synchronization bug in Logger
 V0.2.36.0
 	[kevgrig@gmail.com]
 		* Fixed some SQL escape characters
