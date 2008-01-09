@@ -20,6 +20,8 @@ namespace PublicDomainConsole
                 return result;
             }), null);
 
+            Console.WriteLine(DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.fff"));
+
             Logger log = LoggingConfig.Current.CreateLogger(typeof(Program), "blah");
 
             log.LogDebug10("this should not show");

@@ -220,14 +220,14 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Public Domain"
-        "ProductCode" = "8:{B59EB12A-AEE0-4271-85D0-96472D81EAB2}"
-        "PackageCode" = "8:{A9FC45A9-742A-42C4-A616-432C0B9DAC78}"
+        "ProductCode" = "8:{75C428AF-5FA3-4CF9-BCCB-457D9F78998F}"
+        "PackageCode" = "8:{C202A8CF-F51A-42FA-95B0-0D739DD85DD4}"
         "UpgradeCode" = "8:{0CCA40A4-FC1E-41C9-9838-27107E150A31}"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:TRUE"
-        "ProductVersion" = "8:0.2.37"
+        "ProductVersion" = "8:0.2.38"
         "Manufacturer" = "8:Public Domain"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:http://www.codeplex.com/PublicDomain"
@@ -769,7 +769,7 @@
             }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_1FE9E50360BD4DC1BC1EA01BC51E20B5"
             {
-            "SourcePath" = "8:..\\obj\\Release\\PublicDomain.dll"
+            "SourcePath" = "8:..\\obj\\Debug\\PublicDomain.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_48F8C3159A924E25A2720F96F297D8E9"
@@ -825,7 +825,7 @@
             }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_B21D45BC4AA2435F967D1784128F5EF3"
             {
-            "SourcePath" = "8:..\\bin\\Release\\PublicDomain.XML"
+            "SourcePath" = "8:..\\bin\\Debug\\PublicDomain.XML"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_48F8C3159A924E25A2720F96F297D8E9"
@@ -881,7 +881,7 @@
             }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_E27421C21B39478A9342BBAC30335B30"
             {
-            "SourcePath" = "8:..\\obj\\Release\\PublicDomain.dll"
+            "SourcePath" = "8:..\\obj\\Debug\\PublicDomain.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_284936D8164F4861B97F61E2CC2B5159"

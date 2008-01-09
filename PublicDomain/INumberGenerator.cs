@@ -31,6 +31,7 @@ namespace PublicDomain
     /// <summary>
     /// 
     /// </summary>
+    [Serializable]
     public abstract class NumberGenerator : INumberGenerator
     {
         /// <summary>

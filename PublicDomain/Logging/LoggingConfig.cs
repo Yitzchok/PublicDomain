@@ -332,6 +332,7 @@ namespace PublicDomain.Logging
 
             Logger test;
             string testClass;
+            string existingKey = null;
 
             // First try the specific classes
             if (logClasses != null)
@@ -342,6 +343,7 @@ namespace PublicDomain.Logging
                     if (m_loggers.TryGetValue(testClass, out test))
                     {
                         result = test;
+                        existingKey = testClass;
                         break;
                     }
                 }
@@ -380,14 +382,28 @@ namespace PublicDomain.Logging
 
                     PostProcessNewLogger(key, fallbackThreshold, result);
 
-                    for (int i = 1; i < logClasses.Length; i++)
-                    {
-                        m_loggers[logClasses[i].ToLower()] = result;
-                    }
+                    UpdatePeerLoggers(logClasses, result, key);
                 }
+            }
+            else if (existingKey != null)
+            {
+                UpdatePeerLoggers(logClasses, result, existingKey);
             }
 
             return result;
+        }
+
+        private void UpdatePeerLoggers(string[] logClasses, Logger result, string key)
+        {
+            for (int i = 1; i < logClasses.Length; i++)
+            {
+                string smallKey = logClasses[i].ToLower();
+
+                if (smallKey != key)
+                {
+                    m_loggers[smallKey] = result;
+                }
+            }
         }
 
         /// <summary>

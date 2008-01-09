@@ -51,7 +51,7 @@ namespace PublicDomain.Logging
         {
             return string.Format(
                 FormatString,
-                timestamp.ToString("s"),
+                timestamp.ToString("yyyy-MM-ddTHH:mm:ss.fff"),
                 severity,
                 logEntry,
                 category,

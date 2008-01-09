@@ -13,6 +13,11 @@ Brad Culberson
 
 Version History
 ===============
+V0.2.38.0
+	[kevgrig@gmail.com]
+		* Fixed serialization of IMonotonicNumberGenerator
+		* Added milliseconds to Logger
+		* Fixed bug in re-loading Loggers with multiple logger names
 V0.2.37.0
 	[kevgrig@gmail.com]
 		* Fixed synchronization bug in Logger

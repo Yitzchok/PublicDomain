@@ -14,6 +14,7 @@ namespace PublicDomain
     /// <summary>
     /// 
     /// </summary>
+    [Serializable]
     public class MonotonicNumberGenerator : NumberGenerator, IMonotonicNumberGenerator
     {
         /// <summary>
@@ -72,6 +73,22 @@ namespace PublicDomain
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Gets or sets the current.
+        /// </summary>
+        /// <value>The current.</value>
+        public virtual int Current
+        {
+            get
+            {
+                return m_current;
+            }
+            set
+            {
+                m_current = value;
+            }
         }
     }
 }
