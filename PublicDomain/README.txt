@@ -13,6 +13,9 @@ Brad Culberson
 
 Version History
 ===============
+V0.2.40.0
+	[kevgrig@gmail.com]
+		* Allow dynamic update of all loggers
 V0.2.38.0
 	[kevgrig@gmail.com]
 		* Fixed serialization of IMonotonicNumberGenerator

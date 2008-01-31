@@ -212,6 +212,16 @@ namespace PublicDomain.Logging
                         LoggerSeverity threshold = GetLogValue(val);
                         Logger logger;
 
+                        if (key == AllLoggersDesignator)
+                        {
+                            // Updating all loggers
+                            foreach (Logger logval in m_loggers.Values)
+                            {
+                                m_updateLogger(logval, threshold);
+                                PrepareLogger(threshold, logval);
+                            }
+                        }
+
                         // See if the logger already exists
                         if (m_loggers.TryGetValue(key, out logger))
                         {

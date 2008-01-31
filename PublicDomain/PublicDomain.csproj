@@ -199,6 +199,7 @@
     <Compile Include="Web\Doctype.cs" />
     <Compile Include="Web\LiteralControlOnRender.cs" />
     <Compile Include="Web\RTESupport.cs" />
+    <Compile Include="Xml\HtmlDocumentWriter.cs" />
     <Compile Include="Xml\LenientHtmlDocument.cs" />
     <Compile Include="Xml\LenientHtmlToTextDocument.cs" />
     <Compile Include="Xml\LenientXmlDocument.cs" />
