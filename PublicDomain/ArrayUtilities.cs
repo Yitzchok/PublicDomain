@@ -25,6 +25,19 @@ namespace PublicDomain
         }
 
         /// <summary>
+        /// Clones the list.
+        /// </summary>
+        /// <param name="list">The list.</param>
+        /// <returns></returns>
+        public static List<T> CloneList<T>(List<T> list) where T : ICloneable
+        {
+            return list.ConvertAll<T>(delegate(T t)
+            {
+                return (T)t.Clone();
+            });
+        }
+
+        /// <summary>
         /// 
         /// </summary>
         /// <typeparam name="T"></typeparam>

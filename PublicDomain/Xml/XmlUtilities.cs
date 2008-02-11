@@ -115,5 +115,25 @@ namespace PublicDomain
         {
             return DoFormatXml(doc, settings, -1);
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="node">The node.</param>
+        /// <returns></returns>
+        public static bool NodeHasSignificantChild(XmlNode node)
+        {
+            foreach (XmlNode child in node.ChildNodes)
+            {
+                if (child.NodeType != XmlNodeType.CDATA &&
+                    child.NodeType != XmlNodeType.Comment &&
+                    child.NodeType != XmlNodeType.SignificantWhitespace &&
+                    child.NodeType != XmlNodeType.Whitespace)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 }

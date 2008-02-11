@@ -188,9 +188,9 @@ namespace PublicDomain
         public void Bug12541()
         {
             TzTimeZone timeZone = TzTimeZone.GetTimeZone("America/Denver");
-            Assert.AreEqual("MST", timeZone.GetAbbreviation(DateTime.Parse("1/1/2008 12:00:00")));
-            Assert.AreEqual("MDT", timeZone.GetAbbreviation(DateTime.Parse("5/1/2008 12:00:00")));
-            Assert.AreEqual("MST", timeZone.GetAbbreviation(DateTime.Parse("12/1/2008 12:00:00")));
+            Assert.AreEqual("MST", timeZone.GetAbbreviation(DateTime.Parse("2008-1-1 12:00:00")));
+            Assert.AreEqual("MDT", timeZone.GetAbbreviation(DateTime.Parse("2008-5-1 12:00:00")));
+            Assert.AreEqual("MST", timeZone.GetAbbreviation(DateTime.Parse("2008-12-1 12:00:00")));
         }
 
         [Test]

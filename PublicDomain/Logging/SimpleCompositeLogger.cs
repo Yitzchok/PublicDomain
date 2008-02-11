@@ -8,6 +8,7 @@ namespace PublicDomain.Logging
     /// Can be used for logging based on a class name, which is used
     /// as the category. Also, delineates a new static run on the first log, in debug mode.
     /// </summary>
+    [Serializable]
     public class SimpleCompositeLogger : CompositeLogger
     {
         private string m_className;

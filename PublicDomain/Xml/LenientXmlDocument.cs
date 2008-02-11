@@ -780,6 +780,24 @@ namespace PublicDomain.Xml
         }
 
         /// <summary>
+        /// Creates an element with the specified <see cref="P:System.Xml.XmlNode.Prefix"></see>, <see cref="P:System.Xml.XmlDocument.LocalName"></see>, and <see cref="P:System.Xml.XmlNode.NamespaceURI"></see>.
+        /// </summary>
+        /// <param name="prefix">The prefix of the new element (if any). String.Empty and null are equivalent.</param>
+        /// <param name="localName">The local name of the new element.</param>
+        /// <param name="namespaceURI">The namespace URI of the new element (if any). String.Empty and null are equivalent.</param>
+        /// <returns>
+        /// The new <see cref="T:System.Xml.XmlElement"></see>.
+        /// </returns>
+        public override XmlElement CreateElement(string prefix, string localName, string namespaceURI)
+        {
+            if (DocumentElement != null && string.IsNullOrEmpty(namespaceURI) && !string.IsNullOrEmpty(DocumentElement.NamespaceURI))
+            {
+                namespaceURI = DocumentElement.NamespaceURI;
+            }
+            return base.CreateElement(prefix, localName, namespaceURI);
+        }
+
+        /// <summary>
         /// Sets the comment data.
         /// </summary>
         /// <param name="comment">The comment.</param>
@@ -923,6 +941,24 @@ namespace PublicDomain.Xml
         /// <param name="attribute">The attribute.</param>
         protected virtual void PostProcessSetAttributeValue(XmlAttribute attribute)
         {
+            if (attribute.LocalName == "xmlns" && attribute.OwnerElement != null)
+            {
+                XmlElement ownerElement = attribute.OwnerElement;
+                XmlElement newElement = attribute.OwnerDocument.CreateElement(ownerElement.Prefix, ownerElement.LocalName, attribute.Value);
+                ownerElement.ParentNode.ReplaceChild(newElement, ownerElement);
+                foreach (XmlAttribute ownerAttribute in ownerElement.Attributes)
+                {
+                    if (ownerAttribute != attribute)
+                    {
+                        newElement.SetAttributeNode(ownerAttribute);
+                    }
+                }
+                m_current = newElement;
+                if (m_attributeTarget != null)
+                {
+                    m_attributeTarget = newElement;
+                }
+            }
         }
 
         /// <summary>
@@ -1097,6 +1133,16 @@ namespace PublicDomain.Xml
                 AppendChild(GetDefaultDocumentNode());
                 m_current = DocumentElement;
             }
+            // If we're trying to add another root element with the root element name, then we discard it
+            else if (root != null && m_current == root && child.NodeType == XmlNodeType.Element && RootElementName.Equals(child.LocalName))
+            {
+                if (!XmlUtilities.NodeHasSignificantChild(m_current))
+                {
+                    m_lastElement = (XmlElement)m_current;
+                    m_attributeTarget = m_current;
+                    return;
+                }
+            }
             else if (m_current == this && root != null)
             {
                 RemoveChild(root);
@@ -1149,6 +1195,22 @@ namespace PublicDomain.Xml
         protected virtual XmlNode GetDefaultDocumentNode()
         {
             return CreateElement(m_defaultRootElementName);
+        }
+
+        /// <summary>
+        /// Gets or sets the name of the default root element.
+        /// </summary>
+        /// <value>The name of the default root element.</value>
+        protected virtual string RootElementName
+        {
+            get
+            {
+                return m_defaultRootElementName;
+            }
+            set
+            {
+                m_defaultRootElementName = value;
+            }
         }
 
         /// <summary>

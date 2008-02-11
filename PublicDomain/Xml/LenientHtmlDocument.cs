@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Xml;
+using System.IO;
 
 namespace PublicDomain.Xml
 {
@@ -147,6 +148,30 @@ namespace PublicDomain.Xml
                 }
             }
             base.InternalAppendChild(child, mayHaveChildren);
+        }
+
+        /// <summary>
+        /// Gets the outer HTML.
+        /// </summary>
+        /// <value>The outer HTML.</value>
+        public virtual string OuterHtml
+        {
+            get
+            {
+                XmlWriterSettings settings = new XmlWriterSettings();
+                settings.ConformanceLevel = ConformanceLevel.Auto;
+                settings.OmitXmlDeclaration = true;
+                //settings.Indent = true;
+                StringBuilder sb = new StringBuilder(512);
+                using (StringWriter stringWriter = new StringWriter(sb))
+                {
+                    using (XmlWriter xmlWriter = new HtmlDocumentWriter(XmlWriter.Create(stringWriter, settings)))
+                    {
+                        Save(xmlWriter);
+                    }
+                }
+                return sb.ToString();
+            }
         }
     }
 }

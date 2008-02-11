@@ -13,6 +13,9 @@ Brad Culberson
 
 Version History
 ===============
+V0.2.41.0
+	[kevgrig@gmail.com]
+		* Updated to tzdata2007k
 V0.2.40.0
 	[kevgrig@gmail.com]
 		* Allow dynamic update of all loggers

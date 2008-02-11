@@ -152,6 +152,12 @@ function test()
             cmp[@"<select><option><br/><option><br/><option><br/></select>"] = @"<select><option><br /></option><option><br /></option><option><br /></option></select>";
             cmp[@"<select><option><title a=""test""/><option><title/><option><title/></select>"] = @"<select><option><title a=""test"" /></option><option><title /></option><option><title /></option></select>";
             cmp[@"<div width=""&test;"">"] = @"<div width=""blah"" />";
+            cmp[@"<!DOCTYPE html PUBLIC ""-//W3C//DTD XHTML 1.0 Transitional//EN"" ""http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd""><html xmlns=""http://www.w3.org/1999/xhtml"">
+<head>"] = @"<html xmlns=""http://www.w3.org/1999/xhtml"">
+<head /></html>";
+            cmp[@"<!DOCTYPE html PUBLIC ""-//W3C//DTD XHTML 1.0 Transitional//EN"" ""http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd""><html xmlns=""http://www.w3.org/1999/xhtml"">
+<head><title>blah</title></head><body><br><a name=""top"" id=""top""></a></body>"] = @"<html xmlns=""http://www.w3.org/1999/xhtml"">
+<head><title>blah</title></head><body><br /><a name=""top"" id=""top"" /></body></html>";
 
             LenientHtmlDocument doc = new TestLenientHtmlDocument();
             DoCompare(cmp, doc);
@@ -170,6 +176,8 @@ function test()
                 string output = doc.DocumentElement.OuterXml;
                 Console.WriteLine(output);
                 Assert.AreEqual(y, output);
+                output = doc.OuterHtml;
+                Console.WriteLine(output);
             }
         }
 

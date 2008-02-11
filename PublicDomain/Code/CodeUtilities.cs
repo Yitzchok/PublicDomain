@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.CodeDom.Compiler;
+using System.IO;
 
 namespace PublicDomain.Code
 {
@@ -28,6 +29,21 @@ namespace PublicDomain.Code
             supportedLanguages.Add(Language.CSharp);
             supportedLanguages.Add(Language.VisualBasic);
             s_supportedLanguages = supportedLanguages.ToArray();
+        }
+
+        /// <summary>
+        /// Strips the non file name characters.
+        /// </summary>
+        /// <param name="str">The STR.</param>
+        /// <param name="lang">The lang.</param>
+        /// <returns></returns>
+        public static string StripNonFileNameCharacters(string str, Language lang)
+        {
+            if (!string.IsNullOrEmpty(str))
+            {
+                str = StringUtilities.RemoveCharacters(str, Path.GetInvalidFileNameChars());
+            }
+            return str;
         }
 
         /// <summary>

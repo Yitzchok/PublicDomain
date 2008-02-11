@@ -19,8 +19,8 @@ namespace PublicDomain
         public void Test1()
         {
             foreach (string test in new string[] {
-                    "06/20/1984 3:00:00 PM-05:00",
-                    "1/1/2007+00:00",
+                    "1984-06-20 3:00:00 PM-05:00",
+                    "2007-01-01+00:00",
                 })
             {
                 TzDateTime dt = TzDateTime.Parse(test);
@@ -131,17 +131,17 @@ namespace PublicDomain
         {
             TzTimeZone zone = TzTimeZone.ZoneUsEastern;
 
-            AssertIsDaylightSavingsTime(zone, "12/15/2007", false);
-            AssertIsDaylightSavingsTime(zone, "6/1/2007", true);
-            AssertIsDaylightSavingsTime(zone, "1/1/2007", false);
-            AssertIsDaylightSavingsTime(zone, "3/12/2007", true);
-            AssertIsDaylightSavingsTime(zone, "11/5/2007", false);
+            AssertIsDaylightSavingsTime(zone, "2007-12-15", false);
+            AssertIsDaylightSavingsTime(zone, "2007-6-1", true);
+            AssertIsDaylightSavingsTime(zone, "2007-1-1", false);
+            AssertIsDaylightSavingsTime(zone, "2007-3-12", true);
+            AssertIsDaylightSavingsTime(zone, "2007-11-5", false);
 
-            AssertIsDaylightSavingsTime(zone, "1/1/2006", false);
-            AssertIsDaylightSavingsTime(zone, "4/3/2006", true);
-            AssertIsDaylightSavingsTime(zone, "10/30/2006", false);
-            AssertIsDaylightSavingsTime(zone, "6/1/2006", true);
-            AssertIsDaylightSavingsTime(zone, "12/15/2006", false);
+            AssertIsDaylightSavingsTime(zone, "2006-1-1", false);
+            AssertIsDaylightSavingsTime(zone, "2006-4-3", true);
+            AssertIsDaylightSavingsTime(zone, "2006-10-30", false);
+            AssertIsDaylightSavingsTime(zone, "2006-6-1", true);
+            AssertIsDaylightSavingsTime(zone, "2006-12-15", false);
         }
 
         private static void AssertIsDaylightSavingsTime(TzTimeZone zone, string dt, bool expectIsDaylightSavingsTime)
@@ -194,7 +194,7 @@ namespace PublicDomain
 
             // Bug #2:
             Console.WriteLine("zone.IsDaylightSavingTime(Now): '" + zone.IsDaylightSavingTime(DateTime.Now) + "'");
-            Console.WriteLine("zone.IsDaylightSavingTime(#12/15/2007#): '" + zone.IsDaylightSavingTime(DateTime.Parse("12/15/2007")) + "'");
+            Console.WriteLine("zone.IsDaylightSavingTime(#12/15/2007#): '" + zone.IsDaylightSavingTime(DateTime.Parse("2007-12-15")) + "'");
             Console.WriteLine("zone.IsDaylightSavingTime('2007-12-15'): '" + zone.IsDaylightSavingTime(DateTime.Parse("2007-12-15")) + "'");
 
             // Bug #3:
@@ -560,7 +560,7 @@ namespace PublicDomain
 
         private static void CheckToUniversalTime(TzTimeZone zone, string year)
         {
-            // 3/11/2007 @ 2am
+            // 2007-3-11 @ 2am
             Assert.IsFalse(zone.IsDaylightSavingTime(DateTime.Parse(year + "-03-10")));
             Assert.IsFalse(zone.IsDaylightSavingTime(DateTime.Parse(year + "-03-11")));
             Assert.IsTrue(zone.IsDaylightSavingTime(DateTime.Parse(year + "-03-12")));
@@ -586,7 +586,7 @@ namespace PublicDomain
             Console.WriteLine("zone.ToUniversalTime('" + year + "-05-10 03:00'): '" + zone.ToUniversalTime(DateTime.Parse(year + "-05-10 03:00")) + "'");
             Assert.AreEqual(8, zone.ToUniversalTime(DateTime.Parse(year + "-05-11 03:00")).Hour);
 
-            // 11/4/2007 @ 2 am
+            // 2007-11-4 @ 2 am
             Assert.IsTrue(zone.IsDaylightSavingTime(DateTime.Parse(year + "-11-4")));
             Assert.IsTrue(zone.IsDaylightSavingTime(DateTime.Parse(year + "-11-4")));
             Assert.IsFalse(zone.IsDaylightSavingTime(DateTime.Parse(year + "-11-5")));

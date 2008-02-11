@@ -67,8 +67,8 @@
     <Compile Include="AspRuntimeHost\wwAspRuntimeHost.cs" />
     <Compile Include="AspRuntimeHost\wwAspRuntimeProxy.cs" />
     <Compile Include="AspRuntimeHost\wwWorkerRequest.cs" />
-    <Compile Include="Country.cs" />
     <Compile Include="DisposableCallback.cs" />
+    <Compile Include="DisposableLockGrabber.cs" />
     <Compile Include="EcmaScript\EcmaScriptAssignmentStatement.cs" />
     <Compile Include="EcmaScript\EcmaScriptBlock.cs" />
     <Compile Include="EcmaScript\EcmaScriptBreakStatement.cs" />
@@ -191,8 +191,10 @@
     <Compile Include="Geography\Region.cs" />
     <Compile Include="Geography\RegionType.cs" />
     <Compile Include="IMonotonicNumberGenerator.cs" />
+    <Compile Include="Interfaces\IIdProvider.cs" />
     <Compile Include="INumberGenerator.cs" />
     <Compile Include="IRandomNumberGenerator.cs" />
+    <Compile Include="Isrc.cs" />
     <Compile Include="MathUtilities.cs" />
     <Compile Include="RemotingUtilities.cs" />
     <Compile Include="Util\StringContainer.cs" />
