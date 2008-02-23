@@ -8,6 +8,7 @@ namespace PublicDomain.Logging
     /// <summary>
     /// 
     /// </summary>
+    [Serializable]
     public class FileLogger : Logger
     {
         /// <summary>

@@ -193,5 +193,69 @@ namespace PublicDomain
             }
             return numRemoved;
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="list"></param>
+        /// <param name="comparison"></param>
+        public static void InsertionSort<T>(IList<T> list, Comparison<T> comparison)
+        {
+            if (list == null)
+            {
+                throw new ArgumentNullException("list");
+            }
+            if (comparison == null)
+            {
+                throw new ArgumentNullException("comparison");
+            }
+
+            int count = list.Count;
+            for (int j = 1; j < count; j++)
+            {
+                T key = list[j];
+
+                int i = j - 1;
+                for (; i >= 0 && comparison(list[i], key) > 0; i--)
+                {
+                    list[i + 1] = list[i];
+                }
+                list[i + 1] = key;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="list"></param>
+        /// <param name="startIndex"></param>
+        public static void TrimRight<T>(List<T> list, int startIndex)
+        {
+            // Figure out how many elements there are between startIndex and the end
+            int count = list.Count - startIndex;
+
+            list.RemoveRange(startIndex, count);
+        }
+
+        /// <summary>
+        /// Trims excess items from the end of <paramref name="list"/>
+        /// so the final count is less than or equal to <paramref name="totalCount"/>.
+        /// If there are less items in <paramref name="list"/> than the number
+        /// specified by <paramref name="totalCount"/>, then no action is taken (and
+        /// no exception is thrown).
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="list"></param>
+        /// <param name="totalCount"></param>
+        [PendingPublicDomain]
+        public static void TrimTo<T>(List<T> list, int totalCount)
+        {
+            if (list.Count > totalCount)
+            {
+                TrimRight<T>(list, totalCount - 1);
+            }
+        }
     }
 }

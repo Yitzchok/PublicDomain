@@ -8,6 +8,7 @@ namespace PublicDomain.Logging
     /// Writes to a file, rolling over to a new version of a file
     /// when the previous file has filled to capacity.
     /// </summary>
+    [Serializable]
     public class RollingFileLogger : FileLogger
     {
         private IRollOverStrategy m_strategy;

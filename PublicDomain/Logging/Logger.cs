@@ -11,8 +11,16 @@ namespace PublicDomain.Logging
     /// There is no interface for this class to allow for certain methods
     /// to be overriden and removed in debug builds.
     /// </summary>
+    [Serializable]
     public abstract class Logger
     {
+        /// <summary>
+        /// Global property which specifies wether or not to process messages. It
+        /// is enabled by default and affects the entire AppDomain. If this is disabled,
+        /// messages will pile up in memory.
+        /// </summary>
+        public static bool ProcessMessages = true;
+
         /// <summary>
         /// In milliseconds
         /// </summary>
@@ -38,44 +46,47 @@ namespace PublicDomain.Logging
         /// <param name="isFinal">if set to <c>true</c> [is final].</param>
         private static void LoggerThread(bool isFinal)
         {
-            List<LogArtifact> artifactsCopy = null;
-
-            lock (s_loggerThreadLock)
+            if (ProcessMessages)
             {
-                int length = s_artifacts.Count;
+                List<LogArtifact> artifactsCopy = null;
 
-                if (length > 0)
+                lock (s_loggerThreadLock)
                 {
-                    // Copy out the part of the array and then release the lock
-                    artifactsCopy = s_artifacts.GetRange(0, length);
-                    s_artifacts.RemoveRange(0, length);
-                }
-            }
+                    int length = s_artifacts.Count;
 
-            if (artifactsCopy != null)
-            {
-                if (SameLoggers)
-                {
-                    artifactsCopy[0].Logger.Write(artifactsCopy.ToArray());
-                }
-                else
-                {
-                    int length = artifactsCopy.Count;
-                    for (int i = 0; i < length; i++)
+                    if (length > 0)
                     {
-                        LogArtifact artifact = artifactsCopy[i];
-                        try
+                        // Copy out the part of the array and then release the lock
+                        artifactsCopy = s_artifacts.GetRange(0, length);
+                        s_artifacts.RemoveRange(0, length);
+                    }
+                }
+
+                if (artifactsCopy != null)
+                {
+                    if (SameLoggers)
+                    {
+                        artifactsCopy[0].Logger.Write(artifactsCopy.ToArray());
+                    }
+                    else
+                    {
+                        int length = artifactsCopy.Count;
+                        for (int i = 0; i < length; i++)
                         {
-                            artifact.Logger.Write(artifact);
-                        }
-                        catch (Exception ex)
-                        {
+                            LogArtifact artifact = artifactsCopy[i];
                             try
                             {
-                                CriticalLogger.Current.LogException(ex);
+                                artifact.Logger.Write(artifact);
                             }
-                            catch (Exception)
+                            catch (Exception ex)
                             {
+                                try
+                                {
+                                    CriticalLogger.Current.LogException(ex);
+                                }
+                                catch (Exception)
+                                {
+                                }
                             }
                         }
                     }

@@ -10,6 +10,7 @@ namespace PublicDomain.Logging
     /// always logs severe log events using the <see cref="PublicDomain.Logging.SevereLogFilter"/>,
     /// and by default, uses the default Logger <see cref="PublicDomain.Logging.Logger.Threshold"/> value of Warn.
     /// </summary>
+    [Serializable]
     public class ApplicationLogger : CompositeLogger
     {
         /// <summary>

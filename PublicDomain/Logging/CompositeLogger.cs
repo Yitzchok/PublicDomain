@@ -8,6 +8,7 @@ namespace PublicDomain.Logging
     /// <summary>
     /// By default does not have any filters, and supposes that the composed logs will filter.
     /// </summary>
+    [Serializable]
     public class CompositeLogger : Logger
     {
         /// <summary>

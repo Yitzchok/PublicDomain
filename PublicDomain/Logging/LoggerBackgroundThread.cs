@@ -7,6 +7,7 @@ namespace PublicDomain.Logging
     /// <summary>
     /// 
     /// </summary>
+    [Serializable]
     public class LoggerBackgroundThread : FinalizableBackgroundThread
     {
         /// <summary>

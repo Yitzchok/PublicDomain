@@ -9,6 +9,7 @@ namespace PublicDomain.Logging
     /// * The Console
     /// * The "Application" Event Log
     /// </summary>
+    [Serializable]
     public class CriticalLogger : CompositeLogger
     {
         /// <summary>

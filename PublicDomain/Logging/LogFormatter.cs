@@ -7,6 +7,7 @@ namespace PublicDomain.Logging
     /// <summary>
     /// 
     /// </summary>
+    [Serializable]
     public abstract class LogFormatter : ILogFormatter
     {
         private string m_formatString;

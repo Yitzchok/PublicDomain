@@ -8,6 +8,7 @@ namespace PublicDomain.Logging
     /// Always logs severe events, otherwise defers to normal threshold
     /// conditions.
     /// </summary>
+    [Serializable]
     public class SevereLogFilter : DefaultLogFilter
     {
         /// <summary>

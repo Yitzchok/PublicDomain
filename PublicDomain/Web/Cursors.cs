@@ -10,7 +10,7 @@ namespace PublicDomain
     public static class Cursors
     {
         /// <summary>
-        /// 
+        /// cursor: pointer; cursor: hand;
         /// </summary>
         public const string HandAndPointer = "cursor: pointer; cursor: hand;";
 

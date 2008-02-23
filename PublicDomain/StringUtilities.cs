@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Security.Cryptography;
+using System.Collections;
 
 namespace PublicDomain
 {
@@ -1056,6 +1057,45 @@ namespace PublicDomain
                 return string.Empty;
             }
             return null;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="list"></param>
+        /// <returns></returns>
+        [PendingPublicDomain]
+        public static string Join(IEnumerable list)
+        {
+            return Join(",", list);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="separator"></param>
+        /// <param name="list"></param>
+        /// <returns></returns>
+        [PendingPublicDomain]
+        public static string Join(string separator, IEnumerable list)
+        {
+            StringBuilder sb = new StringBuilder(255);
+            foreach (object o in list)
+            {
+                if (sb.Length > 0)
+                {
+                    sb.Append(separator);
+                }
+                if (o != null)
+                {
+                    sb.Append(o.ToString());
+                }
+                else
+                {
+                    sb.Append("null");
+                }
+            }
+            return sb.ToString();
         }
     }
 }

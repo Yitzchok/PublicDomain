@@ -790,11 +790,22 @@ namespace PublicDomain.Xml
         /// </returns>
         public override XmlElement CreateElement(string prefix, string localName, string namespaceURI)
         {
+            namespaceURI = UpdateNamespaceForNewElement(namespaceURI);
+            return base.CreateElement(prefix, localName, namespaceURI);
+        }
+
+        /// <summary>
+        /// Updates the namespace for new element.
+        /// </summary>
+        /// <param name="namespaceURI">The namespace URI.</param>
+        /// <returns></returns>
+        protected virtual string UpdateNamespaceForNewElement(string namespaceURI)
+        {
             if (DocumentElement != null && string.IsNullOrEmpty(namespaceURI) && !string.IsNullOrEmpty(DocumentElement.NamespaceURI))
             {
                 namespaceURI = DocumentElement.NamespaceURI;
             }
-            return base.CreateElement(prefix, localName, namespaceURI);
+            return namespaceURI;
         }
 
         /// <summary>

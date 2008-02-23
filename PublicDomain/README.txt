@@ -13,6 +13,9 @@ Brad Culberson
 
 Version History
 ===============
+V0.2.42.0
+	[kevgrig@gmail.com]
+		* Fixed LenientHtmlDocument namespace bug
 V0.2.41.0
 	[kevgrig@gmail.com]
 		* Updated to tzdata2007k
