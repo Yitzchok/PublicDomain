@@ -13,6 +13,10 @@ Brad Culberson
 
 Version History
 ===============
+V0.2.43.0
+	[kevgrig@gmail.com]
+		* Updated to tzdata2008b
+		* Updated ConfigurationValues to have nested ExternalConfigs
 V0.2.42.0
 	[kevgrig@gmail.com]
 		* Fixed LenientHtmlDocument namespace bug

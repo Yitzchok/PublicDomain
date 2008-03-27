@@ -26,10 +26,10 @@ namespace PublicDomain.Config
         /// Reads the parameters from assembly.
         /// </summary>
         /// <param name="assemblyStreamName">Name of the assembly stream.</param>
-        /// <param name="intersectAlternateConfig">if set to <c>true</c> [intersect alternate config].</param>
+        /// <param name="intersectedConfigs">The intersected configs.</param>
         /// <returns></returns>
-        public ConfigurationValues(string assemblyStreamName, bool intersectAlternateConfig)
-            : this(assemblyStreamName, Assembly.GetExecutingAssembly(), intersectAlternateConfig)
+        public ConfigurationValues(string assemblyStreamName, List<string> intersectedConfigs)
+            : this(assemblyStreamName, Assembly.GetExecutingAssembly(), intersectedConfigs)
         {
         }
 
@@ -38,9 +38,9 @@ namespace PublicDomain.Config
         /// </summary>
         /// <param name="assemblyStreamName">Name of the assembly stream.</param>
         /// <param name="assembly">The assembly.</param>
-        /// <param name="intersectAlternateConfig">if set to <c>true</c> [intersect alternate config].</param>
+        /// <param name="intersectedConfigs">The intersected configs.</param>
         /// <returns></returns>
-        public ConfigurationValues(string assemblyStreamName, Assembly assembly, bool intersectAlternateConfig)
+        public ConfigurationValues(string assemblyStreamName, Assembly assembly, List<string> intersectedConfigs)
         {
             if (assembly == null)
             {
@@ -52,20 +52,23 @@ namespace PublicDomain.Config
             {
                 throw new ArgumentNullException(string.Format("Could not find embedded resource named {0} in assembly {1}.", assemblyStreamName, assembly));
             }
-            ReadParametersFromStream(stream, intersectAlternateConfig);
+            if (intersectedConfigs == null)
+            {
+                intersectedConfigs = new List<string>();
+            }
+            ReadParametersFromStream(stream, intersectedConfigs);
         }
 
         /// <summary>
         /// Reads the parameters from file.
         /// </summary>
         /// <param name="fileName">Name of the file.</param>
-        /// <param name="intersectAlternateConfig">if set to <c>true</c> [intersect alternate config].</param>
-        /// <returns></returns>
-        public void ReadParametersFromStream(string fileName, bool intersectAlternateConfig)
+        /// <param name="intersectedConfigs">The intersected configs.</param>
+        public void ReadParametersFromStream(string fileName, List<string> intersectedConfigs)
         {
             using (TextReader textReader = new StreamReader(fileName))
             {
-                ReadParametersFromTextReader(textReader, intersectAlternateConfig);
+                ReadParametersFromTextReader(textReader, intersectedConfigs);
             }
         }
 
@@ -73,9 +76,8 @@ namespace PublicDomain.Config
         /// Reads the parameters from stream.
         /// </summary>
         /// <param name="stream">The stream.</param>
-        /// <param name="intersectAlternateConfig">if set to <c>true</c> [intersect alternate config].</param>
-        /// <returns></returns>
-        public void ReadParametersFromStream(Stream stream, bool intersectAlternateConfig)
+        /// <param name="intersectedConfigs">The intersected configs.</param>
+        public void ReadParametersFromStream(Stream stream, List<string> intersectedConfigs)
         {
             if (stream == null)
             {
@@ -83,7 +85,7 @@ namespace PublicDomain.Config
             }
             using (XmlReader reader = XmlReader.Create(stream))
             {
-                ReadParameters(reader, intersectAlternateConfig);
+                ReadParameters(reader, intersectedConfigs);
             }
         }
 
@@ -91,9 +93,8 @@ namespace PublicDomain.Config
         /// Reads the parameters from text reader.
         /// </summary>
         /// <param name="reader">The reader.</param>
-        /// <param name="intersectAlternateConfig">if set to <c>true</c> [intersect alternate config].</param>
-        /// <returns></returns>
-        public void ReadParametersFromTextReader(TextReader reader, bool intersectAlternateConfig)
+        /// <param name="intersectedConfigs">The intersected configs.</param>
+        public void ReadParametersFromTextReader(TextReader reader, List<string> intersectedConfigs)
         {
             if (reader == null)
             {
@@ -101,25 +102,26 @@ namespace PublicDomain.Config
             }
             using (XmlReader xmlReader = XmlReader.Create(reader))
             {
-                ReadParameters(xmlReader, intersectAlternateConfig);
+                ReadParameters(xmlReader, intersectedConfigs);
             }
         }
 
-        private void ReadParameters(XmlReader reader, bool intersectAlternateConfig)
+        private void ReadParameters(XmlReader reader, List<string> intersectedConfigs)
         {
             ReadParamsReader(reader);
 
-            if (intersectAlternateConfig)
+            string alternateConfigFile;
+            if (TryGetString("externalconfig", out alternateConfigFile))
             {
-                string alternateConfigFile;
-                if (TryGetString("externalconfig", out alternateConfigFile))
+                if (File.Exists(alternateConfigFile) && (intersectedConfigs == null || (intersectedConfigs != null && !intersectedConfigs.Contains(alternateConfigFile))))
                 {
-                    if (File.Exists(alternateConfigFile))
+                    if (intersectedConfigs != null)
                     {
-                        ConfigurationValues fileValues = new ConfigurationValues();
-                        fileValues.ReadParametersFromStream(alternateConfigFile, false);
-                        IntersectValues(fileValues);
+                        intersectedConfigs.Add(alternateConfigFile);
                     }
+                    ConfigurationValues fileValues = new ConfigurationValues();
+                    fileValues.ReadParametersFromStream(alternateConfigFile, intersectedConfigs);
+                    IntersectValues(fileValues);
                 }
             }
         }
