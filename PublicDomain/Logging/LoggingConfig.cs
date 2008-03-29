@@ -339,21 +339,18 @@ namespace PublicDomain.Logging
         public virtual Logger CreateLogger(params string[] logClasses)
         {
             Logger result = null;
-
             Logger test;
-            string testClass;
-            string existingKey = null;
 
             // First try the specific classes
             if (logClasses != null)
             {
-                foreach (string logClass in logClasses)
+                string logClass;
+                for (int i = 0; i < logClasses.Length; i++)
                 {
-                    testClass = logClass.ToLower().Trim();
-                    if (m_loggers.TryGetValue(testClass, out test))
+                    logClass = logClasses[i].ToLower().Trim();
+                    if (m_loggers.TryGetValue(logClass, out test))
                     {
                         result = test;
-                        existingKey = testClass;
                         break;
                     }
                 }
@@ -373,7 +370,7 @@ namespace PublicDomain.Logging
                 }
                 else
                 {
-                    if (logClasses.Length == 0)
+                    if (logClasses == null || logClasses.Length == 0)
                     {
                         throw new ArgumentNullException("Could not create fallback logger because no logClasses were specified");
                     }
@@ -394,10 +391,6 @@ namespace PublicDomain.Logging
 
                     UpdatePeerLoggers(logClasses, result, key);
                 }
-            }
-            else if (existingKey != null)
-            {
-                UpdatePeerLoggers(logClasses, result, existingKey);
             }
 
             return result;
@@ -470,10 +463,10 @@ namespace PublicDomain.Logging
         /// <returns></returns>
         public virtual Logger CreateLogger(Type type, params string[] otherLogClasses)
         {
-            if (otherLogClasses == null) return null;
-            string[] classes = new string[otherLogClasses.Length + 1];
-            Array.Copy(otherLogClasses, classes, otherLogClasses.Length);
-            classes[classes.Length - 1] = type.ToString();
+            int ol = otherLogClasses == null ? 0 : otherLogClasses.Length;
+            string[] classes = new string[ol + 1];
+            classes[0] = type.ToString();
+            Array.Copy(otherLogClasses, 0, classes, 1, ol);
             return CreateLogger(classes);
         }
 

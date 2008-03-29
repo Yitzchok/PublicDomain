@@ -208,25 +208,69 @@ namespace PublicDomain.Config
         }
 
         /// <summary>
-        /// Gets the long.
+        /// 
         /// </summary>
         /// <param name="key">The key.</param>
         /// <returns></returns>
-        public long GetLong(string key)
+        public Int64 GetInt64(string key)
         {
-            return GetLong(key, 0);
+            return GetInt64(key, 0);
         }
 
         /// <summary>
-        /// Gets the long.
+        /// 
         /// </summary>
         /// <param name="key">The key.</param>
         /// <param name="defaultValue">The default value.</param>
         /// <returns></returns>
-        public long GetLong(string key, long defaultValue)
+        public Int64 GetInt64(string key, Int64 defaultValue)
         {
             string val = this[key];
-            return val == null ? defaultValue : long.Parse(val);
+            return val == null ? defaultValue : Int64.Parse(val);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <returns></returns>
+        public Int32 GetInt32(string key)
+        {
+            return GetInt32(key, 0);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <param name="defaultValue">The default value.</param>
+        /// <returns></returns>
+        public Int32 GetInt32(string key, Int32 defaultValue)
+        {
+            string val = this[key];
+            return val == null ? defaultValue : Int32.Parse(val);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <returns></returns>
+        public Int16 GetInt16(string key)
+        {
+            return GetInt16(key, 0);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <param name="defaultValue">The default value.</param>
+        /// <returns></returns>
+        public Int16 GetInt16(string key, Int16 defaultValue)
+        {
+            string val = this[key];
+            return val == null ? defaultValue : Int16.Parse(val);
         }
 
         /// <summary>
@@ -281,6 +325,50 @@ namespace PublicDomain.Config
         {
             string val = this[key];
             return val == null ? defaultValue : int.Parse(val);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <returns></returns>
+        public double GetDouble(string key)
+        {
+            return GetDouble(key, 0);
+        }
+
+        /// <summary>
+        /// Gets the 
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <param name="defaultValue">The default value.</param>
+        /// <returns></returns>
+        public double GetDouble(string key, int defaultValue)
+        {
+            string val = this[key];
+            return val == null ? defaultValue : double.Parse(val);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <returns></returns>
+        public float GetFloat(string key)
+        {
+            return GetFloat(key, 0);
+        }
+
+        /// <summary>
+        /// Gets the 
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <param name="defaultValue">The default value.</param>
+        /// <returns></returns>
+        public float GetFloat(string key, float defaultValue)
+        {
+            string val = this[key];
+            return val == null ? defaultValue : float.Parse(val);
         }
 
         /// <summary>
