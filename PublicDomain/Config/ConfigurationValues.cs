@@ -343,7 +343,7 @@ namespace PublicDomain.Config
         /// <param name="key">The key.</param>
         /// <param name="defaultValue">The default value.</param>
         /// <returns></returns>
-        public double GetDouble(string key, int defaultValue)
+        public double GetDouble(string key, double defaultValue)
         {
             string val = this[key];
             return val == null ? defaultValue : double.Parse(val);
