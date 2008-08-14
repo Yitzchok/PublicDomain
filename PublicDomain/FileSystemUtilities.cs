@@ -88,9 +88,37 @@ namespace PublicDomain
                 return path1;
             }
 
+	        // TODO handle UNCs. what if path2.StartsWith(@"\\")?
             if (path2[0] == Path.DirectorySeparatorChar || path2[0] == Path.AltDirectorySeparatorChar)
             {
                 path2 = path2.Substring(1);
+            }
+
+            // Remove alternative directory separator characters, if necessary
+            if (path1.IndexOf(Path.AltDirectorySeparatorChar) == -1)
+            {
+                path2 = path2.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+            }
+
+            // If path1 ends with a slash and path2 starts with a slash, remove one
+            if (path1 != null)
+            {
+                char lastChar = path1[path1.Length - 1];
+
+                if (lastChar == Path.DirectorySeparatorChar || lastChar == Path.AltDirectorySeparatorChar)
+                {
+                    while (path2.Length > 0)
+                    {
+                        if (path2[0] == lastChar)
+                        {
+                            path2 = path2.Substring(1);
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                }
             }
 
             return Path.Combine(path1, path2);
@@ -620,6 +648,149 @@ namespace PublicDomain
             }
 
             throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="from"></param>
+        /// <param name="to"></param>
+        public static void CopyDirectory(string from, string to)
+        {
+            CopyDirectory(from, to, false);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="from"></param>
+        /// <param name="to"></param>
+        /// <param name="recurse"></param>
+        public static void CopyDirectory(string from, string to, bool recurse)
+        {
+            DirectoryInfo fromDir = new DirectoryInfo(from);
+            FileInfo[] files = fromDir.GetFiles();
+            foreach (FileInfo file in files)
+            {
+                string copyFrom = FileSystemUtilities.PathCombine(from, file.Name);
+                string copyTo = FileSystemUtilities.PathCombine(to, file.Name);
+                File.Copy(copyFrom, copyTo);
+            }
+
+            if (recurse)
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="directory"></param>
+        public static void MoveFilesUp(string directory)
+        {
+            DirectoryInfo dir = new DirectoryInfo(directory);
+            DirectoryInfo parent = dir.Parent;
+            FileInfo fileInfo;
+            DirectoryInfo dirInfo;
+
+            string dest = FileSystemUtilities.EnsureDirectoryEnding(dir.Parent.FullName) + dir.Name + "_backup";
+            if (Directory.Exists(dest))
+            {
+                FileSystemUtilities.DeleteDirectoryForcefully(dest);
+            }
+            dir.MoveTo(dest);
+
+            foreach (FileSystemInfo file in dir.GetFileSystemInfos())
+            {
+                fileInfo = file as FileInfo;
+                if (fileInfo != null)
+                {
+                    dest = FileSystemUtilities.EnsureDirectoryEnding(parent.FullName) + fileInfo.Name;
+                    if (File.Exists(dest))
+                    {
+                        File.Delete(dest);
+                    }
+                    fileInfo.MoveTo(dest);
+                }
+                else
+                {
+                    dirInfo = (DirectoryInfo)file;
+                    if (dirInfo.Name != ".svn")
+                    {
+                        dest = FileSystemUtilities.EnsureDirectoryEnding(parent.FullName) + dirInfo.Name;
+                        if (Directory.Exists(dest))
+                        {
+                            FileSystemUtilities.DeleteDirectoryForcefully(dest);
+                        }
+                        dirInfo.MoveTo(dest);
+                    }
+                }
+            }
+
+            FileSystemUtilities.DeleteDirectoryForcefully(dir.FullName);
+        }
+
+        /// <summary>
+        /// Return true if the files are the same, byte for byte.
+        /// http://support.microsoft.com/kb/320348
+        /// </summary>
+        /// <param name="file1"></param>
+        /// <param name="file2"></param>
+        /// <returns></returns>
+        public static bool FileCompare(string file1, string file2)
+        {
+            // Determine if the same file was referenced two times.
+            if (file1 == file2)
+            {
+                // Return true to indicate that the files are the same.
+                return true;
+            }
+
+            // Open the two files.
+            using (FileStream fs1 = new FileStream(file1, FileMode.Open))
+            {
+                using (FileStream fs2 = new FileStream(file2, FileMode.Open))
+                {
+                    // Check the file sizes. If they are not the same, the files 
+                    // are not the same.
+                    if (fs1.Length != fs2.Length)
+                    {
+                        // Return false to indicate files are different
+                        return false;
+                    }
+
+                    // Read and compare a byte from each file until either a
+                    // non-matching set of bytes is found or until the end of
+                    // file1 is reached.
+                    int file1byte;
+                    int file2byte;
+
+                    do
+                    {
+                        // Read one byte from each file.
+                        file1byte = fs1.ReadByte();
+                        file2byte = fs2.ReadByte();
+                    }
+                    while ((file1byte == file2byte) && (file1byte != -1));
+
+                    // Return the success of the comparison. "file1byte" is 
+                    // equal to "file2byte" at this point only if the files are 
+                    // the same.
+                    return ((file1byte - file2byte) == 0);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="file"></param>
+        public static void Touch(string file)
+        {
+            using (File.Create(file))
+            {
+            }
         }
     }
 }

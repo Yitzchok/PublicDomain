@@ -1064,7 +1064,6 @@ namespace PublicDomain
         /// </summary>
         /// <param name="list"></param>
         /// <returns></returns>
-        [PendingPublicDomain]
         public static string Join(IEnumerable list)
         {
             return Join(",", list);
@@ -1076,7 +1075,6 @@ namespace PublicDomain
         /// <param name="separator"></param>
         /// <param name="list"></param>
         /// <returns></returns>
-        [PendingPublicDomain]
         public static string Join(string separator, IEnumerable list)
         {
             StringBuilder sb = new StringBuilder(255);
@@ -1096,6 +1094,133 @@ namespace PublicDomain
                 }
             }
             return sb.ToString();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="find"></param>
+        /// <returns></returns>
+        public static int CountInstances(string str, char find)
+        {
+            return CountInstances(str, find.ToString());
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="find"></param>
+        /// <returns></returns>
+        public static int CountInstances(string str, string find)
+        {
+            int result = 0;
+
+            if (!string.IsNullOrEmpty(str) && !string.IsNullOrEmpty(find))
+            {
+                int i = str.IndexOf(find);
+                while (i != -1)
+                {
+                    result++;
+                    i = str.IndexOf(find, i + find.Length);
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="numCharacters"></param>
+        /// <returns></returns>
+        public static string CutRightCharacters(string str, int numCharacters)
+        {
+            if (!string.IsNullOrEmpty(str) && numCharacters > 0 && numCharacters <= str.Length)
+            {
+                str = str.Substring(0, str.Length - numCharacters);
+            }
+            return str;
+        }
+
+        /// <summary>
+        /// Equivalent to new Uri(uri).GetLeftPart(UriPartial.Authority), except it attempts
+        /// to be more efficient. Always ends in a trailing slash.
+        /// </summary>
+        /// <param name="uri"></param>
+        /// <returns></returns>
+        public static string GetUriAuthority(string uri)
+        {
+            if (string.IsNullOrEmpty(uri))
+            {
+                throw new ArgumentNullException("uri");
+            }
+            return new Uri(uri).GetLeftPart(UriPartial.Authority) + "/";
+        }
+
+        /// <summary>
+        /// Returns a non-null string (but it may be an empty string).
+        /// </summary>
+        /// <param name="uri"></param>
+        /// <returns></returns>
+        public static string GetPastUriAuthority(string uri)
+        {
+            return GetPastUriAuthority(uri, false);
+        }
+
+        /// <summary>
+        /// Returns a non-null string (but it may be an empty string).
+        /// </summary>
+        /// <param name="uri"></param>
+        /// <param name="cutOffQuery"></param>
+        /// <returns></returns>
+        public static string GetPastUriAuthority(string uri, bool cutOffQuery)
+        {
+            string authority = GetUriAuthority(uri);
+            uri = uri.Substring(authority.Length);
+
+            if (cutOffQuery)
+            {
+                int qIndex = uri.IndexOf('?');
+                if (qIndex != -1)
+                {
+                    uri = uri.Substring(0, qIndex);
+                }
+            }
+
+            return uri;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="output"></param>
+        /// <returns></returns>
+        public static string GetHumandReadableText(string output)
+        {
+            if (!string.IsNullOrEmpty(output))
+            {
+                output = output.Replace("\r\n", "<br />").Replace("\n", "<br />");
+            }
+            return output;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static string UppercaseWordStarts(string str)
+        {
+            if (!string.IsNullOrEmpty(str))
+            {
+                str = str.ToLower();
+                str = str[0].ToString().ToUpper() + str.Remove(0, 1);
+                // TODO find spaces and uppercase the characters after each space
+            }
+            return str;
         }
     }
 }

@@ -9,7 +9,6 @@ namespace PublicDomain.Exceptions
     /// 
     /// </summary>
     [Serializable]
-    [PendingPublicDomain]
     public class TODONotImplementedException : NotImplementedException
     {
         /// <summary>

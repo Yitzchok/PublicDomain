@@ -77,6 +77,11 @@ namespace PublicDomain
         public static readonly Regex Email = new Regex(@"^[\w-\.]{1,}\@([\da-zA-Z-]{1,}\.){1,}[\da-zA-Z-]{2,3}$", RegexOptions.Compiled);
 
         /// <summary>
+        /// 
+        /// </summary>
+        public static readonly Regex NonWordDigitRegex = new Regex(@"[^a-zA-Z0-9]+", RegexOptions.Compiled);
+
+        /// <summary>
         /// Gets the capture. Group number 0 is the entire match. Group
         /// number 1 is the first matched group from the left, and so on.
         /// </summary>
@@ -260,6 +265,20 @@ namespace PublicDomain
             }
             result.Append(input);
             return result.ToString();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static string RemoveNonWordCharacters(string str)
+        {
+            if (!string.IsNullOrEmpty(str))
+            {
+                str = NonWordDigitRegex.Replace(str, "");
+            }
+            return str;
         }
     }
 }

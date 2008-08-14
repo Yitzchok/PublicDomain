@@ -13,6 +13,10 @@ Brad Culberson
 
 Version History
 ===============
+V0.2.45.0
+	[kevgrig@gmail.com]
+		* Updated to tzdata2008e
+		* Minor API changes
 V0.2.44.0
 	[kevgrig@gmail.com]
 		* Update how LoggingConfig reads config values for an item with multiple names

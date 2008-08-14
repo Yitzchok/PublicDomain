@@ -53,7 +53,7 @@ namespace PublicDomain
 
             m_thread = new Thread(Run);
             m_thread.IsBackground = true;
-            m_thread.Name = typeof(FinalizableBackgroundThread).Name;
+            m_thread.Name = this.GetType().Name;
             m_thread.Priority = ThreadPriority.BelowNormal;
             m_thread.Start();
         }

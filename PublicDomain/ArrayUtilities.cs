@@ -249,12 +249,37 @@ namespace PublicDomain
         /// <typeparam name="T"></typeparam>
         /// <param name="list"></param>
         /// <param name="totalCount"></param>
-        [PendingPublicDomain]
         public static void TrimTo<T>(List<T> list, int totalCount)
         {
             if (list.Count > totalCount)
             {
                 TrimRight<T>(list, totalCount - 1);
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="array"></param>
+        public static void Trim<T>(ref T[] array)
+        {
+            if (array != null)
+            {
+                int l = array.Length;
+                int trim = 0;
+                for (int i = l - 1; i >= 0; i--)
+                {
+                    if (array[i] != null)
+                    {
+                        break;
+                    }
+                    trim++;
+                }
+                if (trim > 0)
+                {
+                    Array.Resize<T>(ref array, l - trim);
+                }
             }
         }
     }

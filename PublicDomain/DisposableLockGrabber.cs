@@ -8,7 +8,6 @@ namespace PublicDomain
     /// <summary>
     /// 
     /// </summary>
-    [PendingPublicDomain]
     public class DisposableLockGrabber : IDisposable
     {
         [ThreadStatic]

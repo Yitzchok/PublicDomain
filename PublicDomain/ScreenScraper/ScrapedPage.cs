@@ -262,7 +262,7 @@ namespace PublicDomain.ScreenScraper
         /// <param name="tagName">Name of the tag.</param>
         /// <param name="caseSensitive">if set to <c>true</c> [case sensitive].</param>
         /// <returns></returns>
-        public IList<string> SplitByEncapsulatingTags(string subject, string tagName, bool caseSensitive)
+        public List<string> SplitByEncapsulatingTags(string subject, string tagName, bool caseSensitive)
         {
             string subjectSearch = subject;
             if (!tagName.Contains("<"))
@@ -279,7 +279,7 @@ namespace PublicDomain.ScreenScraper
                 tagName = tagName.ToLower();
             }
             string endTag = CreateEndTag(tagName);
-            IList<string> ret = new List<string>();
+            List<string> ret = new List<string>();
 
             int searchStart = 0;
             while (searchStart >= 0)
@@ -370,9 +370,9 @@ namespace PublicDomain.ScreenScraper
         /// <param name="str">The STR.</param>
         /// <param name="split">The split.</param>
         /// <returns></returns>
-        public static IList<string> SplitString(string str, string split)
+        public static List<string> SplitString(string str, string split)
         {
-            IList<string> pieces = new List<string>();
+            List<string> pieces = new List<string>();
             do
             {
                 int splitIndex = str.IndexOf(split);
@@ -406,9 +406,9 @@ namespace PublicDomain.ScreenScraper
         /// <param name="tagName">Name of the tag.</param>
         /// <param name="caseSensitive">if set to <c>true</c> [case sensitive].</param>
         /// <returns></returns>
-        public IList<string> FindChildlessTags(string tagName, bool caseSensitive)
+        public List<string> FindChildlessTags(string tagName, bool caseSensitive)
         {
-            IList<string> ret = new List<string>();
+            List<string> ret = new List<string>();
             string searchSubject = caseSensitive ? RawStream : RawStreamLowercase;
             if (!caseSensitive)
             {
@@ -510,9 +510,9 @@ namespace PublicDomain.ScreenScraper
         /// <param name="tags">The tags.</param>
         /// <param name="lowerNames">if set to <c>true</c> [lower names].</param>
         /// <returns></returns>
-        public static IList<ScreenScraperTag> ConvertToTagList(IList<string> tags, bool lowerNames)
+        public static List<ScreenScraperTag> ConvertToTagList(List<string> tags, bool lowerNames)
         {
-            IList<ScreenScraperTag> ret = new List<ScreenScraperTag>();
+            List<ScreenScraperTag> ret = new List<ScreenScraperTag>();
             foreach (string tag in tags)
             {
                 ScreenScraperTag t = ConvertToTag(tag, lowerNames);

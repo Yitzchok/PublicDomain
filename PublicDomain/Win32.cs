@@ -582,13 +582,13 @@ namespace PublicDomain
                 {
                     throw new ArgumentNullException("UninstallString");
                 }
-                ProcessHelper process = ProcessHelper.Parse(UninstallString);
-                if (quiet && process.FileName.IndexOf("msiexec.exe", StringComparison.CurrentCultureIgnoreCase) != -1)
+                IronProcess process = IronProcess.Parse(UninstallString);
+                if (quiet && process.StartInfo.FileName.IndexOf("msiexec.exe", StringComparison.CurrentCultureIgnoreCase) != -1)
                 {
                     process.AddArguments("/quiet", "/qn");
-                    process.Arguments = process.Arguments.Replace("/I", "/x");
+                    process.SetArgumentsRaw(process.StartInfo.Arguments.Replace("/I", "/x"));
                 }
-                process.StartAndWaitForExit(1200000, true);
+                process.StartAndWaitForExit(1200000);
             }
 
             /// <summary>

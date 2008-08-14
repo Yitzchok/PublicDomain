@@ -12,6 +12,7 @@ namespace PublicDomain
     /// StandardOutput and StandardError streams concurrently (this must be done with
     /// callbacks). See http://msdn2.microsoft.com/en-us/library/system.diagnostics.process.standarderror.aspx
     /// </summary>
+    [Obsolete("Use IronProcess Instead")]
     public class ProcessHelper
     {
         private Process m_process = new Process();

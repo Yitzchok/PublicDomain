@@ -64,7 +64,6 @@ namespace PublicDomain
         /// </summary>
         /// <param name="assembly">The assembly.</param>
         /// <returns></returns>
-        [PendingPublicDomain]
         public static List<Type> FindTypesByInterface<T>(Assembly assembly) where T : class
         {
             Type[] types = assembly.GetTypes();

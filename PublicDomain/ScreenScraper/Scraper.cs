@@ -437,7 +437,7 @@ namespace PublicDomain.ScreenScraper
             {
                 bool followed = false;
                 // See if we can find an http-equiv refresh
-                IList<ScreenScraperTag> metaTags = ScrapedPage.ConvertToTagList(page.FindChildlessTags("meta", false), true);
+                List<ScreenScraperTag> metaTags = ScrapedPage.ConvertToTagList(page.FindChildlessTags("meta", false), true);
 
                 // Now, we have all META tags. Try to find one with HTTP-EQUIV="refresh"
                 ScreenScraperTag refreshTag = null;

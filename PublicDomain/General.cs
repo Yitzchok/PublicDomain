@@ -40,7 +40,6 @@ namespace PublicDomain
         /// </summary>
         /// <param name="str">The STR.</param>
         /// <returns></returns>
-        [PendingPublicDomain]
         public static T ParseEnum<T>(string str)
         {
             return (T)Enum.Parse(typeof(T), str, true);
@@ -52,7 +51,6 @@ namespace PublicDomain
         /// <param name="str">The STR.</param>
         /// <param name="defaultValue">The default value.</param>
         /// <returns></returns>
-        [PendingPublicDomain]
         public static T TryParseEnum<T>(string str, T defaultValue)
         {
             if (!string.IsNullOrEmpty(str))
@@ -68,6 +66,34 @@ namespace PublicDomain
                 }
             }
             return defaultValue;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="inits"></param>
+        public static void InitializeAll(params IInitializable[] inits)
+        {
+            InitializeAll(InitializeState.Nothing, inits);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="inits"></param>
+        public static void InitializeAll(InitializeState state, params IInitializable[] inits)
+        {
+            if (inits != null)
+            {
+                foreach (IInitializable init in inits)
+                {
+                    if (init != null)
+                    {
+                        init.Initialize(state);
+                    }
+                }
+            }
         }
     }
 }

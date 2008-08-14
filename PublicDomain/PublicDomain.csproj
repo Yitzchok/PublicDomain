@@ -56,6 +56,7 @@
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Management" />
     <Reference Include="System.Transactions" />
     <Reference Include="System.Web" />
@@ -69,6 +70,7 @@
     <Compile Include="AspRuntimeHost\wwWorkerRequest.cs" />
     <Compile Include="DisposableCallback.cs" />
     <Compile Include="DisposableLockGrabber.cs" />
+    <Compile Include="Drawing\ImageUtilities.cs" />
     <Compile Include="EcmaScript\EcmaScriptAssignmentStatement.cs" />
     <Compile Include="EcmaScript\EcmaScriptBlock.cs" />
     <Compile Include="EcmaScript\EcmaScriptBreakStatement.cs" />
@@ -194,9 +196,13 @@
     <Compile Include="Interfaces\IIdProvider.cs" />
     <Compile Include="INumberGenerator.cs" />
     <Compile Include="IRandomNumberGenerator.cs" />
-    <Compile Include="Isrc.cs" />
+    <Compile Include="IronProcess.cs" />
+    <Compile Include="Standards\Isrc.cs" />
     <Compile Include="MathUtilities.cs" />
     <Compile Include="RemotingUtilities.cs" />
+    <Compile Include="Scalar.cs" />
+    <Compile Include="Standards\Upc.cs" />
+    <Compile Include="Text\CsvParser.cs" />
     <Compile Include="Util\StringContainer.cs" />
     <Compile Include="Web\Doctype.cs" />
     <Compile Include="Web\LiteralControlOnRender.cs" />
@@ -261,9 +267,9 @@
     <Compile Include="IExposesReaderWriterLock.cs" />
     <Compile Include="IInitializable.cs" />
     <Compile Include="InvariantCultureContext.cs" />
-    <Compile Include="Iso3166.cs" />
-    <Compile Include="Iso6709.cs" />
-    <Compile Include="Iso8601.cs" />
+    <Compile Include="Standards\Iso3166.cs" />
+    <Compile Include="Standards\Iso6709.cs" />
+    <Compile Include="Standards\Iso8601.cs" />
     <Compile Include="Code\Language.cs" />
     <Compile Include="LatitudeLongitudePoint.cs" />
     <Compile Include="ManagementUtilities.cs" />
