@@ -13,6 +13,10 @@ Brad Culberson
 
 Version History
 ===============
+V0.2.46.0
+	[kevgrig@gmail.com]
+		* Added Int64/BIGINT support to PublicDomain.Data
+		* Added Set class
 V0.2.45.0
 	[kevgrig@gmail.com]
 		* Updated to tzdata2008e

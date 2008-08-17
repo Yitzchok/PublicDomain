@@ -783,13 +783,69 @@ namespace PublicDomain
         }
 
         /// <summary>
-        /// 
+        /// <paramref name="file"/> is the absolute path to a file.
+        /// If <paramref name="file"/> does not exist, a 0-length file
+        /// is created and true is returned. If <paramref name="file"/> does exist,
+        /// the LastWrite time of the file is updated to the current time
+        /// and false is returned.
         /// </summary>
         /// <param name="file"></param>
-        public static void Touch(string file)
+        public static bool Touch(string file)
         {
-            using (File.Create(file))
+            if (File.Exists(file))
             {
+                File.SetLastWriteTime(file, DateTime.Now);
+                return false;
+            }
+            else
+            {
+                using (File.Create(file))
+                {
+                }
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static string CutOffTrailingSlashes(string str)
+        {
+            if (!string.IsNullOrEmpty(str))
+            {
+                while (str.Length > 0)
+                {
+                    char c = str[str.Length - 1];
+                    if (c == Path.DirectorySeparatorChar || c == Path.AltDirectorySeparatorChar)
+                    {
+                        str = str.Substring(0, str.Length - 1);
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+            }
+            return str;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="dirs"></param>
+        public static void EnsureDirectories(params string[] dirs)
+        {
+            if (dirs != null)
+            {
+                foreach (string dir in dirs)
+                {
+                    if (!Directory.Exists(dir))
+                    {
+                        Directory.CreateDirectory(dir);
+                    }
+                }
             }
         }
     }

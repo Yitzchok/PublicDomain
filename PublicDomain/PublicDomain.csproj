@@ -197,6 +197,7 @@
     <Compile Include="INumberGenerator.cs" />
     <Compile Include="IRandomNumberGenerator.cs" />
     <Compile Include="IronProcess.cs" />
+    <Compile Include="Set.cs" />
     <Compile Include="Standards\Isrc.cs" />
     <Compile Include="MathUtilities.cs" />
     <Compile Include="RemotingUtilities.cs" />

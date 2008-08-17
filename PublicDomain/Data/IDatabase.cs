@@ -68,24 +68,100 @@ namespace PublicDomain.Data
         DbCommand SetSelectCommand(DbDataAdapter adapter, string sql, IDbConnection openConnection);
 
         /// <summary>
-        /// Gets the value as an Int32. <paramref name="columnIndex"/> is a zero-based
+        /// Gets the specified value as the specified type. If the value
+        /// in the database is NULL, no exception is thrown. Instead,
+        /// the default value for this type (e.g. NULL for objects, false for Boolean,
+        /// 0 for numerics, etc.) is returned. The caller should explicitly
+        /// check for NULL on the IDataReader itself for this column to check
+        /// NULLness.
+        /// <paramref name="columnIndex"/> is a 0-based
         /// column ordinal
         /// </summary>
         /// <param name="reader">The reader.</param>
-        /// <param name="columnIndex">zero-based column ordinal</param>
+        /// <param name="columnIndex">0-based column ordinal</param>
         /// <returns></returns>
-        int GetInt32(IDataReader reader, int columnIndex);
+        Int16 GetInt16(IDataReader reader, int columnIndex);
 
         /// <summary>
+        /// Gets the specified value as the specified type. If the value
+        /// in the database is NULL, no exception is thrown. Instead,
+        /// the default value for this type (e.g. NULL for objects, false for Boolean,
+        /// 0 for numerics, etc.) is returned. The caller should explicitly
+        /// check for NULL on the IDataReader itself for this column to check
+        /// NULLness.
+        /// Gets the int16.
+        /// </summary>
+        /// <param name="reader">The reader.</param>
+        /// <param name="columnName">Name of the column.</param>
+        /// <returns></returns>
+        Int16 GetInt16(IDataReader reader, string columnName);
+
+        /// <summary>
+        /// Gets the specified value as the specified type. If the value
+        /// in the database is NULL, no exception is thrown. Instead,
+        /// the default value for this type (e.g. NULL for objects, false for Boolean,
+        /// 0 for numerics, etc.) is returned. The caller should explicitly
+        /// check for NULL on the IDataReader itself for this column to check
+        /// NULLness.
+        /// Gets the value as an Int32. <paramref name="columnIndex"/> is a 0-based
+        /// column ordinal
+        /// </summary>
+        /// <param name="reader">The reader.</param>
+        /// <param name="columnIndex">0-based column ordinal</param>
+        /// <returns></returns>
+        Int32 GetInt32(IDataReader reader, int columnIndex);
+
+        /// <summary>
+        /// Gets the specified value as the specified type. If the value
+        /// in the database is NULL, no exception is thrown. Instead,
+        /// the default value for this type (e.g. NULL for objects, false for Boolean,
+        /// 0 for numerics, etc.) is returned. The caller should explicitly
+        /// check for NULL on the IDataReader itself for this column to check
+        /// NULLness.
         /// Gets the int32.
         /// </summary>
         /// <param name="reader">The reader.</param>
         /// <param name="columnName">Name of the column.</param>
         /// <returns></returns>
-        int GetInt32(IDataReader reader, string columnName);
+        Int32 GetInt32(IDataReader reader, string columnName);
 
         /// <summary>
-        /// Gets the decimal. <paramref name="columnIndex"/> is a zero-based
+        /// Gets the specified value as the specified type. If the value
+        /// in the database is NULL, no exception is thrown. Instead,
+        /// the default value for this type (e.g. NULL for objects, false for Boolean,
+        /// 0 for numerics, etc.) is returned. The caller should explicitly
+        /// check for NULL on the IDataReader itself for this column to check
+        /// NULLness.
+        /// Gets the value as an Int64. <paramref name="columnIndex"/> is a 0-based
+        /// column ordinal
+        /// </summary>
+        /// <param name="reader">The reader.</param>
+        /// <param name="columnIndex">0-based column ordinal</param>
+        /// <returns></returns>
+        Int64 GetInt64(IDataReader reader, int columnIndex);
+
+        /// <summary>
+        /// Gets the specified value as the specified type. If the value
+        /// in the database is NULL, no exception is thrown. Instead,
+        /// the default value for this type (e.g. NULL for objects, false for Boolean,
+        /// 0 for numerics, etc.) is returned. The caller should explicitly
+        /// check for NULL on the IDataReader itself for this column to check
+        /// NULLness.
+        /// Gets the int64.
+        /// </summary>
+        /// <param name="reader">The reader.</param>
+        /// <param name="columnName">Name of the column.</param>
+        /// <returns></returns>
+        Int64 GetInt64(IDataReader reader, string columnName);
+
+        /// <summary>
+        /// Gets the specified value as the specified type. If the value
+        /// in the database is NULL, no exception is thrown. Instead,
+        /// the default value for this type (e.g. NULL for objects, false for Boolean,
+        /// 0 for numerics, etc.) is returned. The caller should explicitly
+        /// check for NULL on the IDataReader itself for this column to check
+        /// NULLness.
+        /// Gets the decimal. <paramref name="columnIndex"/> is a 0-based
         /// column ordinal
         /// </summary>
         /// <param name="reader">The reader.</param>
@@ -94,6 +170,12 @@ namespace PublicDomain.Data
         decimal GetDecimal(IDataReader reader, int columnIndex);
 
         /// <summary>
+        /// Gets the specified value as the specified type. If the value
+        /// in the database is NULL, no exception is thrown. Instead,
+        /// the default value for this type (e.g. NULL for objects, false for Boolean,
+        /// 0 for numerics, etc.) is returned. The caller should explicitly
+        /// check for NULL on the IDataReader itself for this column to check
+        /// NULLness.
         /// Gets the decimal.
         /// </summary>
         /// <param name="reader">The reader.</param>
@@ -102,38 +184,167 @@ namespace PublicDomain.Data
         decimal GetDecimal(IDataReader reader, string columnName);
 
         /// <summary>
+        /// Gets the specified value as the specified type. If the value
+        /// in the database is NULL, no exception is thrown. Instead,
+        /// the default value for this type (e.g. NULL for objects, false for Boolean,
+        /// 0 for numerics, etc.) is returned. The caller should explicitly
+        /// check for NULL on the IDataReader itself for this column to check
+        /// NULLness.
+        /// 0-based column index
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <param name="columnIndex"></param>
+        /// <returns></returns>
+        bool GetBool(IDataReader reader, int columnIndex);
+
+        /// <summary>
+        /// Gets the specified value as the specified type. If the value
+        /// in the database is NULL, no exception is thrown. Instead,
+        /// the default value for this type (e.g. NULL for objects, false for Boolean,
+        /// 0 for numerics, etc.) is returned. The caller should explicitly
+        /// check for NULL on the IDataReader itself for this column to check
+        /// NULLness.
+        /// 
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <param name="columnName"></param>
+        /// <returns></returns>
+        bool GetBool(IDataReader reader, string columnName);
+
+        /// <summary>
+        /// Gets the specified value as the specified type. If the value
+        /// in the database is NULL, no exception is thrown. Instead,
+        /// the default value for this type (e.g. NULL for objects, false for Boolean,
+        /// 0 for numerics, etc.) is returned. The caller should explicitly
+        /// check for NULL on the IDataReader itself for this column to check
+        /// NULLness.
+        /// 0-based column index
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <param name="columnIndex"></param>
+        /// <returns></returns>
+        string GetString(IDataReader reader, int columnIndex);
+
+        /// <summary>
+        /// Gets the specified value as the specified type. If the value
+        /// in the database is NULL, no exception is thrown. Instead,
+        /// the default value for this type (e.g. NULL for objects, false for Boolean,
+        /// 0 for numerics, etc.) is returned. The caller should explicitly
+        /// check for NULL on the IDataReader itself for this column to check
+        /// NULLness.
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <param name="columnName"></param>
+        /// <returns></returns>
+        string GetString(IDataReader reader, string columnName);
+
+        /// <summary>
+        /// Gets the specified value as the specified type. If the value
+        /// in the database is NULL, no exception is thrown. Instead,
+        /// the default value for this type (e.g. NULL for objects, false for Boolean,
+        /// 0 for numerics, etc.) is returned. The caller should explicitly
+        /// check for NULL on the IDataReader itself for this column to check
+        /// NULLness.
+        /// 0-based column index
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="reader"></param>
+        /// <param name="columnIndex"></param>
+        /// <returns></returns>
+        T GetEnum<T>(IDataReader reader, int columnIndex);
+
+        /// <summary>
+        /// Gets the specified value as the specified type. If the value
+        /// in the database is NULL, no exception is thrown. Instead,
+        /// the default value for this type (e.g. NULL for objects, false for Boolean,
+        /// 0 for numerics, etc.) is returned. The caller should explicitly
+        /// check for NULL on the IDataReader itself for this column to check
+        /// NULLness.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="reader"></param>
+        /// <param name="columnName"></param>
+        /// <returns></returns>
+        T GetEnum<T>(IDataReader reader, string columnName);
+
+        /// <summary>
+        /// Gets the specified value as the specified type. If the value
+        /// in the database is NULL, no exception is thrown. Instead,
+        /// the default value for this type (e.g. NULL for objects, false for Boolean,
+        /// 0 for numerics, etc.) is returned. The caller should explicitly
+        /// check for NULL on the IDataReader itself for this column to check
+        /// NULLness.
+        /// 0-based column index.
+        /// If the caller knows that the date time stored in the database
+        /// was stored in UTC format, then this will return the exact date time
+        /// (without conversion from local to UTC), and set it's Kind property to
+        /// UTC. The value taken from the database is not modified.
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <param name="columnIndex"></param>
+        /// <returns></returns>
+        TzDateTime GetUtcDateTime(IDataReader reader, int columnIndex);
+
+        /// <summary>
+        /// Gets the specified value as the specified type. If the value
+        /// in the database is NULL, no exception is thrown. Instead,
+        /// the default value for this type (e.g. NULL for objects, false for Boolean,
+        /// 0 for numerics, etc.) is returned. The caller should explicitly
+        /// check for NULL on the IDataReader itself for this column to check
+        /// NULLness.
+        /// If the caller knows that the date time stored in the database
+        /// was stored in UTC format, then this will return the exact date time
+        /// (without conversion from local to UTC), and set it's Kind property to
+        /// UTC. The value taken from the database is not modified.
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <param name="columnName"></param>
+        /// <returns></returns>
+        TzDateTime GetUtcDateTime(IDataReader reader, string columnName);
+
+        /// <summary>
         /// Doeses the table exist.
         /// </summary>
         /// <param name="tableName">Name of the table.</param>
+        /// <param name="openConnection"></param>
         /// <returns></returns>
-        bool DoesTableExist(string tableName);
+        bool DoesTableExist(string tableName, IDbConnection openConnection);
 
         /// <summary>
         /// Gets the new max key.
         /// </summary>
-        /// <param name="transactionScopeConnection">The transaction scope connection.</param>
         /// <param name="tableName">Name of the table.</param>
         /// <param name="columnName">Name of the column.</param>
+        /// <param name="transactionScopeConnection">The transaction scope connection.</param>
         /// <returns></returns>
-        int GetNewMaxKey(IDbConnection transactionScopeConnection, string tableName, string columnName);
+        Int32 GetNewMaxKeyInt32(string tableName, string columnName, IDbConnection transactionScopeConnection);
+
+        /// <summary>
+        /// Gets the new max key.
+        /// </summary>
+        /// <param name="tableName">Name of the table.</param>
+        /// <param name="columnName">Name of the column.</param>
+        /// <param name="transactionScopeConnection">The transaction scope connection.</param>
+        /// <returns></returns>
+        Int64 GetNewMaxKeyInt64(string tableName, string columnName, IDbConnection transactionScopeConnection);
 
         /// <summary>
         /// Deletes the rows.
         /// </summary>
-        /// <param name="conn">The conn.</param>
         /// <param name="tableName">Name of the table.</param>
         /// <param name="whereColumn">The where column.</param>
         /// <param name="whereValue">The where value.</param>
+        /// <param name="openConnection"></param>
         /// <returns></returns>
-        int DeleteRows(IDbConnection conn, string tableName, string whereColumn, object whereValue);
+        int DeleteRows(string tableName, string whereColumn, object whereValue, IDbConnection openConnection);
 
         /// <summary>
         /// Gets the row count.
         /// </summary>
-        /// <param name="conn">The conn.</param>
         /// <param name="tableName">Name of the table.</param>
+        /// <param name="openConnection"></param>
         /// <returns></returns>
-        int GetRowCount(IDbConnection conn, string tableName);
+        int GetRowCount(string tableName, IDbConnection openConnection);
 
         /// <summary>
         /// Executes the query data set.
@@ -146,9 +357,9 @@ namespace PublicDomain.Data
         /// Executes the query data set.
         /// </summary>
         /// <param name="query">The query.</param>
-        /// <param name="conn">The conn.</param>
+        /// <param name="openConnection">The conn.</param>
         /// <returns></returns>
-        DataSet ExecuteQueryDataSet(string query, IDbConnection conn);
+        DataSet ExecuteQueryDataSet(string query, IDbConnection openConnection);
 
         /// <summary>
         /// Supports the feature.
@@ -388,32 +599,323 @@ namespace PublicDomain.Data
         }
 
         /// <summary>
-        /// Gets the value as an Int32. <paramref name="columnIndex"/> is a zero-based
-        /// column ordinal
+        /// Gets the specified value as the specified type. If the value
+        /// in the database is NULL, no exception is thrown. Instead,
+        /// the default value for this type (e.g. NULL for objects, false for Boolean,
+        /// 0 for numerics, etc.) is returned. The caller should explicitly
+        /// check for NULL on the IDataReader itself for this column to check
+        /// NULLness.
+        /// <paramref name="columnIndex"/> is a 0-based column index
         /// </summary>
         /// <param name="reader">The reader.</param>
-        /// <param name="columnIndex">zero-based column ordinal</param>
+        /// <param name="columnIndex">0-based column ordinal</param>
         /// <returns></returns>
-        public virtual int GetInt32(IDataReader reader, int columnIndex)
+        public virtual Int16 GetInt16(IDataReader reader, int columnIndex)
         {
+            Int16 result = 0;
             object val = reader.GetValue(columnIndex);
-            return (val is int) ? (int)val : Convert.ToInt32(val);
+            if (val != DBNull.Value)
+            {
+                result = (val is Int16) ? (Int16)val : Convert.ToInt16(val);
+            }
+            return result;
         }
 
         /// <summary>
+        /// Gets the specified value as the specified type. If the value
+        /// in the database is NULL, no exception is thrown. Instead,
+        /// the default value for this type (e.g. NULL for objects, false for Boolean,
+        /// 0 for numerics, etc.) is returned. The caller should explicitly
+        /// check for NULL on the IDataReader itself for this column to check
+        /// NULLness.
+        /// </summary>
+        /// <param name="reader">The reader.</param>
+        /// <param name="columnName">Name of the column.</param>
+        /// <returns></returns>
+        public virtual Int16 GetInt16(IDataReader reader, string columnName)
+        {
+            Int16 result = 0;
+            object val = reader[columnName];
+            if (val != DBNull.Value)
+            {
+                result = (val is Int16) ? (Int16)val : Convert.ToInt16(val);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Gets the specified value as the specified type. If the value
+        /// in the database is NULL, no exception is thrown. Instead,
+        /// the default value for this type (e.g. NULL for objects, false for Boolean,
+        /// 0 for numerics, etc.) is returned. The caller should explicitly
+        /// check for NULL on the IDataReader itself for this column to check
+        /// NULLness.
+        /// Gets the value as an Int32. <paramref name="columnIndex"/> is a 0-based
+        /// column ordinal
+        /// </summary>
+        /// <param name="reader">The reader.</param>
+        /// <param name="columnIndex">0-based column ordinal</param>
+        /// <returns></returns>
+        public virtual Int32 GetInt32(IDataReader reader, int columnIndex)
+        {
+            Int32 result = 0;
+            object val = reader.GetValue(columnIndex);
+            if (val != DBNull.Value)
+            {
+                result = (val is Int32) ? (Int32)val : Convert.ToInt32(val);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Gets the specified value as the specified type. If the value
+        /// in the database is NULL, no exception is thrown. Instead,
+        /// the default value for this type (e.g. NULL for objects, false for Boolean,
+        /// 0 for numerics, etc.) is returned. The caller should explicitly
+        /// check for NULL on the IDataReader itself for this column to check
+        /// NULLness.
         /// Gets the int32.
         /// </summary>
         /// <param name="reader">The reader.</param>
         /// <param name="columnName">Name of the column.</param>
         /// <returns></returns>
-        public virtual int GetInt32(IDataReader reader, string columnName)
+        public virtual Int32 GetInt32(IDataReader reader, string columnName)
         {
+            Int32 result = 0;
             object val = reader[columnName];
-            return (val is int) ? (int)val : Convert.ToInt32(val);
+            if (val != DBNull.Value)
+            {
+                result = (val is Int32) ? (Int32)val : Convert.ToInt32(val);
+            }
+            return result;
         }
 
         /// <summary>
-        /// Gets the decimal. <paramref name="columnIndex"/> is a zero-based
+        /// Gets the specified value as the specified type. If the value
+        /// in the database is NULL, no exception is thrown. Instead,
+        /// the default value for this type (e.g. NULL for objects, false for Boolean,
+        /// 0 for numerics, etc.) is returned. The caller should explicitly
+        /// check for NULL on the IDataReader itself for this column to check
+        /// NULLness.
+        /// <paramref name="columnIndex"/> is a 0-based column index
+        /// </summary>
+        /// <param name="reader">The reader.</param>
+        /// <param name="columnIndex">0-based column ordinal</param>
+        /// <returns></returns>
+        public virtual Int64 GetInt64(IDataReader reader, int columnIndex)
+        {
+            Int64 result = 0;
+            object val = reader.GetValue(columnIndex);
+            if (val != DBNull.Value)
+            {
+                result = (val is Int64) ? (Int64)val : Convert.ToInt64(val);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Gets the specified value as the specified type. If the value
+        /// in the database is NULL, no exception is thrown. Instead,
+        /// the default value for this type (e.g. NULL for objects, false for Boolean,
+        /// 0 for numerics, etc.) is returned. The caller should explicitly
+        /// check for NULL on the IDataReader itself for this column to check
+        /// NULLness.
+        /// </summary>
+        /// <param name="reader">The reader.</param>
+        /// <param name="columnName">Name of the column.</param>
+        /// <returns></returns>
+        public virtual Int64 GetInt64(IDataReader reader, string columnName)
+        {
+            Int64 result = 0;
+            object val = reader[columnName];
+            if (val != DBNull.Value)
+            {
+                result = (val is Int64) ? (Int64)val : Convert.ToInt64(val);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Gets the specified value as the specified type. If the value
+        /// in the database is NULL, no exception is thrown. Instead,
+        /// the default value for this type (e.g. NULL for objects, false for Boolean,
+        /// 0 for numerics, etc.) is returned. The caller should explicitly
+        /// check for NULL on the IDataReader itself for this column to check
+        /// NULLness.
+        /// <paramref name="columnIndex"/> is a 0-based column index.
+        /// If the value in the database is NULL, false is returned.
+        /// </summary>
+        /// <param name="reader">The reader.</param>
+        /// <param name="columnIndex">0-based column ordinal</param>
+        /// <returns></returns>
+        public virtual bool GetBool(IDataReader reader, int columnIndex)
+        {
+            bool result = false;
+            object val = reader.GetValue(columnIndex);
+            if (val != DBNull.Value)
+            {
+                result = (val is bool) ? (bool)val : Convert.ToBoolean(val);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Gets the specified value as the specified type. If the value
+        /// in the database is NULL, no exception is thrown. Instead,
+        /// the default value for this type (e.g. NULL for objects, false for Boolean,
+        /// 0 for numerics, etc.) is returned. The caller should explicitly
+        /// check for NULL on the IDataReader itself for this column to check
+        /// NULLness.
+        /// </summary>
+        /// <param name="reader">The reader.</param>
+        /// <param name="columnName">Name of the column.</param>
+        /// <returns></returns>
+        public virtual bool GetBool(IDataReader reader, string columnName)
+        {
+            bool result = false;
+            object val = reader[columnName];
+            if (val != DBNull.Value)
+            {
+                result = (val is bool) ? (bool)val : Convert.ToBoolean(val);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Gets the specified value as the specified type. If the value
+        /// in the database is NULL, no exception is thrown. Instead,
+        /// the default value for this type (e.g. NULL for objects, false for Boolean,
+        /// 0 for numerics, etc.) is returned. The caller should explicitly
+        /// check for NULL on the IDataReader itself for this column to check
+        /// NULLness.
+        /// <paramref name="columnIndex"/> is a 0-based column index
+        /// </summary>
+        /// <param name="reader">The reader.</param>
+        /// <param name="columnIndex">0-based column ordinal</param>
+        /// <returns></returns>
+        public virtual T GetEnum<T>(IDataReader reader, int columnIndex)
+        {
+            int i = GetInt32(reader, columnIndex);
+            return (T)Enum.ToObject(typeof(T), i);
+        }
+
+        /// <summary>
+        /// Gets the specified value as the specified type. If the value
+        /// in the database is NULL, no exception is thrown. Instead,
+        /// the default value for this type (e.g. NULL for objects, false for Boolean,
+        /// 0 for numerics, etc.) is returned. The caller should explicitly
+        /// check for NULL on the IDataReader itself for this column to check
+        /// NULLness.
+        /// </summary>
+        /// <param name="reader">The reader.</param>
+        /// <param name="columnName">Name of the column.</param>
+        /// <returns></returns>
+        public virtual T GetEnum<T>(IDataReader reader, string columnName)
+        {
+            int i = GetInt32(reader, columnName);
+            return (T)Enum.ToObject(typeof(T), i);
+        }
+
+        /// <summary>
+        /// Gets the specified value as the specified type. If the value
+        /// in the database is NULL, no exception is thrown. Instead,
+        /// the default value for this type (e.g. NULL for objects, false for Boolean,
+        /// 0 for numerics, etc.) is returned. The caller should explicitly
+        /// check for NULL on the IDataReader itself for this column to check
+        /// NULLness.
+        /// <paramref name="columnIndex"/> is a 0-based column index
+        /// </summary>
+        /// <param name="reader">The reader.</param>
+        /// <param name="columnIndex">0-based column ordinal</param>
+        /// <returns></returns>
+        public virtual string GetString(IDataReader reader, int columnIndex)
+        {
+            string result = null;
+            object val = reader.GetValue(columnIndex);
+            if (val != DBNull.Value)
+            {
+                result = (val is string) ? (string)val : Convert.ToString(val);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Gets the specified value as the specified type. If the value
+        /// in the database is NULL, no exception is thrown. Instead,
+        /// the default value for this type (e.g. NULL for objects, false for Boolean,
+        /// 0 for numerics, etc.) is returned. The caller should explicitly
+        /// check for NULL on the IDataReader itself for this column to check
+        /// NULLness.
+        /// </summary>
+        /// <param name="reader">The reader.</param>
+        /// <param name="columnName">Name of the column.</param>
+        /// <returns></returns>
+        public virtual string GetString(IDataReader reader, string columnName)
+        {
+            string result = null;
+            object val = reader[columnName];
+            if (val != DBNull.Value)
+            {
+                result = (val is string) ? (string)val : Convert.ToString(val);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Gets the specified value as the specified type. If the value
+        /// in the database is NULL, no exception is thrown. Instead,
+        /// the default value for this type (e.g. NULL for objects, false for Boolean,
+        /// 0 for numerics, etc.) is returned. The caller should explicitly
+        /// check for NULL on the IDataReader itself for this column to check
+        /// NULLness.
+        /// <paramref name="columnIndex"/> is a 0-based column index
+        /// </summary>
+        /// <param name="reader">The reader.</param>
+        /// <param name="columnIndex">0-based column ordinal</param>
+        /// <returns></returns>
+        public virtual TzDateTime GetUtcDateTime(IDataReader reader, int columnIndex)
+        {
+            TzDateTime result = null;
+            object val = reader.GetValue(columnIndex);
+            if (val != DBNull.Value)
+            {
+                DateTime dt = val is DateTime ? (DateTime)val : Convert.ToDateTime(val);
+                result = new TzDateTime(dt, true);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Gets the specified value as the specified type. If the value
+        /// in the database is NULL, no exception is thrown. Instead,
+        /// the default value for this type (e.g. NULL for objects, false for Boolean,
+        /// 0 for numerics, etc.) is returned. The caller should explicitly
+        /// check for NULL on the IDataReader itself for this column to check
+        /// NULLness.
+        /// </summary>
+        /// <param name="reader">The reader.</param>
+        /// <param name="columnName">Name of the column.</param>
+        /// <returns></returns>
+        public virtual TzDateTime GetUtcDateTime(IDataReader reader, string columnName)
+        {
+            TzDateTime result = null;
+            object o = reader[columnName];
+            if (o != DBNull.Value)
+            {
+                DateTime dt = o is DateTime ? (DateTime)o : Convert.ToDateTime(o);
+                result = new TzDateTime(dt, true);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Gets the specified value as the specified type. If the value
+        /// in the database is NULL, no exception is thrown. Instead,
+        /// the default value for this type (e.g. NULL for objects, false for Boolean,
+        /// 0 for numerics, etc.) is returned. The caller should explicitly
+        /// check for NULL on the IDataReader itself for this column to check
+        /// NULLness.
+        /// Gets the decimal. <paramref name="columnIndex"/> is a 0-based
         /// column ordinal
         /// </summary>
         /// <param name="reader">The reader.</param>
@@ -421,11 +923,22 @@ namespace PublicDomain.Data
         /// <returns></returns>
         public virtual decimal GetDecimal(IDataReader reader, int columnIndex)
         {
+            decimal result = 0;
             object val = reader.GetValue(columnIndex);
-            return (val is decimal) ? (decimal)val : Convert.ToDecimal(val);
+            if (val != DBNull.Value)
+            {
+                result = (val is decimal) ? (decimal)val : Convert.ToDecimal(val);
+            }
+            return result;
         }
 
         /// <summary>
+        /// Gets the specified value as the specified type. If the value
+        /// in the database is NULL, no exception is thrown. Instead,
+        /// the default value for this type (e.g. NULL for objects, false for Boolean,
+        /// 0 for numerics, etc.) is returned. The caller should explicitly
+        /// check for NULL on the IDataReader itself for this column to check
+        /// NULLness.
         /// Gets the decimal.
         /// </summary>
         /// <param name="reader">The reader.</param>
@@ -433,18 +946,43 @@ namespace PublicDomain.Data
         /// <returns></returns>
         public virtual decimal GetDecimal(IDataReader reader, string columnName)
         {
+            decimal result = 0;
             object val = reader[columnName];
-            return (val is decimal) ? (decimal)val : Convert.ToDecimal(val);
+            if (val != DBNull.Value)
+            {
+                result = (val is decimal) ? (decimal)val : Convert.ToDecimal(val);
+            }
+            return result;
         }
 
         /// <summary>
         /// Doeses the table exist.
         /// </summary>
         /// <param name="tableName">Name of the table.</param>
+        /// <param name="openConnection"></param>
         /// <returns></returns>
-        public virtual bool DoesTableExist(string tableName)
+        public virtual bool DoesTableExist(string tableName, IDbConnection openConnection)
         {
-            throw new NotImplementedException();
+            QueryBuilder qb = new QueryBuilder("select count(*) as cnt from information_schema.tables where ?table_name? = ???");
+            qb.AddParameterStringInsensitiveStart();
+            qb.AddParameterStringInsensitiveEnd();
+            qb.AddParameterStringInsensitiveStart();
+            qb.AddParameter(tableName);
+            qb.AddParameterStringInsensitiveEnd();
+            using (new DbConnectionScope())
+            {
+                using (IDataReader reader = ExecuteQueryReader(qb, openConnection))
+                {
+                    if (reader.Read())
+                    {
+                        bool ret = GetInt32(reader, 0) > 0;
+
+                        return ret;
+                    }
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -454,33 +992,80 @@ namespace PublicDomain.Data
         /// <param name="tableName">Name of the table.</param>
         /// <param name="columnName">Name of the column.</param>
         /// <returns></returns>
-        public virtual int GetNewMaxKey(IDbConnection transactionScopeConnection, string tableName, string columnName)
+        public virtual Int32 GetNewMaxKeyInt32(string tableName, string columnName, IDbConnection transactionScopeConnection)
         {
-            throw new NotImplementedException();
+            using (IDataReader reader = ExecuteQueryReader(string.Format("select max({0})+1 from {1}", columnName, tableName), transactionScopeConnection))
+            {
+                Int32 ret = 1;
+                if (reader.Read() && !reader.IsDBNull(0))
+                {
+                    ret = GetInt32(reader, 0);
+                }
+
+                return ret;
+            }
+        }
+
+        /// <summary>
+        /// Gets the new max key.
+        /// </summary>
+        /// <param name="transactionScopeConnection">The transaction scope connection.</param>
+        /// <param name="tableName">Name of the table.</param>
+        /// <param name="columnName">Name of the column.</param>
+        /// <returns></returns>
+        public virtual Int64 GetNewMaxKeyInt64(string tableName, string columnName, IDbConnection transactionScopeConnection)
+        {
+            using (IDataReader reader = ExecuteQueryReader(string.Format("select max({0})+1 from {1}", columnName, tableName), transactionScopeConnection))
+            {
+                Int64 ret = 1;
+                if (reader.Read() && !reader.IsDBNull(0))
+                {
+                    ret = GetInt64(reader, 0);
+                }
+
+                return ret;
+            }
         }
 
         /// <summary>
         /// Deletes the rows.
         /// </summary>
-        /// <param name="conn">The conn.</param>
         /// <param name="tableName">Name of the table.</param>
         /// <param name="whereColumn">The where column.</param>
         /// <param name="whereValue">The where value.</param>
+        /// <param name="openConnection">The conn.</param>
         /// <returns></returns>
-        public virtual int DeleteRows(IDbConnection conn, string tableName, string whereColumn, object whereValue)
+        public virtual int DeleteRows(string tableName, string whereColumn, object whereValue, IDbConnection openConnection)
         {
-            throw new NotImplementedException();
+            string sql = "delete from ? where ? = ?";
+
+            QueryBuilder qb = new QueryBuilder(sql);
+
+            qb.AddParameterString(tableName);
+            qb.AddParameterString(whereColumn);
+            qb.AddParameter(whereValue);
+
+            return ExecuteNonQuery(qb, openConnection);
         }
 
         /// <summary>
         /// Gets the row count.
         /// </summary>
-        /// <param name="conn">The conn.</param>
         /// <param name="tableName">Name of the table.</param>
+        /// <param name="openConnection">The conn.</param>
         /// <returns></returns>
-        public virtual int GetRowCount(IDbConnection conn, string tableName)
+        public virtual int GetRowCount(string tableName, IDbConnection openConnection)
         {
-            throw new NotImplementedException();
+            string sql = "select count(*) from " + tableName;
+
+            using (IDataReader reader = ExecuteQueryReader(sql, openConnection))
+            {
+                if (reader.Read())
+                {
+                    return GetInt32(reader, 0);
+                }
+            }
+            return -1;
         }
 
         /// <summary>

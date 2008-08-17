@@ -24,83 +24,13 @@ namespace PublicDomain.Data
         }
 
         /// <summary>
-        /// Doeses the table exist.
-        /// </summary>
-        /// <param name="tableName">Name of the table.</param>
-        /// <returns></returns>
-        public override bool DoesTableExist(string tableName)
-        {
-            QueryBuilder qb = new QueryBuilder("select count(*) as cnt from information_schema.tables where ?table_name? = ???");
-            qb.AddParameterStringInsensitiveStart();
-            qb.AddParameterStringInsensitiveEnd();
-            qb.AddParameterStringInsensitiveStart();
-            qb.AddParameter(tableName);
-            qb.AddParameterStringInsensitiveEnd();
-            using (new DbConnectionScope())
-            {
-                using (IDataReader reader = ExecuteQueryReader(qb, DbConnectionScope.Current.Connection))
-                {
-                    if (reader.Read())
-                    {
-                        bool ret = GetInt32(reader, 0) > 0;
-
-                        return ret;
-                    }
-                }
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// Deletes the rows.
-        /// </summary>
-        /// <param name="conn">The conn.</param>
-        /// <param name="tableName">Name of the table.</param>
-        /// <param name="whereColumn">The where column.</param>
-        /// <param name="whereValue">The where value.</param>
-        /// <returns></returns>
-        public override int DeleteRows(IDbConnection conn, string tableName, string whereColumn, object whereValue)
-        {
-            string sql = "delete from ? where ? = ?";
-
-            QueryBuilder qb = new QueryBuilder(sql);
-
-            qb.AddParameterString(tableName);
-            qb.AddParameterString(whereColumn);
-            qb.AddParameter(whereValue);
-
-            return ExecuteNonQuery(qb, conn);
-        }
-
-        /// <summary>
-        /// Gets the row count.
-        /// </summary>
-        /// <param name="conn">The conn.</param>
-        /// <param name="tableName">Name of the table.</param>
-        /// <returns></returns>
-        public override int GetRowCount(IDbConnection conn, string tableName)
-        {
-            string sql = "select count(*) from " + tableName;
-
-            using (IDataReader reader = ExecuteQueryReader(sql, conn))
-            {
-                if (reader.Read())
-                {
-                    return GetInt32(reader, 0);
-                }
-            }
-            return -1;
-        }
-
-        /// <summary>
         /// Gets the new max key.
         /// </summary>
         /// <param name="transactionScopeConnection">The transaction scope connection.</param>
         /// <param name="tableName">Name of the table.</param>
         /// <param name="columnName">Name of the column.</param>
         /// <returns></returns>
-        public override int GetNewMaxKey(System.Data.IDbConnection transactionScopeConnection, string tableName, string columnName)
+        public override Int32 GetNewMaxKeyInt32(string tableName, string columnName, IDbConnection transactionScopeConnection)
         {
             // this will join in to any root transaction
             TransactionOptions serializableTransaction = new TransactionOptions();
@@ -111,7 +41,7 @@ namespace PublicDomain.Data
                 {
                     using (new DbConnectionScope())
                     {
-                        int newMaxKey = GetNewMaxKey(DbConnectionScope.Current.Connection, tableName, columnName);
+                        Int32 newMaxKey = GetNewMaxKeyInt32(tableName, columnName, DbConnectionScope.Current.Connection);
 
                         scope.Complete();
 
@@ -122,10 +52,52 @@ namespace PublicDomain.Data
                 {
                     using (IDataReader reader = ExecuteQueryReader(string.Format("select max({0})+1 from {1}", columnName, tableName), transactionScopeConnection))
                     {
-                        int ret = 1;
+                        Int32 ret = 1;
                         if (reader.Read() && !reader.IsDBNull(0))
                         {
                             ret = Database.Current.GetInt32(reader, 0);
+                        }
+                        scope.Complete();
+
+                        return ret;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the new max key.
+        /// </summary>
+        /// <param name="transactionScopeConnection">The transaction scope connection.</param>
+        /// <param name="tableName">Name of the table.</param>
+        /// <param name="columnName">Name of the column.</param>
+        /// <returns></returns>
+        public override Int64 GetNewMaxKeyInt64(string tableName, string columnName, IDbConnection transactionScopeConnection)
+        {
+            // this will join in to any root transaction
+            TransactionOptions serializableTransaction = new TransactionOptions();
+            serializableTransaction.IsolationLevel = System.Transactions.IsolationLevel.Serializable;
+            using (DbTransactionScope scope = new DbTransactionScope(TransactionScopeOption.Required, serializableTransaction))
+            {
+                if (transactionScopeConnection == null)
+                {
+                    using (new DbConnectionScope())
+                    {
+                        Int64 newMaxKey = GetNewMaxKeyInt64(tableName, columnName, DbConnectionScope.Current.Connection);
+
+                        scope.Complete();
+
+                        return newMaxKey;
+                    }
+                }
+                else
+                {
+                    using (IDataReader reader = ExecuteQueryReader(string.Format("select max({0})+1 from {1}", columnName, tableName), transactionScopeConnection))
+                    {
+                        Int64 ret = 1;
+                        if (reader.Read() && !reader.IsDBNull(0))
+                        {
+                            ret = Database.Current.GetInt64(reader, 0);
                         }
                         scope.Complete();
 

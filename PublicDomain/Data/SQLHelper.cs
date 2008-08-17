@@ -14,6 +14,15 @@ namespace PublicDomain.Data
     public static class SQLHelper
     {
         /// <summary>
+        /// 255
+        /// </summary>
+        public const int DefaultShortVarcharLength = 255;
+
+        private const string EXTENDED_PROPERTY_MAX_LENGTH = "SQLHelper.MaxLength";
+        private const string EXTENDED_PROPERTY_IS_UNICODE = "SQLHelper.IsUnicode";
+        private const string EXTENDED_PROPERTY_SCALE = "SQLHelper.Scale";
+
+        /// <summary>
         /// Normalizes the specified type.
         /// </summary>
         /// <param name="type">The type.</param>
@@ -52,7 +61,7 @@ namespace PublicDomain.Data
         {
             if (val is TzDateTime)
             {
-                if (((TzDateTime)val).DateTimeUtc.TimeOfDay == new TimeSpan(0))
+                if (((TzDateTime)val).DateTimeUtc.TimeOfDay.Equals(TimeSpan.Zero))
                 {
                     return ObjectToDbString(databaseType, val, DbType.Date);
                 }
@@ -63,7 +72,7 @@ namespace PublicDomain.Data
             }
             else if (val is DateTime)
             {
-                if (((DateTime)val).TimeOfDay == new TimeSpan(0))
+                if (((DateTime)val).TimeOfDay.Equals(TimeSpan.Zero))
                 {
                     return ObjectToDbString(databaseType, new TzDateTime((DateTime)val), DbType.Date);
                 }
@@ -88,11 +97,11 @@ namespace PublicDomain.Data
             {
                 return ObjectToDbString(databaseType, val, DbType.Binary);
             }
-            else if (val is IEnumerable<int>)
+            else if (val is IEnumerable<Int16>)
             {
                 string ret = null;
-                IEnumerable<int> ival = (IEnumerable<int>)val;
-                foreach (int i in ival)
+                IEnumerable<Int16> ival = (IEnumerable<Int16>)val;
+                foreach (Int16 i in ival)
                 {
                     if (ret != null)
                     {
@@ -102,10 +111,64 @@ namespace PublicDomain.Data
                 }
                 return ret;
             }
-            else if (val is int[])
+            else if (val is Int16[])
             {
                 string ret = null;
-                foreach (int i in (int[])val)
+                foreach (Int16 i in (Int16[])val)
+                {
+                    if (ret != null)
+                    {
+                        ret += ",";
+                    }
+                    ret += i;
+                }
+                return ret;
+            }
+            else if (val is IEnumerable<Int32>)
+            {
+                string ret = null;
+                IEnumerable<Int32> ival = (IEnumerable<Int32>)val;
+                foreach (Int32 i in ival)
+                {
+                    if (ret != null)
+                    {
+                        ret += ",";
+                    }
+                    ret += i;
+                }
+                return ret;
+            }
+            else if (val is Int32[])
+            {
+                string ret = null;
+                foreach (Int32 i in (Int32[])val)
+                {
+                    if (ret != null)
+                    {
+                        ret += ",";
+                    }
+                    ret += i;
+                }
+                return ret;
+            }
+            else if (val is IEnumerable<Int64>)
+            {
+                string ret = null;
+                IEnumerable<Int64> ival = (IEnumerable<Int64>)val;
+                foreach (Int64 i in ival)
+                {
+                    if (ret != null)
+                    {
+                        ret += ",";
+                    }
+                    ret += i;
+                }
+                return ret;
+            }
+            else if (val is Int64[])
+            {
+                string ret = null;
+                foreach (Int64 i in (Int64[])val)
                 {
                     if (ret != null)
                     {
@@ -253,7 +316,9 @@ namespace PublicDomain.Data
                             {
                                 builder.Append("CAST(");
                                 builder.Append(s);
-                                builder.Append(" as varchar(255))");
+                                builder.Append(" as varchar(");
+                                builder.Append(DefaultShortVarcharLength);
+                                builder.Append("))");
                             }
                             else
                             {
@@ -328,20 +393,6 @@ namespace PublicDomain.Data
         }
 
         /// <summary>
-        /// If the caller knows that the date time stored in the database
-        /// was stored in UTC format, then this will return the exact date time
-        /// (without conversion from local to UTC), and set it's Kind property to
-        /// UTC. The value taken from the database is not modified.
-        /// </summary>
-        /// <param name="reader"></param>
-        /// <param name="index"></param>
-        /// <returns></returns>
-        public static TzDateTime ReadDateTimeToUtc(IDataReader reader, int index)
-        {
-            return new TzDateTime(reader.GetDateTime(index), true);
-        }
-
-        /// <summary>
         /// Gets the type of the database.
         /// </summary>
         /// <param name="databaseType">Type of the database.</param>
@@ -349,78 +400,99 @@ namespace PublicDomain.Data
         /// <returns></returns>
         public static string GetDatabaseType(DatabaseType databaseType, Type type)
         {
-            switch (type.Name.ToLower())
+            if (type.Equals(typeof(string)))
             {
-                case "string":
-                    return "VARCHAR";
-                case "blob":
-                    switch (databaseType)
-                    {
-                        case DatabaseType.MySql:
-                            return "LONGBLOB";
-                        case DatabaseType.SqlServer:
-                            return "IMAGE";
-                        case DatabaseType.PostgreSql:
-                            return "OID";
-                        default:
-                            throw new NotImplementedException();
-                    }
-                case "int16":
-                    return "SMALLINT";
-                case "int32":
-                    return "INT";
-                case "stringbuilder":
-                    switch (databaseType)
-                    {
-                        case DatabaseType.MySql:
-                            return "LONGTEXT";
-                        case DatabaseType.SqlServer:
-                        case DatabaseType.PostgreSql:
-                            return "TEXT";
-                        default:
-                            throw new NotImplementedException();
-                    }
-                case "single":
-                case "float":
-                case "double":
-                    switch (databaseType)
-                    {
-                        case DatabaseType.MySql:
-                            return "DOUBLE";
-                        case DatabaseType.SqlServer:
-                            return "FLOAT";
-                        case DatabaseType.PostgreSql:
-                            return "NUMERIC";
-                        default:
-                            throw new NotImplementedException();
-                    }
-                case "decimal":
-                    // Considered an "exact" numeric type
-                    switch (databaseType)
-                    {
-                        case DatabaseType.MySql:
-                            return "DOUBLE";
-                        case DatabaseType.SqlServer:
-                            // http://msdn2.microsoft.com/en-us/library/ms187746.aspx
-                            return "DECIMAL";
-                        case DatabaseType.PostgreSql:
-                            return "NUMERIC";
-                        default:
-                            throw new NotImplementedException();
-                    }
-                case "datetime":
-                    switch (databaseType)
-                    {
-                        case DatabaseType.MySql:
-                        case DatabaseType.SqlServer:
-                            return "DATETIME";
-                        case DatabaseType.PostgreSql:
-                            return "TIMESTAMP";
-                        default:
-                            throw new NotImplementedException();
-                    }
-                default:
-                    return type.Name.ToUpper();
+                return "VARCHAR";
+            }
+            else if (type.Equals(typeof(Blob)))
+            {
+                switch (databaseType)
+                {
+                    case DatabaseType.MySql:
+                        return "LONGBLOB";
+                    case DatabaseType.SqlServer:
+                        return "IMAGE";
+                    case DatabaseType.PostgreSql:
+                        return "OID";
+                    default:
+                        throw new NotImplementedException();
+                }
+            }
+            else if (type.Equals(typeof(bool)))
+            {
+                return "TINYINT";
+            }
+            else if (type.Equals(typeof(Int16)))
+            {
+                return "SMALLINT";
+            }
+            else if (type.Equals(typeof(Int32)))
+            {
+                return "INT";
+            }
+            else if (type.Equals(typeof(Int64)))
+            {
+                return "BIGINT";
+            }
+            else if (type.Equals(typeof(StringBuilder)))
+            {
+                switch (databaseType)
+                {
+                    case DatabaseType.MySql:
+                        return "LONGTEXT";
+                    case DatabaseType.SqlServer:
+                    case DatabaseType.PostgreSql:
+                        return "TEXT";
+                    default:
+                        throw new NotImplementedException();
+                }
+            }
+            else if (type.Equals(typeof(Single)) || type.Equals(typeof(float)) || type.Equals(typeof(double)))
+            {
+                switch (databaseType)
+                {
+                    case DatabaseType.MySql:
+                        return "DOUBLE";
+                    case DatabaseType.SqlServer:
+                        return "FLOAT";
+                    case DatabaseType.PostgreSql:
+                        return "NUMERIC";
+                    default:
+                        throw new NotImplementedException();
+                }
+            }
+            else if (type.Equals(typeof(decimal)))
+            {
+                // Considered an "exact" numeric type
+                switch (databaseType)
+                {
+                    case DatabaseType.MySql:
+                        return "DOUBLE";
+                    case DatabaseType.SqlServer:
+                        // http://msdn2.microsoft.com/en-us/library/ms187746.aspx
+                        return "DECIMAL";
+                    case DatabaseType.PostgreSql:
+                        return "NUMERIC";
+                    default:
+                        throw new NotImplementedException();
+                }
+            }
+            else if (type.Equals(typeof(DateTime)) || type.Equals(typeof(TzDateTime)))
+            {
+                switch (databaseType)
+                {
+                    case DatabaseType.MySql:
+                    case DatabaseType.SqlServer:
+                        return "DATETIME";
+                    case DatabaseType.PostgreSql:
+                        return "TIMESTAMP";
+                    default:
+                        throw new NotImplementedException();
+                }
+            }
+            else
+            {
+                return type.Name.ToUpper();
             }
         }
 
@@ -460,6 +532,7 @@ namespace PublicDomain.Data
 
         private static string GetIdentifier(string str)
         {
+            // TODO 64 is only for MySQL, no?
             return str.Length > 63 ? str.Substring(0, 63) : str;
         }
 
@@ -527,11 +600,11 @@ namespace PublicDomain.Data
             {
                 if (Database.Current.DatabaseType == DatabaseType.MySql)
                 {
-                    ret.MaxLength = 255;
+                    ret.MaxLength = DefaultShortVarcharLength;
                 }
                 else
                 {
-                    ret.MaxLength = 255;
+                    ret.MaxLength = DefaultShortVarcharLength;
                 }
             }
             else if (columnType.Equals(typeof(decimal)))
@@ -559,10 +632,6 @@ namespace PublicDomain.Data
             col.ExtendedProperties[EXTENDED_PROPERTY_SCALE] = scale;
             return col;
         }
-
-        private const string EXTENDED_PROPERTY_MAX_LENGTH = "SQLHelper.MaxLength";
-        private const string EXTENDED_PROPERTY_IS_UNICODE = "SQLHelper.IsUnicode";
-        private const string EXTENDED_PROPERTY_SCALE = "SQLHelper.Scale";
 
         /// <summary>
         /// Sets the length of the max.
