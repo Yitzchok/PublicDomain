@@ -19,7 +19,7 @@ namespace PublicDomain.Data
         /// <summary>
         /// 
         /// </summary>
-        public const string DefaultDbProviderFactoryAssemblyMySql = "MySql.Data, Version=5.1.3.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL";
+        public const string DefaultDbProviderFactoryAssemblyMySql = "MySql.Data";
 
         /// <summary>
         /// 
@@ -29,7 +29,7 @@ namespace PublicDomain.Data
         /// <summary>
         /// 
         /// </summary>
-        public const string DefaultDbProviderFactoryAssemblyPostgreSql = "Npgsql, Version=1.97.1.0, Culture=neutral, PublicKeyToken=5d8b90d52f46fda7, processorArchitecture=MSIL";
+        public const string DefaultDbProviderFactoryAssemblyPostgreSql = "Npgsql";
 
         /// <summary>
         /// 

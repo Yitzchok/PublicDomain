@@ -18,20 +18,9 @@ namespace PublicDomain.Logging
         /// </summary>
         public const string DefaultSource = "Application";
 
-        /// <summary>
-        /// 
-        /// </summary>
-        public static EventLogLogger Application = new EventLogLogger(EventLogSource.Application);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public static EventLogLogger System = new EventLogLogger(EventLogSource.System);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public static EventLogLogger Security = new EventLogLogger(EventLogSource.Security);
+        private static EventLogLogger s_application;
+        private static EventLogLogger s_system;
+        private static EventLogLogger s_security;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EventLogLogger"/> class.
@@ -93,6 +82,51 @@ namespace PublicDomain.Logging
 
             m_log.Source = source;
             m_log.Log = log;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public static EventLogLogger Application
+        {
+            get
+            {
+                if (s_application == null)
+                {
+                    s_application = new EventLogLogger(EventLogSource.Application);
+                }
+                return s_application;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public static EventLogLogger System
+        {
+            get
+            {
+                if (s_system == null)
+                {
+                    s_system = new EventLogLogger(EventLogSource.System);
+                }
+                return s_system;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public static EventLogLogger Security
+        {
+            get
+            {
+                if (s_security == null)
+                {
+                    s_security = new EventLogLogger(EventLogSource.Security);
+                }
+                return s_security;
+            }
         }
 
         /// <summary>

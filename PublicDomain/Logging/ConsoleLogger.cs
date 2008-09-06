@@ -10,10 +10,7 @@ namespace PublicDomain.Logging
     [Serializable]
     public class ConsoleLogger : TextWriterLogger
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        public static ConsoleLogger Current = new ConsoleLogger();
+        private static ConsoleLogger s_current;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConsoleLogger"/> class.
@@ -21,6 +18,21 @@ namespace PublicDomain.Logging
         public ConsoleLogger()
             : base(Console.Out)
         {
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public static ConsoleLogger Current
+        {
+            get
+            {
+                if (s_current == null)
+                {
+                    s_current = new ConsoleLogger();
+                }
+                return s_current;
+            }
         }
     }
 }

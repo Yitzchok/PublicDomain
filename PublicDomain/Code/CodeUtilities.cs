@@ -771,7 +771,7 @@ End Namespace
         }
 
         /// <summary>
-        /// Gets the primary language file extension.
+        /// Gets the primary language file extension. This does not begin with a period.
         /// </summary>
         /// <param name="language">The language.</param>
         /// <returns></returns>

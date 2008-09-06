@@ -13,6 +13,9 @@ Brad Culberson
 
 Version History
 ===============
+V0.2.47.0
+	[kevgrig@gmail.com]
+		* Security bug
 V0.2.46.0
 	[kevgrig@gmail.com]
 		* Added Int64/BIGINT support to PublicDomain.Data

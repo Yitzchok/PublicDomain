@@ -22,8 +22,23 @@ namespace PublicDomain.Logging
         /// </summary>
         public CriticalLogger()
         {
-            AddLogger(EventLogLogger.Application);
-            AddLogger(ConsoleLogger.Current);
+            // The calling AppDomain may not have sufficient permissions
+            // to create one or both of these loggers, so in that 
+            // case we just eat the exceptions
+            try
+            {
+                AddLogger(EventLogLogger.Application);
+            }
+            catch (Exception)
+            {
+            }
+            try
+            {
+                AddLogger(ConsoleLogger.Current);
+            }
+            catch (Exception)
+            {
+            }
         }
 
         /// <summary>
