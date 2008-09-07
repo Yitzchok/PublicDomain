@@ -12,6 +12,12 @@ namespace PublicDomain.Code
     public static class CodeUtilities
     {
         /// <summary>
+        /// urn:language:
+        /// See http://tools.ietf.org/html/rfc2141. All Uris should be in lower case
+        /// </summary>
+        public const string LanguageUriPrefix = "urn:language:";
+
+        /// <summary>
         /// 
         /// </summary>
         public const string DefaultNamespace = "DefaultNamespace";
@@ -56,25 +62,9 @@ namespace PublicDomain.Code
         {
             switch (lang)
             {
-                case Language.CSharp:
-                case Language.JSharp:
-                    // http://www.ecma-international.org/publications/standards/Ecma-334.htm
-                    // Page 70, Printed Page 92
-
-                    // TODO The following is not complete
-                    // TODO JSharp should its own version of this -- it is different
-
-                    str = StringUtilities.RemoveCharactersInverse(str, '_', 'a', '-', 'z', 'A', '-', 'Z', '0', '-', '9');
-                    break;
-                case Language.VisualBasic:
-                    // http://msdn.microsoft.com/library/default.asp?url=/library/en-us/vbls7/html/vblrfVBSpec2_2.asp
-
-                    str = StringUtilities.RemoveCharactersInverse(str, '_', 'a', '-', 'z', 'A', '-', 'Z', '0', '-', '9', '\\', '[', '\\', ']');
-                    break;
                 default:
-                    throw new NotImplementedException();
+                    return RegexUtilities.RemoveNonWordCharacters(str);
             }
-            return str;
         }
 
         /// <summary>
@@ -207,7 +197,6 @@ namespace PublicDomain.Code
             {
                 case Language.CSharp:
                 case Language.VisualBasic:
-                case Language.JSharp:
                     return new DotNetCodeRunner(language);
                 default:
                     throw new NotImplementedException();
@@ -373,22 +362,11 @@ End Namespace
         }
 
         /// <summary>
-        /// Gets the name of the language display.
-        /// </summary>
-        /// <param name="lang">The lang.</param>
-        /// <returns></returns>
-        public static string GetLanguageDisplayName(Language lang)
-        {
-            return GetLanguageDisplayName(lang, false);
-        }
-
-        /// <summary>
         /// Gets the display name of the language.
         /// </summary>
         /// <param name="lang">The language.</param>
-        /// <param name="appendIfDotNetEmulation">if set to <c>true</c> [append if dot net emulation].</param>
         /// <returns></returns>
-        public static string GetLanguageDisplayName(Language lang, bool appendIfDotNetEmulation)
+        public static string GetLanguageDisplayName(Language lang)
         {
             switch (lang)
             {
@@ -398,10 +376,8 @@ End Namespace
                     return "C#";
                 case Language.Java:
                     return "Java";
-                case Language.JScriptDotNet:
-                    return appendIfDotNetEmulation ? "JScript.NET" : "JScript";
-                case Language.JSharp:
-                    return "J#";
+                case Language.JavaScript:
+                    return "JavaScript";
                 case Language.Php:
                     return "PHP";
                 case Language.Ruby:
@@ -412,22 +388,8 @@ End Namespace
                     return "F#";
                 case Language.Cobol:
                     return "COBOL";
-                case Language.CPlusPlusDotNet:
-                    return appendIfDotNetEmulation ? "C++.NET" : "C++";
-                case Language.JavaDotNet:
-                    return appendIfDotNetEmulation ? "Java.NET" : "Java";
-                case Language.PerlDotNet:
-                    return appendIfDotNetEmulation ? "Perl.NET" : "Perl";
-                case Language.PhpDotNet:
-                    return appendIfDotNetEmulation ? "PHP.NET" : "PHP";
-                case Language.PythonDotNet:
-                    return appendIfDotNetEmulation ? "Python.NET" : "Python";
-                case Language.RubyDotNet:
-                    return appendIfDotNetEmulation ? "Ruby.NET" : "Ruby";
                 case Language.Sql:
                     return "SQL";
-                case Language.VisualBasicDotNet:
-                    return appendIfDotNetEmulation ? "Visual Basic.NET" : "Visual Basic";
                 case Language.Html:
                     return "HTML";
                 case Language.Xhtml:
@@ -441,22 +403,11 @@ End Namespace
         }
 
         /// <summary>
-        /// Gets the name of the language by.
+        /// Gets a <seealso cref="PublicDomain.Code.Language"/> given a string name.
         /// </summary>
         /// <param name="name">The name.</param>
         /// <returns></returns>
         public static Language GetLanguageByName(string name)
-        {
-            return GetLanguageByName(name, true);
-        }
-
-        /// <summary>
-        /// Gets a <seealso cref="PublicDomain.Code.Language"/> given a string name.
-        /// </summary>
-        /// <param name="name">The name.</param>
-        /// <param name="assumeDotNet">if set to <c>true</c> [assume dot net].</param>
-        /// <returns></returns>
-        public static Language GetLanguageByName(string name, bool assumeDotNet)
         {
             if (string.IsNullOrEmpty(name))
             {
@@ -467,11 +418,10 @@ End Namespace
             {
                 case "cplusplus":
                 case "c++":
-                    return assumeDotNet ? Language.CPlusPlusDotNet : Language.CPlusPlus;
                 case "cplusplus.net":
                 case "c++.net":
                 case "c++net":
-                    return Language.CPlusPlusDotNet;
+                    return Language.CPlusPlus;
                 case "c#":
                 case "csharp":
                 case "c#.net":
@@ -479,43 +429,37 @@ End Namespace
                 case "csharp.net":
                     return Language.CSharp;
                 case "java":
-                    return assumeDotNet ? Language.JavaDotNet : Language.Java;
                 case "java.net":
                 case "javanet":
-                    return Language.JavaDotNet;
-                case "js":
-                case "jscript":
-                    return Language.JScriptDotNet;
                 case "vj#":
                 case "j#":
                 case "jsharp":
-                    return Language.JSharp;
+                    return Language.Java;
+                case "js":
+                case "javascript":
+                case "jscript":
+                    return Language.JavaScript;
                 case "php":
-                    return assumeDotNet ? Language.PhpDotNet : Language.Php;
                 case "php.net":
                 case "phpnet":
-                    return Language.PhpDotNet;
+                    return Language.Php;
                 case "visualbasic.net":
                 case "visualbasicnet":
-                    return Language.VisualBasicDotNet;
                 case "vb":
                 case "visualbasic":
-                    return assumeDotNet ? Language.VisualBasicDotNet : Language.VisualBasic;
+                    return Language.VisualBasic;
                 case "ruby":
-                    return assumeDotNet ? Language.RubyDotNet : Language.Ruby;
                 case "ruby.net":
                 case "rubynet":
-                    return Language.RubyDotNet;
+                    return Language.Ruby;
                 case "perl":
-                    return assumeDotNet ? Language.PerlDotNet : Language.Perl;
                 case "perl.net":
                 case "perlnet":
-                    return Language.PerlDotNet;
+                    return Language.Perl;
                 case "python":
-                    return assumeDotNet ? Language.PythonDotNet : Language.Python;
                 case "python.net":
                 case "pythonnet":
-                    return Language.PythonDotNet;
+                    return Language.Python;
                 case "f#":
                 case "fsharp":
                 case "f#.net":
@@ -542,77 +486,14 @@ End Namespace
                 throw new ArgumentNullException("uri");
             }
             uri = uri.Trim().ToLower();
-            switch (uri)
+
+            if (uri.Length < LanguageUriPrefix.Length)
             {
-                case LanguageConstants.UriAda:
-                    return Language.Ada;
-                case LanguageConstants.UriC:
-                    return Language.C;
-                case LanguageConstants.UriCobol:
-                    return Language.Cobol;
-                case LanguageConstants.UriCPlusPlus:
-                    return Language.CPlusPlus;
-                case LanguageConstants.UriCPlusPlusDotNet:
-                    return Language.CPlusPlusDotNet;
-                case LanguageConstants.UriCSharp:
-                    return Language.CSharp;
-                case LanguageConstants.UriD:
-                    return Language.D;
-                case LanguageConstants.UriFortran:
-                    return Language.Fortran;
-                case LanguageConstants.UriFSharp:
-                    return Language.FSharp;
-                case LanguageConstants.UriHaskell:
-                    return Language.Haskell;
-                case LanguageConstants.UriHtml:
-                    return Language.Html;
-                case LanguageConstants.UriJava:
-                    return Language.Java;
-                case LanguageConstants.UriJavaDotNet:
-                    return Language.JavaDotNet;
-                case LanguageConstants.UriJScriptDotNet:
-                    return Language.JScriptDotNet;
-                case LanguageConstants.UriJSharp:
-                    return Language.JSharp;
-                case LanguageConstants.UriLisp:
-                    return Language.Lisp;
-                case LanguageConstants.UriPascal:
-                    return Language.Pascal;
-                case LanguageConstants.UriPerl:
-                    return Language.Perl;
-                case LanguageConstants.UriPerlDotNet:
-                    return Language.PerlDotNet;
-                case LanguageConstants.UriPhp:
-                    return Language.Php;
-                case LanguageConstants.UriPhpDotNet:
-                    return Language.PhpDotNet;
-                case LanguageConstants.UriPlainText:
-                    return Language.PlainText;
-                case LanguageConstants.UriPython:
-                    return Language.Python;
-                case LanguageConstants.UriPythonDotNet:
-                    return Language.PythonDotNet;
-                case LanguageConstants.UriRuby:
-                    return Language.Ruby;
-                case LanguageConstants.UriRubyDotNet:
-                    return Language.RubyDotNet;
-                case LanguageConstants.UriScheme:
-                    return Language.Scheme;
-                case LanguageConstants.UriSql:
-                    return Language.Sql;
-                case LanguageConstants.UriUnknown:
-                    return Language.Unknown;
-                case LanguageConstants.UriVisualBasic:
-                    return Language.VisualBasic;
-                case LanguageConstants.UriVisualBasicDotNet:
-                    return Language.VisualBasicDotNet;
-                case LanguageConstants.UriXhtml:
-                    return Language.Xhtml;
-                case LanguageConstants.UriXml:
-                    return Language.Xml;
-                default:
-                    throw new NotImplementedException();
+                throw new ArgumentException("uri should begin with " + LanguageUriPrefix);
             }
+
+            uri = uri.Substring(LanguageUriPrefix.Length);
+            return General.ParseEnum<Language>(uri);
         }
 
         /// <summary>
@@ -624,74 +505,8 @@ End Namespace
         {
             switch (lang)
             {
-                case Language.Ada:
-                    return LanguageConstants.UriAda;
-                case Language.C:
-                    return LanguageConstants.UriC;
-                case Language.Cobol:
-                    return LanguageConstants.UriCobol;
-                case Language.CPlusPlus:
-                    return LanguageConstants.UriCPlusPlus;
-                case Language.CPlusPlusDotNet:
-                    return LanguageConstants.UriCPlusPlusDotNet;
-                case Language.CSharp:
-                    return LanguageConstants.UriCSharp;
-                case Language.D:
-                    return LanguageConstants.UriD;
-                case Language.Fortran:
-                    return LanguageConstants.UriFortran;
-                case Language.FSharp:
-                    return LanguageConstants.UriFSharp;
-                case Language.Haskell:
-                    return LanguageConstants.UriHaskell;
-                case Language.Html:
-                    return LanguageConstants.UriHtml;
-                case Language.Java:
-                    return LanguageConstants.UriJava;
-                case Language.JavaDotNet:
-                    return LanguageConstants.UriJavaDotNet;
-                case Language.JScriptDotNet:
-                    return LanguageConstants.UriJScriptDotNet;
-                case Language.JSharp:
-                    return LanguageConstants.UriJSharp;
-                case Language.Lisp:
-                    return LanguageConstants.UriLisp;
-                case Language.Pascal:
-                    return LanguageConstants.UriPascal;
-                case Language.Perl:
-                    return LanguageConstants.UriPerl;
-                case Language.PerlDotNet:
-                    return LanguageConstants.UriPerlDotNet;
-                case Language.Php:
-                    return LanguageConstants.UriPhp;
-                case Language.PhpDotNet:
-                    return LanguageConstants.UriPhpDotNet;
-                case Language.PlainText:
-                    return LanguageConstants.UriPlainText;
-                case Language.Python:
-                    return LanguageConstants.UriPython;
-                case Language.PythonDotNet:
-                    return LanguageConstants.UriPythonDotNet;
-                case Language.Ruby:
-                    return LanguageConstants.UriRuby;
-                case Language.RubyDotNet:
-                    return LanguageConstants.UriRubyDotNet;
-                case Language.Scheme:
-                    return LanguageConstants.UriScheme;
-                case Language.Sql:
-                    return LanguageConstants.UriSql;
-                case Language.Unknown:
-                    return LanguageConstants.UriUnknown;
-                case Language.VisualBasic:
-                    return LanguageConstants.UriVisualBasic;
-                case Language.VisualBasicDotNet:
-                    return LanguageConstants.UriVisualBasicDotNet;
-                case Language.Xhtml:
-                    return LanguageConstants.UriXhtml;
-                case Language.Xml:
-                    return LanguageConstants.UriXml;
                 default:
-                    throw new NotImplementedException();
+                    return LanguageUriPrefix + lang.ToString().ToLower();
             }
         }
 
@@ -777,54 +592,53 @@ End Namespace
         /// <returns></returns>
         public static string GetPrimaryLanguageFileExtension(Language language)
         {
+            // The default is just to take the language name and do ToLower
+            // on it, so the switch is only necessary if this mapping doesn't do
+            // the job.
             switch (language)
             {
                 case Language.Unknown:
                     return "txt";
-
                 case Language.CSharp:
                     return "cs";
-
-                case Language.JSharp:
-                    return "jsl";
-
-                case Language.CPlusPlusDotNet:
                 case Language.CPlusPlus:
                     return "cpp";
-
-                case Language.JScriptDotNet:
+                case Language.JavaScript:
                     return "js";
-
-                case Language.VisualBasicDotNet:
                 case Language.VisualBasic:
                     return "vb";
-
-                case Language.JavaDotNet:
-                    return "java";
-
                 case Language.Ruby:
-                case Language.RubyDotNet:
                     return "rb";
-
-                case Language.PhpDotNet:
-                    return "php";
-
                 case Language.Python:
-                case Language.PythonDotNet:
                     return "py";
-
                 case Language.Perl:
-                case Language.PerlDotNet:
                     return "pl";
-
                 case Language.FSharp:
                     return "fs";
-
-                case Language.Xhtml:
-                    return "xhtml";
-
                 case Language.PlainText:
                     return "txt";
+                case Language.Haskell:
+                    return "hs";
+                case Language.Cobol:
+                    return "cbl";
+                case Language.Scheme:
+                    return "scm";
+                case Language.Fortran:
+                    return "for";
+                case Language.Pascal:
+                    return "pas";
+                case Language.Eiffel:
+                    return "ei";
+                case Language.Prolog:
+                    return "pl";
+                case Language.Smalltalk:
+                    return "st";
+                case Language.Forth:
+                    return "4th";
+                case Language.Modula:
+                    return "mod";
+                case Language.LOLCODE:
+                    return "lol";
             }
             return language.ToString().ToLower();
         }

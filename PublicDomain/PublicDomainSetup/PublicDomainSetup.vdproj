@@ -215,19 +215,20 @@
         "MsiBootstrapper"
         {
         "LangId" = "3:1033"
+        "RequiresElevation" = "11:FALSE"
         }
         "Product"
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Public Domain"
-        "ProductCode" = "8:{D3E9139D-807E-4F18-A3A5-D52798194C28}"
-        "PackageCode" = "8:{0F6786E4-9BCB-4357-8495-FC7A84449AD9}"
+        "ProductCode" = "8:{5FA607B7-A05E-462D-B376-551AC1A9C42C}"
+        "PackageCode" = "8:{B47CB003-4116-408D-9971-2C93CBE4E33D}"
         "UpgradeCode" = "8:{0CCA40A4-FC1E-41C9-9838-27107E150A31}"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:TRUE"
-        "ProductVersion" = "8:0.2.48"
+        "ProductVersion" = "8:0.2.49"
         "Manufacturer" = "8:Public Domain"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:http://www.codeplex.com/PublicDomain"
@@ -769,7 +770,7 @@
             }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_1FE9E50360BD4DC1BC1EA01BC51E20B5"
             {
-            "SourcePath" = "8:..\\obj\\Release\\PublicDomain.dll"
+            "SourcePath" = "8:..\\obj\\Debug\\PublicDomain.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_48F8C3159A924E25A2720F96F297D8E9"
@@ -825,7 +826,7 @@
             }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_B21D45BC4AA2435F967D1784128F5EF3"
             {
-            "SourcePath" = "8:..\\bin\\Release\\PublicDomain.XML"
+            "SourcePath" = "8:..\\bin\\Debug\\PublicDomain.XML"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_48F8C3159A924E25A2720F96F297D8E9"
@@ -881,7 +882,7 @@
             }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_E27421C21B39478A9342BBAC30335B30"
             {
-            "SourcePath" = "8:..\\obj\\Release\\PublicDomain.dll"
+            "SourcePath" = "8:..\\obj\\Debug\\PublicDomain.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_284936D8164F4861B97F61E2CC2B5159"
@@ -963,9 +964,6 @@
                 {
                 }
             }
-        }
-        "VJSharpPlugin"
-        {
         }
     }
 }
