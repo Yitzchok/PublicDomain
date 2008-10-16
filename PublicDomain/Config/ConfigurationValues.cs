@@ -108,10 +108,9 @@ namespace PublicDomain.Config
 
         private void ReadParameters(XmlReader reader, List<string> intersectedConfigs)
         {
-            ReadParamsReader(reader);
+            List<string> alternateConfigs = ReadParamsReader(reader);
 
-            string alternateConfigFile;
-            if (TryGetString("externalconfig", out alternateConfigFile))
+            foreach (string alternateConfigFile in alternateConfigs)
             {
                 if (File.Exists(alternateConfigFile) && (intersectedConfigs == null || (intersectedConfigs != null && !intersectedConfigs.Contains(alternateConfigFile))))
                 {
@@ -126,8 +125,9 @@ namespace PublicDomain.Config
             }
         }
 
-        private void ReadParamsReader(XmlReader reader)
+        private List<string> ReadParamsReader(XmlReader reader)
         {
+            List<string> alternateConfigs = new List<string>();
             while (reader.Read())
             {
                 if (reader.NodeType == XmlNodeType.Element && reader.LocalName.ToLower() == "param")
@@ -136,10 +136,16 @@ namespace PublicDomain.Config
                     string val = reader.GetAttribute("value");
                     if (!string.IsNullOrEmpty(name))
                     {
-                        m_values[name.ToLower()] = val;
+                        name = name.ToLower();
+                        if (name.Equals("externalconfig"))
+                        {
+                            alternateConfigs.Add(val);
+                        }
+                        m_values[name] = val;
                     }
                 }
             }
+            return alternateConfigs;
         }
 
         /// <summary>

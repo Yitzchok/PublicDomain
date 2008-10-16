@@ -295,7 +295,7 @@ namespace PublicDomain
         /// Removes the read only.
         /// </summary>
         /// <param name="path">The path.</param>
-        private static void RemoveReadOnly(string path)
+        public static void RemoveReadOnly(string path)
         {
             DirectoryInfo current = new DirectoryInfo(path);
             current.Attributes = FileAttributes.Normal;

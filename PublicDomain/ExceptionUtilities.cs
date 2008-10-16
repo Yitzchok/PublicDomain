@@ -85,11 +85,12 @@ namespace PublicDomain
                 }
 
                 sb.AppendFormat(
-                    @"Exception ({0}), Type={1}, Message={3}, Stack Trace={2}",
+                    @"Exception ({0}), Type={1}, Message={3}, Stack Trace={4}{2}",
                     i,
                     ex.GetType().Name,
                     ex.StackTrace,
-                    ex.Message
+                    ex.Message,
+                    Environment.NewLine
                 );
 
                 ex = ex.InnerException;
