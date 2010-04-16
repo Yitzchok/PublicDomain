@@ -24,13 +24,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tzdata", "tzdata", "{7B65FE
 		tzdata\zone.tab = tzdata\zone.tab
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PublicDomain", "PublicDomain.csproj", "{DB173085-8CC4-4C49-8AA4-328442ABC887}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PublicDomain", "src\PublicDomain\PublicDomain.csproj", "{DB173085-8CC4-4C49-8AA4-328442ABC887}"
 EndProject
-Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "PublicDomainSetup", "PublicDomainSetup\PublicDomainSetup.vdproj", "{2D2ED908-635A-407B-A3C1-480CC73768F4}"
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "PublicDomainSetup", "src\PublicDomainSetup\PublicDomainSetup.vdproj", "{2D2ED908-635A-407B-A3C1-480CC73768F4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PublicDomainTests", "PublicDomainTests\PublicDomainTests.csproj", "{FE8D16C2-12E8-4072-BC95-3D533F0FA117}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PublicDomainTests", "src\PublicDomainTests\PublicDomainTests.csproj", "{FE8D16C2-12E8-4072-BC95-3D533F0FA117}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PublicDomainConsole", "PublicDomainConsole\PublicDomainConsole.csproj", "{FE7D4927-0137-44F0-AACF-7F199B5F00EA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PublicDomainConsole", "src\PublicDomainConsole\PublicDomainConsole.csproj", "{FE7D4927-0137-44F0-AACF-7F199B5F00EA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
