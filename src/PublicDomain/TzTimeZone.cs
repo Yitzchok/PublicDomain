@@ -121,7 +121,7 @@ namespace PublicDomain
         {
             get
             {
-                return new ReadOnlyDictionary<string,TzZoneInfo>(s_zones);
+                return new ReadOnlyDictionary<string, TzZoneInfo>(s_zones);
             }
         }
 
@@ -814,7 +814,7 @@ namespace PublicDomain
                 try
                 {
                     s_zonesLock.AcquireReaderLock(-1);
-                    
+
                     if (Zones.TryGetValue(tzName, out zoneInfo))
                     {
                         result = new TzTimeZone(zoneInfo);

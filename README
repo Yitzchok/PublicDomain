@@ -1,0 +1,74 @@
+PublicDomain
+A completely free, public domain collection of oft-needed code and packages for .NET. Features include Time Zone support, Logging API, Dynamic Code Evaluation (C#, VB.Net), Global Assembly Cache (GAC) API, Rss, Atom, and OPML APIs, Screen scraping API, and a milieu of various utilities for strings, arrays, cryptography, and much, much more.
+
+PublicDomain binaries and source code are... in the Public Domain (surprise surprise). Therefore, there is no license, so the code (or any part of it) may be included even in corporate applications. Public domain code has no authority, and is provided "AS IS," without express or implied warranty of any kind.
+
+
+Goals
+Open source libraries in .NET have two problems or annoyances:
+.NET projects and utilities are scattered, difficult to deploy and integrate, difficult to find, difficult to contribute to, and,
+Licenses are confusing or restrictive.
+
+This package solves these two problems as follows:
+This package becomes a "catch all" for all different types of code, so that there is no dependency hierarchy, and
+This code is in the Public Domain (http://en.wikipedia.org/wiki/Public_domain), meaning that the code has no legal authority, will ask nothing for its use, and has absolutely no restrictions (as opposed to the GPL)! The code (or any part of it) may be included even in corporate applications. Public domain code is provided "AS IS," without express or implied warranty of any kind.
+Download Instructions
+Go to the Releases tab.
+To reference PublicDomain, download PublicDomain.dll, install it, and put it in your project or place it in the GAC and then reference it (by default, binaries and source are installed in C:\Program Files\Public Domain\).
+High Level Feature List
+This is a bullet point distillation of the full feature list below:
+Time Zone support
+Logging API
+Dynamic Code Evaluation (C#, VB.Net)
+Global Assembly Cache (GAC) API
+Unzipper Class
+Rss, Atom, and OPML APIs
+Screen scraping API
+Milieu of various utilities for strings, arrays, cryptography
+And More!
+Feature List
+This is an (undetailed, dated, and partial) sampling of some of the code included in the current release:
+Dynamic code evaluation in C#, VB.NET
+Example: PublicDomain.Dynacode.CodeUtilities.EvalSnippet(Language.CSharp, "1*337")
+First pure C# implementation of the Olson Time Zone database
+Programmatic access to RULE and ZONE information, instead of obfuscated C and C code
+Abstracted and powerful Logging API, with formatting interfaces and extensions such as Composite loggers
+Generic Pair, Triple, ReadOnlyDictionary, and ReadOnlyICollection classes
+API for getting a list of programs from the Add/Remove Program list as a collection of IInstallProgram instances. These wrappers include methods like Uninstall()
+API for manipulating the GAC (Global Assembly Cache), including installing/uninstalling assemblies into/from the GAC, as well as listing or searching for assemblies
+Iso* classes such as Iso8601 for various parsing facilities
+Cryptography Utilities, String utilities
+Archiver class
+Uses J# libraries to extract zip file entries
+Win32 class
+Provides PInvoke wrappers to WIN32 functions
+Methods: LogoffCurrentUser, Shutdown, RestartWindows
+ProcessHelper class
+Wrapper around System.Diagnostics.Process which provides some convenience methods but most importantly deal with the complex nature of getting both StandardOutput and StandardError streams concurrently
+FileSystemUtilities class
+Methods: SaveInputStreamToFile, CombineTrackbacksInPath
+ObjectUtilities class
+SerializeObjectToBinary, DeserializeObjectFromBinary
+ReflectionUtilities class
+GetStrongName, FindTypeByInterface, FindInstanceByInterface
+JStream class
+Transparently pass a .NET System.IO.Stream class where a java.io.InputStream class is expected
+JInputStream class
+Transparently pass a java.io.InputStream class where a .NET System.IO.Stream class is expected
+StringUtilities class
+CultureConstants class
+All windows culture constants
+DisposableReaderWriter class
+Wrapper around the .NET ReaderWriterLock to more easily use a reader/writer lock
+InvariantCultureContext class
+The class can be used in a using() {} block or a try, finally block with a dispose call and allows for setting the current Thread's culture to the invariant culture during the length of the scope. This is useful when it is critical to have invariant culture rules, for example, if you are dependent that a real number is of the form X.XXXX, then you will be thrown off if there is a European culture.
+RegexUtilities class
+Common regular expressions
+ScreenScraper class
+Help in managing GET and POST requests to websites, including cookie handling, HTTP redirects, and output parsing
+Various ISO Format wrapper classes
+Iso3166, Iso6709
+LatitudeLongitudePoint class
+UnitedStatesUtilities class and USState class
+Static list of U.S. states in object form
+
