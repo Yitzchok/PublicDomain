@@ -332,12 +332,10 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="doc\Documentation.chm" />
-    <None Include="Migrated rules for PublicDomain.ruleset" />
     <None Include="PublicDomain.snk" />
   </ItemGroup>
   <ItemGroup>
     <None Include="pd.ico" />
-    <Content Include="README.txt" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
