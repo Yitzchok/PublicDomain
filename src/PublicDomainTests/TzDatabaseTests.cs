@@ -437,9 +437,10 @@ namespace PublicDomain
         /// Reads the database and then overwrites TzTimeZone.cs
         /// which has the codified data.
         /// </summary>
+        [Test, Ignore]
         public void ExecuteReplaceData()
         {
-            string fileLocation = @"..\..\..\TzTimeZone.cs";
+            string fileLocation = @"..\..\..\PublicDomain\TzTimeZone.cs";
             StringBuilder sb = new StringBuilder(5092);
             using (new ConsoleRerouter(sb))
             {
