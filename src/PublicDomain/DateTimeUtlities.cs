@@ -235,7 +235,7 @@ namespace PublicDomain
             {
                 timeSpan = timeSpan.Substring(1);
             }
-            
+
             timeSpan = ParseTimeSpanAssumptions(timeSpan, noColonAssumption);
 
             return TimeSpan.TryParse(timeSpan, out result);
@@ -267,7 +267,8 @@ namespace PublicDomain
             }
 
             timeSpan = ParseTimeSpanAssumptions(timeSpan, noColonAssumption);
-
+            if (timeSpan == "24:00")
+                timeSpan = "0:00:00";
             return TimeSpan.Parse(timeSpan);
         }
 

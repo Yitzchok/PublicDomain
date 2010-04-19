@@ -25,7 +25,7 @@ namespace PublicDomain
         /// <summary>
         /// 
         /// </summary>
-        public const string TzDatabaseDirectory = @"..\..\..\tzdata\";
+        public const string TzDatabaseDirectory = @"..\..\..\..\tzdata\";
 
         /// <summary>
         /// 
